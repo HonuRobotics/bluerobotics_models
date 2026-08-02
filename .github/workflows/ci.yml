@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [lyrical]
+  pull_request:
+
+jobs:
+  build:
+    # The prebuilt ROS image replaces a from-scratch ROS install on every run;
+    # rosdep then only adds the deltas (ros_gz, gz vendor packages, test deps).
+    # Build/test are explicit steps (not action-ros-ci, whose pinned releases
+    # hardcode a distro whitelist that lags new ROS releases).
+    runs-on: ubuntu-latest
+    container:
+      image: ros:lyrical
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: src/bluerov2
+      # Ensures colcon/rosdep/vcstool are present in the container.
+      - uses: ros-tooling/setup-ros@v0.7
+      - name: Install dependencies
+        run: |
+          rosdep update
+          rosdep install --from-paths src -y --ignore-src
+      - name: Build
+        run: |
+          source /opt/ros/lyrical/setup.bash
+          colcon build --event-handlers console_cohesion+
+      - name: Test
+        run: |
+          source /opt/ros/lyrical/setup.bash
+          colcon test --event-handlers console_cohesion+
+          colcon test-result --verbose

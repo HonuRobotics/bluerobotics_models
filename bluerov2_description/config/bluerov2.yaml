@@ -1,0 +1,41 @@
+# BlueROV2 build-time configuration.
+# Edit this file and rebuild (colcon build) to regenerate the URDF, the composed
+# Gazebo model AND the ros_gz bridge config; the buoyancy collision resizes
+# automatically for the configured loadout.
+#
+# variant: standard | heavy   (heavy = Heavy kit: 8-thruster vectored layout +
+#                              heavy frame mesh; standard = 6 thrusters)
+variant: standard
+
+# Topic namespace: sensor/claw topics default to /<topic_namespace>/<name>/...
+topic_namespace: bluerov2
+
+# Accessories to mount. `type` must match a macro in urdf/accessories.xacro;
+# xyz/rpy are the mount pose relative to base_link (metres / radians).
+# Optional per-accessory topic overrides (bases; per-sensor suffixes like
+# /image, /scan, /cmd_pos are appended):
+#   topic:     base for BOTH the Gazebo and ROS sides
+#   gz_topic:  Gazebo-side base   (overrides `topic`)
+#   ros_topic: ROS-side base      (overrides `topic`)
+#   bridge:    dict of NATIVE ros_gz_bridge keys (lazy, subscriber_queue,
+#              publisher_queue, ...) merged into that accessory's generated
+#              bridge entries, e.g.  bridge: {lazy: false, publisher_queue: 5}
+#
+# extra_bridge_topics: optional top-level list, appended VERBATIM to the
+# generated bridge config in native ros_gz_bridge syntax, for topics outside
+# the accessory system (thruster commands, odometry, ...). Never hand-edit the
+# generated ros_gz_bridge.yaml; it is overwritten on rebuild.
+#
+# Default: forward-looking camera only. Uncomment entries below to add the rest
+# of the catalog; the bridge config regenerates to match on rebuild.
+accessories:
+  - {type: explorehd_camera, name: camera,    xyz: "0.22 0 0.05",     rpy: "0 0 0"}
+  # - {type: ping360,          name: ping360,   xyz: "0.16 0 0.13",     rpy: "0 0 0"}
+  # - {type: dvl_a50,          name: dvl,       xyz: "-0.12 0 -0.14",   rpy: "0 0 0"}
+  # - {type: roof_rack,        name: roof_rack, xyz: "0 0 0.17",        rpy: "0 0 0"}
+  # - {type: payload_skid,     name: skid,      xyz: "0 0 -0.17",       rpy: "0 0 0"}
+  # - {type: sonoptix_echo,    name: sonoptix,  xyz: "0.14 0.16 -0.05", rpy: "0 0 0"}
+  # - {type: omniscan_450_fs,  name: omniscan,  xyz: "0.14 -0.16 -0.05", rpy: "0 0 0"}
+  # - {type: marinesitu_c3,    name: stereo,    xyz: "-0.16 0 0.16",    rpy: "0 0 0"}
+  # - {type: newton_gripper,   name: gripper,   xyz: "0.28 0 -0.08",    rpy: "0 0 0"}
+  # - {type: sediment_sampler, name: sampler,   xyz: "-0.26 0 -0.06",   rpy: "0 0 3.14159"}

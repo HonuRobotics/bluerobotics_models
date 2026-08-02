@@ -1,0 +1,18 @@
+BlueROV2 simulation packages
+Copyright 2026 Honu Robotics
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This repository redistributes third-party mesh assets, reused as temporary
+placeholders until original art replaces them:
+
+- bluerov2_description/meshes/bluerov2.dae, bluerov2_heavy.dae,
+  t200/ccw_prop.dae, t200/cw_prop.dae
+  From Project DAVE (https://github.com/IOES-Lab/dave, ros2 branch).
+  License: Apache-2.0.
+
+- bluerov2_description/meshes/accessories/ping360.dae
+  From CentraleNantesROV/bluerov2
+  (https://github.com/CentraleNantesROV/bluerov2). License: Apache-2.0.
+
+See bluerov2_description/ASSETS.md for per-file provenance.

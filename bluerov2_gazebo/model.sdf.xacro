@@ -1,0 +1,265 @@
+<?xml version="1.0"?>
+<!--
+  Simulation-ready BlueROV2 model, GENERATED from config/bluerov2.yaml at build
+  time (the variant selects the thruster count). It merge-includes the
+  bluerov2_description geometry and adds the Gazebo plugins: hydrodynamics, one
+  Thruster per propeller joint, and one <sensor> per sensor-type accessory
+  (camera / rgbd / gpu_lidar / DVL). Buoyancy is a world plugin (in the playground
+  world), not here.
+
+  In a world:  <include><uri>model://bluerov2_gazebo</uri></include>
+-->
+<sdf version="1.12" xmlns:xacro="http://ros.org/wiki/xacro"
+     xmlns:gz="http://gazebosim.org/schema">
+
+  <xacro:arg name="config_file"
+             default="$(find bluerov2_description)/config/bluerov2.yaml"/>
+  <xacro:property name="cfg" value="${xacro.load_yaml('$(arg config_file)')}"/>
+  <xacro:property name="heavy" value="${cfg.get('variant', 'standard') == 'heavy'}"/>
+
+  <!-- Topic namespace for sensor/claw topics: /<topic_namespace>/<accessory name>/...
+       Per accessory, `gz_topic` / `topic` override the gz-side base (the bridge
+       config is generated from the same yaml, so gz and ROS sides stay in sync). -->
+  <xacro:property name="topic_ns" value="${cfg.get('topic_namespace', 'bluerov2')}"/>
+
+  <!-- T200 thrust saturation (forward > reverse). Values are the ~16 V
+       full-throttle endpoints of the T200 performance curve (approx. 5.25 kgf
+       forward / 4.1 kgf reverse); tune down for 12 V, up for 20 V. Curve/datasheet:
+       https://bluerobotics.com/store/rov/bluerov2-components-spares/t200-thruster-brov2-spare-r1-vp/ -->
+  <xacro:property name="t200_max_thrust" value="51.5"/>    <!-- N, forward -->
+  <xacro:property name="t200_min_thrust" value="-40.2"/>   <!-- N, reverse -->
+
+  <!-- One Thruster plugin per propeller joint. ccw props take +coeff, cw props
+       -coeff so the reaction torques balance; matches the description layout.
+       max/min_thrust_cmd clamp the commanded thrust (N) -> saturation + asymmetry. -->
+  <xacro:macro name="thruster" params="n coeff">
+    <plugin filename="gz-sim-thruster-system" name="gz::sim::systems::Thruster">
+      <namespace>bluerov2</namespace>
+      <joint_name>thruster${n}_joint</joint_name>
+      <thrust_coefficient>${coeff}</thrust_coefficient>
+      <fluid_density>1025.0</fluid_density>
+      <propeller_diameter>0.1</propeller_diameter>
+      <velocity_control>true</velocity_control>
+      <max_thrust_cmd>${t200_max_thrust}</max_thrust_cmd>
+      <min_thrust_cmd>${t200_min_thrust}</min_thrust_cmd>
+    </plugin>
+  </xacro:macro>
+
+  <!-- ===================== Sensors (config-driven) =====================
+       One <sensor> per sensor-type accessory, emitted as a near-massless link
+       fixed to base_link at the accessory's config pose (so the description stays
+       Gazebo-free). The world must load gz-sim-sensors-system, plus
+       gz-sim-dvl-system for the DVL. NOTE: gz sensor axes follow the link frame -
+       a camera looks +X, a gpu_lidar scans the sensor XY plane, DVL beams point
+       down per <tilt>; tune each accessory's rpy for the intended view. -->
+
+  <!-- Wrapper: a massless sensor link fixed to base_link at `pose`, holding the
+       <sensor> block passed in. Mass is negligible (the accessory's real mass/
+       geometry already live in base_link via the description). -->
+  <xacro:macro name="sensor_link" params="name pose *sensor">
+    <link name="${name}_sensor">
+      <pose relative_to="base_link">${pose}</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>1e-6</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>1e-6</iyy><iyz>0</iyz><izz>1e-6</izz>
+        </inertia>
+      </inertial>
+      <xacro:insert_block name="sensor"/>
+    </link>
+    <joint name="${name}_sensor_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>${name}_sensor</child>
+    </joint>
+  </xacro:macro>
+
+  <!-- exploreHD USB HD camera. -->
+  <xacro:macro name="camera_sensor" params="name pose topic_base">
+    <xacro:sensor_link name="${name}" pose="${pose}">
+      <sensor name="${name}" type="camera">
+        <topic>${topic_base}/image</topic>
+        <update_rate>20</update_rate>
+        <always_on>1</always_on>
+        <visualize>true</visualize>
+        <camera>
+          <camera_info_topic>${topic_base}/camera_info</camera_info_topic>
+          <horizontal_fov>1.396</horizontal_fov>       <!-- ~80 deg -->
+          <image><width>1920</width><height>1080</height></image>
+          <clip><near>0.05</near><far>300</far></clip>
+          <!-- GZ_VISIBILITY_ALL (0x0FFFFFFF): the all-ones default trips an
+               ogre2 warning about its reserved high bits; same behaviour. -->
+          <visibility_mask>268435455</visibility_mask>
+        </camera>
+      </sensor>
+    </xacro:sensor_link>
+  </xacro:macro>
+
+  <!-- MarineSitu C3 stereo camera, modelled as an RGBD sensor (rgb + depth +
+       points); swap to two <camera>s at the 7.5 cm baseline for a true pair. -->
+  <xacro:macro name="rgbd_sensor" params="name pose topic_base">
+    <xacro:sensor_link name="${name}" pose="${pose}">
+      <sensor name="${name}" type="rgbd_camera">
+        <topic>${topic_base}</topic>
+        <update_rate>15</update_rate>
+        <always_on>1</always_on>
+        <camera>
+          <horizontal_fov>1.20</horizontal_fov>
+          <image><width>1280</width><height>720</height></image>
+          <clip><near>0.1</near><far>20</far></clip>
+          <!-- GZ_VISIBILITY_ALL, as above. -->
+          <visibility_mask>268435455</visibility_mask>
+        </camera>
+      </sensor>
+    </xacro:sensor_link>
+  </xacro:macro>
+
+  <!-- Ping360 scanning imaging sonar, APPROXIMATED by a 360-deg gpu_lidar sweep
+       (geometry/range only, no acoustics). Real Ping360 range ~0.75-50 m. -->
+  <xacro:macro name="ping360_sensor" params="name pose topic_base">
+    <xacro:sensor_link name="${name}" pose="${pose}">
+      <sensor name="${name}" type="gpu_lidar">
+        <topic>${topic_base}/scan</topic>
+        <update_rate>10</update_rate>
+        <always_on>1</always_on>
+        <visualize>true</visualize>
+        <lidar>
+          <scan>
+            <horizontal><samples>400</samples><resolution>1</resolution>
+              <min_angle>-3.141593</min_angle><max_angle>3.141593</max_angle></horizontal>
+            <vertical><samples>1</samples><resolution>1</resolution>
+              <min_angle>0</min_angle><max_angle>0</max_angle></vertical>
+          </scan>
+          <range><min>0.75</min><max>50</max><resolution>0.01</resolution></range>
+        </lidar>
+      </sensor>
+    </xacro:sensor_link>
+  </xacro:macro>
+
+  <!-- Water Linked DVL-A50: native DopplerVelocityLog custom sensor, 4-beam Janus
+       (tilt 22.5 deg). Publishes gz.msgs.DVLVelocityTracking (no stock ros_gz
+       bridge - needs a relay). Requires gz-sim-dvl-system in the world. -->
+  <xacro:macro name="dvl_sensor" params="name pose topic_base">
+    <xacro:sensor_link name="${name}" pose="${pose}">
+      <sensor name="${name}" type="custom" gz:type="dvl">
+        <topic>${topic_base}/velocity</topic>
+        <update_rate>8</update_rate>
+        <always_on>1</always_on>
+        <gz:dvl>
+          <type>phased_array</type>
+          <arrangement degrees="true">
+            <beam id="1"><aperture>2</aperture><rotation>45</rotation><tilt>22.5</tilt></beam>
+            <beam><aperture>2</aperture><rotation>135</rotation><tilt>22.5</tilt></beam>
+            <beam><aperture>2</aperture><rotation>-45</rotation><tilt>22.5</tilt></beam>
+            <beam><aperture>2</aperture><rotation>-135</rotation><tilt>22.5</tilt></beam>
+          </arrangement>
+          <tracking>
+            <bottom_mode>
+              <when>best</when>
+              <noise type="gaussian"><stddev>0.002</stddev></noise>
+              <visualize>false</visualize>
+            </bottom_mode>
+          </tracking>
+          <resolution>0.01</resolution>
+          <maximum_range>50.0</maximum_range>
+          <minimum_range>0.1</minimum_range>
+          <reference_frame>0 0 0 0 0 -1.570796</reference_frame>
+        </gz:dvl>
+      </sensor>
+    </xacro:sensor_link>
+  </xacro:macro>
+
+  <!-- Recursive dispatcher: emit one sensor per sensor-type accessory in the
+       config. Non-sensor accessories (payload_skid, roof_rack) and the parked
+       imaging sonars (sonoptix_echo, omniscan_450_fs) emit nothing here. -->
+  <xacro:macro name="mount_sensors" params="items">
+    <xacro:if value="${len(items) > 0}">
+      <xacro:property name="a" value="${items[0]}"/>
+      <xacro:property name="t" value="${a['type']}"/>
+      <xacro:property name="p" value="${a['xyz'] + ' ' + a['rpy']}"/>
+      <xacro:property name="tb" value="${a.get('gz_topic', a.get('topic', topic_ns + '/' + a['name']))}"/>
+      <xacro:if value="${t == 'explorehd_camera'}"><xacro:camera_sensor name="${a['name']}" pose="${p}" topic_base="${tb}"/></xacro:if>
+      <xacro:if value="${t == 'marinesitu_c3'}">   <xacro:rgbd_sensor    name="${a['name']}" pose="${p}" topic_base="${tb}"/></xacro:if>
+      <xacro:if value="${t == 'ping360'}">         <xacro:ping360_sensor name="${a['name']}" pose="${p}" topic_base="${tb}"/></xacro:if>
+      <xacro:if value="${t == 'dvl_a50'}">         <xacro:dvl_sensor     name="${a['name']}" pose="${p}" topic_base="${tb}"/></xacro:if>
+      <xacro:mount_sensors items="${items[1:]}"/>
+    </xacro:if>
+  </xacro:macro>
+
+  <!-- Claw actuation (gripper jaws / sampler cups): one JointPositionController per
+       finger, both on the same command topic so a single gz.msgs.Double opens/
+       closes both symmetrically (SDF <mimic> is unsupported on the default dartsim
+       engine). Command an angle 0 (closed) .. 0.6 (open) on <topic_base>/cmd_pos. -->
+  <xacro:macro name="claw_controller" params="topic_base left_joint right_joint">
+    <plugin filename="gz-sim-joint-position-controller-system"
+            name="gz::sim::systems::JointPositionController">
+      <joint_name>${left_joint}</joint_name>
+      <topic>${topic_base}/cmd_pos</topic>
+      <p_gain>2.0</p_gain> <i_gain>0.05</i_gain> <d_gain>0.1</d_gain>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system"
+            name="gz::sim::systems::JointPositionController">
+      <joint_name>${right_joint}</joint_name>
+      <topic>${topic_base}/cmd_pos</topic>
+      <p_gain>2.0</p_gain> <i_gain>0.05</i_gain> <d_gain>0.1</d_gain>
+    </plugin>
+  </xacro:macro>
+
+  <!-- Recursive dispatcher: emit the controllers for each claw accessory. -->
+  <xacro:macro name="mount_grippers" params="items">
+    <xacro:if value="${len(items) > 0}">
+      <xacro:property name="a" value="${items[0]}"/>
+      <xacro:property name="n" value="${a['name']}"/>
+      <xacro:property name="tb" value="${a.get('gz_topic', a.get('topic', topic_ns + '/' + n))}"/>
+      <xacro:if value="${a['type'] == 'newton_gripper'}">  <xacro:claw_controller topic_base="${tb}" left_joint="${n}_jaw_left_joint" right_joint="${n}_jaw_right_joint"/></xacro:if>
+      <xacro:if value="${a['type'] == 'sediment_sampler'}"><xacro:claw_controller topic_base="${tb}" left_joint="${n}_cup_left_joint" right_joint="${n}_cup_right_joint"/></xacro:if>
+      <xacro:mount_grippers items="${items[1:]}"/>
+    </xacro:if>
+  </xacro:macro>
+
+  <model name="bluerov2">
+    <include merge="true">
+      <uri>package://bluerov2_description/urdf/bluerov2.urdf</uri>
+    </include>
+
+    <!-- Hydrodynamic damping (Fossen quadratic drag, reference BlueROV2). -->
+    <plugin filename="gz-sim-hydrodynamics-system"
+            name="gz::sim::systems::Hydrodynamics">
+      <link_name>base_link</link_name>
+      <water_density>1025.0</water_density>
+      <xU>0</xU>   <yV>0</yV>   <zW>0</zW>
+      <kP>0</kP>   <mQ>0</mQ>   <nR>0</nR>
+      <xUabsU>-33.732</xUabsU>
+      <yVabsV>-54.16</yVabsV>
+      <zWabsW>-73.225</zWabsW>
+      <kPabsP>-3.992</kPabsP>
+      <mQabsQ>-3.992</mQabsQ>
+      <nRabsR>-3.992</nRabsR>
+    </plugin>
+
+    <!-- Thrusters: horizontal vectored 1-4 (both variants), then vertical
+         (2 for standard, 4 for heavy). Command each with a thrust in Newtons on
+         /model/bluerov2/joint/thruster<n>_joint/cmd_thrust; feedback (rad/s) on
+         .../ang_vel. -->
+    <xacro:thruster n="1" coeff="0.02"/>
+    <xacro:thruster n="2" coeff="0.02"/>
+    <xacro:thruster n="3" coeff="-0.02"/>
+    <xacro:thruster n="4" coeff="-0.02"/>
+    <xacro:if value="${heavy}">
+      <xacro:thruster n="5" coeff="0.02"/>
+      <xacro:thruster n="6" coeff="-0.02"/>
+      <xacro:thruster n="7" coeff="-0.02"/>
+      <xacro:thruster n="8" coeff="0.02"/>
+    </xacro:if>
+    <xacro:unless value="${heavy}">
+      <xacro:thruster n="5" coeff="0.02"/>
+      <xacro:thruster n="6" coeff="-0.02"/>
+    </xacro:unless>
+
+    <!-- Sensors: one per sensor-type accessory in config/bluerov2.yaml. -->
+    <xacro:mount_sensors items="${cfg.get('accessories', [])}"/>
+
+    <!-- Grippers: JointPositionControllers for each gripper accessory. -->
+    <xacro:mount_grippers items="${cfg.get('accessories', [])}"/>
+  </model>
+</sdf>

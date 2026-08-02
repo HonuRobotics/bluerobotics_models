@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<!--
+  Self-contained underwater world for the BlueROV2: sun, a ground plane for
+  reference, the core + sensor systems, uniform-density water (buoyancy) and the
+  vehicle itself pulled in via <include>. Started directly with `gz sim` it
+  comes up paused; press play and the near-neutral vehicle drifts up very
+  slowly, damped by its hydrodynamics.
+
+  Run it directly, no ROS:  gz sim <this file>
+-->
+<sdf version="1.12">
+  <world name="bluerov2_playground">
+
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster"/>
+
+    <!-- Renders the vehicle's camera / rgbd / gpu_lidar (Ping360) sensors; needs a
+         render path (GPU, or software GL headless). gz-sim-dvl-system drives the DVL-A50 custom sensor. -->
+    <plugin filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="gz-sim-dvl-system"
+            name="gz::sim::systems::DopplerVelocityLogSystem"/>
+
+    <!-- Uniform-density water (whole world submerged): the BlueROV2 shows its
+         near-neutral, slightly-positive buoyancy by rising very slowly. Displaced volume comes from
+         the model's collision, sized analytically in bluerov2_description so
+         density*volume = mass*(1+margin); the model's Hydrodynamics plugin damps
+         the rise to a steady rate. -->
+    <plugin filename="gz-sim-buoyancy-system"
+            name="gz::sim::systems::Buoyancy">
+      <uniform_fluid_density>1025</uniform_fluid_density>
+      <enable>bluerov2</enable>
+    </plugin>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.3 0.3 0.35 1</ambient>
+            <diffuse>0.3 0.3 0.35 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- The vehicle, pulled in from bluerov2_gazebo (the composed model). -->
+    <include>
+      <uri>model://bluerov2_gazebo</uri>
+      <name>bluerov2</name>
+      <pose>0 0 0.5 0 0 0</pose>
+    </include>
+
+  </world>
+</sdf>

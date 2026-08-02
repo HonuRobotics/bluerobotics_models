@@ -1,0 +1,214 @@
+<?xml version="1.0"?>
+<!--
+  BlueROV2 accessory macros + a recursive dispatcher that mounts the accessories
+  listed in config/bluerov2.yaml. Each accessory is a link (mesh or a sized
+  primitive placeholder) attached to the parent by a fixed joint at the config
+  pose. Meshes/sizes are temporary placeholders (see ACCESSORIES.md); sensor
+  and claw behaviour lives in bluerov2_gazebo. Type names here MUST match
+  the config's `type`.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Single source of truth for accessory masses (kg). Consumed by the macros
+       below AND by the buoyancy sizing in bluerov2.urdf.xacro. Keep the keys in
+       sync with the macro / dispatcher type names. Placeholder values. -->
+  <xacro:property name="accessory_mass"
+    value="${dict(ping360=0.5, payload_skid=3.0, roof_rack=0.2, sonoptix_echo=0.75, omniscan_450_fs=0.44, marinesitu_c3=0.43, explorehd_camera=0.08, dvl_a50=0.17, newton_gripper=0.5, sediment_sampler=0.5)}"/>
+
+  <!-- ===== helpers ===== -->
+  <xacro:macro name="_box_accessory" params="name xyz rpy parent size mass:=0.3">
+    <link name="${name}">
+      <inertial>
+        <mass value="${mass}"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual>
+        <geometry><box size="${size}"/></geometry>
+        <material name="${name}_mat"><color rgba="0.5 0.5 0.55 1"/></material>
+      </visual>
+    </link>
+    <joint name="${name}_joint" type="fixed">
+      <parent link="${parent}"/><child link="${name}"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="_cyl_accessory" params="name xyz rpy parent radius length mass:=0.3">
+    <link name="${name}">
+      <inertial>
+        <mass value="${mass}"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual>
+        <geometry><cylinder radius="${radius}" length="${length}"/></geometry>
+        <material name="${name}_mat"><color rgba="0.5 0.5 0.55 1"/></material>
+      </visual>
+    </link>
+    <joint name="${name}_joint" type="fixed">
+      <parent link="${parent}"/><child link="${name}"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- ===== accessories ===== -->
+  <!-- Ping360 scanning imaging sonar (reused open mesh, Apache-2.0). -->
+  <xacro:macro name="ping360" params="name xyz rpy parent:=base_link">
+    <link name="${name}">
+      <inertial>
+        <mass value="${accessory_mass['ping360']}"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual>
+        <geometry>
+          <!-- Mesh is ~40x oversized as authored; 0.01 matches CentraleNantes usage. -->
+          <mesh filename="package://bluerov2_description/meshes/accessories/ping360.dae"
+                scale="0.01 0.01 0.01"/>
+        </geometry>
+      </visual>
+    </link>
+    <joint name="${name}_joint" type="fixed">
+      <parent link="${parent}"/><child link="${name}"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- Primitive placeholders (dims from product pages; swap for real meshes). -->
+  <xacro:macro name="payload_skid" params="name xyz rpy parent:=base_link">
+    <xacro:_box_accessory name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"
+                          size="0.475 0.338 0.197" mass="${accessory_mass['payload_skid']}"/>
+  </xacro:macro>
+  <xacro:macro name="roof_rack" params="name xyz rpy parent:=base_link">
+    <xacro:_box_accessory name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"
+                          size="0.38 0.10 0.02" mass="${accessory_mass['roof_rack']}"/>
+  </xacro:macro>
+  <xacro:macro name="sonoptix_echo" params="name xyz rpy parent:=base_link">
+    <xacro:_box_accessory name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"
+                          size="0.150 0.100 0.042" mass="${accessory_mass['sonoptix_echo']}"/>
+  </xacro:macro>
+  <xacro:macro name="omniscan_450_fs" params="name xyz rpy parent:=base_link">
+    <xacro:_box_accessory name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"
+                          size="0.165 0.055 0.033" mass="${accessory_mass['omniscan_450_fs']}"/>
+  </xacro:macro>
+  <xacro:macro name="marinesitu_c3" params="name xyz rpy parent:=base_link">
+    <xacro:_box_accessory name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"
+                          size="0.095 0.165 0.089" mass="${accessory_mass['marinesitu_c3']}"/>
+  </xacro:macro>
+  <xacro:macro name="explorehd_camera" params="name xyz rpy parent:=base_link">
+    <xacro:_cyl_accessory name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"
+                          radius="0.0195" length="0.12" mass="${accessory_mass['explorehd_camera']}"/>
+  </xacro:macro>
+  <xacro:macro name="dvl_a50" params="name xyz rpy parent:=base_link">
+    <xacro:_cyl_accessory name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"
+                          radius="0.033" length="0.025" mass="${accessory_mass['dvl_a50']}"/>
+  </xacro:macro>
+
+  <!-- Newton Subsea Gripper (1-DOF): a body fixed to the parent, plus two jaws on
+       revolute joints that open/close symmetrically (mirrored axes). Primitive
+       placeholder (real mesh TBD); the JointPositionControllers that drive the jaws
+       live in bluerov2_gazebo. Jaw command 0 (closed) .. 0.6 rad (open). -->
+  <xacro:macro name="_gripper_jaw" params="name side y axis">
+    <link name="${name}_jaw_${side}">
+      <inertial>
+        <mass value="0.1"/>
+        <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+      </inertial>
+      <visual>
+        <origin xyz="0.03 0 0" rpy="0 0 0"/>
+        <geometry><box size="0.06 0.012 0.03"/></geometry>
+        <material name="${name}_jaw_mat"><color rgba="0.5 0.5 0.55 1"/></material>
+      </visual>
+      <collision>
+        <origin xyz="0.03 0 0" rpy="0 0 0"/>
+        <geometry><box size="0.06 0.012 0.03"/></geometry>
+      </collision>
+    </link>
+    <joint name="${name}_jaw_${side}_joint" type="revolute">
+      <parent link="${name}_body"/><child link="${name}_jaw_${side}"/>
+      <origin xyz="0.025 ${y} 0" rpy="0 0 0"/>
+      <axis xyz="${axis}"/>
+      <limit lower="0" upper="0.6" effort="10" velocity="2"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- Shared claw body: box housing fixed to the parent at the mount pose. -->
+  <xacro:macro name="_claw_body" params="name xyz rpy parent">
+    <link name="${name}_body">
+      <inertial>
+        <mass value="0.3"/>
+        <inertia ixx="0.0005" ixy="0" ixz="0" iyy="0.0005" iyz="0" izz="0.0005"/>
+      </inertial>
+      <visual>
+        <geometry><box size="0.05 0.06 0.06"/></geometry>
+        <material name="${name}_mat"><color rgba="0.5 0.5 0.55 1"/></material>
+      </visual>
+      <collision><geometry><box size="0.05 0.06 0.06"/></geometry></collision>
+    </link>
+    <joint name="${name}_mount" type="fixed">
+      <parent link="${parent}"/><child link="${name}_body"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="newton_gripper" params="name xyz rpy parent:=base_link">
+    <xacro:_claw_body name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"/>
+    <xacro:_gripper_jaw name="${name}" side="left"  y="0.02"  axis="0 0 1"/>
+    <xacro:_gripper_jaw name="${name}" side="right" y="-0.02" axis="0 0 -1"/>
+  </xacro:macro>
+
+  <!-- Newton Sediment Sampler: the same 1-DOF claw with rubber-cup end-links
+       instead of jaws (the cups ride the open/close DOF - they do not spin). -->
+  <xacro:macro name="_sampler_cup" params="name side y axis">
+    <link name="${name}_cup_${side}">
+      <inertial>
+        <mass value="0.1"/>
+        <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+      </inertial>
+      <visual>
+        <origin xyz="0.028 0 0" rpy="0 0 0"/>
+        <geometry><box size="0.055 0.01 0.012"/></geometry>
+        <material name="${name}_arm_mat"><color rgba="0.5 0.5 0.55 1"/></material>
+      </visual>
+      <visual>
+        <origin xyz="0.062 0 0" rpy="0 1.5708 0"/>
+        <geometry><cylinder radius="0.018" length="0.026"/></geometry>
+        <material name="${name}_cup_mat"><color rgba="0.1 0.3 0.8 1"/></material>
+      </visual>
+      <collision>
+        <origin xyz="0.045 0 0" rpy="0 0 0"/>
+        <geometry><box size="0.09 0.02 0.026"/></geometry>
+      </collision>
+    </link>
+    <joint name="${name}_cup_${side}_joint" type="revolute">
+      <parent link="${name}_body"/><child link="${name}_cup_${side}"/>
+      <origin xyz="0.025 ${y} 0" rpy="0 0 0"/>
+      <axis xyz="${axis}"/>
+      <limit lower="0" upper="0.6" effort="10" velocity="2"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="sediment_sampler" params="name xyz rpy parent:=base_link">
+    <xacro:_claw_body name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"/>
+    <xacro:_sampler_cup name="${name}" side="left"  y="0.02"  axis="0 0 1"/>
+    <xacro:_sampler_cup name="${name}" side="right" y="-0.02" axis="0 0 -1"/>
+  </xacro:macro>
+
+  <!-- ===== recursive dispatcher: mount each config accessory by type ===== -->
+  <xacro:macro name="mount_accessories" params="items parent:=base_link">
+    <xacro:if value="${len(items) > 0}">
+      <xacro:property name="a" value="${items[0]}"/>
+      <xacro:property name="t" value="${a['type']}"/>
+      <xacro:if value="${t == 'ping360'}">         <xacro:ping360         name="${a['name']}" xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/></xacro:if>
+      <xacro:if value="${t == 'payload_skid'}">    <xacro:payload_skid    name="${a['name']}" xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/></xacro:if>
+      <xacro:if value="${t == 'roof_rack'}">       <xacro:roof_rack       name="${a['name']}" xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/></xacro:if>
+      <xacro:if value="${t == 'sonoptix_echo'}">   <xacro:sonoptix_echo   name="${a['name']}" xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/></xacro:if>
+      <xacro:if value="${t == 'omniscan_450_fs'}"> <xacro:omniscan_450_fs name="${a['name']}" xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/></xacro:if>
+      <xacro:if value="${t == 'marinesitu_c3'}">   <xacro:marinesitu_c3   name="${a['name']}" xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/></xacro:if>
+      <xacro:if value="${t == 'explorehd_camera'}"><xacro:explorehd_camera name="${a['name']}" xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/></xacro:if>
+      <xacro:if value="${t == 'dvl_a50'}">         <xacro:dvl_a50         name="${a['name']}" xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/></xacro:if>
+      <xacro:if value="${t == 'newton_gripper'}"> <xacro:newton_gripper  name="${a['name']}" xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/></xacro:if>
+      <xacro:if value="${t == 'sediment_sampler'}"><xacro:sediment_sampler name="${a['name']}" xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/></xacro:if>
+      <xacro:mount_accessories items="${items[1:]}" parent="${parent}"/>
+    </xacro:if>
+  </xacro:macro>
+
+</robot>

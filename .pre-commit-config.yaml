@@ -1,0 +1,48 @@
+# Local hooks mirror the ament linters that colcon test / CI run, so a passing
+# pre-commit means a passing lint stage. Deliberately NO black/isort/ruff:
+# their style conflicts with the ament linters (e.g. isort's import grouping
+# violates ament_flake8's import order).
+#
+# Setup:  pip install pre-commit && pre-commit install
+# The ament_* hooks need a sourced ROS environment.
+
+exclude: ^bluerov2_description/(meshes|rviz)/
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: check-xml
+        types: [text]
+        files: \.(xml|xacro|sdf)$|model\.config$
+      # Existing placeholder meshes reach 24 MB; tighten once the artist
+      # assets (with a size budget) replace them.
+      - id: check-added-large-files
+        args: [--maxkb=26000]
+
+  - repo: local
+    hooks:
+      - id: ament-copyright
+        name: ament_copyright
+        entry: ament_copyright
+        language: system
+        types: [python]
+      - id: ament-flake8
+        name: ament_flake8
+        entry: ament_flake8
+        language: system
+        types: [python]
+      - id: ament-pep257
+        name: ament_pep257
+        entry: ament_pep257
+        language: system
+        types: [python]
+      - id: ament-lint-cmake
+        name: ament_lint_cmake
+        entry: ament_lint_cmake
+        language: system
+        files: CMakeLists\.txt$
