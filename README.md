@@ -18,11 +18,19 @@ see each README's binary-install section for how configuration works there):
 
 ```bash
 cd ~/ws/src && git clone https://github.com/HonuRobotics/bluerov2.git
-cd ~/ws && rosdep install --from-paths src -yi && colcon build
+cd ~/ws
+rosdep update
+rosdep install --from-paths src --ignore-packages-from-source --default-yes
+colcon build
 source install/setup.bash
 ros2 launch bluerov2_gazebo sim.launch.xml     # Gazebo
 ros2 launch bluerov2_description display.launch.xml   # RViz
 ```
+
+`rosdep update` refreshes the dependency database; skipping it in fresh
+containers is the usual cause of "Cannot locate rosdep definition" errors.
+Both colcon install layouts are supported (the default isolated layout or
+`--merge-install`).
 
 Each package README documents configuration (variant + accessory loadout),
 ROS topics and how to include the model in an existing Gazebo world.
