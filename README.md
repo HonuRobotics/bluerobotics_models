@@ -1,7 +1,8 @@
-# BlueROV2
+# Blue Robotics models
 
-ROS 2 / Gazebo Sim packages for the Blue Robotics BlueROV2 underwater vehicle
-(standard and Heavy configurations).
+ROS 2 / Gazebo Sim model packages for Blue Robotics vehicles. Currently the
+BlueROV2 underwater vehicle (standard and Heavy configurations); the BlueBoat
+USV is planned next.
 
 | Package | Purpose |
 |---------|---------|
@@ -17,7 +18,7 @@ From source (binary `apt install ros-<distro>-bluerov2-*` packages are planned;
 see each README's binary-install section for how configuration works there):
 
 ```bash
-cd ~/ws/src && git clone https://github.com/HonuRobotics/bluerov2.git
+cd ~/ws/src && git clone https://github.com/HonuRobotics/bluerobotics_models.git
 cd ~/ws
 rosdep update
 rosdep install --from-paths src --ignore-packages-from-source --default-yes

@@ -9,10 +9,10 @@ remains is process.
 ## One-time prerequisites
 
 1. **Public source repo**: push this repo to
-   `https://github.com/HonuRobotics/bluerov2` (branch `lyrical`) and get CI
+   `https://github.com/HonuRobotics/bluerobotics_models` (branch `lyrical`) and get CI
    green on the target distro.
 2. **Release repo**: create an empty
-   `https://github.com/HonuRobotics/bluerov2-release` (bloom populates it).
+   `https://github.com/HonuRobotics/bluerobotics_models-release` (bloom populates it).
 3. **Hold until the final meshes land** (project decision): don't publish the
    placeholder-mesh model to apt; the artist's glTF assets replace them first
    (and shrink the 24 MB heavy-frame `.dae`, which matters for deb size).
@@ -37,9 +37,9 @@ remains is process.
 2. Bloom (first time creates the track and can open the rosdistro PR for you;
    needs a GitHub token):
    ```bash
-   bloom-release --rosdistro lyrical --track lyrical bluerov2 --edit
-   # upstream:  https://github.com/HonuRobotics/bluerov2.git   (branch lyrical)
-   # release:   https://github.com/HonuRobotics/bluerov2-release.git
+   bloom-release --rosdistro lyrical --track lyrical bluerobotics_models --edit
+   # upstream:  https://github.com/HonuRobotics/bluerobotics_models.git   (branch lyrical)
+   # release:   https://github.com/HonuRobotics/bluerobotics_models-release.git
    ```
 3. Wait for the [ros/rosdistro](https://github.com/ros/rosdistro) PR review +
    merge, then the buildfarm builds `ros-lyrical-bluerov2-description` /
