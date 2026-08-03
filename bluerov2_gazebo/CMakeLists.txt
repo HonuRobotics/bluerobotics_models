@@ -57,6 +57,9 @@ if(BUILD_TESTING)
   # Headless gz server integration test (render assertions skip on CPU-only
   # hosts); see test/test_gz_launch.py.
   ament_add_pytest_test(test_gz_launch test/test_gz_launch.py TIMEOUT 300)
+  # Headless ROS bring-up test: container + bridge + robot_state_publisher
+  # through sim.launch.xml; see test/test_ros_launch.py.
+  ament_add_pytest_test(test_ros_launch test/test_ros_launch.py TIMEOUT 300)
 endif()
 
 ament_package()
