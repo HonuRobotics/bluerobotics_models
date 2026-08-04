@@ -1,6 +1,6 @@
 # Releasing to the ROS buildfarm
 
-Runbook for bloom-releasing `bluerov2_description` + `bluerov2_gazebo` into a
+Runbook for bloom-releasing the vehicle packages in this repository into a
 ROS 2 distro (target: **Lyrical**). The packages themselves are release-ready
 (manifests with version/maintainer/license/urls, per-package `CHANGELOG.rst`,
 uniform versions, no network access at build time, tests headless-safe); what

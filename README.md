@@ -1,13 +1,14 @@
 # Blue Robotics models
 
-ROS 2 / Gazebo Sim model packages for Blue Robotics vehicles. Currently the
-BlueROV2 underwater vehicle (standard and Heavy configurations); the BlueBoat
-USV is planned next.
+ROS 2 / Gazebo Sim model packages for Blue Robotics vehicles: the BlueROV2
+underwater vehicle (standard and Heavy configurations) and the BlueBoat USV.
 
 | Package | Purpose |
 |---------|---------|
 | [`bluerov2_description`](bluerov2_description/) | URDF/xacro, meshes, RViz; pure description, no simulator code |
 | [`bluerov2_gazebo`](bluerov2_gazebo/) | Composed Gazebo model (thrusters, hydrodynamics, sensors, grippers), world, launch and ros_gz bridge |
+| [`blueboat_description`](blueboat_description/) | BlueBoat URDF/xacro, primitive visuals, RViz; no simulator code |
+| [`blueboat_gazebo`](blueboat_gazebo/) | Composed BlueBoat model (twin thrusters, hydrodynamics, echosounder), surface-water world, launch and ros_gz bridge |
 
 Targets **ROS 2 Lyrical + Gazebo Jetty** (the default pairing on Ubuntu 26.04),
 via `ros_gz`.

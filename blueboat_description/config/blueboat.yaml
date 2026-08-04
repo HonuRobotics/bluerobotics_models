@@ -1,0 +1,33 @@
+# BlueBoat build-time configuration.
+# Edit this file and rebuild (colcon build) to regenerate the URDF, the composed
+# Gazebo model AND the ros_gz bridge config.
+#
+# Topic namespace: sensor topics default to /<topic_namespace>/<name>/...
+topic_namespace: blueboat
+
+# Accessories to mount. `type` must match a macro in urdf/accessories.xacro;
+# xyz/rpy are the mount pose relative to base_link (metres / radians).
+# Optional per-accessory topic overrides (bases; per-sensor suffixes like
+# /range are appended):
+#   topic:     base for BOTH the Gazebo and ROS sides
+#   gz_topic:  Gazebo-side base   (overrides `topic`)
+#   ros_topic: ROS-side base      (overrides `topic`)
+#   bridge:    dict of NATIVE ros_gz_bridge keys (lazy, subscriber_queue,
+#              publisher_queue, ...) merged into that accessory's generated
+#              bridge entries
+#
+# extra_bridge_topics: optional top-level list, appended VERBATIM to the
+# generated bridge config in native ros_gz_bridge syntax. Never hand-edit the
+# generated ros_gz_bridge.yaml; it is overwritten on rebuild.
+#
+# Default: the Ping2 echosounder only. Uncomment entries below to add the rest
+# of the catalog; the bridge config regenerates to match on rebuild.
+accessories:
+  - {type: ping_sonar,          name: ping,        xyz: "0 0 -0.05",     rpy: "0 0 0"}
+  # - {type: flag,                name: flag,        xyz: "-0.3 0 -0.08",  rpy: "0 0 0"}
+  # - {type: antenna_mast,        name: mast,        xyz: "-0.35 0 0.45",  rpy: "0 0 0"}
+  # - {type: basestation_antenna, name: basestation, xyz: "-0.35 0 0.78",  rpy: "0 0 0"}
+  # - {type: ping_mount,          name: ping_mount,  xyz: "0 -0.12 -0.02", rpy: "0 0 0"}
+  # - {type: payload_bracket,     name: payload,     xyz: "0.1 0 0.15",    rpy: "0 0 0"}
+  # - {type: omniscan_450,        name: sidescan,    xyz: "0.2 0.22 -0.03", rpy: "0 0 0"}
+  # - {type: surveyor_multibeam,  name: multibeam,   xyz: "0.35 0 -0.08",  rpy: "0 0 0"}
