@@ -35,9 +35,12 @@
   <xacro:property name="footprint_x" value="0.457"/>
   <xacro:property name="footprint_y" value="${0.575 if heavy else 0.338}"/>
 
-  <xacro:property name="base_mass"     value="${13.0 if heavy else 10.0}"/>
+  <!-- Hull masses chosen so the all-up vehicle (hull + real 0.344 kg T200s)
+       matches the reference in-air masses: ~11.5 kg standard, ~15.5 kg heavy. -->
+  <xacro:property name="base_mass"     value="${12.75 if heavy else 9.4}"/>
   <xacro:property name="n_thrusters"   value="${8 if heavy else 6}"/>
-  <xacro:property name="thruster_mass" value="0.002"/>
+  <xacro:property name="thruster_mass" value="0.344"/>
+  <xacro:property name="hull_height"   value="0.065"/>  <!-- effective slab height for inertia -->
   <xacro:property name="acc_mass_total"
     value="${fsum([accessory_mass[a['type']] for a in cfg.get('accessories', [])])}"/>
   <xacro:property name="total_mass"
@@ -57,8 +60,11 @@
     <inertial>
       <origin xyz="0 0 0.011" rpy="0 0 0"/>
       <mass value="${base_mass}"/>
-      <inertia ixx="0.099" ixy="0.0" ixz="0.0"
-               iyy="0.178" iyz="0.0" izz="0.269"/>
+      <!-- Box-slab inertia from the variant footprint, so heavy gets the wider
+           hull's tensor instead of inheriting the standard one. -->
+      <inertia ixx="${base_mass/12.0 * (footprint_y**2 + hull_height**2)}" ixy="0.0" ixz="0.0"
+               iyy="${base_mass/12.0 * (footprint_x**2 + hull_height**2)}" iyz="0.0"
+               izz="${base_mass/12.0 * (footprint_x**2 + footprint_y**2)}"/>
     </inertial>
 
     <visual>

@@ -20,9 +20,11 @@
                params="number xyz rpy spin visual_rpy parent:=base_link">
     <link name="thruster${number}">
       <inertial>
-        <mass value="0.002"/>
-        <inertia ixx="0.001" ixy="0.0" ixz="0.0"
-                 iyy="0.001" iyz="0.0" izz="0.001"/>
+        <!-- T200 in air ~0.344 kg; short-cylinder inertia (r~38 mm, h~40 mm).
+             Note izz <= ixx + iyy must hold or sdformat rejects the link. -->
+        <mass value="0.344"/>
+        <inertia ixx="1.7e-4" ixy="0.0" ixz="0.0"
+                 iyy="1.7e-4" iyz="0.0" izz="2.5e-4"/>
       </inertial>
       <visual>
         <origin xyz="0 0 0" rpy="${visual_rpy}"/>
