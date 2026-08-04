@@ -21,9 +21,15 @@ jobs:
       run:
         shell: bash
     steps:
+      # Make apt fail-and-retry instead of hanging when a mirror wedges
+      # (packages.ros.org flakiness otherwise stalls setup-ros / rosdep).
+      - name: Harden apt against hung mirrors
+        run: |
+          printf 'Acquire::Retries "3";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' \
+            > /etc/apt/apt.conf.d/80-network-hardening
       - uses: actions/checkout@v4
         with:
-          path: src/bluerov2
+          path: src/bluerobotics_models
       # Ensures colcon/rosdep/vcstool are present in the container.
       - uses: ros-tooling/setup-ros@v0.7
       - name: Install dependencies
