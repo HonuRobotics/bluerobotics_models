@@ -68,7 +68,8 @@
       </inertial>
       <visual>
         <geometry>
-          <!-- Mesh is ~40x oversized as authored; 0.01 matches CentraleNantes usage. -->
+          <!-- Mesh is ~100x oversized as authored (7.7x7.7x8.3 units, no
+               COLLADA unit element); 0.01 matches CentraleNantes usage. -->
           <mesh filename="package://bluerov2_description/meshes/accessories/ping360.dae"
                 scale="0.01 0.01 0.01"/>
         </geometry>

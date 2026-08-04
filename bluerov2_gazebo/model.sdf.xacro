@@ -137,8 +137,9 @@
   </xacro:macro>
 
   <!-- Water Linked DVL-A50: native DopplerVelocityLog custom sensor, 4-beam Janus
-       (tilt 22.5 deg). Publishes gz.msgs.DVLVelocityTracking (no stock ros_gz
-       bridge - needs a relay). Requires gz-sim-dvl-system in the world. -->
+       (tilt 22.5 deg). Publishes gz.msgs.DVLVelocityTracking, bridged to
+       marine_acoustic_msgs/msg/Dvl by ros_gz_bridge. Requires
+       gz-sim-dvl-system in the world. -->
   <xacro:macro name="dvl_sensor" params="name pose topic_base">
     <xacro:sensor_link name="${name}" pose="${pose}">
       <sensor name="${name}" type="custom" gz:type="dvl">
