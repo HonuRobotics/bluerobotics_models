@@ -24,6 +24,7 @@ import os
 import shutil
 import signal
 import subprocess
+import tempfile
 import time
 import uuid
 
@@ -50,9 +51,15 @@ def sim(request):
     env = dict(os.environ,
                GZ_PARTITION=f'test_{uuid.uuid4().hex[:8]}',
                ROS_DOMAIN_ID=str(os.getpid() % 100 + 1))
+    log = tempfile.NamedTemporaryFile('w+', suffix='.log', delete=False,
+                                      prefix='ros_launch_')
     proc = subprocess.Popen(LAUNCH, env=env, start_new_session=True,
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL)
+                            stdout=log, stderr=subprocess.STDOUT)
+
+    def fail(message):
+        log.flush()
+        tail = ''.join(open(log.name).readlines()[-40:])
+        pytest.fail(f'{message}\nlast launch output ({log.name}):\n{tail}')
 
     def teardown():
         # SIGINT the whole group so ros2 launch shuts its children down.
@@ -70,12 +77,12 @@ def sim(request):
     deadline = time.time() + 120
     while time.time() < deadline:
         if proc.poll() is not None:
-            pytest.fail('ros2 launch exited during startup')
+            fail('ros2 launch exited during startup')
         _, out = ros(env, 'node', 'list')
         if '/robot_state_publisher' in out:
             return env
         time.sleep(3)
-    pytest.fail('launch never brought the nodes up')
+    fail('launch never brought the nodes up')
 
 
 def test_container_and_nodes_up(sim):

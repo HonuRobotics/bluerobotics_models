@@ -6,21 +6,23 @@
 # Setup:  pip install pre-commit && pre-commit install
 # The ament_* hooks need a sourced ROS environment.
 
-exclude: ^bluerov2_description/(meshes|rviz)/
-
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
+        exclude: ^bluerov2_description/(meshes|rviz)/
       - id: end-of-file-fixer
+        exclude: ^bluerov2_description/(meshes|rviz)/
       - id: check-merge-conflict
       - id: check-yaml
       - id: check-xml
         types: [text]
         files: \.(xml|xacro|sdf)$|model\.config$
+        exclude: ^bluerov2_description/meshes/
       # Existing placeholder meshes reach 24 MB; tighten once the artist
-      # assets (with a size budget) replace them.
+      # assets (with a size budget) replace them. Deliberately NOT excluded
+      # from the meshes directory: guarding those files is its purpose.
       - id: check-added-large-files
         args: [--maxkb=26000]
 
@@ -31,6 +33,7 @@ repos:
         entry: ament_copyright
         language: system
         types: [python]
+        exclude: ^bluerov2_description/(meshes|rviz)/
       - id: ament-flake8
         name: ament_flake8
         entry: ament_flake8

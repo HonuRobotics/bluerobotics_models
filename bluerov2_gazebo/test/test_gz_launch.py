@@ -23,6 +23,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import tempfile
 import time
 import uuid
 
@@ -50,9 +51,15 @@ def sim(request):
     if shutil.which('gz') is None:
         pytest.skip('gz CLI not available')
     env = dict(os.environ, GZ_PARTITION=f'test_{uuid.uuid4().hex[:8]}')
+    log = tempfile.NamedTemporaryFile('w+', suffix='.log', delete=False,
+                                      prefix='gz_launch_')
     proc = subprocess.Popen(['gz', 'sim', '-s', '-r', str(WORLD)], env=env,
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL)
+                            stdout=log, stderr=subprocess.STDOUT)
+
+    def fail(message):
+        log.flush()
+        tail = ''.join(open(log.name).readlines()[-40:])
+        pytest.fail(f'{message}\nlast gz output ({log.name}):\n{tail}')
 
     def teardown():
         proc.terminate()
@@ -66,12 +73,12 @@ def sim(request):
     deadline = time.time() + 120
     while time.time() < deadline:
         if proc.poll() is not None:
-            pytest.fail('gz server exited during startup')
+            fail('gz server exited during startup')
         _, out = gz(env, 'model', '--list')
         if 'bluerov2' in out:
             return env
         time.sleep(2)
-    pytest.fail('model never appeared in the world')
+    fail('model never appeared in the world')
 
 
 def test_model_loaded(sim):
