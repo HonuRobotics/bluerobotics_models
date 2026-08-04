@@ -15,6 +15,14 @@
   <xacro:property name="accessory_mass"
     value="${dict(ping360=0.5, payload_skid=3.0, roof_rack=0.2, sonoptix_echo=0.75, omniscan_450_fs=0.44, marinesitu_c3=0.43, explorehd_camera=0.08, dvl_a50=0.17, newton_gripper=0.5, sediment_sampler=0.5)}"/>
 
+  <!-- Displaced volume (m^3) of each accessory's COLLISION geometry. The
+       Buoyancy plugin sums every collision in the model, so the analytic hull
+       box in bluerov2.urdf.xacro must shrink by this amount to keep the total
+       displacement on target. Only the claws carry collisions; keep these in
+       sync with the collision boxes below. -->
+  <xacro:property name="accessory_volume"
+    value="${dict(ping360=0.0, payload_skid=0.0, roof_rack=0.0, sonoptix_echo=0.0, omniscan_450_fs=0.0, marinesitu_c3=0.0, explorehd_camera=0.0, dvl_a50=0.0, newton_gripper=0.05*0.06*0.06 + 2*0.06*0.012*0.03, sediment_sampler=0.05*0.06*0.06 + 2*0.09*0.02*0.026)}"/>
+
   <!-- ===== helpers ===== -->
   <xacro:macro name="_box_accessory" params="name xyz rpy parent size mass:=0.3">
     <link name="${name}">

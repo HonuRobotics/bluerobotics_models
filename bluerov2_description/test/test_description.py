@@ -13,6 +13,7 @@
 # limitations under the License.
 """Generation-pipeline tests: config yaml -> URDF (validity, variants, buoyancy)."""
 
+import math
 from pathlib import Path
 import re
 import shutil
@@ -96,13 +97,30 @@ def total_mass(root):
                for m in root.findall('.//inertial/mass'))
 
 
+def collision_volume(root):
+    """Sum every collision volume in the URDF, as the gz Buoyancy system does."""
+    total = 0.0
+    for geo in root.findall('.//collision/geometry'):
+        box = geo.find('box')
+        cyl = geo.find('cylinder')
+        sph = geo.find('sphere')
+        if box is not None:
+            x, y, z = (float(v) for v in box.get('size').split())
+            total += x * y * z
+        elif cyl is not None:
+            total += (math.pi * float(cyl.get('radius')) ** 2
+                      * float(cyl.get('length')))
+        elif sph is not None:
+            total += 4 / 3 * math.pi * float(sph.get('radius')) ** 3
+        else:
+            raise AssertionError(
+                f'unhandled collision geometry: {[c.tag for c in geo]}')
+    return total
+
+
 def buoyancy_ratio(root):
-    """Return water_density * base_link collision volume / total mass."""
-    base = next(li for li in root.findall('link')
-                if li.get('name') == 'base_link')
-    box = base.find('./collision/geometry/box')
-    x, y, z = (float(v) for v in box.get('size').split())
-    return WATER_DENSITY * x * y * z / total_mass(root)
+    """Return water_density * total collision volume / total mass."""
+    return WATER_DENSITY * collision_volume(root) / total_mass(root)
 
 
 def test_default_config_camera_only():

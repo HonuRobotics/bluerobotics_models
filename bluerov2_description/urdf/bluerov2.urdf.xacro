@@ -42,8 +42,13 @@
     value="${fsum([accessory_mass[a['type']] for a in cfg.get('accessories', [])])}"/>
   <xacro:property name="total_mass"
     value="${base_mass + n_thrusters * thruster_mass + acc_mass_total}"/>
+  <!-- The Buoyancy plugin sums EVERY collision in the model, so accessories
+       that carry collisions (the claws) already displace water; shrink the
+       hull box by their volume to keep total displacement on target. -->
+  <xacro:property name="acc_volume_total"
+    value="${fsum([accessory_volume[a['type']] for a in cfg.get('accessories', [])])}"/>
   <xacro:property name="buoyancy_volume"
-    value="${total_mass * (1.0 + buoyancy_margin) / water_density}"/>
+    value="${total_mass * (1.0 + buoyancy_margin) / water_density - acc_volume_total}"/>
   <xacro:property name="buoyancy_height"
     value="${buoyancy_volume / (footprint_x * footprint_y)}"/>
 
