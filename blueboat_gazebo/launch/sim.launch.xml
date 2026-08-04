@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!--
+  Bring up Gazebo with the BlueBoat already in the world (the playground world
+  <include>s the composed model). With use_composition (default), gz_server, the
+  ros_gz bridge and robot_state_publisher run as composable nodes in ONE
+  container process; the Gazebo GUI runs as a separate process. The world starts
+  paused; no buoyancy/hydro yet (Phase 3).
+-->
+<launch>
+  <arg name="world"
+       default="$(find-pkg-share blueboat_gazebo)/worlds/blueboat_playground.sdf"
+       description="World SDF (defaults to the self-contained playground)."/>
+  <arg name="use_composition" default="true"
+       description="Run gz_server, bridge and robot_state_publisher in one process."/>
+  <arg name="gui" default="true" description="Launch the Gazebo GUI."/>
+  <arg name="config_file"
+       default="$(find-pkg-share blueboat_description)/config/blueboat.yaml"
+       description="Vehicle config (accessories) expanded at launch."/>
+  <arg name="bridge_config_file"
+       default="$(find-pkg-share blueboat_gazebo)/config/ros_gz_bridge.yaml"
+       description="ros_gz bridge config (generated; regenerate for custom loadouts)."/>
+
+  <!-- Base URDF, shared by both robot_state_publisher variants below. -->
+  <let name="robot_description"
+       value="$(command 'xacro $(find-pkg-share blueboat_description)/urdf/blueboat.urdf.xacro config_file:=$(var config_file)')"/>
+
+  <!-- Gazebo server (composable) — creates the shared container. -->
+  <gz_server world_sdf_file="$(var world)"
+             container_name="ros_gz_container"
+             create_own_container="true"
+             use_composition="$(var use_composition)"/>
+
+  <!-- Gazebo GUI (separate Qt process). -->
+  <executable cmd="gz sim -g" output="screen" if="$(var gui)"/>
+
+  <!-- ros_gz bridge (composable) — joins the container; bridges the clock. -->
+  <ros_gz_bridge bridge_name="ros_gz_bridge"
+                 config_file="$(var bridge_config_file)"
+                 container_name="ros_gz_container"
+                 create_own_container="false"
+                 use_composition="$(var use_composition)"/>
+
+  <!-- robot_state_publisher: composable node in the container when composing... -->
+  <load_composable_node target="ros_gz_container" if="$(var use_composition)">
+    <composable_node pkg="robot_state_publisher"
+                     plugin="robot_state_publisher::RobotStatePublisher"
+                     name="robot_state_publisher">
+      <param name="robot_description" value="$(var robot_description)" type="str"/>
+      <param name="use_sim_time" value="true" type="bool"/>
+    </composable_node>
+  </load_composable_node>
+
+  <!-- ...or a plain node when composition is disabled. -->
+  <node pkg="robot_state_publisher" exec="robot_state_publisher"
+        name="robot_state_publisher" unless="$(var use_composition)">
+    <param name="robot_description" value="$(var robot_description)"/>
+    <param name="use_sim_time" value="true"/>
+  </node>
+</launch>
