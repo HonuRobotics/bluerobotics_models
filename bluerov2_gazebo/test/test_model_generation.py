@@ -15,14 +15,12 @@
 
 import importlib.util
 from pathlib import Path
-import shutil
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import (get_package_prefix,
                                          get_package_share_directory)
-import pytest
 import yaml
 
 GZ_SHARE = Path(get_package_share_directory('bluerov2_gazebo'))
@@ -99,8 +97,6 @@ def test_plugin_references_survive_lumping():
     urdf_links = {li.get('name') for li in urdf_root.findall('link')}
     assert joint_refs <= urdf_joints
     assert link_refs <= urdf_links
-    if shutil.which('gz') is None:
-        pytest.skip('gz CLI unavailable: post-lumping check cannot run')
     with tempfile.NamedTemporaryFile('w', suffix='.urdf', delete=False) as f:
         f.write(urdf_text)
         urdf_path = f.name

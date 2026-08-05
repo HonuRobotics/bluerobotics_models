@@ -16,7 +16,6 @@
 import math
 from pathlib import Path
 import re
-import shutil
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
@@ -174,30 +173,27 @@ def test_catalog_completeness_and_toggle():
         assert not expected & empty_links, f'{type_name} present when absent'
 
 
-def test_mesh_references_resolve():
+@pytest.mark.parametrize('variant', ('standard', 'heavy'))
+def test_mesh_references_resolve(variant):
     """#5: every package:// mesh URI in the generated URDF exists on disk."""
-    for variant in ('standard', 'heavy'):
-        root = generate_urdf(make_config(variant, full_catalog_accessories()))
-        uris = {m.get('filename') for m in root.findall('.//mesh')}
-        assert uris
-        for uri in uris:
-            package, _, rel = uri.removeprefix('package://').partition('/')
-            path = Path(get_package_share_directory(package)) / rel
-            assert path.is_file(), f'missing mesh {uri}'
+    root = generate_urdf(make_config(variant, full_catalog_accessories()))
+    uris = {m.get('filename') for m in root.findall('.//mesh')}
+    assert uris
+    for uri in uris:
+        package, _, rel = uri.removeprefix('package://').partition('/')
+        path = Path(get_package_share_directory(package)) / rel
+        assert path.is_file(), f'missing mesh {uri}'
 
 
-def test_check_urdf_accepts_generated():
-    """The urdfdom validator accepts the generated URDF for both variants."""
-    if shutil.which('check_urdf') is None:
-        pytest.skip('check_urdf not available')
-    for variant in ('standard', 'heavy'):
-        text = xacro_output(make_config(variant, full_catalog_accessories()))
-        with tempfile.NamedTemporaryFile('w', suffix='.urdf',
-                                         delete=False) as f:
-            f.write(text)
-            urdf_path = f.name
-        subprocess.run(['check_urdf', urdf_path], check=True,
-                       capture_output=True, timeout=30)
+@pytest.mark.parametrize('variant', ('standard', 'heavy'))
+def test_check_urdf_accepts_generated(variant):
+    """The urdfdom validator accepts the generated URDF."""
+    text = xacro_output(make_config(variant, full_catalog_accessories()))
+    with tempfile.NamedTemporaryFile('w', suffix='.urdf', delete=False) as f:
+        f.write(text)
+        urdf_path = f.name
+    subprocess.run(['check_urdf', urdf_path], check=True,
+                   capture_output=True, timeout=30)
 
 
 def test_mass_table_matches_dispatcher():
