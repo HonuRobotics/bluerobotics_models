@@ -2,7 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [lyrical]
+    # TEMPORARY: exercise the always-on test logging without opening a PR.
+    # Drop the second entry before this branch is merged.
+    branches: [lyrical, jrivero/launch-test-terminal-logging]
   pull_request:
 
 jobs:
