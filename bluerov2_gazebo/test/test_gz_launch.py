@@ -17,13 +17,16 @@ Headless Gazebo integration: world loads, interfaces up, physics steps.
 The render smoke test (camera image) SKIPS rather than fails when no usable
 render path exists, so CPU-only CI runners stay green while still exercising
 software-GL rendering where available.
+
+The gz server runs verbose and inherits this process' stdout/stderr, so its
+whole log is in the test terminal on pass and fail alike (CMakeLists.txt runs
+this file with NOCAPTURE so pytest does not swallow it).
 """
 
 import os
 from pathlib import Path
 import shutil
 import subprocess
-import tempfile
 import time
 import uuid
 
@@ -35,14 +38,28 @@ WORLD = (Path(get_package_share_directory('bluerov2_gazebo'))
 WORLD_NAME = 'bluerov2_playground'
 
 
+def banner(message):
+    """Mark a boundary in the interleaved server/test output."""
+    # flush: the server writes to the same fds directly, unbuffered.
+    print(f'\n===== {message} =====', flush=True)
+
+
 def gz(env, *args, timeout=10):
-    """Run a gz CLI command; return (returncode, stdout)."""
+    """Run a gz CLI command; echo it to the terminal, return (rc, stdout)."""
+    command = f'$ gz {" ".join(args)}'
     try:
         out = subprocess.run(['gz', *args], env=env, capture_output=True,
                              text=True, timeout=timeout)
-        return out.returncode, out.stdout
     except subprocess.TimeoutExpired:
+        print(f'{command} -> timed out after {timeout}s', flush=True)
         return -1, ''
+    # stdout is only echoed by the callers that need it (the polling loops
+    # would print the same listing dozens of times); stderr never is otherwise.
+    report = f'{command} -> exit {out.returncode}'
+    if out.stderr.strip():
+        report += f'\n{out.stderr.strip()}'
+    print(report, flush=True)
+    return out.returncode, out.stdout
 
 
 @pytest.fixture(scope='module')
@@ -51,15 +68,14 @@ def sim(request):
     if shutil.which('gz') is None:
         pytest.skip('gz CLI not available')
     env = dict(os.environ, GZ_PARTITION=f'test_{uuid.uuid4().hex[:8]}')
-    log = tempfile.NamedTemporaryFile('w+', suffix='.log', delete=False,
-                                      prefix='gz_launch_')
-    proc = subprocess.Popen(['gz', 'sim', '-s', '-r', str(WORLD)], env=env,
-                            stdout=log, stderr=subprocess.STDOUT)
+    # -v 4 is gz's most verbose level; passing no stdout/stderr here leaves the
+    # server on this process' streams, i.e. writing straight to the terminal.
+    command = ['gz', 'sim', '-s', '-r', '-v', '4', str(WORLD)]
+    banner(f'gz server starting: {" ".join(command)}')
+    proc = subprocess.Popen(command, env=env)
 
     def fail(message):
-        log.flush()
-        tail = ''.join(open(log.name).readlines()[-40:])
-        pytest.fail(f'{message}\nlast gz output ({log.name}):\n{tail}')
+        pytest.fail(f'{message} (gz server output is above)')
 
     def teardown():
         proc.terminate()
@@ -68,6 +84,7 @@ def sim(request):
         except subprocess.TimeoutExpired:
             proc.kill()
             proc.wait(timeout=10)
+        banner(f'gz server stopped (exit {proc.returncode})')
 
     request.addfinalizer(teardown)
     deadline = time.time() + 120

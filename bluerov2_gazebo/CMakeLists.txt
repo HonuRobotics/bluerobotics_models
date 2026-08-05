@@ -55,11 +55,15 @@ if(BUILD_TESTING)
   ament_add_pytest_test(test_model_generation test/test_model_generation.py
     TIMEOUT 180)
   # Headless gz server integration test (render assertions skip on CPU-only
-  # hosts); see test/test_gz_launch.py.
-  ament_add_pytest_test(test_gz_launch test/test_gz_launch.py TIMEOUT 300)
+  # hosts); see test/test_gz_launch.py. NOCAPTURE (pytest -s) keeps the sim
+  # output these tests stream on the terminal on success too, not only inside
+  # a failure report: CI logs are the only place to debug a flake after it.
+  ament_add_pytest_test(test_gz_launch test/test_gz_launch.py TIMEOUT 300
+    NOCAPTURE)
   # Headless ROS bring-up test: container + bridge + robot_state_publisher
-  # through sim.launch.xml; see test/test_ros_launch.py.
-  ament_add_pytest_test(test_ros_launch test/test_ros_launch.py TIMEOUT 300)
+  # through sim.launch.xml; see test/test_ros_launch.py. NOCAPTURE as above.
+  ament_add_pytest_test(test_ros_launch test/test_ros_launch.py TIMEOUT 300
+    NOCAPTURE)
 endif()
 
 ament_package()
