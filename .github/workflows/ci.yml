@@ -24,6 +24,7 @@ jobs:
           path: src/bluerov2
       - name: Install dependencies
         run: |
+          apt-get update
           rosdep update
           rosdep install --from-paths src -y --ignore-src
       - name: Build
