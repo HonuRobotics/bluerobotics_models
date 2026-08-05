@@ -74,14 +74,34 @@ ros2 topic pub /bluerov2/gripper/cmd_pos std_msgs/msg/Float64 "data: 0.6" -1
 | `/model/bluerov2/joint/thruster<N>_joint/cmd_thrust` | `gz.msgs.Double` | subscribes | thrust command in newtons, clamped to the T200 limits; N = 1..6 (standard) or 1..8 (heavy) |
 | `/model/bluerov2/joint/thruster<N>_joint/ang_vel` | `gz.msgs.Double` | publishes | propeller speed feedback (rad/s) |
 
-Drive a thruster directly:
+Thrust commands are latched: each thruster holds its last command until a new
+one arrives. The horizontal thrusters (1-4) are vectored at 45 degrees, so
+single-axis motion needs a mix with these signs (thrust in newtons; the
+vertical pair, 5-6, heaves):
+
+| motion | t1 | t2 | t3 | t4 |
+|--------|----|----|----|----|
+| surge +x (forward) | - | - | + | + |
+| sway +y (left) | - | + | - | + |
+| yaw +z (counterclockwise) | - | + | + | - |
+
+Command the mix together (`&` + `wait` publishes in parallel). Bringing
+thrusters up one command at a time leaves the wrench unbalanced while the
+remaining commands arrive, yawing the vehicle off its heading before it
+translates:
 
 ```bash
-gz topic -t /model/bluerov2/joint/thruster1_joint/cmd_thrust -m gz.msgs.Double -p 'data: 10.0'
+# surge forward at ~28 N
+gz topic -t /model/bluerov2/joint/thruster1_joint/cmd_thrust -m gz.msgs.Double -p 'data: -10.0' &
+gz topic -t /model/bluerov2/joint/thruster2_joint/cmd_thrust -m gz.msgs.Double -p 'data: -10.0' &
+gz topic -t /model/bluerov2/joint/thruster3_joint/cmd_thrust -m gz.msgs.Double -p 'data: 10.0' &
+gz topic -t /model/bluerov2/joint/thruster4_joint/cmd_thrust -m gz.msgs.Double -p 'data: 10.0' &
+wait
 ```
 
-Horizontal thrusters (1-4) surge and yaw the vehicle; the vertical pair heaves
-it. To expose thruster commands over ROS, add entries to the config's
+Stop by publishing `data: 0.0` to all four the same way. Controllers that
+publish continuously (teleop, ArduPilot, MAVROS) are unaffected by the onset
+ordering. To expose thruster commands over ROS, add entries to the config's
 `extra_bridge_topics:` list and rebuild.
 
 Never edit the generated `config/ros_gz_bridge.yaml`; edit the vehicle config
