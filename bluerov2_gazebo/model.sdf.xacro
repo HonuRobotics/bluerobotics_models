@@ -53,17 +53,19 @@
        a camera looks +X, a gpu_lidar scans the sensor XY plane, DVL beams point
        down per <tilt>; tune each accessory's rpy for the intended view. -->
 
-  <!-- Wrapper: a massless sensor link fixed to base_link at `pose`, holding the
-       <sensor> block passed in. Mass is negligible (the accessory's real mass/
-       geometry already live in base_link via the description). -->
+  <!-- Wrapper: a near-massless sensor link fixed to base_link at `pose`, holding
+       the <sensor> block passed in. The accessory's real mass/geometry already
+       live in base_link via the description; 1e-5 kg keeps each wrapper under
+       0.5% of the 0.02% buoyancy margin, so a full sensor loadout cannot tip
+       the trim negative. -->
   <xacro:macro name="sensor_link" params="name pose *sensor">
     <link name="${name}_sensor">
       <pose relative_to="base_link">${pose}</pose>
       <inertial>
-        <mass>0.001</mass>
+        <mass>1e-5</mass>
         <inertia>
-          <ixx>1e-6</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1e-6</iyy><iyz>0</iyz><izz>1e-6</izz>
+          <ixx>1e-8</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>1e-8</iyy><iyz>0</iyz><izz>1e-8</izz>
         </inertia>
       </inertial>
       <xacro:insert_block name="sensor"/>
@@ -223,7 +225,12 @@
       <uri>package://bluerov2_description/urdf/bluerov2.urdf</uri>
     </include>
 
-    <!-- Hydrodynamic damping (Fossen quadratic drag, reference BlueROV2). -->
+    <!-- Hydrodynamic damping (Fossen quadratic drag, reference BlueROV2).
+         Added mass (xDotU etc., e.g. von Benzon 2022) is intentionally left at
+         zero: the plugin applies it as explicit acceleration feedback, which
+         diverges when added mass exceeds rigid mass (heave: 18.68 vs 11.5 kg).
+         The stable path is SDF <fluid_added_mass>, pending build time URDF
+         conversion so base_link's inertial can carry it. -->
     <plugin filename="gz-sim-hydrodynamics-system"
             name="gz::sim::systems::Hydrodynamics">
       <link_name>base_link</link_name>

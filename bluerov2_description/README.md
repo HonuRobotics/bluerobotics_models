@@ -47,6 +47,8 @@ Edit `config/bluerov2.yaml` and rebuild.
 | `explorehd_camera` | HD camera |
 | `marinesitu_c3` | stereo camera |
 | `sonoptix_echo` / `omniscan_450_fs` | imaging sonars |
+| `newton_gripper` | Newton subsea gripper |
+| `sediment_sampler` | sediment sampler claw |
 | `payload_skid` / `roof_rack` | payload frames |
 
 The default loadout is the forward camera only; the rest of the catalog ships
