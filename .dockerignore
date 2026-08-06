@@ -1,0 +1,17 @@
+# The build context is the repository root. Keep out VCS data and build output,
+# and keep out the docker/ helpers themselves so that editing compose.yaml or
+# run.sh does not invalidate the layer that copies the sources - except
+# entrypoint.sh, which the Dockerfile does COPY.
+.git
+.github
+build
+install
+log
+docker/Dockerfile
+docker/compose.yaml
+docker/run.sh
+docker/README.md
+!docker/entrypoint.sh
+__pycache__
+*.pyc
+.pytest_cache

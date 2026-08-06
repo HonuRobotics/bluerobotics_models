@@ -1,0 +1,135 @@
+# Blue Robotics models in Docker, with GPU rendering and GUI passthrough.
+#
+#   cd docker
+#   docker compose build
+#   ../docker/run.sh sim            # or: docker compose run --rm sim
+#
+# GUI services need the host X server reachable; docker/run.sh sets up a
+# throwaway X cookie for that. Doing it by hand instead:
+#   xhost +local: && docker compose run --rm sim
+#
+# `gpus: all` requires the NVIDIA container toolkit; the driver capabilities
+# (graphics, display) come from NVIDIA_DRIVER_CAPABILITIES baked into the image.
+# On a machine without an NVIDIA GPU, drop that key (see the `sim-cpu` service).
+
+name: bluerobotics_models
+
+x-env: &env
+  DISPLAY: ${DISPLAY:-:0}
+  XAUTHORITY: /tmp/.docker.xauth
+  QT_X11_NO_MITSHM: 1
+  ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
+
+# On a hybrid laptop (discrete NVIDIA + integrated GPU) mapping /dev/dri in gives
+# Mesa a render node, and libglvnd then resolves GLX to libGLX_mesa -> the
+# INTEGRATED GPU, silently. The NVIDIA vendor libraries are injected by the
+# container runtime but never selected. These three variables pin both the GLX
+# path (Gazebo GUI, ogre2 GL3Plus) and the EGL path (headless sensor rendering)
+# to the NVIDIA vendor. Verify with `glxinfo -B` inside the container: the
+# renderer must name the GPU, not llvmpipe and not the integrated device.
+x-env-nvidia: &env-nvidia
+  __NV_PRIME_RENDER_OFFLOAD: 1
+  __GLX_VENDOR_LIBRARY_NAME: nvidia
+  __EGL_VENDOR_LIBRARY_FILENAMES: /usr/share/glvnd/egl_vendor.d/10_nvidia.json
+
+x-common: &common
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile
+    args:
+      ROS_DISTRO: ${ROS_DISTRO:-lyrical}
+      USER_UID: ${USER_UID:-1000}
+      USER_GID: ${USER_GID:-1000}
+  image: bluerobotics_models:${ROS_DISTRO:-lyrical}
+  # Host networking keeps DDS discovery between the container and any ROS 2
+  # node on the host working without multicast gymnastics; host IPC lets DDS
+  # and Gazebo use shared memory transport.
+  network_mode: host
+  ipc: host
+  environment: *env
+  volumes:
+    - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    - ${XAUTH_FILE:-/tmp/.docker.xauth}:/tmp/.docker.xauth:rw
+  stdin_open: true
+  tty: true
+
+x-gpu: &gpu
+  gpus: all
+  # /dev/dri is the DRM render node: Mesa needs it on a non-NVIDIA host, and it
+  # is what makes the integrated GPU reachable on a hybrid one - hence the
+  # x-env-nvidia pinning above, without which Mesa quietly wins.
+  devices:
+    - /dev/dri:/dev/dri
+
+# `environment` is respecified per GPU service rather than folded into the
+# x-gpu anchor: when two merged anchors define the same key, the first in the
+# merge sequence wins, so x-common's environment would silently shadow it.
+services:
+  # Gazebo with the BlueROV2 in the playground world, GUI on the host display.
+  sim:
+    <<: [*common, *gpu]
+    environment:
+      <<: [*env, *env-nvidia]
+    command: ros2 launch bluerov2_gazebo sim.launch.xml
+
+  # Same, without the Gazebo GUI: server + bridge + robot_state_publisher only.
+  # Sensor rendering still happens, so the GPU is still worth having.
+  sim-headless:
+    <<: [*common, *gpu]
+    environment:
+      <<: [*env, *env-nvidia]
+    command: ros2 launch bluerov2_gazebo sim.launch.xml gui:=false
+
+  # RViz view of the description alone (no Gazebo).
+  rviz:
+    <<: [*common, *gpu]
+    environment:
+      <<: [*env, *env-nvidia]
+    command: ros2 launch bluerov2_description display.launch.xml
+
+  # Interactive shell with both the ROS underlay and this overlay sourced.
+  shell:
+    <<: [*common, *gpu]
+    environment:
+      <<: [*env, *env-nvidia]
+    command: bash
+
+  # colcon test over the built workspace (the same suite CI runs).
+  test:
+    <<: [*common, *gpu]
+    environment:
+      <<: [*env, *env-nvidia]
+    working_dir: /ws
+    command: bash -c "colcon test --event-handlers console_cohesion+ && colcon test-result --verbose"
+
+  # No-GPU fallback: identical to `sim` but rendering through Mesa llvmpipe.
+  # Use it to check the image on a machine without the NVIDIA container toolkit.
+  sim-cpu:
+    <<: *common
+    environment:
+      <<: *env
+      LIBGL_ALWAYS_SOFTWARE: 1
+    command: ros2 launch bluerov2_gazebo sim.launch.xml
+
+  # Development loop: the host source tree is bind-mounted over the image's
+  # copy, so edits are picked up by a rebuild inside the container:
+  #   docker compose run --rm dev
+  #   colcon build --event-handlers console_cohesion+ && source install/setup.bash
+  # The build/install artifacts stay in named volumes, keeping the host tree
+  # clean and avoiding a rebuild from scratch on every run.
+  dev:
+    <<: [*common, *gpu]
+    environment:
+      <<: [*env, *env-nvidia]
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${XAUTH_FILE:-/tmp/.docker.xauth}:/tmp/.docker.xauth:rw
+      - ..:/ws/src/bluerobotics_models:rw
+      - ws-build:/ws/build
+      - ws-install:/ws/install
+    working_dir: /ws
+    command: bash
+
+volumes:
+  ws-build:
+  ws-install:
