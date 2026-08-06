@@ -127,8 +127,9 @@ Frames and joints (published as TF by `robot_state_publisher`):
 |------|------|-------|
 | `base_link` | link (root) | hull; carries the buoyancy collision box |
 | `thruster<N>`, `thruster<N>_joint` | link, continuous joint | N = 1..6 (standard) or 1..8 (heavy) |
-| `<accessory name>` | link, fixed joint | one frame per configured accessory |
-| `<claw>_jaw_left/right`, `<claw>_cup_left/right` | links, revolute joints | claw fingers; 0 (closed) to 0.6 rad (open) |
+| `<accessory name>` | link, fixed joint `<name>_joint` | one frame per configured accessory (except the claws, below) |
+| `<claw>_body` | link, fixed joint `<claw>_mount` | claw housing; the claw's mount frame |
+| `<claw>_jaw_left/right`, `<claw>_cup_left/right` | links, revolute joints `<...>_joint` | claw fingers; 0 (closed) to 0.6 rad (open) |
 
 In Gazebo the fixed-joint accessory links are lumped into `base_link` (see the
 known-warning note); in RViz/TF they stay separate frames.

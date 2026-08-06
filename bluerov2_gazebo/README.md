@@ -76,14 +76,14 @@ ros2 topic pub /bluerov2/gripper/cmd_pos std_msgs/msg/Float64 "data: 0.6" -1
 
 Thrust commands are latched: each thruster holds its last command until a new
 one arrives. The horizontal thrusters (1-4) are vectored at 45 degrees, so
-single-axis motion needs a mix with these signs (thrust in newtons; the
-vertical pair, 5-6, heaves):
+single-axis motion needs a mix with these signs (thrust in newtons):
 
-| motion | t1 | t2 | t3 | t4 |
-|--------|----|----|----|----|
-| surge +x (forward) | - | - | + | + |
-| sway +y (left) | - | + | - | + |
-| yaw +z (counterclockwise) | - | + | + | - |
+| motion | t1 | t2 | t3 | t4 | t5 | t6 |
+|--------|----|----|----|----|----|----|
+| surge +x (forward) | - | - | + | + | 0 | 0 |
+| sway +y (left) | - | + | - | + | 0 | 0 |
+| yaw +z (counterclockwise) | - | + | + | - | 0 | 0 |
+| heave +z (up) | 0 | 0 | 0 | 0 | - | - |
 
 Command the mix together (`&` + `wait` publishes in parallel). Bringing
 thrusters up one command at a time leaves the wrench unbalanced while the
