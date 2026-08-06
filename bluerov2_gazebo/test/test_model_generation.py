@@ -15,6 +15,7 @@
 
 import importlib.util
 from pathlib import Path
+import re
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
@@ -34,6 +35,7 @@ _spec = importlib.util.spec_from_file_location('bridge_gen', _SCRIPT)
 bridge_gen = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(bridge_gen)
 
+# One entry per catalog type; test_full_config_covers_catalog enforces sync.
 FULL_CONFIG = """\
 variant: heavy
 accessories:
@@ -41,8 +43,12 @@ accessories:
   - {type: marinesitu_c3,    name: stereo,  xyz: "-0.16 0 0.16",  rpy: "0 0 0"}
   - {type: ping360,          name: ping360, xyz: "0.16 0 0.13",   rpy: "0 0 0"}
   - {type: dvl_a50,          name: dvl,     xyz: "-0.12 0 -0.14", rpy: "0 0 0"}
+  - {type: sonoptix_echo,    name: sonar_l, xyz: "0.14 0.16 -0.05",  rpy: "0 0 0"}
+  - {type: omniscan_450_fs,  name: sonar_r, xyz: "0.14 -0.16 -0.05", rpy: "0 0 0"}
   - {type: newton_gripper,   name: gripper, xyz: "0.28 0 -0.08",  rpy: "0 0 0"}
+  - {type: sediment_sampler, name: sampler, xyz: "-0.26 0 -0.06", rpy: "0 0 0"}
   - {type: roof_rack,        name: rack,    xyz: "0 0 0.17",      rpy: "0 0 0"}
+  - {type: payload_skid,     name: skid,    xyz: "0 0 -0.17",     rpy: "0 0 0"}
 """
 
 RGBD_SUFFIXES = ('image', 'depth_image', 'points', 'camera_info')
@@ -65,16 +71,17 @@ def plugins(root, filename):
 
 
 def test_model_generation_follows_config():
-    """#7: plugin/sensor counts track the config; no xacro residue."""
+    """Plugin and sensor counts track the config; no xacro residue."""
     root, text = xacro(MODEL_XACRO, FULL_CONFIG)
     assert 'xacro:' not in text and 'xmlns:xacro' not in text
     assert len(plugins(root, 'gz-sim-thruster-system')) == 8  # heavy
     assert len(plugins(root, 'gz-sim-hydrodynamics-system')) == 1
-    assert len(plugins(root, 'gz-sim-joint-position-controller-system')) == 2
+    # one controller per claw joint: gripper jaws + sampler cups
+    assert len(plugins(root, 'gz-sim-joint-position-controller-system')) == 4
     sensors = list(root.iter('sensor'))
     by_type = {s.get('type') for s in sensors}
     assert by_type == {'camera', 'rgbd_camera', 'gpu_lidar', 'custom'}
-    assert len(sensors) == 4  # roof_rack emits nothing
+    assert len(sensors) == 4  # geometry-only accessories emit nothing
     std_root, _ = xacro(MODEL_XACRO, 'variant: standard\naccessories: []\n')
     assert len(plugins(std_root, 'gz-sim-thruster-system')) == 6
     assert not list(std_root.iter('sensor'))
@@ -128,7 +135,7 @@ def sdf_gz_topics(root):
 
 
 def test_sensor_and_bridge_topics_agree():
-    """#10: model gz topics == generated bridge gz topics, by construction."""
+    """Model gz topics equal generated bridge gz topics, by construction."""
     configs = [
         FULL_CONFIG,
         (DESC_SHARE / 'config' / 'bluerov2.yaml').read_text(),
@@ -140,3 +147,15 @@ def test_sensor_and_bridge_topics_agree():
         entries = bridge_gen.bridge_entries(yaml.safe_load(config))
         bridge_topics = {e['gz_topic_name'] for e in entries} - {'/clock'}
         assert sdf_gz_topics(root) == bridge_topics
+
+
+def test_full_config_covers_catalog():
+    """FULL_CONFIG exercises every accessory type the description offers."""
+    xacro_text = (DESC_SHARE / 'urdf' / 'accessories.xacro').read_text()
+    dict_src = re.search(r'\$\{dict\(([^)]*)\)\}', xacro_text).group(1)
+    catalog = set(re.findall(r'(\w+)=', dict_src))
+    config_types = {a['type']
+                    for a in yaml.safe_load(FULL_CONFIG)['accessories']}
+    assert config_types == catalog, (
+        f'FULL_CONFIG drift: missing {catalog - config_types}, '
+        f'unknown {config_types - catalog}')

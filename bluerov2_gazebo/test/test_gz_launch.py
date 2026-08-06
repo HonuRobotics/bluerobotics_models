@@ -14,11 +14,9 @@
 """
 Headless Gazebo integration: world loads, interfaces up, physics behaves.
 
-The gz CLI is a hard requirement: its absence fails the suite rather than
-skipping it, so a broken environment cannot report green. The render smoke
-test (camera image) is the one exception: it SKIPS when no usable render path
-exists, so CPU-only CI runners stay green while still exercising rendering
-where available.
+Everything here is a hard requirement, including the camera render test:
+a missing gz CLI or render path fails the suite rather than skipping it, so
+a broken environment cannot report green. CI runners render headless via EGL.
 """
 
 import math
@@ -113,13 +111,13 @@ def sim(request):
 
 
 def test_model_loaded(sim):
-    """#11: the composed model is in the world."""
+    """The composed model is in the world."""
     _, out = gz(sim, 'model', '--list')
     assert 'bluerov2' in out
 
 
 def test_interfaces_advertised(sim):
-    """#11: thruster commands and sensor topics are advertised."""
+    """Thruster commands and sensor topics are advertised."""
     deadline = time.time() + 30
     needed = ('/model/bluerov2/joint/thruster1_joint/cmd_thrust',
               '/model/bluerov2/joint/thruster6_joint/cmd_thrust',
@@ -133,7 +131,7 @@ def test_interfaces_advertised(sim):
 
 
 def test_physics_steps(sim):
-    """#11: simulation iterations advance (systems survive stepping)."""
+    """Simulation iterations advance (systems survive stepping)."""
     deadline = time.time() + 30
     while time.time() < deadline:
         code, out = gz(sim, 'topic', '-e', '-t',
@@ -147,11 +145,11 @@ def test_physics_steps(sim):
 
 
 def test_camera_renders(sim):
-    """#12: camera publishes an image if a render path exists (else skip)."""
+    """The default loadout's camera streams frames at its configured size."""
     code, out = gz(sim, 'topic', '-e', '-t', '/bluerov2/camera/image',
                    '-n', '1', timeout=30)
-    if code != 0 or 'data' not in out:
-        pytest.skip('no image (no usable render engine on this host)')
+    assert code == 0 and 'data' in out, (
+        'no camera image: broken sensor config or no usable render path')
     assert 'width: 1920' in out
 
 

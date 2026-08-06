@@ -71,7 +71,9 @@ def xacro_output(config_text):
         config_path = f.name
     out = subprocess.run(
         ['xacro', str(TOP_XACRO), f'config_file:={config_path}'],
-        check=True, capture_output=True, text=True, timeout=60)
+        capture_output=True, text=True, timeout=60)
+    assert out.returncode == 0, (
+        f'xacro failed ({out.returncode})\n--- stderr ---\n{out.stderr}')
     return out.stdout
 
 
@@ -123,7 +125,7 @@ def buoyancy_ratio(root):
 
 
 def test_default_config_camera_only():
-    """#1: the shipped default builds a valid standard model, camera only."""
+    """The shipped default config builds a standard model with camera only."""
     default = (SHARE / 'config' / 'bluerov2.yaml').read_text()
     root = generate_urdf(default)
     links = link_names(root)
@@ -135,7 +137,7 @@ def test_default_config_camera_only():
 
 
 def test_buoyancy_invariant_across_loadouts():
-    """#2: rho*V/mass stays at the target margin for any loadout."""
+    """rho*V/mass stays at the target buoyancy margin for any loadout."""
     configs = [
         make_config(),
         (SHARE / 'config' / 'bluerov2.yaml').read_text(),
@@ -149,7 +151,7 @@ def test_buoyancy_invariant_across_loadouts():
 
 
 def test_variant_selects_thrusters_and_mesh():
-    """#3: heavy -> 8 thrusters + heavy mesh; standard -> 6 + standard mesh."""
+    """The heavy variant gets 8 thrusters + heavy mesh; standard 6 + standard."""
     std = generate_urdf(make_config('standard'))
     heavy = generate_urdf(make_config('heavy'))
     count = {r: len([li for li in link_names(r)
@@ -163,7 +165,7 @@ def test_variant_selects_thrusters_and_mesh():
 
 
 def test_catalog_completeness_and_toggle():
-    """#4: every accessory type generates its links, and only when configured."""
+    """Every accessory type generates its links, and only when configured."""
     empty_links = link_names(generate_urdf(make_config()))
     for type_name, (pose, links_tpl) in CATALOG.items():
         name = f'acc_{type_name}'
@@ -175,7 +177,7 @@ def test_catalog_completeness_and_toggle():
 
 @pytest.mark.parametrize('variant', ('standard', 'heavy'))
 def test_mesh_references_resolve(variant):
-    """#5: every package:// mesh URI in the generated URDF exists on disk."""
+    """Every package:// mesh URI in the generated URDF exists on disk."""
     root = generate_urdf(make_config(variant, full_catalog_accessories()))
     uris = {m.get('filename') for m in root.findall('.//mesh')}
     assert uris
@@ -192,15 +194,23 @@ def test_check_urdf_accepts_generated(variant):
     with tempfile.NamedTemporaryFile('w', suffix='.urdf', delete=False) as f:
         f.write(text)
         urdf_path = f.name
-    subprocess.run(['check_urdf', urdf_path], check=True,
-                   capture_output=True, timeout=30)
+    out = subprocess.run(['check_urdf', urdf_path], capture_output=True,
+                         text=True, timeout=30)
+    assert out.returncode == 0, (
+        f'check_urdf rejected the URDF ({out.returncode})\n'
+        f'--- stdout ---\n{out.stdout}\n--- stderr ---\n{out.stderr}')
 
 
-def test_mass_table_matches_dispatcher():
-    """#6: accessory_mass keys equal the dispatcher's accessory types."""
+def test_mass_table_matches_macros():
+    """
+    Accessory mass keys match the catalog, and each names a macro.
+
+    The dispatcher invokes the config type directly as a macro, so a key
+    without a same-named macro would fail only at build time.
+    """
     text = ACCESSORIES_XACRO.read_text()
     dict_src = re.search(r'\$\{dict\(([^)]*)\)\}', text).group(1)
     mass_keys = set(re.findall(r'(\w+)=', dict_src))
-    dispatcher = set(re.findall(r"t == '(\w+)'", text))
-    assert mass_keys == dispatcher
-    assert dispatcher == set(CATALOG)
+    macros = set(re.findall(r'<xacro:macro name="(\w+)"', text))
+    assert mass_keys <= macros, f'mass keys without a macro: {mass_keys - macros}'
+    assert mass_keys == set(CATALOG)

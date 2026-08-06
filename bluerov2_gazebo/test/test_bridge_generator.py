@@ -38,7 +38,7 @@ def accessory(type_name, name, **extra):
 
 
 def test_default_camera_only():
-    """#9: camera-only config yields exactly clock + image + camera_info."""
+    """Camera-only config yields exactly clock + image + camera_info."""
     cfg = {'accessories': [accessory('explorehd_camera', 'camera')]}
     entries = entries_for(cfg)
     assert set(entries) == {'/clock', '/bluerov2/camera/image',
@@ -46,7 +46,7 @@ def test_default_camera_only():
 
 
 def test_per_type_topic_sets():
-    """#9: each accessory type produces its documented topics and types."""
+    """Each accessory type produces its documented topics and types."""
     cfg = {'accessories': [
         accessory('marinesitu_c3', 'stereo'),
         accessory('dvl_a50', 'dvl'),
@@ -66,7 +66,7 @@ def test_per_type_topic_sets():
 
 
 def test_non_sensor_accessories_produce_nothing():
-    """#9: geometry-only accessories add no bridge entries."""
+    """Geometry-only accessories add no bridge entries."""
     cfg = {'accessories': [accessory('roof_rack', 'rack'),
                            accessory('payload_skid', 'skid'),
                            accessory('sonoptix_echo', 'sonoptix'),
@@ -75,7 +75,7 @@ def test_non_sensor_accessories_produce_nothing():
 
 
 def test_topic_override_precedence():
-    """#9: gz_topic/ros_topic > topic > /<namespace>/<name>."""
+    """Topic precedence: gz_topic/ros_topic > topic > /<namespace>/<name>."""
     cfg = {'topic_namespace': 'rov_a', 'accessories': [
         accessory('explorehd_camera', 'camera'),
         accessory('ping360', 'ping360', topic='/sonar/front'),
@@ -91,7 +91,7 @@ def test_topic_override_precedence():
 
 
 def test_lazy_default_and_bridge_override():
-    """#9: GZ_TO_ROS entries default lazy, clock is eager, bridge: overrides."""
+    """GZ_TO_ROS entries default lazy, clock is eager, bridge: overrides."""
     cfg = {'accessories': [
         accessory('explorehd_camera', 'camera'),
         accessory('ping360', 'ping360',
@@ -107,7 +107,7 @@ def test_lazy_default_and_bridge_override():
 
 
 def test_extra_bridge_topics_verbatim():
-    """#9: extra_bridge_topics entries are appended untouched."""
+    """extra_bridge_topics entries are appended untouched."""
     extra = {'ros_topic_name': '/thrust1',
              'gz_topic_name': '/model/bluerov2/joint/thruster1_joint/cmd_thrust',
              'ros_type_name': 'std_msgs/msg/Float64',
