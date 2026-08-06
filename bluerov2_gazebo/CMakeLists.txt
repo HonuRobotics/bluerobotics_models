@@ -57,10 +57,14 @@ if(BUILD_TESTING)
   # Headless gz server integration test (render assertions skip on CPU-only
   # hosts); includes the buoyancy-rise and surge behavior checks, which watch
   # the vehicle for several seconds each; see test/test_gz_launch.py.
-  ament_add_pytest_test(test_gz_launch test/test_gz_launch.py TIMEOUT 420)
+  # NOCAPTURE so the sim output printed at teardown reaches the test logs even
+  # when every assertion passes (pytest captures stdout of passing tests).
+  ament_add_pytest_test(test_gz_launch test/test_gz_launch.py TIMEOUT 420
+    NOCAPTURE)
   # Headless ROS bring-up test: container + bridge + robot_state_publisher
   # through sim.launch.xml; see test/test_ros_launch.py.
-  ament_add_pytest_test(test_ros_launch test/test_ros_launch.py TIMEOUT 300)
+  ament_add_pytest_test(test_ros_launch test/test_ros_launch.py TIMEOUT 300
+    NOCAPTURE)
 endif()
 
 ament_package()
