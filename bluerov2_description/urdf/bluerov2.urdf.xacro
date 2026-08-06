@@ -67,6 +67,10 @@
                izz="${base_mass/12.0 * (footprint_x**2 + footprint_y**2)}"/>
     </inertial>
 
+    <!-- The DAVE hull meshes are authored in 25 mm units with a +90-deg-about-Y
+     node transform, so 0.025 puts them in metres: 0.450 x 0.339 x 0.250 m,
+     matching the real 457 x 338 x 254 mm and footprint_x/footprint_y above.
+     Both variant meshes share the scale. -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
