@@ -15,14 +15,13 @@
 
 import importlib.util
 from pathlib import Path
-import shutil
+import re
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import (get_package_prefix,
                                          get_package_share_directory)
-import pytest
 import yaml
 
 GZ_SHARE = Path(get_package_share_directory('blueboat_gazebo'))
@@ -36,12 +35,17 @@ _spec = importlib.util.spec_from_file_location('bridge_gen', _SCRIPT)
 bridge_gen = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(bridge_gen)
 
+# One entry per catalog type; test_full_config_covers_catalog enforces sync.
 FULL_CONFIG = """\
 accessories:
-  - {type: ping_sonar,         name: ping,      xyz: "0 0 -0.05",    rpy: "0 0 0"}
-  - {type: flag,               name: flag,      xyz: "-0.3 0 -0.08", rpy: "0 0 0"}
-  - {type: antenna_mast,       name: mast,      xyz: "-0.35 0 0.45", rpy: "0 0 0"}
-  - {type: surveyor_multibeam, name: multibeam, xyz: "0.35 0 -0.08", rpy: "0 0 0"}
+  - {type: ping_sonar,          name: ping,      xyz: "0 0 -0.05",     rpy: "0 0 0"}
+  - {type: ping_mount,          name: mount,     xyz: "0 0 -0.02",     rpy: "0 0 0"}
+  - {type: flag,                name: flag,      xyz: "-0.3 0 -0.08",  rpy: "0 0 0"}
+  - {type: antenna_mast,        name: mast,      xyz: "-0.35 0 0.45",  rpy: "0 0 0"}
+  - {type: basestation_antenna, name: radio,     xyz: "-0.30 0 0.10",  rpy: "0 0 0"}
+  - {type: payload_bracket,     name: bracket,   xyz: "0.10 0 0.05",   rpy: "0 0 0"}
+  - {type: omniscan_450,        name: omniscan,  xyz: "0.30 0 -0.10",  rpy: "0 0 0"}
+  - {type: surveyor_multibeam,  name: multibeam, xyz: "0.35 0 -0.08",  rpy: "0 0 0"}
 """
 
 
@@ -62,7 +66,7 @@ def plugins(root, filename):
 
 
 def test_model_generation_follows_config():
-    """#7: plugin/sensor counts track the config; no xacro residue."""
+    """Plugin and sensor counts track the config; no xacro residue."""
     root, text = xacro(MODEL_XACRO, FULL_CONFIG)
     assert 'xacro:' not in text and 'xmlns:xacro' not in text
     assert len(plugins(root, 'gz-sim-thruster-system')) == 2
@@ -90,8 +94,6 @@ def test_plugin_references_survive_lumping():
     urdf_links = {li.get('name') for li in urdf_root.findall('link')}
     assert joint_refs <= urdf_joints
     assert link_refs <= urdf_links
-    if shutil.which('gz') is None:
-        pytest.skip('gz CLI unavailable: post-lumping check cannot run')
     with tempfile.NamedTemporaryFile('w', suffix='.urdf', delete=False) as f:
         f.write(urdf_text)
         urdf_path = f.name
@@ -113,7 +115,7 @@ def sdf_gz_topics(root):
 
 
 def test_sensor_and_bridge_topics_agree():
-    """#10: model gz topics == generated bridge gz topics, by construction."""
+    """Model gz topics equal generated bridge gz topics, by construction."""
     configs = [
         FULL_CONFIG,
         (DESC_SHARE / 'config' / 'blueboat.yaml').read_text(),
@@ -126,3 +128,15 @@ def test_sensor_and_bridge_topics_agree():
                          if e['gz_topic_name'] != '/clock'
                          and not e['gz_topic_name'].endswith('/cmd_thrust')}
         assert sdf_gz_topics(root) == bridge_topics
+
+
+def test_full_config_covers_catalog():
+    """FULL_CONFIG exercises every accessory type the description offers."""
+    xacro_text = (DESC_SHARE / 'urdf' / 'accessories.xacro').read_text()
+    catalog = set(re.findall(r'<xacro:macro name="([a-z]\w*)"', xacro_text))
+    catalog -= {'mount_accessories'}
+    config_types = {a['type']
+                    for a in yaml.safe_load(FULL_CONFIG)['accessories']}
+    assert config_types == catalog, (
+        f'FULL_CONFIG drift: missing {catalog - config_types}, '
+        f'unknown {config_types - catalog}')

@@ -24,7 +24,7 @@ Visualization Manager:
       Description Topic:
         Value: /robot_description
         Depth: 5
-        Durability Policy: Volatile
+        Durability Policy: Transient Local
         Reliability Policy: Reliable
       Visual Enabled: true
       Collision Enabled: false

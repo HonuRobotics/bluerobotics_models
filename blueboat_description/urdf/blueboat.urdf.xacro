@@ -24,6 +24,7 @@
        total_mass / (water_density * 2 * pontoon_length * pontoon_width); tune these
        for the waterline you want (verify the float on a GPU). Dims/offsets approx.
        the two pontoons from the hull collision mesh (~1.19 m long, centres y~0.3). -->
+  <xacro:property name="thruster_mass" value="0.344"/>
   <xacro:property name="pontoon_length" value="1.1"/>
   <xacro:property name="pontoon_width"  value="0.19"/>
   <xacro:property name="pontoon_height" value="0.19"/>

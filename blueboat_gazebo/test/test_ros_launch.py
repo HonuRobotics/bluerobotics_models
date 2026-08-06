@@ -47,7 +47,7 @@ def ros(env, *args, timeout=15):
 def sim(request):
     """Bring up sim.launch.xml headless on isolated domains; yield the env."""
     if shutil.which('ros2') is None:
-        pytest.skip('ros2 CLI not available')
+        pytest.fail('ros2 CLI not available: the launch suite cannot run')
     env = dict(os.environ,
                GZ_PARTITION=f'test_{uuid.uuid4().hex[:8]}',
                ROS_DOMAIN_ID=str(os.getpid() % 100 + 1))
@@ -72,6 +72,11 @@ def sim(request):
             except ProcessLookupError:
                 pass
             proc.wait(timeout=10)
+        # Always surface the launch output: warnings matter even when every
+        # assertion passed, and exit codes underreport partial failures.
+        log.flush()
+        tail = ''.join(open(log.name).readlines()[-60:])
+        print(f'\n--- ros2 launch output tail ({log.name}) ---\n{tail}')
 
     request.addfinalizer(teardown)
     deadline = time.time() + 120

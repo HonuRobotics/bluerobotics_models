@@ -53,10 +53,10 @@
     <link name="${name}_sensor">
       <pose relative_to="base_link">${pose}</pose>
       <inertial>
-        <mass>0.001</mass>
+        <mass>1e-5</mass>
         <inertia>
-          <ixx>1e-6</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1e-6</iyy><iyz>0</iyz><izz>1e-6</izz>
+          <ixx>1e-8</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>1e-8</iyy><iyz>0</iyz><izz>1e-8</izz>
         </inertia>
       </inertial>
       <xacro:insert_block name="sensor"/>

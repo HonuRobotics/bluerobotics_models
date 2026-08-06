@@ -8,11 +8,16 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
   <!-- ===== helpers ===== -->
+  <!-- Inertia tensors follow from the primitive geometry and the mass, so they
+       track the placeholder dimensions automatically. -->
   <xacro:macro name="_box_accessory" params="name xyz rpy parent size mass:=0.3">
+    <xacro:property name="d" value="${[float(v) for v in size.split()]}"/>
     <link name="${name}">
       <inertial>
         <mass value="${mass}"/>
-        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+        <inertia ixx="${float(mass)/12.0 * (d[1]**2 + d[2]**2)}" ixy="0" ixz="0"
+                 iyy="${float(mass)/12.0 * (d[0]**2 + d[2]**2)}" iyz="0"
+                 izz="${float(mass)/12.0 * (d[0]**2 + d[1]**2)}"/>
       </inertial>
       <visual>
         <geometry><box size="${size}"/></geometry>
@@ -29,7 +34,9 @@
     <link name="${name}">
       <inertial>
         <mass value="${mass}"/>
-        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+        <inertia ixx="${float(mass)/12.0 * (3*float(radius)**2 + float(length)**2)}" ixy="0" ixz="0"
+                 iyy="${float(mass)/12.0 * (3*float(radius)**2 + float(length)**2)}" iyz="0"
+                 izz="${float(mass)/2.0 * float(radius)**2}"/>
       </inertial>
       <visual>
         <geometry><cylinder radius="${radius}" length="${length}"/></geometry>
@@ -47,8 +54,13 @@
   <xacro:macro name="flag" params="name xyz rpy parent:=base_link">
     <link name="${name}">
       <inertial>
+        <origin xyz="0 0 0.15" rpy="0 0 0"/>
         <mass value="0.05"/>
-        <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+        <!-- Slender pole (r 6 mm, l 0.30 m) about its centre; the cloth is
+             negligible. -->
+        <inertia ixx="${0.05/12.0 * (3*0.006**2 + 0.30**2)}" ixy="0" ixz="0"
+                 iyy="${0.05/12.0 * (3*0.006**2 + 0.30**2)}" iyz="0"
+                 izz="${0.05/2.0 * 0.006**2}"/>
       </inertial>
       <visual>
         <origin xyz="0 0 0.15" rpy="0 0 0"/>
@@ -96,19 +108,14 @@
                           size="0.191 0.091 0.057" mass="0.6"/>
   </xacro:macro>
 
-  <!-- ===== recursive dispatcher: mount each config accessory by type ===== -->
+  <!-- ===== recursive dispatcher: mount each config accessory by type =====
+       The config `type` IS the macro name, invoked directly; an unknown type
+       fails the build loudly instead of silently mounting nothing. -->
   <xacro:macro name="mount_accessories" params="items parent:=base_link">
     <xacro:if value="${len(items) > 0}">
       <xacro:property name="a" value="${items[0]}"/>
-      <xacro:property name="t" value="${a['type']}"/>
-      <xacro:if value="${t == 'flag'}">               <xacro:flag                name="${a['name']}" xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/></xacro:if>
-      <xacro:if value="${t == 'antenna_mast'}">       <xacro:antenna_mast        name="${a['name']}" xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/></xacro:if>
-      <xacro:if value="${t == 'basestation_antenna'}"><xacro:basestation_antenna name="${a['name']}" xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/></xacro:if>
-      <xacro:if value="${t == 'ping_sonar'}">         <xacro:ping_sonar          name="${a['name']}" xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/></xacro:if>
-      <xacro:if value="${t == 'ping_mount'}">         <xacro:ping_mount          name="${a['name']}" xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/></xacro:if>
-      <xacro:if value="${t == 'payload_bracket'}">    <xacro:payload_bracket     name="${a['name']}" xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/></xacro:if>
-      <xacro:if value="${t == 'omniscan_450'}">       <xacro:omniscan_450        name="${a['name']}" xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/></xacro:if>
-      <xacro:if value="${t == 'surveyor_multibeam'}"> <xacro:surveyor_multibeam  name="${a['name']}" xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/></xacro:if>
+      <xacro:call macro="${a['type']}" name="${a['name']}"
+                  xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/>
       <xacro:mount_accessories items="${items[1:]}" parent="${parent}"/>
     </xacro:if>
   </xacro:macro>

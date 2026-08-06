@@ -19,7 +19,7 @@
       <inertial>
         <!-- T200 in air ~0.344 kg; short-cylinder inertia (r~38 mm, h~40 mm).
              Note izz <= ixx + iyy must hold or sdformat rejects the link. -->
-        <mass value="0.344"/>
+        <mass value="${thruster_mass}"/>
         <inertia ixx="1.7e-4" ixy="0.0" ixz="0.0"
                  iyy="1.7e-4" iyz="0.0" izz="2.5e-4"/>
       </inertial>

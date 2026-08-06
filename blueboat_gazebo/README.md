@@ -72,6 +72,22 @@ ros2 topic pub /blueboat/thrusters/stbd/thrust std_msgs/msg/Float64 "data: 20.0"
 | `/model/blueboat/joint/motor_<side>_joint/cmd_thrust` | `gz.msgs.Double` | subscribes | thrust command (bridged from the ROS topics above) |
 | `/model/blueboat/joint/motor_<side>_joint/ang_vel` | `gz.msgs.Double` | publishes | propeller speed feedback (rad/s) |
 
+Thrust commands are latched: each motor holds its last command until a new one
+arrives. Command both motors together (`&` + `wait` publishes in parallel);
+bringing them up one command at a time applies a differential wrench while the
+second command is in flight and yaws the boat off its heading:
+
+```bash
+# ahead at ~20 N
+gz topic -t /model/blueboat/joint/motor_port_joint/cmd_thrust -m gz.msgs.Double -p 'data: 10.0' &
+gz topic -t /model/blueboat/joint/motor_stbd_joint/cmd_thrust -m gz.msgs.Double -p 'data: 10.0' &
+wait
+```
+
+Equal thrust drives ahead; differential thrust yaws (more starboard thrust
+turns to port and vice versa). Stop with `data: 0.0` to both. Controllers that
+publish continuously are unaffected by the onset ordering.
+
 Never edit the generated `config/ros_gz_bridge.yaml`; edit the vehicle config
 and rebuild. Native bridge options (`lazy`, queue sizes, ...) go in each
 accessory's `bridge:` dict, and arbitrary extra entries in the top-level

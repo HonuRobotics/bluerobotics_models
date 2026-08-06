@@ -15,13 +15,11 @@
 
 from pathlib import Path
 import re
-import shutil
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import get_package_share_directory
-import pytest
 
 SHARE = Path(get_package_share_directory('blueboat_description'))
 TOP_XACRO = SHARE / 'urdf' / 'blueboat.urdf.xacro'
@@ -66,7 +64,9 @@ def xacro_output(config_text):
         config_path = f.name
     out = subprocess.run(
         ['xacro', str(TOP_XACRO), f'config_file:={config_path}'],
-        check=True, capture_output=True, text=True, timeout=60)
+        capture_output=True, text=True, timeout=60)
+    assert out.returncode == 0, (
+        f'xacro failed ({out.returncode})\n--- stderr ---\n{out.stderr}')
     return out.stdout
 
 
@@ -104,7 +104,7 @@ def pontoon_boxes(root):
 
 
 def test_default_config_ping_only():
-    """#1: the shipped default builds two motors and the echosounder."""
+    """The shipped default config builds two motors and the echosounder."""
     default = (SHARE / 'config' / 'blueboat.yaml').read_text()
     links = link_names(generate_urdf(default))
     assert {'base_link', 'motor_port_link', 'motor_stbd_link', 'ping'} <= links
@@ -114,7 +114,7 @@ def test_default_config_ping_only():
 
 
 def test_pontoon_buoyancy_invariant():
-    """#2: segmented pontoons tile fully and give positive reserve buoyancy."""
+    """Segmented pontoons tile fully and give positive reserve buoyancy."""
     root = generate_urdf(make_config(full_catalog_accessories()))
     boxes = pontoon_boxes(root)
     sides = {'port': [], 'stbd': []}
@@ -138,20 +138,22 @@ def test_pontoon_buoyancy_invariant():
 
 
 def test_catalog_completeness_and_toggle():
-    """#4: every accessory type generates its link, and only when configured."""
+    """Every accessory type generates its link, and only when configured."""
     empty_links = link_names(generate_urdf(make_config()))
     for type_name, pose in CATALOG.items():
         name = f'acc_{type_name}'
         root = generate_urdf(make_config([(type_name, name, pose)]))
         assert name in link_names(root), f'{type_name} missing link'
         assert name not in empty_links
-    dispatcher = set(re.findall(r"t == '(\w+)'",
-                                ACCESSORIES_XACRO.read_text()))
-    assert dispatcher == set(CATALOG)
+    # The dispatcher invokes the config type directly as a macro, so every
+    # catalog type must have a same-named macro.
+    macros = set(re.findall(r'<xacro:macro name="([a-z]\w*)"',
+                            ACCESSORIES_XACRO.read_text()))
+    assert set(CATALOG) <= macros, f'missing macros: {set(CATALOG) - macros}'
 
 
 def test_no_mesh_assets():
-    """#5: licensing guard: the package ships no meshes, visuals are primitive."""
+    """Licensing guard: the package ships no meshes, visuals are primitive."""
     root = generate_urdf(make_config(full_catalog_accessories()))
     assert not root.findall('.//mesh'), 'unexpected mesh reference in URDF'
     assert not (SHARE / 'meshes').exists(), 'unexpected meshes directory'
@@ -159,11 +161,12 @@ def test_no_mesh_assets():
 
 def test_check_urdf_accepts_generated():
     """The urdfdom validator accepts the generated URDF."""
-    if shutil.which('check_urdf') is None:
-        pytest.skip('check_urdf not available')
     text = xacro_output(make_config(full_catalog_accessories()))
     with tempfile.NamedTemporaryFile('w', suffix='.urdf', delete=False) as f:
         f.write(text)
         urdf_path = f.name
-    subprocess.run(['check_urdf', urdf_path], check=True,
-                   capture_output=True, timeout=30)
+    out = subprocess.run(['check_urdf', urdf_path], capture_output=True,
+                         text=True, timeout=30)
+    assert out.returncode == 0, (
+        f'check_urdf rejected the URDF ({out.returncode})\n'
+        f'--- stdout ---\n{out.stdout}\n--- stderr ---\n{out.stderr}')
