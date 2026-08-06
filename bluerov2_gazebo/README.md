@@ -67,6 +67,22 @@ to match on rebuild.
 ros2 topic pub /bluerov2/gripper/cmd_pos std_msgs/msg/Float64 "data: 0.6" -1
 ```
 
+#### Sensor frames
+
+Every sensor tags its messages with `header.frame_id = <accessory name>` — the
+accessory's own link, which `robot_state_publisher` puts in TF — so
+`lookup_transform('base_link', msg.header.frame_id)` resolves for all of them.
+
+Those frames are **body**-convention (x forward, y left, z up), which is what
+Gazebo emits: an RGBD camera facing a wall 2.95 m ahead returns points at
+`x=2.95`, not `z=2.95`.
+
+The cameras carry the same body frame, so they do **not** follow REP-145, which
+expects image and camera_info to be tagged with an optical frame (z forward, x
+right, y down). Consumers that unproject pixels — `image_pipeline`, RViz's
+Camera display — need to account for that themselves; the optical frame is
+`rpy = (-pi/2, 0, -pi/2)` relative to the accessory link.
+
 ### Gazebo transport interface (gz topics, not bridged by default)
 
 | gz topic | Type | Direction | Purpose |

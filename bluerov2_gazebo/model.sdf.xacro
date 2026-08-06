@@ -51,7 +51,26 @@
        Gazebo-free). The world must load gz-sim-sensors-system, plus
        gz-sim-dvl-system for the DVL. NOTE: gz sensor axes follow the link frame -
        a camera looks +X, a gpu_lidar scans the sensor XY plane, DVL beams point
-       down per <tilt>; tune each accessory's rpy for the intended view. -->
+       down per <tilt>; tune each accessory's rpy for the intended view.
+
+       FRAMES. Every sensor pins <frame_id> to a link the DESCRIPTION defines,
+       because that is the only name TF carries: robot_state_publisher publishes
+       the URDF's links, while the ${name}_sensor wrapper links below exist only
+       here. Left unset, gz derives the id from the SDF ('bluerov2/camera_sensor/
+       camera'), which is in neither the URDF nor TF, so a consumer doing
+       lookup_transform(base_link, msg.header.frame_id) simply fails.
+
+       Every sensor uses its accessory's own link, i.e. the BODY frame (x
+       forward, y left, z up). That matches what gz emits for the geometry
+       topics - measured, not assumed: an rgbd_camera facing a wall 2.95 m ahead
+       returns points at x=2.95, not z=2.95, so its cloud is body-framed and
+       tagging it otherwise would rotate it 90 degrees in RViz.
+
+       The cameras are the caveat. REP-145 says image/camera_info should carry an
+       OPTICAL frame (z forward, x right, y down), and this model deliberately
+       does not define one: consumers that unproject pixels (image_pipeline,
+       RViz's Camera display) must apply the optical rotation themselves, i.e.
+       rpy = (-pi/2, 0, -pi/2) relative to the link frame. -->
 
   <!-- Wrapper: a near-massless sensor link fixed to base_link at `pose`, holding
        the <sensor> block passed in. The accessory's real mass/geometry already
@@ -80,6 +99,8 @@
   <xacro:macro name="camera_sensor" params="name pose topic_base">
     <xacro:sensor_link name="${name}" pose="${pose}">
       <sensor name="${name}" type="camera">
+        <!-- Body frame; see the FRAMES note above on the optical convention. -->
+        <frame_id>${name}</frame_id>
         <topic>${topic_base}/image</topic>
         <update_rate>20</update_rate>
         <always_on>1</always_on>
@@ -102,6 +123,7 @@
   <xacro:macro name="rgbd_sensor" params="name pose topic_base">
     <xacro:sensor_link name="${name}" pose="${pose}">
       <sensor name="${name}" type="rgbd_camera">
+        <frame_id>${name}</frame_id>
         <topic>${topic_base}</topic>
         <update_rate>15</update_rate>
         <always_on>1</always_on>
@@ -121,6 +143,7 @@
   <xacro:macro name="ping360_sensor" params="name pose topic_base">
     <xacro:sensor_link name="${name}" pose="${pose}">
       <sensor name="${name}" type="gpu_lidar">
+        <frame_id>${name}</frame_id>
         <topic>${topic_base}/scan</topic>
         <update_rate>10</update_rate>
         <always_on>1</always_on>
@@ -145,6 +168,7 @@
   <xacro:macro name="dvl_sensor" params="name pose topic_base">
     <xacro:sensor_link name="${name}" pose="${pose}">
       <sensor name="${name}" type="custom" gz:type="dvl">
+        <frame_id>${name}</frame_id>
         <topic>${topic_base}/velocity</topic>
         <update_rate>8</update_rate>
         <always_on>1</always_on>
