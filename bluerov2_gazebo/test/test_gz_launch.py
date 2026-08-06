@@ -77,8 +77,9 @@ def sim(request):
     env = dict(os.environ, GZ_PARTITION=f'test_{uuid.uuid4().hex[:8]}')
     log = tempfile.NamedTemporaryFile('w+', suffix='.log', delete=False,
                                       prefix='gz_launch_')
-    proc = subprocess.Popen(['gz', 'sim', '-s', '-r', str(WORLD)], env=env,
-                            stdout=log, stderr=subprocess.STDOUT)
+    # -v 3 so warnings and messages (not just errors) reach the audited log.
+    proc = subprocess.Popen(['gz', 'sim', '-s', '-r', '-v', '3', str(WORLD)],
+                            env=env, stdout=log, stderr=subprocess.STDOUT)
 
     def fail(message):
         log.flush()
