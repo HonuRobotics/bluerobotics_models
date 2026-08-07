@@ -21,6 +21,7 @@ import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import get_package_share_directory
 import pytest
+import yaml
 
 SHARE = Path(get_package_share_directory('blueboat_description'))
 TOP_XACRO = SHARE / 'urdf' / 'blueboat.urdf.xacro'
@@ -205,3 +206,23 @@ def test_accessory_pose_propagates():
     joint = next(j for j in root.findall('joint')
                  if j.get('name') == 'acc_flag_joint')
     assert joint.find('origin').get('xyz') == '0.11 -0.22 0.33'
+
+
+def test_echosounder_mounted_below_waterline():
+    """
+    The default ping mount is submerged at rest.
+
+    The gpu_lidar returns seabed ranges from anywhere, so a transducer mounted
+    in the air fails silently; lock the mount below the static waterline
+    computed from mass and waterplane area.
+    """
+    config = (SHARE / 'config' / 'blueboat.yaml').read_text()
+    ping = next(a for a in yaml.safe_load(config)['accessories']
+                if a['type'] == 'ping_sonar')
+    ping_z = float(ping['xyz'].split()[2])
+    area = 2 * PONTOON['length'] * PONTOON['width']
+    draft = total_mass(generate_urdf(config)) / (WATER_DENSITY * area)
+    waterline_z = PONTOON['z'] - PONTOON['height'] / 2 + draft
+    assert ping_z < waterline_z, (
+        f'ping transducer at z {ping_z} is above the static waterline '
+        f'{waterline_z:.3f}')

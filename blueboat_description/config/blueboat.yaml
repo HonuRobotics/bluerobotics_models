@@ -23,7 +23,9 @@ topic_namespace: blueboat
 # Default: the Ping2 echosounder only. Uncomment entries below to add the rest
 # of the catalog; the bridge config regenerates to match on rebuild.
 accessories:
-  - {type: ping_sonar,          name: ping,        xyz: "0 0 -0.05",     rpy: "0 0 0"}
+  # The transducer must sit below the static waterline (~z -0.24); the
+  # integration kit mounts it under the hull.
+  - {type: ping_sonar,          name: ping,        xyz: "0 0 -0.32",     rpy: "0 0 0"}
   # - {type: flag,                name: flag,        xyz: "-0.3 0 -0.08",  rpy: "0 0 0"}
   # - {type: antenna_mast,        name: mast,        xyz: "-0.35 0 0.45",  rpy: "0 0 0"}
   # - {type: basestation_antenna, name: basestation, xyz: "-0.35 0 0.78",  rpy: "0 0 0"}

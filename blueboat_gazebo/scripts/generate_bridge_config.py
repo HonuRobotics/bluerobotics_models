@@ -44,6 +44,12 @@ def absolute(topic):
     return topic if topic.startswith('/') else '/' + topic
 
 
+# The gz side topics bake the model instance name: worlds must spawn the
+# model under this name (the playground does). Per instance parameterization
+# is the multi vehicle PR.
+MODEL_NAME = 'blueboat'
+
+
 def bridge_entries(cfg):
     """Build the list of bridge entries for a parsed vehicle config."""
     ns = cfg.get('topic_namespace', 'blueboat')
@@ -68,7 +74,7 @@ def bridge_entries(cfg):
         entries.append({
             'ros_topic_name': absolute(f'{ns}/thrusters/{side}/thrust'),
             'gz_topic_name':
-                f'/model/blueboat/joint/motor_{side}_joint/cmd_thrust',
+                f'/model/{MODEL_NAME}/joint/motor_{side}_joint/cmd_thrust',
             'ros_type_name': 'std_msgs/msg/Float64',
             'gz_type_name': 'gz.msgs.Double',
             'direction': 'ROS_TO_GZ',

@@ -32,7 +32,10 @@
        /model/blueboat/joint/motor_<side>_joint/cmd_thrust. -->
   <xacro:macro name="thruster" params="side coeff">
     <!-- No <namespace>: the plugin defaults to the model name, so the command
-         topics track the instance name and multiple vehicles stay distinct. -->
+         topics track the instance name. NOTE: the shipped bridge config and the
+         playground world's buoyancy <enable> still bake the default instance
+         name (blueboat); per instance parameterization is the multi vehicle
+         PR. -->
     <plugin filename="gz-sim-thruster-system" name="gz::sim::systems::Thruster">
       <joint_name>motor_${side}_joint</joint_name>
       <thrust_coefficient>${coeff}</thrust_coefficient>

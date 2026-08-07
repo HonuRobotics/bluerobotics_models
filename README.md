@@ -26,6 +26,11 @@ rosdep install --from-paths src --ignore-packages-from-source --default-yes
 colcon build
 source install/setup.bash
 ros2 launch bluerov2_gazebo sim.launch.xml     # Gazebo
+```
+
+In a second terminal (also sourced):
+
+```bash
 ros2 launch bluerov2_description display.launch.xml   # RViz
 ```
 
