@@ -25,6 +25,10 @@ jobs:
       - name: Install dependencies
         run: |
           apt-get update
+          # The headless EGL render path is an explicit contract, not a
+          # transitive accident of the gz dependency graph.
+          apt-get install -y --no-install-recommends \
+            libegl1 libgl1 libgl1-mesa-dri libglvnd0 mesa-utils
           rosdep update
           rosdep install --from-paths src -y --ignore-src
       - name: Build
