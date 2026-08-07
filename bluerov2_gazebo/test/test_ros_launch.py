@@ -20,108 +20,58 @@ composable-node container with gz_server, the generated ros_gz bridge config
 and robot_state_publisher, all headless (gui:=false).
 """
 
+import functools
 import os
-import shutil
 import signal
-import subprocess
-import tempfile
-import time
 import uuid
 
+from conftest import launch_sim, make_cli, poll_until, stop_process_group
 import pytest
 
 LAUNCH = ['ros2', 'launch', 'bluerov2_gazebo', 'sim.launch.xml', 'gui:=false']
 
-
-def ros(env, *args, timeout=15):
-    """Run a ros2 CLI command; return (returncode, stdout)."""
-    try:
-        out = subprocess.run(['ros2', *args], env=env, capture_output=True,
-                             text=True, timeout=timeout)
-        return out.returncode, out.stdout
-    except subprocess.TimeoutExpired:
-        return -1, ''
+ros = make_cli('ros2', default_timeout=15)
 
 
 @pytest.fixture(scope='module')
 def sim(request):
     """Bring up sim.launch.xml headless on isolated domains; yield the env."""
-    if shutil.which('ros2') is None:
-        pytest.fail('ros2 CLI not available: the launch suite cannot run')
     env = dict(os.environ,
                GZ_PARTITION=f'test_{uuid.uuid4().hex[:8]}',
                ROS_DOMAIN_ID=str(os.getpid() % 100 + 1))
-    log = tempfile.NamedTemporaryFile('w+', suffix='.log', delete=False,
-                                      prefix='ros_launch_')
-    proc = subprocess.Popen(LAUNCH, env=env, start_new_session=True,
-                            stdout=log, stderr=subprocess.STDOUT)
-
-    def fail(message):
-        log.flush()
-        tail = ''.join(open(log.name).readlines()[-40:])
-        pytest.fail(f'{message}\nlast launch output ({log.name}):\n{tail}')
-
-    def teardown():
-        # SIGINT the whole group so ros2 launch shuts its children down.
-        try:
-            os.killpg(proc.pid, signal.SIGINT)
-            proc.wait(timeout=20)
-        except (ProcessLookupError, subprocess.TimeoutExpired):
-            try:
-                os.killpg(proc.pid, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
-            proc.wait(timeout=10)
-        # Always surface the launch output: warnings matter even when every
-        # assertion passed, and exit codes underreport partial failures.
-        log.flush()
-        tail = ''.join(open(log.name).readlines()[-60:])
-        print(f'\n--- ros2 launch output tail ({log.name}) ---\n{tail}')
-
-    request.addfinalizer(teardown)
-    deadline = time.time() + 120
-    while time.time() < deadline:
-        if proc.poll() is not None:
-            fail('ros2 launch exited during startup')
-        _, out = ros(env, 'node', 'list')
-        if '/robot_state_publisher' in out:
-            return env
-        time.sleep(3)
-    fail('launch never brought the nodes up')
+    # SIGINT first so ros2 launch shuts its children down in order.
+    return launch_sim(
+        request, 'ros2 launch', LAUNCH, env,
+        ready=lambda e: '/robot_state_publisher' in ros(e, 'node', 'list')[1],
+        stop=functools.partial(stop_process_group,
+                               sig=signal.SIGINT, grace=20))
 
 
 def test_container_and_nodes_up(sim):
     """The container and its three composed nodes are alive."""
-    deadline = time.time() + 30
     needed = ('/ros_gz_container', '/robot_state_publisher', '/ros_gz_bridge')
-    while time.time() < deadline:
-        _, out = ros(sim, 'node', 'list')
-        if all(node in out for node in needed):
-            return
-        time.sleep(2)
-    pytest.fail(f'missing nodes; last listing:\n{out}')
+    poll_until(
+        lambda: all(n in ros(sim, 'node', 'list')[1] for n in needed), 30,
+        lambda: f'missing nodes; last listing:\n{ros(sim, "node", "list")[1]}')
 
 
 def test_bridge_clock_flows(sim):
     """/clock arrives on the ROS side: the generated bridge config loaded."""
-    code, out = ros(sim, 'topic', 'echo', '/clock', '--once', timeout=30)
-    assert code == 0 and 'clock' in out, 'no /clock over the bridge'
+    code, out, err = ros(sim, 'topic', 'echo', '/clock', '--once', timeout=30)
+    assert code == 0 and 'clock' in out, f'no /clock over the bridge\n{err}'
 
 
 def test_robot_description_published(sim):
     """robot_state_publisher latched the xacro-expanded URDF."""
-    code, out = ros(sim, 'topic', 'echo', '/robot_description', '--once',
-                    '--full-length', '--qos-durability', 'transient_local',
-                    '--qos-reliability', 'reliable', timeout=30)
-    assert code == 0 and 'bluerov2' in out
+    code, out, err = ros(sim, 'topic', 'echo', '/robot_description', '--once',
+                         '--full-length', '--qos-durability', 'transient_local',
+                         '--qos-reliability', 'reliable', timeout=30)
+    assert code == 0 and 'bluerov2' in out, f'no latched description\n{err}'
 
 
 def test_camera_topic_bridged(sim):
     """The default loadout's camera topics exist on the ROS graph."""
-    deadline = time.time() + 30
-    while time.time() < deadline:
-        _, out = ros(sim, 'topic', 'list')
-        if '/bluerov2/camera/image' in out:
-            return
-        time.sleep(2)
-    pytest.fail(f'camera topic not bridged; last listing:\n{out}')
+    poll_until(
+        lambda: '/bluerov2/camera/image' in ros(sim, 'topic', 'list')[1], 30,
+        lambda: 'camera topic not bridged; last listing:\n'
+                f'{ros(sim, "topic", "list")[1]}')

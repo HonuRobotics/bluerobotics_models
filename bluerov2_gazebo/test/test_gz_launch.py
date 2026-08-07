@@ -25,13 +25,11 @@ import math
 import os
 from pathlib import Path
 import re
-import shutil
 import subprocess
-import tempfile
-import time
 import uuid
 
 from ament_index_python.packages import get_package_share_directory
+from conftest import launch_sim, make_cli, poll_until
 import pytest
 
 WORLD = (Path(get_package_share_directory('bluerov2_gazebo'))
@@ -41,15 +39,7 @@ WORLD_NAME = 'bluerov2_playground'
 _NUM = r'-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?'
 POSE_TRIPLE = re.compile(rf'({_NUM}) ({_NUM}) ({_NUM})')
 
-
-def gz(env, *args, timeout=10):
-    """Run a gz CLI command; return (returncode, stdout, stderr)."""
-    try:
-        out = subprocess.run(['gz', *args], env=env, capture_output=True,
-                             text=True, timeout=timeout)
-        return out.returncode, out.stdout, out.stderr
-    except subprocess.TimeoutExpired:
-        return -1, '', f'gz {args[0]}: timed out after {timeout}s'
+gz = make_cli('gz')
 
 
 def model_pose(env):
@@ -76,12 +66,9 @@ def sim_seconds(env):
 def wait_sim_seconds(env, seconds, timeout=120):
     """Block until the sim clock advances `seconds`, whatever the RTF."""
     start = sim_seconds(env)
-    deadline = time.time() + timeout
-    while time.time() < deadline:
-        if sim_seconds(env) - start >= seconds:
-            return
-        time.sleep(0.5)
-    pytest.fail(f'sim advanced less than {seconds}s in {timeout}s of wall time')
+    poll_until(lambda: sim_seconds(env) - start >= seconds, timeout,
+               f'sim advanced less than {seconds}s in {timeout}s of wall time',
+               interval=0.5)
 
 
 def teleport(env, x, y, z):
@@ -119,43 +106,12 @@ def command_thrusters(env, mapping, repeats=6):
 @pytest.fixture(scope='module')
 def sim(request):
     """Start a headless gz server on an isolated partition; yield its env."""
-    if shutil.which('gz') is None:
-        pytest.fail('gz CLI not available: the simulation suite cannot run')
     env = dict(os.environ, GZ_PARTITION=f'test_{uuid.uuid4().hex[:8]}')
-    log = tempfile.NamedTemporaryFile('w+', suffix='.log', delete=False,
-                                      prefix='gz_launch_')
     # -v 3 so warnings and messages (not just errors) reach the audited log.
-    proc = subprocess.Popen(['gz', 'sim', '-s', '-r', '-v', '3', str(WORLD)],
-                            env=env, stdout=log, stderr=subprocess.STDOUT)
-
-    def fail(message):
-        log.flush()
-        tail = ''.join(open(log.name).readlines()[-40:])
-        pytest.fail(f'{message}\nlast gz output ({log.name}):\n{tail}')
-
-    def teardown():
-        proc.terminate()
-        try:
-            proc.wait(timeout=10)
-        except subprocess.TimeoutExpired:
-            proc.kill()
-            proc.wait(timeout=10)
-        # Always surface the server output: warnings matter even when every
-        # assertion passed, and exit codes underreport partial failures.
-        log.flush()
-        tail = ''.join(open(log.name).readlines()[-60:])
-        print(f'\n--- gz sim output tail ({log.name}) ---\n{tail}')
-
-    request.addfinalizer(teardown)
-    deadline = time.time() + 120
-    while time.time() < deadline:
-        if proc.poll() is not None:
-            fail('gz server exited during startup')
-        _, out, _ = gz(env, 'model', '--list')
-        if 'bluerov2' in out:
-            return env
-        time.sleep(2)
-    fail('model never appeared in the world')
+    return launch_sim(
+        request, 'gz sim',
+        ['gz', 'sim', '-s', '-r', '-v', '3', str(WORLD)], env,
+        ready=lambda e: 'bluerov2' in gz(e, 'model', '--list')[1])
 
 
 def test_model_loaded(sim):
@@ -166,30 +122,22 @@ def test_model_loaded(sim):
 
 def test_interfaces_advertised(sim):
     """Thruster commands and sensor topics are advertised."""
-    deadline = time.time() + 30
     needed = ('/model/bluerov2/joint/thruster1_joint/cmd_thrust',
               '/model/bluerov2/joint/thruster6_joint/cmd_thrust',
               f'/world/{WORLD_NAME}/clock')
-    while time.time() < deadline:
-        _, out, _ = gz(sim, 'topic', '-l')
-        if all(topic in out for topic in needed):
-            return
-        time.sleep(2)
-    pytest.fail(f'missing topics; last listing:\n{out}')
+    poll_until(
+        lambda: all(t in gz(sim, 'topic', '-l')[1] for t in needed), 30,
+        lambda: f'missing topics; last listing:\n{gz(sim, "topic", "-l")[1]}')
 
 
 def test_physics_steps(sim):
     """Simulation iterations advance (systems survive stepping)."""
-    deadline = time.time() + 30
-    while time.time() < deadline:
+    def advancing():
         code, out, _ = gz(sim, 'topic', '-e', '-t',
                           f'/world/{WORLD_NAME}/stats', '-n', '1', timeout=15)
-        if code == 0 and 'iterations' in out:
-            iterations = int(out.split('iterations:')[1].split()[0])
-            if iterations > 0:
-                return
-        time.sleep(2)
-    pytest.fail('sim iterations did not advance')
+        return (code == 0 and 'iterations' in out
+                and int(out.split('iterations:')[1].split()[0]) > 0)
+    poll_until(advancing, 30, 'sim iterations did not advance')
 
 
 def test_camera_renders(sim):
