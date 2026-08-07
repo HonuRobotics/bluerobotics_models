@@ -43,11 +43,12 @@ jobs:
       - name: Build
         run: |
           source /opt/ros/lyrical/setup.bash
-          colcon build --event-handlers console_cohesion+
+          # merge-install is the project standard layout (see the README).
+          colcon build --merge-install --event-handlers console_cohesion+
       - name: Test
         run: |
           source /opt/ros/lyrical/setup.bash
-          colcon test --event-handlers console_cohesion+
+          colcon test --merge-install --event-handlers console_cohesion+
           colcon test-result --verbose
       # Full colcon logs (per-test stdout included) for auditing, pass or fail.
       - uses: actions/upload-artifact@v4

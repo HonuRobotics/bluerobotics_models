@@ -22,7 +22,7 @@ file and the `ros_gz` bridge. Gazebo-specific assets/plugins live here, keeping
 
 ## Build
 ```bash
-colcon build --packages-select bluerov2_description bluerov2_gazebo
+colcon build --merge-install --packages-select bluerov2_description bluerov2_gazebo
 source install/setup.bash
 ```
 
@@ -132,7 +132,7 @@ From debs, the composed `model.sdf` and the bridge config are baked with the
 works as documented above. To customize the accessory loadout:
 
 - **Overlay workspace (recommended).** Clone this repo into a colcon workspace,
-  edit `bluerov2_description/config/bluerov2.yaml`, `colcon build`, source the
+  edit `bluerov2_description/config/bluerov2.yaml`, `colcon build --merge-install`, source the
   overlay. All three generated artifacts (URDF, `model.sdf`, bridge yaml) stay
   consistent automatically, and the deb remains untouched.
 

@@ -28,7 +28,7 @@ launch/   display.launch.xml
 ## Build
 
 ```bash
-colcon build --packages-select blueboat_description
+colcon build --merge-install --packages-select blueboat_description
 source install/setup.bash
 ```
 

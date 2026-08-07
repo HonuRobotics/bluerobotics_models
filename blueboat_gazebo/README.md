@@ -21,7 +21,7 @@ simulator code.
 ## Build
 
 ```bash
-colcon build --packages-select blueboat_description blueboat_gazebo
+colcon build --merge-install --packages-select blueboat_description blueboat_gazebo
 source install/setup.bash
 ```
 
