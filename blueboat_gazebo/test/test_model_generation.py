@@ -115,18 +115,32 @@ def sdf_gz_topics(root):
 
 
 def test_sensor_and_bridge_topics_agree():
-    """Model gz topics equal generated bridge gz topics, by construction."""
+    """
+    Model gz topics equal generated bridge gz topics, by construction.
+
+    Fixed entries (clock, joint states, thrusters) and extra_bridge_topics
+    pass through untouched; everything else must match a model sensor topic.
+    """
+    extra = {
+        'ros_topic_name': '/diagnostics', 'gz_topic_name': '/diagnostics',
+        'ros_type_name': 'std_msgs/msg/Empty', 'gz_type_name': 'gz.msgs.Empty',
+        'direction': 'GZ_TO_ROS'}
     configs = [
         FULL_CONFIG,
         (DESC_SHARE / 'config' / 'blueboat.yaml').read_text(),
         FULL_CONFIG + 'topic_namespace: boat_a\n',
     ]
     for config in configs:
-        root, _ = xacro(MODEL_XACRO, config)
-        entries = bridge_gen.bridge_entries(yaml.safe_load(config))
+        cfg = yaml.safe_load(config)
+        cfg.setdefault('extra_bridge_topics', []).append(extra)
+        entries = bridge_gen.bridge_entries(cfg)
+        assert extra in entries, 'extra_bridge_topics dropped'
+        ns = cfg.get('topic_namespace', 'blueboat')
+        fixed = {'/clock', f'/{ns}/joint_states', extra['gz_topic_name']}
         bridge_topics = {e['gz_topic_name'] for e in entries
-                         if e['gz_topic_name'] != '/clock'
+                         if e['gz_topic_name'] not in fixed
                          and not e['gz_topic_name'].endswith('/cmd_thrust')}
+        root, _ = xacro(MODEL_XACRO, config)
         assert sdf_gz_topics(root) == bridge_topics
 
 
@@ -140,3 +154,37 @@ def test_full_config_covers_catalog():
     assert config_types == catalog, (
         f'FULL_CONFIG drift: missing {catalog - config_types}, '
         f'unknown {config_types - catalog}')
+
+
+def test_sensor_frame_ids_resolve_in_tf():
+    """
+    Every sensor's <frame_id> names a frame TF actually carries.
+
+    TF comes from the URDF via robot_state_publisher; gz's derived SDF scoped
+    ids and the ${name}_sensor wrapper links are in neither, so an unset
+    frame_id yields messages no lookup_transform can resolve.
+    """
+    sdf_root, _ = xacro(MODEL_XACRO, FULL_CONFIG)
+    urdf_root, _ = xacro(URDF_XACRO, FULL_CONFIG)
+    urdf_links = {li.get('name') for li in urdf_root.findall('link')}
+    sensors = list(sdf_root.iter('sensor'))
+    assert sensors
+    for sensor in sensors:
+        frame = sensor.find('frame_id')
+        assert frame is not None, (
+            f'sensor {sensor.get("name")} sets no <frame_id>')
+        assert frame.text in urdf_links, (
+            f'sensor {sensor.get("name")} publishes frame_id {frame.text!r}, '
+            f'which robot_state_publisher never puts in TF')
+
+
+def test_installed_artifacts_match_shipped_config():
+    """The generated files that ship agree with the config they came from."""
+    cfg = yaml.safe_load((DESC_SHARE / 'config' / 'blueboat.yaml').read_text())
+    bridge_yaml = GZ_SHARE / 'config' / 'ros_gz_bridge.yaml'
+    assert yaml.safe_load(bridge_yaml.read_text()) == \
+        bridge_gen.bridge_entries(cfg)
+    urdf = ET.fromstring((DESC_SHARE / 'urdf' / 'blueboat.urdf').read_text())
+    links = {li.get('name') for li in urdf.findall('link')}
+    for acc in cfg['accessories']:
+        assert acc['name'] in links, f'{acc["name"]} missing from shipped URDF'

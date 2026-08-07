@@ -20,6 +20,7 @@ import tempfile
 import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import get_package_share_directory
+import pytest
 
 SHARE = Path(get_package_share_directory('blueboat_description'))
 TOP_XACRO = SHARE / 'urdf' / 'blueboat.urdf.xacro'
@@ -170,3 +171,37 @@ def test_check_urdf_accepts_generated():
     assert out.returncode == 0, (
         f'check_urdf rejected the URDF ({out.returncode})\n'
         f'--- stdout ---\n{out.stdout}\n--- stderr ---\n{out.stderr}')
+
+
+PONTOON = {'length': 1.1, 'width': 0.19, 'height': 0.19,
+           'x': -0.05, 'y': 0.30, 'z': -0.22, 'segments': 6}
+
+
+def test_pontoons_are_a_symmetric_catamaran():
+    """Both pontoons mirror across y and their segments tile without gaps."""
+    boxes = pontoon_boxes(generate_urdf(make_config(full_catalog_accessories())))
+    assert len(boxes) == 2 * PONTOON['segments']
+    sides = {}
+    for name, x, y, z, lx, ly, lz in boxes:
+        sides.setdefault(name.split('_')[1], []).append((x, y, z, lx, ly, lz))
+    assert set(sides) == {'port', 'stbd'}
+    seg_len = PONTOON['length'] / PONTOON['segments']
+    for side, sign in (('port', +1), ('stbd', -1)):
+        segments = sorted(sides[side])
+        assert len(segments) == PONTOON['segments']
+        for x, y, z, lx, ly, lz in segments:
+            assert y == pytest.approx(sign * PONTOON['y']), (
+                f'{side} pontoon at y={y}, expected {sign * PONTOON["y"]}')
+            assert z == pytest.approx(PONTOON['z'])
+            assert (lx, ly, lz) == pytest.approx(
+                (seg_len, PONTOON['width'], PONTOON['height']))
+        for (x0, *_), (x1, *_) in zip(segments, segments[1:]):
+            assert x1 - x0 == pytest.approx(seg_len), f'{side}: gap or overlap'
+
+
+def test_accessory_pose_propagates():
+    """The config mount pose lands verbatim on the accessory's fixed joint."""
+    root = generate_urdf(make_config([('flag', 'acc_flag', '0.11 -0.22 0.33')]))
+    joint = next(j for j in root.findall('joint')
+                 if j.get('name') == 'acc_flag_joint')
+    assert joint.find('origin').get('xyz') == '0.11 -0.22 0.33'

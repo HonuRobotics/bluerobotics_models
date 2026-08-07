@@ -104,6 +104,6 @@
   <xacro:blueboat_thruster side="stbd" xyz="-0.488 -0.295 -0.272"/>
 
   <!-- ===================== Accessories (from config) ===================== -->
-  <xacro:mount_accessories items="${cfg.get('accessories', [])}"/>
+  <xacro:mount_accessories items="${cfg.get('accessories') or []}"/>
 
 </robot>

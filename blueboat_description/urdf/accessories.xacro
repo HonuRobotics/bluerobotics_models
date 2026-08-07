@@ -10,17 +10,17 @@
   <!-- ===== helpers ===== -->
   <!-- Inertia tensors follow from the primitive geometry and the mass, so they
        track the placeholder dimensions automatically. -->
-  <xacro:macro name="_box_accessory" params="name xyz rpy parent size mass:=0.3">
-    <xacro:property name="d" value="${[float(v) for v in size.split()]}"/>
+  <!-- One shared skeleton (link + fixed joint + visual); the box/cyl wrappers
+       below compute the matching inertia tensor from geometry and mass, so the
+       two never drift apart. -->
+  <xacro:macro name="_accessory" params="name xyz rpy parent mass ixx iyy izz *geometry">
     <link name="${name}">
       <inertial>
         <mass value="${mass}"/>
-        <inertia ixx="${float(mass)/12.0 * (d[1]**2 + d[2]**2)}" ixy="0" ixz="0"
-                 iyy="${float(mass)/12.0 * (d[0]**2 + d[2]**2)}" iyz="0"
-                 izz="${float(mass)/12.0 * (d[0]**2 + d[1]**2)}"/>
+        <inertia ixx="${ixx}" ixy="0" ixz="0" iyy="${iyy}" iyz="0" izz="${izz}"/>
       </inertial>
       <visual>
-        <geometry><box size="${size}"/></geometry>
+        <xacro:insert_block name="geometry"/>
         <material name="${name}_mat"><color rgba="0.5 0.5 0.55 1"/></material>
       </visual>
     </link>
@@ -28,29 +28,31 @@
       <parent link="${parent}"/><child link="${name}"/>
       <origin xyz="${xyz}" rpy="${rpy}"/>
     </joint>
+  </xacro:macro>
+
+  <xacro:macro name="_box_accessory" params="name xyz rpy parent size mass:=0.3">
+    <xacro:property name="d" value="${[float(v) for v in size.split()]}"/>
+    <xacro:_accessory name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"
+                      mass="${mass}"
+                      ixx="${float(mass)/12.0 * (d[1]**2 + d[2]**2)}"
+                      iyy="${float(mass)/12.0 * (d[0]**2 + d[2]**2)}"
+                      izz="${float(mass)/12.0 * (d[0]**2 + d[1]**2)}">
+      <geometry><box size="${size}"/></geometry>
+    </xacro:_accessory>
   </xacro:macro>
 
   <xacro:macro name="_cyl_accessory" params="name xyz rpy parent radius length mass:=0.3">
-    <link name="${name}">
-      <inertial>
-        <mass value="${mass}"/>
-        <inertia ixx="${float(mass)/12.0 * (3*float(radius)**2 + float(length)**2)}" ixy="0" ixz="0"
-                 iyy="${float(mass)/12.0 * (3*float(radius)**2 + float(length)**2)}" iyz="0"
-                 izz="${float(mass)/2.0 * float(radius)**2}"/>
-      </inertial>
-      <visual>
-        <geometry><cylinder radius="${radius}" length="${length}"/></geometry>
-        <material name="${name}_mat"><color rgba="0.5 0.5 0.55 1"/></material>
-      </visual>
-    </link>
-    <joint name="${name}_joint" type="fixed">
-      <parent link="${parent}"/><child link="${name}"/>
-      <origin xyz="${xyz}" rpy="${rpy}"/>
-    </joint>
+    <xacro:_accessory name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"
+                      mass="${mass}"
+                      ixx="${float(mass)/12.0 * (3*float(radius)**2 + float(length)**2)}"
+                      iyy="${float(mass)/12.0 * (3*float(radius)**2 + float(length)**2)}"
+                      izz="${float(mass)/2.0 * float(radius)**2}">
+      <geometry><cylinder radius="${radius}" length="${length}"/></geometry>
+    </xacro:_accessory>
   </xacro:macro>
 
   <!-- ===== accessories ===== -->
-  <!-- Flag: reuses the existing base flag mesh, split out so it can be toggled. -->
+  <!-- Flag: pole + banner primitives; a separate accessory so it can be toggled. -->
   <xacro:macro name="flag" params="name xyz rpy parent:=base_link">
     <link name="${name}">
       <inertial>

@@ -38,9 +38,10 @@ def accessory(type_name, name, **extra):
 
 
 def test_thrusters_always_bridged():
-    """#9: drivetrain thrust commands exist even with no accessories."""
+    """Drivetrain thrust commands exist even with no accessories."""
     entries = entries_for({'accessories': []})
-    assert set(entries) == {'/clock', '/blueboat/thrusters/port/thrust',
+    assert set(entries) == {'/clock', '/joint_states',
+                            '/blueboat/thrusters/port/thrust',
                             '/blueboat/thrusters/stbd/thrust'}
     port = entries['/blueboat/thrusters/port/thrust']
     assert port['direction'] == 'ROS_TO_GZ'
@@ -49,7 +50,7 @@ def test_thrusters_always_bridged():
 
 
 def test_ping_sonar_topics():
-    """#9: the echosounder produces its LaserScan entry, lazily."""
+    """The echosounder produces its LaserScan entry, lazily."""
     entries = entries_for({'accessories': [accessory('ping_sonar', 'ping')]})
     ping = entries['/blueboat/ping/range']
     assert ping['ros_type_name'] == 'sensor_msgs/msg/LaserScan'
@@ -57,18 +58,18 @@ def test_ping_sonar_topics():
 
 
 def test_non_sensor_accessories_produce_nothing():
-    """#9: geometry-only accessories add no bridge entries."""
+    """Geometry-only accessories add no bridge entries."""
     cfg = {'accessories': [accessory('flag', 'flag'),
                            accessory('antenna_mast', 'mast'),
                            accessory('omniscan_450', 'sidescan'),
                            accessory('surveyor_multibeam', 'multibeam')]}
-    assert set(entries_for(cfg)) == {'/clock',
+    assert set(entries_for(cfg)) == {'/clock', '/joint_states',
                                      '/blueboat/thrusters/port/thrust',
                                      '/blueboat/thrusters/stbd/thrust'}
 
 
 def test_topic_override_precedence():
-    """#9: gz_topic/ros_topic > topic > /<namespace>/<name>."""
+    """Gz_topic/ros_topic > topic > /<namespace>/<name>."""
     cfg = {'topic_namespace': 'boat_a', 'accessories': [
         accessory('ping_sonar', 'ping',
                   gz_topic='boat_a/ping_raw', ros_topic='/sensors/ping'),
@@ -80,7 +81,7 @@ def test_topic_override_precedence():
 
 
 def test_extra_bridge_topics_verbatim():
-    """#9: extra_bridge_topics entries are appended untouched."""
+    """Extra_bridge_topics entries are appended untouched."""
     extra = {'ros_topic_name': '/odom',
              'gz_topic_name': '/model/blueboat/odom',
              'ros_type_name': 'nav_msgs/msg/Odometry',
