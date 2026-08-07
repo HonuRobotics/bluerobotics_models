@@ -2,7 +2,6 @@ name: CI
 
 on:
   push:
-    branches: [lyrical]
   pull_request:
 
 jobs:
@@ -27,15 +26,19 @@ jobs:
           apt-get update
           rosdep update
           rosdep install --from-paths src -y --ignore-src
+      # console_direct+ streams every subprocess's stdout/stderr straight to the
+      # job log as it happens, and --log-level info makes colcon print the exact
+      # command it invokes for each package, so the run is auditable in the
+      # Actions UI without downloading the artifact.
       - name: Build
         run: |
           source /opt/ros/lyrical/setup.bash
-          colcon build --event-handlers console_cohesion+
+          colcon --log-level info build --event-handlers console_direct+
       - name: Test
         run: |
           source /opt/ros/lyrical/setup.bash
-          colcon test --event-handlers console_cohesion+
-          colcon test-result --verbose
+          colcon --log-level info test --event-handlers console_direct+
+          colcon test-result --verbose --all
       # Full colcon logs (per-test stdout included) for auditing, pass or fail.
       - uses: actions/upload-artifact@v4
         if: always()
