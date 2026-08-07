@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<!--
+  BlueBoat accessory macros + a recursive dispatcher that mounts the accessories
+  listed in config/blueboat.yaml. Each accessory is a link attached to the
+  parent by a fixed joint at the config pose; sensor behaviour lives in
+  blueboat_gazebo. Type names here MUST match the config's `type`.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- ===== helpers ===== -->
+  <!-- Inertia tensors follow from the primitive geometry and the mass, so they
+       track the placeholder dimensions automatically. -->
+  <!-- One shared skeleton (link + fixed joint + visual); the box/cyl wrappers
+       below compute the matching inertia tensor from geometry and mass, so the
+       two never drift apart. -->
+  <xacro:macro name="_accessory" params="name xyz rpy parent mass ixx iyy izz *geometry">
+    <link name="${name}">
+      <inertial>
+        <mass value="${mass}"/>
+        <inertia ixx="${ixx}" ixy="0" ixz="0" iyy="${iyy}" iyz="0" izz="${izz}"/>
+      </inertial>
+      <visual>
+        <xacro:insert_block name="geometry"/>
+        <material name="${name}_mat"><color rgba="0.5 0.5 0.55 1"/></material>
+      </visual>
+    </link>
+    <joint name="${name}_joint" type="fixed">
+      <parent link="${parent}"/><child link="${name}"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="_box_accessory" params="name xyz rpy parent size mass:=0.3">
+    <xacro:property name="d" value="${[float(v) for v in size.split()]}"/>
+    <xacro:_accessory name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"
+                      mass="${mass}"
+                      ixx="${float(mass)/12.0 * (d[1]**2 + d[2]**2)}"
+                      iyy="${float(mass)/12.0 * (d[0]**2 + d[2]**2)}"
+                      izz="${float(mass)/12.0 * (d[0]**2 + d[1]**2)}">
+      <geometry><box size="${size}"/></geometry>
+    </xacro:_accessory>
+  </xacro:macro>
+
+  <xacro:macro name="_cyl_accessory" params="name xyz rpy parent radius length mass:=0.3">
+    <xacro:_accessory name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"
+                      mass="${mass}"
+                      ixx="${float(mass)/12.0 * (3*float(radius)**2 + float(length)**2)}"
+                      iyy="${float(mass)/12.0 * (3*float(radius)**2 + float(length)**2)}"
+                      izz="${float(mass)/2.0 * float(radius)**2}">
+      <geometry><cylinder radius="${radius}" length="${length}"/></geometry>
+    </xacro:_accessory>
+  </xacro:macro>
+
+  <!-- ===== accessories ===== -->
+  <!-- Flag: pole + banner primitives; a separate accessory so it can be toggled. -->
+  <xacro:macro name="flag" params="name xyz rpy parent:=base_link">
+    <link name="${name}">
+      <inertial>
+        <origin xyz="0 0 0.15" rpy="0 0 0"/>
+        <mass value="0.05"/>
+        <!-- Slender pole (r 6 mm, l 0.30 m) about its centre; the cloth is
+             negligible. -->
+        <inertia ixx="${0.05/12.0 * (3*0.006**2 + 0.30**2)}" ixy="0" ixz="0"
+                 iyy="${0.05/12.0 * (3*0.006**2 + 0.30**2)}" iyz="0"
+                 izz="${0.05/2.0 * 0.006**2}"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0.15" rpy="0 0 0"/>
+        <geometry><cylinder radius="0.006" length="0.30"/></geometry>
+        <material name="flag_pole_mat"><color rgba="0.15 0.15 0.15 1"/></material>
+      </visual>
+      <visual>
+        <origin xyz="0.05 0 0.27" rpy="0 0 0"/>
+        <geometry><box size="0.10 0.004 0.07"/></geometry>
+        <material name="flag_mat"><color rgba="0.85 0.10 0.10 1"/></material>
+      </visual>
+    </link>
+    <joint name="${name}_joint" type="fixed">
+      <parent link="${parent}"/><child link="${name}"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="antenna_mast" params="name xyz rpy parent:=base_link">
+    <xacro:_cyl_accessory name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"
+                          radius="0.0125" length="0.57" mass="0.4"/>
+  </xacro:macro>
+  <xacro:macro name="basestation_antenna" params="name xyz rpy parent:=base_link">
+    <xacro:_box_accessory name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"
+                          size="0.140 0.120 0.039" mass="0.3"/>
+  </xacro:macro>
+  <xacro:macro name="ping_sonar" params="name xyz rpy parent:=base_link">
+    <xacro:_cyl_accessory name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"
+                          radius="0.025" length="0.041" mass="0.2"/>
+  </xacro:macro>
+  <xacro:macro name="ping_mount" params="name xyz rpy parent:=base_link">
+    <xacro:_box_accessory name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"
+                          size="0.242 0.044 0.055" mass="0.2"/>
+  </xacro:macro>
+  <xacro:macro name="payload_bracket" params="name xyz rpy parent:=base_link">
+    <xacro:_box_accessory name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"
+                          size="0.300 0.200 0.050" mass="0.5"/>
+  </xacro:macro>
+  <xacro:macro name="omniscan_450" params="name xyz rpy parent:=base_link">
+    <xacro:_box_accessory name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"
+                          size="0.339 0.064 0.040" mass="0.5"/>
+  </xacro:macro>
+  <xacro:macro name="surveyor_multibeam" params="name xyz rpy parent:=base_link">
+    <xacro:_box_accessory name="${name}" xyz="${xyz}" rpy="${rpy}" parent="${parent}"
+                          size="0.191 0.091 0.057" mass="0.6"/>
+  </xacro:macro>
+
+  <!-- ===== recursive dispatcher: mount each config accessory by type =====
+       The config `type` IS the macro name, invoked directly; an unknown type
+       fails the build loudly instead of silently mounting nothing. -->
+  <xacro:macro name="mount_accessories" params="items parent:=base_link">
+    <xacro:if value="${len(items) > 0}">
+      <xacro:property name="a" value="${items[0]}"/>
+      <xacro:call macro="${a['type']}" name="${a['name']}"
+                  xyz="${a['xyz']}" rpy="${a['rpy']}" parent="${parent}"/>
+      <xacro:mount_accessories items="${items[1:]}" parent="${parent}"/>
+    </xacro:if>
+  </xacro:macro>
+
+</robot>

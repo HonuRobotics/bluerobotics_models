@@ -30,7 +30,7 @@ launch/   display.launch.xml
 
 ## Build
 ```bash
-colcon build --packages-select bluerov2_description
+colcon build --merge-install --packages-select bluerov2_description
 source install/setup.bash
 ```
 

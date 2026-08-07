@@ -11,9 +11,9 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
-        exclude: ^bluerov2_description/(meshes|rviz)/
+        exclude: ^(bluerov2_description/(meshes|rviz)|blueboat_description/rviz)/
       - id: end-of-file-fixer
-        exclude: ^bluerov2_description/(meshes|rviz)/
+        exclude: ^(bluerov2_description/(meshes|rviz)|blueboat_description/rviz)/
       - id: check-merge-conflict
       - id: check-yaml
       - id: check-xml
@@ -33,7 +33,7 @@ repos:
         entry: ament_copyright
         language: system
         types: [python]
-        exclude: ^bluerov2_description/(meshes|rviz)/
+        exclude: ^(bluerov2_description/(meshes|rviz)|blueboat_description/rviz)/
       - id: ament-flake8
         name: ament_flake8
         entry: ament_flake8

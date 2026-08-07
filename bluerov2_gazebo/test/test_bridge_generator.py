@@ -41,8 +41,14 @@ def test_default_camera_only():
     """Camera-only config yields exactly clock + image + camera_info."""
     cfg = {'accessories': [accessory('explorehd_camera', 'camera')]}
     entries = entries_for(cfg)
+    thrusters = {f'/bluerov2/thrusters/thruster{n}/thrust'
+                 for n in range(1, 7)}
     assert set(entries) == {'/clock', '/bluerov2/camera/image',
-                            '/bluerov2/camera/camera_info'}
+                            '/bluerov2/camera/camera_info'} | thrusters
+    assert entries['/bluerov2/thrusters/thruster1/thrust']['direction'] == \
+        'ROS_TO_GZ'
+    heavy = entries_for({'variant': 'heavy', 'accessories': []})
+    assert '/bluerov2/thrusters/thruster8/thrust' in heavy
 
 
 def test_per_type_topic_sets():
@@ -71,7 +77,9 @@ def test_non_sensor_accessories_produce_nothing():
                            accessory('payload_skid', 'skid'),
                            accessory('sonoptix_echo', 'sonoptix'),
                            accessory('omniscan_450_fs', 'omniscan')]}
-    assert set(entries_for(cfg)) == {'/clock'}
+    thrusters = {f'/bluerov2/thrusters/thruster{n}/thrust'
+                 for n in range(1, 7)}
+    assert set(entries_for(cfg)) == {'/clock'} | thrusters
 
 
 def test_topic_override_precedence():

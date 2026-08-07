@@ -1,0 +1,151 @@
+<?xml version="1.0"?>
+<!--
+  Simulation-ready BlueBoat model, GENERATED from config/blueboat.yaml at build
+  time. It merge-includes the blueboat_description geometry and adds the Gazebo
+  plugins: hydrodynamics, one Thruster per outboard motor, and one <sensor> per
+  sensor-type accessory. Buoyancy is a world plugin (graded, in the playground
+  world), not here.
+
+  In a world:  <include><uri>model://blueboat_gazebo</uri></include>
+-->
+<sdf version="1.12" xmlns:xacro="http://ros.org/wiki/xacro"
+     xmlns:gz="http://gazebosim.org/schema">
+
+  <xacro:arg name="config_file"
+             default="$(find blueboat_description)/config/blueboat.yaml"/>
+  <xacro:property name="cfg" value="${xacro.load_yaml('$(arg config_file)')}"/>
+
+  <!-- Topic namespace for sensor topics: /<topic_namespace>/<accessory name>/...
+       Per accessory, `gz_topic` / `topic` override the gz-side base (the bridge
+       config is generated from the same yaml, so gz and ROS sides stay in sync). -->
+  <xacro:property name="topic_ns" value="${cfg.get('topic_namespace', 'blueboat')}"/>
+
+  <!-- T200 thrust saturation (same motors as the BlueROV2), 16 V full-throttle
+       endpoints; tune per bus voltage. Curve/datasheet:
+       https://bluerobotics.com/store/rov/bluerov2-components-spares/t200-thruster-brov2-spare-r1-vp/ -->
+  <xacro:property name="t200_max_thrust" value="51.5"/>   <!-- N, forward -->
+  <xacro:property name="t200_min_thrust" value="-40.2"/>  <!-- N, reverse -->
+
+  <!-- One Thruster plugin per outboard motor. Twin-screw differential drive: the
+       props counter-rotate (opposite coeff sign) so their reaction yaw cancels in
+       straight-line running. Command thrust (N) on
+       /model/blueboat/joint/motor_<side>_joint/cmd_thrust. -->
+  <xacro:macro name="thruster" params="side coeff">
+    <!-- No <namespace>: the plugin defaults to the model name, so the command
+         topics track the instance name. NOTE: the shipped bridge config and the
+         playground world's buoyancy <enable> still bake the default instance
+         name (blueboat); per instance parameterization is the multi vehicle
+         PR. -->
+    <plugin filename="gz-sim-thruster-system" name="gz::sim::systems::Thruster">
+      <joint_name>motor_${side}_joint</joint_name>
+      <thrust_coefficient>${coeff}</thrust_coefficient>
+      <fluid_density>1025.0</fluid_density>
+      <propeller_diameter>0.076</propeller_diameter>  <!-- T200 prop -->
+      <velocity_control>true</velocity_control>
+      <max_thrust_cmd>${t200_max_thrust}</max_thrust_cmd>
+      <min_thrust_cmd>${t200_min_thrust}</min_thrust_cmd>
+    </plugin>
+  </xacro:macro>
+
+  <!-- ===================== Sensors (config-driven) =====================
+       One <sensor> per sensor-type accessory, as a massless link fixed to
+       base_link at the accessory pose (keeps the description Gazebo-free). Needs
+       gz-sim-sensors-system in the world (GPU). The two imaging sonars
+       (omniscan_450 side-scan, surveyor_multibeam) are PARKED - no acoustic model
+       ships for Jetty - so they stay geometry-only. -->
+  <xacro:macro name="sensor_link" params="name pose *sensor">
+    <link name="${name}_sensor">
+      <pose relative_to="base_link">${pose}</pose>
+      <inertial>
+        <mass>1e-5</mass>
+        <inertia>
+          <ixx>1e-8</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>1e-8</iyy><iyz>0</iyz><izz>1e-8</izz>
+        </inertia>
+      </inertial>
+      <xacro:insert_block name="sensor"/>
+    </link>
+    <joint name="${name}_sensor_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>${name}_sensor</child>
+    </joint>
+  </xacro:macro>
+
+  <!-- Ping2 single-beam echosounder: a 1-ray gpu_lidar pointing straight down
+       (range to the seabed). Real Ping2 range ~0.5-100 m. -->
+  <xacro:macro name="echosounder_sensor" params="name pose topic_base">
+    <xacro:sensor_link name="${name}" pose="${pose}">
+      <sensor name="${name}" type="gpu_lidar">
+        <!-- Pin frame_id to the accessory's own URDF link: that is the only
+             name TF carries (robot_state_publisher publishes the URDF links;
+             the ${name}_sensor wrapper link exists only here, and gz's derived
+             id is in neither). Body frame convention. -->
+        <frame_id>${name}</frame_id>
+        <topic>${topic_base}/range</topic>
+        <update_rate>10</update_rate>
+        <always_on>1</always_on>
+        <visualize>true</visualize>
+        <lidar>
+          <scan>
+            <horizontal><samples>1</samples><resolution>1</resolution>
+              <min_angle>0</min_angle><max_angle>0</max_angle></horizontal>
+            <vertical><samples>1</samples><resolution>1</resolution>
+              <min_angle>-1.5708</min_angle><max_angle>-1.5708</max_angle></vertical>
+          </scan>
+          <range><min>0.5</min><max>100</max><resolution>0.01</resolution></range>
+        </lidar>
+      </sensor>
+    </xacro:sensor_link>
+  </xacro:macro>
+
+  <!-- Recursive dispatcher: only the ping_sonar echosounder is modelled; the
+       imaging sonars are parked and all other accessories emit nothing. -->
+  <xacro:macro name="mount_sensors" params="items">
+    <xacro:if value="${len(items) > 0}">
+      <xacro:property name="a" value="${items[0]}"/>
+      <xacro:property name="t" value="${a['type']}"/>
+      <xacro:property name="p" value="${a['xyz'] + ' ' + a['rpy']}"/>
+      <xacro:property name="tb" value="${a.get('gz_topic', a.get('topic', topic_ns + '/' + a['name']))}"/>
+      <xacro:if value="${t == 'ping_sonar'}"><xacro:echosounder_sensor name="${a['name']}" pose="${p}" topic_base="${tb}"/></xacro:if>
+      <xacro:mount_sensors items="${items[1:]}"/>
+    </xacro:if>
+  </xacro:macro>
+
+  <model name="blueboat">
+    <include merge="true">
+      <uri>package://blueboat_description/urdf/blueboat.urdf</uri>
+    </include>
+
+    <!-- Hydrodynamic damping for the surface hull (Fossen). USV placeholder
+         coefficients: strong sway/yaw resistance, moderate surge, plus
+         heave/roll/pitch damping so the graded-buoyancy float settles instead of
+         bobbing. Tune against real BlueBoat response. -->
+    <plugin filename="gz-sim-hydrodynamics-system"
+            name="gz::sim::systems::Hydrodynamics">
+      <link_name>base_link</link_name>
+      <water_density>1025.0</water_density>
+      <xU>-20</xU>    <yV>-40</yV>    <zW>-30</zW>
+      <kP>-20</kP>    <mQ>-20</mQ>    <nR>-15</nR>
+      <xUabsU>-30</xUabsU>
+      <yVabsV>-90</yVabsV>
+      <zWabsW>-100</zWabsW>
+      <kPabsP>-40</kPabsP>
+      <mQabsQ>-40</mQabsQ>
+      <nRabsR>-30</nRabsR>
+    </plugin>
+
+    <!-- Joint states for the motor joints, so robot_state_publisher can
+         animate the props in RViz. Bridged to /joint_states. -->
+    <plugin filename="gz-sim-joint-state-publisher-system"
+            name="gz::sim::systems::JointStatePublisher">
+      <topic>${topic_ns}/joint_states</topic>
+    </plugin>
+
+    <!-- Twin outboards (counter-rotating). -->
+    <xacro:thruster side="port" coeff="0.02"/>
+    <xacro:thruster side="stbd" coeff="-0.02"/>
+
+    <!-- Sensors: one per sensor-type accessory in config/blueboat.yaml. -->
+    <xacro:mount_sensors items="${cfg.get('accessories') or []}"/>
+  </model>
+</sdf>

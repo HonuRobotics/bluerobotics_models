@@ -15,12 +15,13 @@
 """
 Generate the ros_gz bridge config from the vehicle accessory config.
 
-Run at build time (see CMakeLists.txt): reads bluerov2.yaml and emits one bridge
-entry per topic of each configured accessory, plus /clock. Topic bases follow
-/<topic_namespace>/<accessory name>, overridable per accessory with `topic`
-(both sides), `gz_topic` (Gazebo side) and `ros_topic` (ROS side). This is the
-single point that must agree with the sensor <topic>s emitted by
-model.sdf.xacro; both read the same config, so they cannot drift.
+Run at build time (see CMakeLists.txt): emits /clock, the two thruster command
+topics (part of the drivetrain, always present) and one entry per topic of each
+configured accessory. Topic bases follow /<topic_namespace>/<accessory name>,
+overridable per accessory with `topic` (both sides), `gz_topic` (Gazebo side)
+and `ros_topic` (ROS side). This is the single point that must agree with the
+sensor <topic>s emitted by model.sdf.xacro; both read the same config, so they
+cannot drift.
 
 Usage: generate_bridge_config.py <vehicle_config.yaml> <output_bridge.yaml>
 """
@@ -29,33 +30,11 @@ import sys
 
 import yaml
 
-# type -> [(topic suffix ('' = the base itself), ROS type, gz type, direction)]
+# type -> [(topic suffix, ROS type, gz type, direction)]
 ACCESSORY_TOPICS = {
-    'explorehd_camera': [
-        ('image', 'sensor_msgs/msg/Image', 'gz.msgs.Image', 'GZ_TO_ROS'),
-        ('camera_info', 'sensor_msgs/msg/CameraInfo', 'gz.msgs.CameraInfo',
+    'ping_sonar': [
+        ('range', 'sensor_msgs/msg/LaserScan', 'gz.msgs.LaserScan',
          'GZ_TO_ROS'),
-    ],
-    'marinesitu_c3': [
-        ('image', 'sensor_msgs/msg/Image', 'gz.msgs.Image', 'GZ_TO_ROS'),
-        ('depth_image', 'sensor_msgs/msg/Image', 'gz.msgs.Image', 'GZ_TO_ROS'),
-        ('points', 'sensor_msgs/msg/PointCloud2', 'gz.msgs.PointCloudPacked',
-         'GZ_TO_ROS'),
-        ('camera_info', 'sensor_msgs/msg/CameraInfo', 'gz.msgs.CameraInfo',
-         'GZ_TO_ROS'),
-    ],
-    'ping360': [
-        ('scan', 'sensor_msgs/msg/LaserScan', 'gz.msgs.LaserScan', 'GZ_TO_ROS'),
-    ],
-    'dvl_a50': [
-        ('velocity', 'marine_acoustic_msgs/msg/Dvl',
-         'gz.msgs.DVLVelocityTracking', 'GZ_TO_ROS'),
-    ],
-    'newton_gripper': [
-        ('cmd_pos', 'std_msgs/msg/Float64', 'gz.msgs.Double', 'ROS_TO_GZ'),
-    ],
-    'sediment_sampler': [
-        ('cmd_pos', 'std_msgs/msg/Float64', 'gz.msgs.Double', 'ROS_TO_GZ'),
     ],
 }
 
@@ -68,12 +47,12 @@ def absolute(topic):
 # The gz side topics bake the model instance name: worlds must spawn the
 # model under this name (the playground does). Per instance parameterization
 # is the multi vehicle PR.
-MODEL_NAME = 'bluerov2'
+MODEL_NAME = 'blueboat'
 
 
 def bridge_entries(cfg):
     """Build the list of bridge entries for a parsed vehicle config."""
-    ns = cfg.get('topic_namespace', 'bluerov2')
+    ns = cfg.get('topic_namespace', 'blueboat')
     entries = [{
         'ros_topic_name': '/clock',
         'gz_topic_name': '/clock',
@@ -81,14 +60,21 @@ def bridge_entries(cfg):
         'gz_type_name': 'gz.msgs.Clock',
         'direction': 'GZ_TO_ROS',
     }]
-    # Thrusters: drivetrain, not accessories. Thrust in newtons, one topic per
-    # thruster; the count follows the variant.
-    count = 8 if cfg.get('variant') == 'heavy' else 6
-    for n in range(1, count + 1):
+    # Motor joint states from the JointStatePublisher plugin, for
+    # robot_state_publisher / RViz prop animation.
+    entries.append({
+        'ros_topic_name': '/joint_states',
+        'gz_topic_name': absolute(f'{ns}/joint_states'),
+        'ros_type_name': 'sensor_msgs/msg/JointState',
+        'gz_type_name': 'gz.msgs.Model',
+        'direction': 'GZ_TO_ROS',
+    })
+    # Twin outboard thrusters: drivetrain, not accessories. Thrust in newtons.
+    for side in ('port', 'stbd'):
         entries.append({
-            'ros_topic_name': absolute(f'{ns}/thrusters/thruster{n}/thrust'),
+            'ros_topic_name': absolute(f'{ns}/thrusters/{side}/thrust'),
             'gz_topic_name':
-                f'/model/{MODEL_NAME}/joint/thruster{n}_joint/cmd_thrust',
+                f'/model/{MODEL_NAME}/joint/motor_{side}_joint/cmd_thrust',
             'ros_type_name': 'std_msgs/msg/Float64',
             'gz_type_name': 'gz.msgs.Double',
             'direction': 'ROS_TO_GZ',
@@ -107,16 +93,13 @@ def bridge_entries(cfg):
                 'direction': direction,
             }
             if direction == 'GZ_TO_ROS':
-                # Defer the gz subscription until a ROS subscriber shows up, so
-                # unwatched sensors (e.g. camera streams) cost nothing to bridge.
+                # Defer the gz subscription until a ROS subscriber shows up.
                 entry['lazy'] = True
-            # Pass-through: native ros_gz_bridge keys (lazy, subscriber_queue,
-            # publisher_queue, ...) from the accessory's `bridge:` dict override
-            # the defaults above.
+            # Pass-through: native ros_gz_bridge keys from the accessory's
+            # `bridge:` dict override the defaults above.
             entry.update(acc.get('bridge') or {})
             entries.append(entry)
-    # Verbatim extra entries (native ros_gz_bridge syntax) for anything outside
-    # the accessory system, e.g. thruster commands or odometry.
+    # Verbatim extra entries (native ros_gz_bridge syntax).
     entries.extend(cfg.get('extra_bridge_topics') or [])
     return entries
 
@@ -129,7 +112,7 @@ def main():
         cfg = yaml.safe_load(f) or {}
     with open(sys.argv[2], 'w') as f:
         f.write('# GENERATED from the vehicle config '
-                '(bluerov2_description/config/bluerov2.yaml)\n'
+                '(blueboat_description/config/blueboat.yaml)\n'
                 '# by generate_bridge_config.py. Do not edit; edit the vehicle '
                 'config and rebuild.\n')
         yaml.safe_dump(bridge_entries(cfg), f, sort_keys=False)

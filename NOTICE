@@ -1,4 +1,4 @@
-Blue Robotics simulation model packages (BlueROV2)
+Blue Robotics simulation model packages (BlueROV2, BlueBoat)
 Copyright 2026 Honu Robotics
 
 Licensed under the Apache License, Version 2.0 (see LICENSE).
@@ -15,4 +15,5 @@ placeholders until original art replaces them:
   From CentraleNantesROV/bluerov2
   (https://github.com/CentraleNantesROV/bluerov2). License: Apache-2.0.
 
-See bluerov2_description/ASSETS.md for per-file provenance.
+See bluerov2_description/ASSETS.md for per-file provenance. The blueboat_*
+packages ship no third-party assets (primitive shapes only).

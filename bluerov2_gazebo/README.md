@@ -22,7 +22,7 @@ file and the `ros_gz` bridge. Gazebo-specific assets/plugins live here, keeping
 
 ## Build
 ```bash
-colcon build --packages-select bluerov2_description bluerov2_gazebo
+colcon build --merge-install --packages-select bluerov2_description bluerov2_gazebo
 source install/setup.bash
 ```
 
@@ -83,7 +83,7 @@ right, y down). Consumers that unproject pixels — `image_pipeline`, RViz's
 Camera display — need to account for that themselves; the optical frame is
 `rpy = (-pi/2, 0, -pi/2)` relative to the accessory link.
 
-### Gazebo transport interface (gz topics, not bridged by default)
+### Thrust interface
 
 | gz topic | Type | Direction | Purpose |
 |----------|------|-----------|---------|
@@ -117,8 +117,11 @@ wait
 
 Stop by publishing `data: 0.0` to all four the same way. Controllers that
 publish continuously (teleop, ArduPilot, MAVROS) are unaffected by the onset
-ordering. To expose thruster commands over ROS, add entries to the config's
-`extra_bridge_topics:` list and rebuild.
+ordering.
+
+The same commands are bridged to ROS as
+`/bluerov2/thrusters/thruster<N>/thrust` (`std_msgs/msg/Float64`, thrust in
+newtons), mirroring the BlueBoat interface.
 
 Never edit the generated `config/ros_gz_bridge.yaml`; edit the vehicle config
 and rebuild. Native bridge options (`lazy`, queue sizes, ...) go in each
@@ -132,7 +135,7 @@ From debs, the composed `model.sdf` and the bridge config are baked with the
 works as documented above. To customize the accessory loadout:
 
 - **Overlay workspace (recommended).** Clone this repo into a colcon workspace,
-  edit `bluerov2_description/config/bluerov2.yaml`, `colcon build`, source the
+  edit `bluerov2_description/config/bluerov2.yaml`, `colcon build --merge-install`, source the
   overlay. All three generated artifacts (URDF, `model.sdf`, bridge yaml) stay
   consistent automatically, and the deb remains untouched.
 

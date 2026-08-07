@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!--
+  Visualize the BlueBoat description in RViz: robot_state_publisher (build-time
+  base URDF), joint_state_publisher_gui (sliders to spin the propellers) and RViz
+  with the packaged config. Pure ROS/description - no Gazebo. Not composed: only
+  robot_state_publisher is a composable component; the GUIs are standalone Qt
+  processes, so a container would hold a single node.
+-->
+<launch>
+  <arg name="gui" default="true"
+       description="Start joint_state_publisher_gui to drive the joints."/>
+  <arg name="config_file"
+       default="$(find-pkg-share blueboat_description)/config/blueboat.yaml"
+       description="Vehicle config (accessories) expanded at launch."/>
+
+  <node pkg="robot_state_publisher" exec="robot_state_publisher"
+        name="robot_state_publisher">
+    <!-- type="str": keep launch from running yaml type-inference over the URDF. -->
+    <param name="robot_description"
+           value="$(command 'xacro $(find-pkg-share blueboat_description)/urdf/blueboat.urdf.xacro config_file:=$(var config_file)')"
+           type="str"/>
+  </node>
+
+  <node pkg="joint_state_publisher_gui" exec="joint_state_publisher_gui"
+        name="joint_state_publisher_gui" if="$(var gui)"/>
+
+  <node pkg="rviz2" exec="rviz2" name="rviz2"
+        args="-d $(find-pkg-share blueboat_description)/rviz/blueboat.rviz"/>
+</launch>
