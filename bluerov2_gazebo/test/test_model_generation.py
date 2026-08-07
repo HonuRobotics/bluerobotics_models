@@ -171,7 +171,9 @@ def test_sensor_and_bridge_topics_agree():
     for config in configs:
         root, _ = xacro(MODEL_XACRO, config)
         entries = bridge_gen.bridge_entries(yaml.safe_load(config))
-        bridge_topics = {e['gz_topic_name'] for e in entries} - {'/clock'}
+        bridge_topics = {e['gz_topic_name'] for e in entries
+                         if e['gz_topic_name'] != '/clock'
+                         and not e['gz_topic_name'].endswith('/cmd_thrust')}
         assert sdf_gz_topics(root) == bridge_topics
 
 
