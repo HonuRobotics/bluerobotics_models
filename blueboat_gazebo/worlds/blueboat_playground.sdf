@@ -1,9 +1,12 @@
 <?xml version="1.0"?>
 <!--
-  Minimal, self-contained Gazebo Sim world for Phase 1 BlueBoat bring-up: sun, a
-  ground plane for reference, the core systems, and the vehicle itself pulled in
-  via <include>. No ocean or hydrodynamics yet (those arrive with the physics
-  work). The world starts paused, so the vehicle simply rests at its pose.
+  Self-contained Gazebo Sim world for the BlueBoat: sun, a seabed plane at
+  z -3, graded buoyancy (seawater below z 0, air above), a visual water
+  surface at the waterline, the core systems and the vehicle pulled in via
+  <include>. Started directly it comes up paused; press play and the boat
+  settles to its static draft (about 70 mm) and floats level. Hydrodynamic
+  damping lives in the included model; tuning the coefficients against the
+  real vehicle is the deferred part.
 
   Run it directly, no ROS:  gz sim <this file>
 -->
