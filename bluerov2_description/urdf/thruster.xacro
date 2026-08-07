@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!--
+  Reusable T200 thruster macro for the BlueROV2.
+
+  A thruster is a single link carrying the propeller mesh, attached to the
+  parent link by a continuous joint that spins about the propeller axis. The
+  numeric pose values reproduce the reference BlueROV2 layout (ArduSub vectored
+  configuration); see the DAVE bluerov2 model for provenance.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!--
+    number      unique thruster index (used to name the link and joint)
+    xyz / rpy   pose of the thruster link relative to the parent link
+    spin        propeller handedness: "ccw" or "cw" (selects the prop mesh)
+    visual_rpy  extra rotation applied to the prop mesh so it faces outward
+    parent      link the thruster is mounted on
+  -->
+  <xacro:macro name="t200_thruster"
+               params="number xyz rpy spin visual_rpy parent:=base_link">
+    <link name="thruster${number}">
+      <inertial>
+        <!-- T200 in air (thruster_mass, set in bluerov2.urdf.xacro); short
+             cylinder inertia (r~38 mm, h~40 mm). Note izz <= ixx + iyy must
+             hold or sdformat rejects the link. -->
+        <mass value="${thruster_mass}"/>
+        <inertia ixx="1.7e-4" ixy="0.0" ixz="0.0"
+                 iyy="1.7e-4" iyz="0.0" izz="2.5e-4"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="${visual_rpy}"/>
+        <geometry>
+          <mesh filename="package://bluerov2_description/meshes/t200/${spin}_prop.dae"/>
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="thruster${number}_joint" type="continuous">
+      <parent link="${parent}"/>
+      <child link="thruster${number}"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+      <axis xyz="0 0 -1"/>
+    </joint>
+  </xacro:macro>
+
+</robot>

@@ -1,0 +1,2 @@
+# Placeholder meshes: no textual diffs in PRs, excluded from language stats.
+bluerov2_description/meshes/** -diff linguist-vendored
