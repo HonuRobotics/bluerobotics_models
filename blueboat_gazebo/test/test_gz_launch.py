@@ -152,14 +152,20 @@ def test_echosounder_ranges(sim):
 
 
 def test_boat_recovers_from_submersion(sim):
-    """Pushed under, the pontoons drive the boat straight back up."""
+    """
+    Pushed under, the pontoons drive the boat back to its float equilibrium.
+
+    Only the end state is asserted: the recovery is fast enough that a slow
+    runner can miss the submerged baseline between the teleport and the first
+    pose read, so any delta assertion races.
+    """
     teleport(sim, 0, 0, -1.0)
-    t0, z0 = sim_seconds(sim), model_pose(sim)[2]
-    wait_sim_seconds(sim, 4)
+    t0 = sim_seconds(sim)
+    wait_sim_seconds(sim, 6)
     t1, z1 = sim_seconds(sim), model_pose(sim)[2]
-    assert z1 > z0 + 0.3 and z1 > -0.3, (
-        f'no reserve buoyancy recovery: z {z0:.2f} -> {z1:.2f} '
-        f'over {t1 - t0:.1f} sim s')
+    assert z1 > 0.1, (
+        f'no reserve buoyancy recovery: z {z1:.2f} after {t1 - t0:.1f} sim s '
+        f'(float equilibrium is about +0.24)')
 
 
 def test_forward_thrust_surges(sim):
