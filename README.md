@@ -43,28 +43,10 @@ works if you prefer it.
 Each package README documents configuration (variant + accessory loadout),
 ROS topics and how to include the model in an existing Gazebo world.
 
-## Development
+## Contributing
 
-Optional but recommended: install the pre-commit hooks. They mirror the ament
-linters that CI runs (plus basic file hygiene), so a passing pre-commit means a
-passing lint stage.
-
-```bash
-pip install pre-commit
-pre-commit install              # from the repo root; runs on every git commit
-```
-
-To check manually at any time:
-
-```bash
-pre-commit run --all-files      # everything, staged or not
-pre-commit run                  # staged files only
-pre-commit run ament_flake8 --all-files   # a single hook
-```
-
-The `ament_*` hooks need a sourced ROS environment; some hooks fix files in
-place (trailing whitespace, end of file), so re-stage and re-run after a
-failure that says "files were modified by this hook".
+Developer workflow (build, tests, pre-commit hooks, conventions):
+see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
