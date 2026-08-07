@@ -120,7 +120,7 @@ def test_plugin_references_survive_lumping():
 
 def test_sensor_frame_ids_resolve_in_tf():
     """
-    #34: every sensor's <frame_id> names a frame TF actually carries.
+    Every sensor's <frame_id> names a frame TF actually carries.
 
     header.frame_id is only useful if a consumer can look the frame up. TF comes
     from the URDF via robot_state_publisher, but neither sensor-side name is in
