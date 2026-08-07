@@ -118,6 +118,32 @@ def test_plugin_references_survive_lumping():
         f'plugin links lumped away: {link_refs - surviving_links}')
 
 
+def test_sensor_frame_ids_resolve_in_tf():
+    """
+    #34: every sensor's <frame_id> names a frame TF actually carries.
+
+    header.frame_id is only useful if a consumer can look the frame up. TF comes
+    from the URDF via robot_state_publisher, but neither sensor-side name is in
+    it: gz's conversion lumps the description's fixed-joint accessory links away,
+    and the SDF's own <name>_sensor wrapper links were never in the URDF at all.
+    Unset, gz derives the id from the SDF ('bluerov2/camera_sensor/camera'),
+    which no lookup_transform can resolve. Pin it to a URDF link name.
+    """
+    sdf_root, _ = xacro(MODEL_XACRO, FULL_CONFIG)
+    urdf_root, _ = xacro(URDF_XACRO, FULL_CONFIG)
+    urdf_links = {li.get('name') for li in urdf_root.findall('link')}
+    sensors = list(sdf_root.iter('sensor'))
+    assert sensors
+    for sensor in sensors:
+        frame = sensor.find('frame_id')
+        assert frame is not None, (
+            f'sensor {sensor.get("name")} sets no <frame_id>: gz will derive an '
+            f'SDF-scoped id that is absent from TF')
+        assert frame.text in urdf_links, (
+            f'sensor {sensor.get("name")} publishes frame_id '
+            f'{frame.text!r}, which robot_state_publisher never puts in TF')
+
+
 def sdf_gz_topics(root):
     """Collect the gz-side topics the model advertises/subscribes."""
     topics = set()
