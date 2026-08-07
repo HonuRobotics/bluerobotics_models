@@ -1,10 +1,11 @@
 <?xml version="1.0"?>
 <!--
-  Self-contained underwater world for the BlueROV2: sun, a ground plane for
-  reference, the core + sensor systems, uniform-density water (buoyancy) and the
-  vehicle itself pulled in via <include>. Started directly with `gz sim` it
-  comes up paused; press play and the near-neutral vehicle drifts up very
-  slowly, damped by its hydrodynamics.
+  Self-contained underwater world for the BlueROV2: sun, a seabed plane, the
+  core + sensor systems, graded buoyancy (seawater below z 0, air above) and
+  the vehicle pulled in via <include>. Started directly with `gz sim` it comes
+  up paused; press play and the near-neutral vehicle drifts up very slowly,
+  damped by its hydrodynamics, until it floats essentially awash at the
+  surface (the 0.02% margin leaves almost no freeboard).
 
   Run it directly, no ROS:  gz sim <this file>
 -->
@@ -32,14 +33,20 @@
     <plugin filename="gz-sim-dvl-system"
             name="gz::sim::systems::DopplerVelocityLogSystem"/>
 
-    <!-- Uniform-density water (whole world submerged): the BlueROV2 shows its
-         near-neutral, slightly-positive buoyancy by rising very slowly. Displaced volume comes from
-         the model's collision, sized analytically in bluerov2_description so
-         density*volume = mass*(1+margin); the model's Hydrodynamics plugin damps
-         the rise to a steady rate. -->
+    <!-- Graded buoyancy: seawater (1025) below z=0, air above, so the vehicle
+         has a real free surface (and can share a world with surface vessels).
+         Displaced volume comes from the model's collision, sized analytically
+         in bluerov2_description so density*volume = mass*(1+margin); the
+         model's Hydrodynamics plugin damps the slow rise. -->
     <plugin filename="gz-sim-buoyancy-system"
             name="gz::sim::systems::Buoyancy">
-      <uniform_fluid_density>1025</uniform_fluid_density>
+      <graded_buoyancy>
+        <default_density>1025</default_density>
+        <density_change>
+          <above_depth>0</above_depth>
+          <density>1</density>
+        </density_change>
+      </graded_buoyancy>
       <enable>bluerov2</enable>
     </plugin>
 
