@@ -1,0 +1,249 @@
+<?xml version="1.0"?>
+<!--
+  Static mesh sandbox for the BlueBoat. Every mesh shipped by
+  blueboat_description, laid out on a grid so they can be eyeballed side by
+  side. No physics of interest, no buoyancy, no sensors - everything is
+  <static> and nothing moves.
+
+  Each <model> is named after its mesh FILE (extension stripped), so the entity
+  tree reads as a file listing and you can tell immediately which asset you are
+  looking at.
+
+  Layout: 6 per row, 1 m apart, all lifted to z = 0.1.
+    y = 0   hull, T200, T200 prop, blueboat prop, flag, antenna mast
+    y = 2   directional antenna, payload bracket, ping mount,
+            side scan sonar, sonar, surveyor
+
+  Note the hull is ~1.2 m long, so at 1 m spacing it overlaps its neighbour.
+  Everything else clears comfortably.
+
+  Lighting matches vrx_gazebo/worlds/open_water.sdf - cyan ambient, procedural
+  sky, attenuated sun - so the meshes are judged under the light they will
+  actually be seen in, minus the water. The GUI grid is deliberately left ON
+  (open_water disables it) because it is the 1 m scale reference here.
+
+  What this is for:
+    scale       - the GUI grid is 1 m. The hull should read ~1.2 m long, a
+                  T200 ~0.1 m, the antenna mast ~0.57 m tall.
+    origin      - every model is placed at exactly z = 0.1 above a reference
+                  plane at z = 0, so the expected gap is a uniform 10 cm. A
+                  mesh sitting at a different height, or clipping the plane,
+                  has an origin that is not on its base.
+    orientation - +X is to the right along each row. Anything with a bow or a
+                  front should face +X. The assembled model puts the BlueBoat
+                  bow at +X with the outboards aft.
+    materials   - PBR generally has to be declared in SDF rather than read out
+                  of the .glb. Bear in mind the cyan ambient tints everything,
+                  so judge material presence rather than exact colour.
+
+  Requires blueboat_description built and sourced - the meshes resolve via
+  GZ_SIM_RESOURCE_PATH, populated by that package's environment hook.
+
+  Run it directly, no ROS:  gz sim <this file>
+-->
+<sdf version="1.12">
+  <world name="blueboat_mesh_sandbox">
+
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster"/>
+
+    <!-- Ocean-like scene, matching open_water.sdf: deep-water ambient and the
+         built-in procedural sky. Grid left enabled as the scale reference. -->
+    <scene>
+      <ambient>0.0 1.0 1.0</ambient>
+      <background>0.0 0.7 0.8</background>
+      <sky></sky>
+      <grid>true</grid>
+    </scene>
+
+    <!-- Directional light (sun, attenuated by water), from open_water.sdf. -->
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 20 0 0 0</pose>
+      <diffuse>1 1 1 1</diffuse>
+      <specular>0.5 0.5 0.5 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- Reference plane at z = 0. Models sit 10 cm above it, so anything not
+         showing that uniform gap has an origin that is not on its base. -->
+    <model name="reference_plane">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <plane><normal>0 0 1</normal><size>16 10</size></plane>
+          </geometry>
+          <material>
+            <ambient>0.25 0.25 0.28 1</ambient>
+            <diffuse>0.35 0.35 0.38 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================ row 1 ============================ -->
+
+    <model name="blueboat.visual">
+      <static>true</static>
+      <pose>0 0 0.1 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <mesh><uri>model://blueboat_description/meshes/blueboat/blueboat.visual.glb</uri></mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="thruster.visual">
+      <static>true</static>
+      <pose>1 0 0.1 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <mesh><uri>model://blueboat_description/meshes/blueboat/accessories/T200/thruster.visual.glb</uri></mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="thruster_propeller.visual">
+      <static>true</static>
+      <pose>2 0 0.1 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <mesh><uri>model://blueboat_description/meshes/blueboat/accessories/T200_prop/thruster_propeller.visual.glb</uri></mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="blueboat_prop.visual">
+      <static>true</static>
+      <pose>3 0 0.1 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <mesh><uri>model://blueboat_description/meshes/blueboat/accessories/blueboat_prop/blueboat_prop.visual.glb</uri></mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="Flag.visual">
+      <static>true</static>
+      <pose>4 0 0.1 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <mesh><uri>model://blueboat_description/meshes/blueboat/accessories/flag/Flag.visual.glb</uri></mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="Antenna_Mast_visual">
+      <static>true</static>
+      <pose>5 0 0.1 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <mesh><uri>model://blueboat_description/meshes/blueboat/antenna_mast/Antenna_Mast_visual.glb</uri></mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================ row 2 ============================ -->
+
+    <model name="Directional_Antenna_visual">
+      <static>true</static>
+      <pose>0 2 0.1 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <mesh><uri>model://blueboat_description/meshes/blueboat/directional_antenna/Directional_Antenna_visual.glb</uri></mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="Payload_Bracket_visual">
+      <static>true</static>
+      <pose>1 2 0.1 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <mesh><uri>model://blueboat_description/meshes/blueboat/payload_bracket/Payload_Bracket_visual.glb</uri></mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="Ping_Mount_visual">
+      <static>true</static>
+      <pose>2 2 0.1 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <mesh><uri>model://blueboat_description/meshes/blueboat/ping_mount/Ping_Mount_visual.glb</uri></mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="side_scan_sonar_visual">
+      <static>true</static>
+      <pose>3 2 0.1 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <mesh><uri>model://blueboat_description/meshes/blueboat/side_scan_sonar/side_scan_sonar_visual.glb</uri></mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="Sonar_visual">
+      <static>true</static>
+      <pose>4 2 0.1 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <mesh><uri>model://blueboat_description/meshes/blueboat/sonar/Sonar_visual.glb</uri></mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <model name="Surveyor_visual">
+      <static>true</static>
+      <pose>5 2 0.1 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <mesh><uri>model://blueboat_description/meshes/blueboat/surveyor/Surveyor_visual.glb</uri></mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

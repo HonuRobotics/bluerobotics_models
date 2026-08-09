@@ -21,6 +21,7 @@ xacro_add_files(
 )
 
 install(DIRECTORY
+  meshes
   urdf
   rviz
   launch
