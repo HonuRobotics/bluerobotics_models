@@ -12,9 +12,11 @@ ament_environment_hooks("hooks/resource_paths.dsv.in")
 ament_environment_hooks("hooks/resource_paths.sh.in")
 
 # Expand the xacro into a concrete URDF at *build* time and install it. The
-# config yaml (accessories) is passed as the config_file arg; xacro's --deps
-# reports the xacro includes AND the load_yaml'd config, so editing the config
-# or any xacro re-triggers this on the next colcon build.
+# config yaml (accessories) is passed as the config_file arg.
+# Dependencies are listed EXPLICITLY below: xacro_add_files also snapshots
+# `xacro --deps` at configure time, but that snapshot only warns on failure
+# and is not refreshed until the next reconfigure, so on its own a config or
+# include edit can silently fail to regenerate the URDF.
 
 # Validate the battery loadout before generating: slots, fit, offsets, counts
 # and buoyancy_trim, with readable messages. Errors fail the build here rather
@@ -38,6 +40,11 @@ xacro_add_files(
   urdf/blueboat.urdf.xacro
     REMAP config_file:=${CMAKE_CURRENT_SOURCE_DIR}/config/blueboat.yaml
           batteries_file:=${CMAKE_CURRENT_SOURCE_DIR}/config/batteries.yaml
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/config/blueboat.yaml
+            ${CMAKE_CURRENT_SOURCE_DIR}/config/batteries.yaml
+            ${CMAKE_CURRENT_SOURCE_DIR}/urdf/thruster.xacro
+            ${CMAKE_CURRENT_SOURCE_DIR}/urdf/accessories.xacro
+            ${CMAKE_CURRENT_SOURCE_DIR}/urdf/batteries.xacro
     INSTALL DESTINATION urdf
 )
 

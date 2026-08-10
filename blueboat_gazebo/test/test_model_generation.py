@@ -22,6 +22,7 @@ import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import (get_package_prefix,
                                          get_package_share_directory)
+import pytest
 import yaml
 
 GZ_SHARE = Path(get_package_share_directory('blueboat_gazebo'))
@@ -77,6 +78,33 @@ def test_model_generation_follows_config():
     empty_root, _ = xacro(MODEL_XACRO, 'accessories: []\n')
     assert not list(empty_root.iter('sensor'))
     assert len(plugins(empty_root, 'gz-sim-thruster-system')) == 2
+
+
+def test_battery_mass_survives_gz_conversion():
+    """
+    Battery mass is merged, not dropped, when gz lumps the battery links away.
+
+    Batteries are fixed-joint, inertia-only links, so gz's URDF conversion
+    lumps them into their parent link. The converted model's total mass must
+    equal the URDF total; the boat then rides deeper with a heavier loadout
+    through the pontoon collisions, exactly as designed.
+    """
+    config = (DESC_SHARE / 'config' / 'blueboat.yaml').read_text()
+    urdf_root, urdf_text = xacro(URDF_XACRO, config)
+    urdf_total = sum(float(m.get('value'))
+                     for m in urdf_root.findall('.//inertial/mass'))
+    with tempfile.NamedTemporaryFile('w', suffix='.urdf', delete=False) as f:
+        f.write(urdf_text)
+        urdf_path = f.name
+    out = subprocess.run(['gz', 'sdf', '-p', urdf_path], check=True,
+                         capture_output=True, text=True, timeout=60)
+    converted = ET.fromstring(out.stdout)
+    links = converted.findall('.//link')
+    assert not any(li.get('name').startswith('battery_') for li in links), (
+        'battery links were expected to lump into their parent')
+    sdf_total = sum(float(m.text)
+                    for m in converted.findall('.//inertial/mass'))
+    assert sdf_total == pytest.approx(urdf_total, rel=1e-6)
 
 
 def test_plugin_references_survive_lumping():

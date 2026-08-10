@@ -134,6 +134,22 @@ def test_lighter_pack_shrinks_the_buoyancy_box():
         pytest.approx(delta_mass, rel=1e-6)
 
 
+def test_custom_pack_resizes_the_buoyancy_box():
+    """A third party pack's mass lands on the link AND the box sizing."""
+    base = generate_urdf(make_config(extra='buoyancy_trim: neutral\n'))
+    custom = generate_urdf(make_config(
+        ['{custom_pack: {mass: 2.0, size: [0.14, 0.07, 0.06]}, slot: tube}'],
+        extra='buoyancy_trim: neutral\n'))
+    link = next(li for li in custom.findall('link')
+                if li.get('name') == 'battery_tube')
+    assert float(link.find('./inertial/mass').get('value')) == \
+        pytest.approx(2.0)
+    delta = total_mass(custom) - total_mass(base)
+    assert delta == pytest.approx(2.0 - PACK_18AH_MASS)
+    assert displacement(custom) - displacement(base) == \
+        pytest.approx(delta, rel=1e-6)
+
+
 def test_in_tube_offset_trims_pitch():
     root = generate_urdf(make_config(
         ['{pack: br_liion_18ah, slot: tube, offset: {x: 0.05}}']))
@@ -149,11 +165,28 @@ def test_in_tube_offset_trims_pitch():
     (make_config(['{pack: br_liion_18ah, slot: hull}']), 'unknown slot'),
     (make_config(extra='buoyancy_trim: 2.5\n'), 'sanity limit'),
     (make_config(extra='buoyancy_trim: floaty\n'), 'must be'),
+    (make_config(['{pack: br_liion_18ah, custom_pack: {mass: 1.0, '
+                  'size: [0.1, 0.05, 0.05]}, slot: tube}']), 'exactly one'),
+    (make_config(['{slot: tube}']), 'exactly one'),
+    (make_config(['{pack: br_liion_18ah, slot: tube, ofset: {x: 0.01}}']),
+     'unknown keys'),
+    (make_config(['{custom_pack: {size: [0.1, 0.05, 0.05]}, slot: tube}']),
+     'positive `mass`'),
+    (make_config(['{custom_pack: {mass: 1.0, size: [0.1, 0.05]}, '
+                  'slot: tube}']), 'needs `size:'),
 ])
 def test_validator_rejects(config, fragment):
     code, stderr = run_validator(config)
     assert code != 0
     assert fragment in stderr, stderr
+
+
+def test_validator_warns_on_discontinued_pack():
+    """The retired 15.6Ah pack still generates, but warns at validation."""
+    code, stderr = run_validator(make_config(
+        ['{pack: br_liion_15_6ah, slot: tube}']))
+    assert code == 0
+    assert 'discontinued' in stderr, stderr
 
 
 def test_validator_accepts_default():

@@ -22,6 +22,7 @@ import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import (get_package_prefix,
                                          get_package_share_directory)
+import pytest
 import yaml
 
 GZ_SHARE = Path(get_package_share_directory('bluerov2_gazebo'))
@@ -116,6 +117,37 @@ def test_plugin_references_survive_lumping():
         f'plugin joints lumped away: {joint_refs - surviving_joints}')
     assert link_refs <= surviving_links, (
         f'plugin links lumped away: {link_refs - surviving_links}')
+
+
+def test_battery_mass_survives_gz_conversion():
+    """
+    Battery mass is merged, not dropped, when gz lumps the battery link away.
+
+    Batteries are fixed-joint, inertia-only links, so gz's URDF conversion
+    lumps them into base_link. The converted model's total mass must equal
+    the URDF total, and the buoyancy box must still displace that total (up
+    to the configured trim) in 1025 kg/m3 seawater.
+    """
+    config = (DESC_SHARE / 'config' / 'bluerov2.yaml').read_text()
+    urdf_root, urdf_text = xacro(URDF_XACRO, config)
+    urdf_total = sum(float(m.get('value'))
+                     for m in urdf_root.findall('.//inertial/mass'))
+    with tempfile.NamedTemporaryFile('w', suffix='.urdf', delete=False) as f:
+        f.write(urdf_text)
+        urdf_path = f.name
+    out = subprocess.run(['gz', 'sdf', '-p', urdf_path], check=True,
+                         capture_output=True, text=True, timeout=60)
+    converted = ET.fromstring(out.stdout)
+    links = converted.findall('.//link')
+    assert not any(li.get('name').startswith('battery_') for li in links), (
+        'battery links were expected to lump into base_link')
+    sdf_total = sum(float(m.text)
+                    for m in converted.findall('.//inertial/mass'))
+    assert sdf_total == pytest.approx(urdf_total, rel=1e-6)
+    base = next(li for li in links if li.get('name') == 'base_link')
+    size = base.find('./collision/geometry/box/size')
+    lx, ly, lz = (float(v) for v in size.text.split())
+    assert 1025.0 * lx * ly * lz == pytest.approx(sdf_total, rel=1e-3)
 
 
 def test_sensor_frame_ids_resolve_in_tf():

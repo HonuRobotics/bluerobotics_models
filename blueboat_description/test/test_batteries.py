@@ -150,6 +150,19 @@ def test_validator_accepts_default_and_full_loadout():
     (['{custom_pack: {mass: 1.0, size: [0.5, 0.1, 0.1]}, slot: port_fwd}'],
      'does not fit'),
     ([], 'not a runnable vehicle'),
+    (['{pack: br_liion_18ah, custom_pack: {mass: 1.0, '
+      'size: [0.1, 0.05, 0.05]}, slot: port_fwd}'], 'exactly one'),
+    (['{slot: port_fwd}'], 'exactly one'),
+    (['{pack: br_liion_18ah, slot: port_fwd, ofset: {x: 0.01}}'],
+     'unknown keys'),
+    (['{custom_pack: not_a_mapping, slot: port_fwd}'], 'must be a mapping'),
+    (['{custom_pack: {mass: -1.0, size: [0.1, 0.05, 0.05]}, slot: port_fwd}'],
+     'positive `mass`'),
+    (['{custom_pack: {mass: 1.0, size: [0.1, 0.05]}, slot: port_fwd}'],
+     'needs `size:'),
+    (['{pack: br_liion_18ah, slot: port_fwd, name: twin}',
+      '{pack: br_liion_18ah, slot: stbd_fwd, name: twin}'],
+     'duplicate battery name'),
 ])
 def test_validator_rejects(batteries, fragment):
     code, stderr = run_validator(make_config(batteries))

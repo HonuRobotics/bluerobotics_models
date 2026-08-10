@@ -13,6 +13,7 @@ ament_environment_hooks("hooks/resource_paths.sh.in")
 
 install(DIRECTORY
   launch
+  models
   worlds
   DESTINATION share/${PROJECT_NAME})
 
@@ -35,9 +36,10 @@ install(FILES ${bridge_yaml} DESTINATION share/${PROJECT_NAME}/config)
 # Composed simulation model. model.sdf is GENERATED from model.sdf.xacro at build
 # time: it reads bluerov2_description/config/bluerov2.yaml (variant -> thruster
 # count) and adds the Gazebo plugins. xacro_add_files (no DESTINATION) installs it
-# to share/${PROJECT_NAME}/model.sdf, next to the static model.config; xacro --deps
-# re-triggers generation when the config or the xacro changes.
-xacro_add_files(model.sdf.xacro INSTALL)
+# to share/${PROJECT_NAME}/model.sdf, next to the static model.config. The config
+# dependency is EXPLICIT: the configure time xacro --deps snapshot cannot resolve
+# $(find) and fails with only a warning, leaving the rule without deps.
+xacro_add_files(model.sdf.xacro DEPENDS ${vehicle_config} INSTALL)
 install(FILES
   model.config
   model.sdf.xacro
