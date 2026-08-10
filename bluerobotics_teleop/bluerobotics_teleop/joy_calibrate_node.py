@@ -25,7 +25,7 @@ the two input side configs the teleop launch reads:
 The mixer config (thruster topics and gains) is model truth, not user
 preference, and is never touched here. Run with the joystick plugged in:
 
-    ros2 run joy joy_node &
+    ros2 run joy joy_node --ros-args -p autorepeat_rate:=20.0 &
     ros2 run bluerobotics_teleop joy_calibrate --vehicle blueboat
 """
 
