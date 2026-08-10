@@ -3,7 +3,7 @@
   Self-contained underwater world for the BlueROV2: sun, a seabed plane, the
   core + sensor systems, graded buoyancy (seawater below z 0, air above) and
   the vehicle pulled in via <include>. Started directly with `gz sim` it comes
-  up paused; press play and the near-neutral vehicle drifts up very slowly,
+  up paused; press play and the near-neutral vehicle rises very slowly,
   damped by its hydrodynamics, until it floats essentially awash at the
   surface (the 0.02% margin leaves almost no freeboard).
 
@@ -60,6 +60,8 @@
 
     <model name="ground_plane">
       <static>true</static>
+      <!-- Seabed, well below the z=0 water surface. -->
+      <pose>0 0 -5 0 0 0</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
@@ -89,7 +91,7 @@
     <include>
       <uri>model://bluerov2_gazebo</uri>
       <name>bluerov2</name>
-      <pose>0 0 0.5 0 0 0</pose>
+      <pose>0 0 -1 0 0 0</pose>
     </include>
 
   </world>
