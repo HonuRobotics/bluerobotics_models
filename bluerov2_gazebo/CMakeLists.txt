@@ -13,7 +13,6 @@ ament_environment_hooks("hooks/resource_paths.sh.in")
 
 install(DIRECTORY
   launch
-  models
   worlds
   DESTINATION share/${PROJECT_NAME})
 
