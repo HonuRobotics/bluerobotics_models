@@ -33,3 +33,15 @@ accessories:
   # - {type: payload_bracket,     name: payload,     xyz: "0.1 0 0.15",    rpy: "0 0 0"}
   # - {type: omniscan_450,        name: sidescan,    xyz: "0.2 0.22 -0.03", rpy: "0 0 0"}
   # - {type: surveyor_multibeam,  name: multibeam,   xyz: "0.35 0 -0.08",  rpy: "0 0 0"}
+
+# Battery loadout. Omit for the default: one 18Ah pack per hull in the mid_fwd
+# bays (even port/stbd mass, per the operator guide). Packs and slots are
+# defined in config/batteries.yaml; each entry takes `pack` (a catalog key) or
+# `custom_pack: {mass, size}`, a `slot`, an optional `name` and an optional in
+# slot `offset: {x: ...}` within the bay's allowed range. Batteries carry
+# inertia only (no collision): a heavier loadout rides deeper.
+# batteries:
+#   - {pack: br_liion_18ah, slot: port_mid_fwd}
+#   - {pack: br_liion_18ah, slot: stbd_mid_fwd}
+#   - {pack: br_liion_18ah, slot: port_aft, offset: {x: 0.03}}
+#   - {pack: br_liion_18ah, slot: stbd_aft}

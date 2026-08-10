@@ -39,3 +39,15 @@ accessories:
   # - {type: marinesitu_c3,    name: stereo,    xyz: "-0.16 0 0.16",    rpy: "0 0 0"}
   # - {type: newton_gripper,   name: gripper,   xyz: "0.28 0 -0.08",    rpy: "0 0 0"}
   # - {type: sediment_sampler, name: sampler,   xyz: "-0.26 0 -0.06",   rpy: "0 0 3.14159"}
+
+# Battery. Omit for the default: one 18Ah pack centred in the battery tube.
+# Packs and the tube slot are defined in config/batteries.yaml; sliding the
+# pack fore/aft (`offset: {x: ...}`) is the real world pitch trim practice.
+# batteries:
+#   - {pack: br_lipo_10ah, slot: tube, offset: {x: 0.05}}
+
+# Net buoyancy target in kg of equivalent displacement: `neutral` hangs in the
+# water column, `neutral_plus` (default) keeps the historical fail-safe margin,
+# a signed number floats (+) or sinks (-) by that much, e.g. a heavier custom
+# pack without re-ballasting.
+# buoyancy_trim: neutral_plus

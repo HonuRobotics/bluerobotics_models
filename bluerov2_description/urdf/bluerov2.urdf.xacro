@@ -14,6 +14,7 @@
   <!-- Relative includes so they resolve at build time. -->
   <xacro:include filename="thruster.xacro"/>
   <xacro:include filename="accessories.xacro"/>
+  <xacro:include filename="batteries.xacro"/>
 
   <!-- Config file: REMAP'd to the source config at build time; the default is the
        installed copy for manual/runtime use (lazy - not evaluated when REMAP'd). -->
@@ -22,36 +23,59 @@
   <xacro:property name="cfg" value="${xacro.load_yaml('$(arg config_file)')}"/>
   <xacro:property name="heavy" value="${cfg.get('variant', 'standard') == 'heavy'}"/>
 
+  <!-- Battery catalog + slot + default loadout; REMAP'd at build time like
+       config_file. The loadout is cfg's `batteries:` (default when omitted). -->
+  <xacro:arg name="batteries_file"
+             default="$(find bluerov2_description)/config/batteries.yaml"/>
+  <xacro:property name="battery_db"
+                  value="${xacro.load_yaml('$(arg batteries_file)')}"/>
+  <xacro:property name="battery_items"
+                  value="${cfg.get('batteries') or battery_db['default_loadout']}"/>
+
   <!-- ======================= Buoyancy sizing =======================
        The Buoyancy world plugin (in bluerov2_gazebo) derives displaced volume
        from base_link's collision. Size that box analytically so the WHOLE vehicle
        (base + thrusters + configured accessories) is slightly positively buoyant:
          water_density * volume = total_mass * (1 + buoyancy_margin)
        Keep the real footprint per variant; solve for the box height. The tunable
-       constants are water_density, buoyancy_margin and buoyancy_cob_z. -->
+       constants are water_density, buoyancy_cob_z and the config's
+       `buoyancy_trim` (see below). -->
   <xacro:property name="water_density"   value="1025.0"/>   <!-- seawater kg/m^3 -->
-  <xacro:property name="buoyancy_margin" value="0.0002"/>   <!-- 0.02% positive: near-neutral (~1.6 cm/s terminal fail-safe rise) -->
+  <xacro:property name="buoyancy_margin" value="0.0002"/>   <!-- the `neutral_plus` preset: 0.02% positive (~1.6 cm/s terminal fail-safe rise) -->
   <xacro:property name="buoyancy_cob_z"  value="0.06"/>     <!-- centre of buoyancy z (box centre), kept above CoM -->
   <xacro:property name="footprint_x" value="0.457"/>
   <xacro:property name="footprint_y" value="${0.575 if heavy else 0.338}"/>
 
-  <!-- Hull masses chosen so the all-up vehicle (hull + real 0.344 kg T200s)
-       matches the reference in-air masses: ~11.5 kg standard, ~15.5 kg heavy. -->
-  <xacro:property name="base_mass"     value="${12.75 if heavy else 9.4}"/>
+  <!-- Hull masses chosen so the all-up vehicle (hull + real 0.344 kg T200s +
+       the default 18Ah battery mounted by batteries.xacro) matches the
+       reference in-air masses: ~11.5 kg standard, ~15.5 kg heavy. The battery
+       is an explicit link, so the hull mass here EXCLUDES it. -->
+  <xacro:property name="base_mass"     value="${11.35 if heavy else 8.0}"/>
   <xacro:property name="n_thrusters"   value="${8 if heavy else 6}"/>
   <xacro:property name="thruster_mass" value="0.344"/>
   <xacro:property name="hull_height"   value="0.065"/>  <!-- effective slab height for inertia -->
   <xacro:property name="acc_mass_total"
     value="${fsum([accessory_mass[a['type']] for a in cfg.get('accessories', [])])}"/>
+  <xacro:property name="battery_mass_total"
+    value="${fsum([(b['custom_pack'] if 'custom_pack' in b else battery_db['battery_packs'][b['pack']])['mass'] for b in battery_items])}"/>
   <xacro:property name="total_mass"
-    value="${base_mass + n_thrusters * thruster_mass + acc_mass_total}"/>
+    value="${base_mass + n_thrusters * thruster_mass + acc_mass_total + battery_mass_total}"/>
+
+  <!-- Net buoyancy target in kg of equivalent displacement, the unit operators
+       trim in: `neutral` hangs in the column, `neutral_plus` (default) keeps
+       the historical fail-safe margin, a signed number floats (+) or sinks (-)
+       by that many kg without re-ballasting. Batteries never displace water
+       (no collision), so their mass enters here and only here. -->
+  <xacro:property name="trim_raw" value="${cfg.get('buoyancy_trim', 'neutral_plus')}"/>
+  <xacro:property name="trim_kg"
+    value="${0.0 if trim_raw == 'neutral' else (total_mass * buoyancy_margin if trim_raw == 'neutral_plus' else float(trim_raw))}"/>
   <!-- The Buoyancy plugin sums EVERY collision in the model, so accessories
        that carry collisions (the claws) already displace water; shrink the
        hull box by their volume to keep total displacement on target. -->
   <xacro:property name="acc_volume_total"
     value="${fsum([accessory_volume[a['type']] for a in cfg.get('accessories', [])])}"/>
   <xacro:property name="buoyancy_volume"
-    value="${total_mass * (1.0 + buoyancy_margin) / water_density - acc_volume_total}"/>
+    value="${(total_mass + trim_kg) / water_density - acc_volume_total}"/>
   <xacro:property name="buoyancy_height"
     value="${buoyancy_volume / (footprint_x * footprint_y)}"/>
 
@@ -127,5 +151,8 @@
 
   <!-- ===================== Accessories (from config) ===================== -->
   <xacro:mount_accessories items="${cfg.get('accessories', [])}"/>
+
+  <!-- ===================== Battery (from config) ===================== -->
+  <xacro:mount_batteries items="${battery_items}" db="${battery_db}"/>
 
 </robot>

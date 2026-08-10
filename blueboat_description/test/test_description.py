@@ -106,12 +106,14 @@ def pontoon_boxes(root):
 
 
 def test_default_config_ping_only():
-    """The shipped default config builds two motors and the echosounder."""
+    """The default config has motors, echosounder and battery loadout."""
     default = (SHARE / 'config' / 'blueboat.yaml').read_text()
     links = link_names(generate_urdf(default))
-    assert {'base_link', 'motor_port_link', 'motor_stbd_link', 'ping'} <= links
+    assert {'base_link', 'motor_port_link', 'motor_stbd_link', 'ping',
+            'battery_port_mid_fwd', 'battery_stbd_mid_fwd'} <= links
     accessory_links = links - {'base_link', 'motor_port_link',
-                               'motor_stbd_link'}
+                               'motor_stbd_link'} \
+        - {li for li in links if li.startswith('battery_')}
     assert accessory_links == {'ping'}
 
 

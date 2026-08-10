@@ -1,0 +1,60 @@
+# Battery catalog and slot definitions for the BlueBoat.
+#
+# `battery_packs` describes what a battery IS (vehicle agnostic; specs from the
+# Blue Robotics product pages). `battery_slots` describes where THIS vehicle can
+# carry one: pose in base_link, the fit envelope, and the allowed x offset
+# range. The loadout itself lives in config/blueboat.yaml under `batteries:`;
+# when that key is omitted, `default_loadout` below applies.
+#
+# Physics rule: batteries contribute inertia only, never collisions. They
+# displace no water; the boat simply rides deeper with a heavier loadout.
+
+battery_packs:
+  br_liion_18ah:
+    label: "Blue Robotics Lithium-ion 14.8V 18Ah"
+    chemistry: li_ion
+    voltage: 14.8       # V nominal
+    capacity_ah: 18.0
+    energy_wh: 266.4
+    mass: 1.400         # kg
+    size: [0.145, 0.074, 0.068]   # m
+  br_lipo_10ah:
+    label: "Blue Robotics Lithium Polymer 14.8V 10Ah (travel)"
+    chemistry: li_po
+    voltage: 14.8
+    capacity_ah: 10.0
+    energy_wh: 148.0
+    mass: 0.750
+    size: [0.168, 0.044, 0.060]
+  br_liion_15_6ah:
+    label: "Blue Robotics Lithium-ion 14.8V 15.6Ah"
+    chemistry: li_ion
+    voltage: 14.8
+    capacity_ah: 15.6
+    energy_wh: 230.0
+    mass: 1.163
+    size: [0.146, 0.075, 0.075]
+    discontinued: true
+
+# Four bays per hull on the hull floor, loaded through the hatches. The grid is
+# symmetric about the pontoon longitudinal centre (x -0.05), so a full loadout
+# is pitch neutral by construction. Envelope respects the pontoon interior;
+# batteries may slide fore/aft within a bay (offset_x), matching the operator
+# guide's advice to balance weight fore/aft and keep it low.
+battery_slots:
+  port_fwd:     {xyz: [ 0.28,  0.30, -0.27], envelope: [0.20, 0.15, 0.12], offset_x: [-0.05, 0.05]}
+  port_mid_fwd: {xyz: [ 0.06,  0.30, -0.27], envelope: [0.20, 0.15, 0.12], offset_x: [-0.05, 0.05]}
+  port_mid_aft: {xyz: [-0.16,  0.30, -0.27], envelope: [0.20, 0.15, 0.12], offset_x: [-0.05, 0.05]}
+  port_aft:     {xyz: [-0.38,  0.30, -0.27], envelope: [0.20, 0.15, 0.12], offset_x: [-0.05, 0.05]}
+  stbd_fwd:     {xyz: [ 0.28, -0.30, -0.27], envelope: [0.20, 0.15, 0.12], offset_x: [-0.05, 0.05]}
+  stbd_mid_fwd: {xyz: [ 0.06, -0.30, -0.27], envelope: [0.20, 0.15, 0.12], offset_x: [-0.05, 0.05]}
+  stbd_mid_aft: {xyz: [-0.16, -0.30, -0.27], envelope: [0.20, 0.15, 0.12], offset_x: [-0.05, 0.05]}
+  stbd_aft:     {xyz: [-0.38, -0.30, -0.27], envelope: [0.20, 0.15, 0.12], offset_x: [-0.05, 0.05]}
+
+# As sold: one 18Ah pack per hull, even port/stbd mass per the operator guide.
+default_loadout:
+  - {pack: br_liion_18ah, slot: port_mid_fwd}
+  - {pack: br_liion_18ah, slot: stbd_mid_fwd}
+
+# Up to four packs per hull on the splitter harness.
+max_batteries: 8

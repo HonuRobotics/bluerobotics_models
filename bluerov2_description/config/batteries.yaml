@@ -1,0 +1,53 @@
+# Battery catalog and slot definition for the BlueROV2.
+#
+# `battery_packs` describes what a battery IS (vehicle agnostic; specs from the
+# Blue Robotics product pages). `battery_slots` describes where THIS vehicle
+# carries one: pose in base_link, the fit envelope, and the allowed x offset
+# range. The loadout itself lives in config/bluerov2.yaml under `batteries:`;
+# when that key is omitted, `default_loadout` below applies.
+#
+# Physics rule: batteries contribute inertia only, never collisions. They
+# displace no water; battery mass enters the buoyancy box sizing in
+# bluerov2.urdf.xacro (see also `buoyancy_trim` there).
+
+battery_packs:
+  br_liion_18ah:
+    label: "Blue Robotics Lithium-ion 14.8V 18Ah"
+    chemistry: li_ion
+    voltage: 14.8       # V nominal
+    capacity_ah: 18.0
+    energy_wh: 266.4
+    mass: 1.400         # kg
+    size: [0.145, 0.074, 0.068]   # m
+  br_lipo_10ah:
+    label: "Blue Robotics Lithium Polymer 14.8V 10Ah (travel)"
+    chemistry: li_po
+    voltage: 14.8
+    capacity_ah: 10.0
+    energy_wh: 148.0
+    mass: 0.750
+    size: [0.168, 0.044, 0.060]
+  br_liion_15_6ah:
+    label: "Blue Robotics Lithium-ion 14.8V 15.6Ah"
+    chemistry: li_ion
+    voltage: 14.8
+    capacity_ah: 15.6
+    energy_wh: 230.0
+    mass: 1.163
+    size: [0.146, 0.075, 0.075]
+    discontinued: true
+
+# The single 3" battery enclosure at the bottom centre of the frame. The pack
+# is much shorter than the tube, and sliding it fore/aft is the real world
+# pitch trim practice; that freedom is the offset_x range. The z estimate
+# places the tube under the hull slab; refine when the hull meshes model the
+# enclosure explicitly.
+battery_slots:
+  tube: {xyz: [0.0, 0.0, -0.08], envelope: [0.29, 0.078, 0.078], offset_x: [-0.07, 0.07]}
+
+# As sold: one 18Ah pack, centred (the neutral trim position).
+default_loadout:
+  - {pack: br_liion_18ah, slot: tube}
+
+# One battery enclosure.
+max_batteries: 1

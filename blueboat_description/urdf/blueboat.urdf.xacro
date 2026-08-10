@@ -11,12 +11,22 @@
 
   <xacro:include filename="thruster.xacro"/>
   <xacro:include filename="accessories.xacro"/>
+  <xacro:include filename="batteries.xacro"/>
 
   <!-- Config file: REMAP'd to the source config at build time; the default is
        the installed copy for manual/runtime use. -->
   <xacro:arg name="config_file"
              default="$(find blueboat_description)/config/blueboat.yaml"/>
   <xacro:property name="cfg" value="${xacro.load_yaml('$(arg config_file)')}"/>
+
+  <!-- Battery catalog + slots + default loadout; REMAP'd at build time like
+       config_file. The loadout is cfg's `batteries:` (default when omitted). -->
+  <xacro:arg name="batteries_file"
+             default="$(find blueboat_description)/config/batteries.yaml"/>
+  <xacro:property name="battery_db"
+                  value="${xacro.load_yaml('$(arg batteries_file)')}"/>
+  <xacro:property name="battery_items"
+                  value="${cfg.get('batteries') or battery_db['default_loadout']}"/>
 
   <!-- Buoyancy hull. Graded buoyancy (surface vessel) rejects mesh collisions, so
        each catamaran pontoon is a primitive box that both displaces water and does
@@ -25,6 +35,7 @@
        for the waterline you want (verify the float on a GPU). Dims/offsets approx.
        the two pontoons from the hull collision mesh (~1.19 m long, centres y~0.3). -->
   <xacro:property name="thruster_mass" value="0.344"/>
+  <xacro:property name="hull_mass"     value="27.2"/>   <!-- 30.0 minus the two default 18Ah packs -->
   <xacro:property name="pontoon_length" value="1.1"/>
   <xacro:property name="pontoon_width"  value="0.19"/>
   <xacro:property name="pontoon_height" value="0.19"/>
@@ -87,9 +98,15 @@
   <link name="base_link">
     <inertial>
       <origin xyz="-0.05 0 -0.20" rpy="0 0 0"/>
-      <mass value="30.0"/>
-      <inertia ixx="2.42369" ixy="0.0" ixz="0.0"
-               iyy="3.9235025" iyz="0.0" izz="5.6403125"/>
+      <!-- Hull mass EXCLUDES batteries since the loadout mounts them as
+           explicit links (batteries.xacro): the previous 30.0 kg implicitly
+           carried the default two 18Ah packs (2.8 kg), subtracted here so the
+           all-up default vehicle is unchanged. Tensor scaled with the mass
+           (same geometry). -->
+      <mass value="${hull_mass}"/>
+      <inertia ixx="${2.42369 * hull_mass / 30.0}" ixy="0.0" ixz="0.0"
+               iyy="${3.9235025 * hull_mass / 30.0}" iyz="0.0"
+               izz="${5.6403125 * hull_mass / 30.0}"/>
     </inertial>
 
     <!-- Pontoon buoyancy/contact, distributed into pontoon_segments boxes each. -->
@@ -105,5 +122,8 @@
 
   <!-- ===================== Accessories (from config) ===================== -->
   <xacro:mount_accessories items="${cfg.get('accessories') or []}"/>
+
+  <!-- ===================== Batteries (from config) ===================== -->
+  <xacro:mount_batteries items="${battery_items}" db="${battery_db}"/>
 
 </robot>

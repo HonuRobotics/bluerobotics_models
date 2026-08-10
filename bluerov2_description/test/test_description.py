@@ -132,7 +132,9 @@ def test_default_config_camera_only():
     thrusters = {li for li in links if re.fullmatch(r'thruster\d', li)}
     assert len(thrusters) == 6
     assert 'camera' in links
-    accessory_links = links - thrusters - {'base_link'}
+    assert 'battery_tube' in links
+    accessory_links = links - thrusters - {'base_link'} \
+        - {li for li in links if li.startswith('battery_')}
     assert accessory_links == {'camera'}
 
 

@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<!--
+  Battery loadout macros. The catalog, slots and default loadout come from
+  config/batteries.yaml (the `batteries_file` arg, REMAP'd at build time like
+  the vehicle config); the loadout itself is the vehicle config's `batteries:`
+  list, validated at build time by scripts/validate_battery_config.py.
+
+  A battery is inertia only: no visual, no collision. The buoyancy plugins sum
+  collision volumes as displaced water, and a pack inside a hull displaces
+  nothing of its own; giving it a collision would create phantom flotation.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- One battery: an inertia-only link fixed to the parent at the slot pose
+       plus the optional in-slot x offset. Box inertia from the pack size, the
+       same convention the accessory helpers use. -->
+  <xacro:macro name="_battery_link" params="name mass size_x size_y size_z
+                                            xyz parent">
+    <link name="battery_${name}">
+      <inertial>
+        <mass value="${mass}"/>
+        <inertia ixx="${float(mass)/12.0 * (size_y**2 + size_z**2)}" ixy="0" ixz="0"
+                 iyy="${float(mass)/12.0 * (size_x**2 + size_z**2)}" iyz="0"
+                 izz="${float(mass)/12.0 * (size_x**2 + size_y**2)}"/>
+      </inertial>
+    </link>
+    <joint name="battery_${name}_joint" type="fixed">
+      <parent link="${parent}"/><child link="battery_${name}"/>
+      <origin xyz="${xyz}" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- Recursive dispatcher over the resolved loadout. Each item is a config
+       entry ({pack|custom_pack, slot, name?, offset?}); pack keys resolve
+       through the catalog, custom packs are used as given. The build time
+       validator has already checked slots, fit, offsets and counts; the dict
+       lookups here are only the backstop. -->
+  <xacro:macro name="mount_batteries" params="items db parent:=base_link">
+    <xacro:if value="${len(items) > 0}">
+      <xacro:property name="b" value="${items[0]}"/>
+      <xacro:property name="b_pack"
+        value="${b['custom_pack'] if 'custom_pack' in b else db['battery_packs'][b['pack']]}"/>
+      <xacro:property name="b_slot" value="${db['battery_slots'][b['slot']]}"/>
+      <xacro:property name="b_off" value="${b.get('offset') or dict()}"/>
+      <xacro:_battery_link name="${b.get('name', b['slot'])}"
+        mass="${b_pack['mass']}"
+        size_x="${b_pack['size'][0]}" size_y="${b_pack['size'][1]}"
+        size_z="${b_pack['size'][2]}"
+        xyz="${b_slot['xyz'][0] + float(b_off.get('x', 0.0))}
+             ${b_slot['xyz'][1]} ${b_slot['xyz'][2]}"
+        parent="${parent}"/>
+      <xacro:mount_batteries items="${items[1:]}" db="${db}" parent="${parent}"/>
+    </xacro:if>
+  </xacro:macro>
+
+</robot>

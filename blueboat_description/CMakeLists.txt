@@ -3,6 +3,7 @@ project(blueboat_description)
 
 find_package(ament_cmake REQUIRED)
 find_package(xacro REQUIRED)
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 # Put this package's share dir on GZ_SIM_RESOURCE_PATH so package:// URIs into it
 # (the generated URDF that blueboat_gazebo merge-includes) resolve
@@ -14,9 +15,29 @@ ament_environment_hooks("hooks/resource_paths.sh.in")
 # config yaml (accessories) is passed as the config_file arg; xacro's --deps
 # reports the xacro includes AND the load_yaml'd config, so editing the config
 # or any xacro re-triggers this on the next colcon build.
+
+# Validate the battery loadout before generating: slots, fit, offsets, counts
+# and buoyancy_trim, with readable messages. Errors fail the build here rather
+# than producing a silently wrong vehicle.
+set(battery_stamp ${CMAKE_CURRENT_BINARY_DIR}/battery_config.validated)
+add_custom_command(
+  OUTPUT ${battery_stamp}
+  COMMAND Python3::Interpreter
+          ${CMAKE_CURRENT_SOURCE_DIR}/scripts/validate_battery_config.py
+          --vehicle blueboat
+          --config ${CMAKE_CURRENT_SOURCE_DIR}/config/blueboat.yaml
+          --catalog ${CMAKE_CURRENT_SOURCE_DIR}/config/batteries.yaml
+  COMMAND ${CMAKE_COMMAND} -E touch ${battery_stamp}
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/config/blueboat.yaml
+          ${CMAKE_CURRENT_SOURCE_DIR}/config/batteries.yaml
+          ${CMAKE_CURRENT_SOURCE_DIR}/scripts/validate_battery_config.py
+  COMMENT "Validating blueboat battery loadout")
+add_custom_target(${PROJECT_NAME}_battery_validation ALL DEPENDS ${battery_stamp})
+
 xacro_add_files(
   urdf/blueboat.urdf.xacro
     REMAP config_file:=${CMAKE_CURRENT_SOURCE_DIR}/config/blueboat.yaml
+          batteries_file:=${CMAKE_CURRENT_SOURCE_DIR}/config/batteries.yaml
     INSTALL DESTINATION urdf
 )
 
@@ -26,12 +47,16 @@ install(DIRECTORY
   launch
   config
   DESTINATION share/${PROJECT_NAME})
+install(PROGRAMS
+  scripts/validate_battery_config.py
+  DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
   find_package(ament_cmake_pytest REQUIRED)
   ament_add_pytest_test(test_description test/test_description.py TIMEOUT 180)
+  ament_add_pytest_test(test_batteries test/test_batteries.py TIMEOUT 180)
 endif()
 
 ament_package()
