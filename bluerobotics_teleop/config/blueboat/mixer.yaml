@@ -1,0 +1,14 @@
+# BlueBoat differential mixer: model truth, not user preference. Port rides
+# at +y, so a positive yaw (turn left, REP 103) is starboard forward and
+# port reverse.
+twist_to_thrust:
+  ros__parameters:
+    thruster_topics:
+      - /blueboat/thrusters/port/thrust
+      - /blueboat/thrusters/stbd/thrust
+    gains_linear_x:  [ 1.0,  1.0]
+    gains_linear_y:  [ 0.0,  0.0]
+    gains_linear_z:  [ 0.0,  0.0]
+    gains_angular_z: [-1.0,  1.0]
+    max_thrust_forward: 50.0
+    max_thrust_reverse: -40.0

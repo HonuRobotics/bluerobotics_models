@@ -1,0 +1,69 @@
+# Copyright 2026 Honu Robotics
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""
+Gamepad teleop bring up: joy_node -> teleop_twist_joy -> twist_to_thrust.
+
+Select the vehicle with vehicle:=bluerov2|blueboat (default bluerov2); the
+argument picks the config directory. Run next to a running simulation
+(sim.launch.xml) or a bridged real vehicle.
+"""
+
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
+
+
+def generate_launch_description():
+    config = PathJoinSubstitution([
+        FindPackageShare('bluerobotics_teleop'), 'config',
+        LaunchConfiguration('vehicle')])
+
+    return LaunchDescription([
+        DeclareLaunchArgument(
+            'vehicle', default_value='bluerov2',
+            choices=['bluerov2', 'blueboat'],
+            description='Which vehicle config directory to load.'),
+        Node(
+            package='joy',
+            executable='joy_node',
+            name='joy_node',
+            parameters=[{
+                'device_id': 0,
+                'deadzone': 0.1,
+                'autorepeat_rate': 20.0,
+                'use_sim_time': True,
+            }],
+        ),
+        Node(
+            package='teleop_twist_joy',
+            executable='teleop_node',
+            name='teleop_twist_joy_node',
+            parameters=[
+                PathJoinSubstitution([config, 'joystick.config.yaml']),
+                {'use_sim_time': True},
+            ],
+        ),
+        Node(
+            package='bluerobotics_teleop',
+            executable='twist_to_thrust',
+            name='twist_to_thrust',
+            parameters=[
+                PathJoinSubstitution([config, 'mixer.yaml']),
+                PathJoinSubstitution([config, 'twist_to_thrust.yaml']),
+                {'use_sim_time': True},
+            ],
+        ),
+    ])
