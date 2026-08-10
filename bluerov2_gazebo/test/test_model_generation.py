@@ -22,6 +22,7 @@ import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import (get_package_prefix,
                                          get_package_share_directory)
+import pytest
 import yaml
 
 GZ_SHARE = Path(get_package_share_directory('bluerov2_gazebo'))
@@ -116,6 +117,18 @@ def test_plugin_references_survive_lumping():
         f'plugin joints lumped away: {joint_refs - surviving_joints}')
     assert link_refs <= surviving_links, (
         f'plugin links lumped away: {link_refs - surviving_links}')
+
+
+def test_installed_model_sdf_carries_the_specs_comment():
+    """The stamped model.sdf repeats the URDF specs; the masses agree."""
+    text = (GZ_SHARE / 'model.sdf').read_text()
+    assert 'model specs' in text, 'installed model.sdf is not stamped'
+    match = re.search(r'^  total mass: +([\d.]+) kg', text, re.M)
+    assert match, 'specs comment misses the total mass row'
+    urdf_root = ET.parse(DESC_SHARE / 'urdf' / 'bluerov2.urdf').getroot()
+    total = sum(float(m.get('value'))
+                for m in urdf_root.findall('.//inertial/mass'))
+    assert float(match.group(1)) == pytest.approx(total, abs=5e-4)
 
 
 def test_sensor_frame_ids_resolve_in_tf():

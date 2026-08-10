@@ -35,8 +35,30 @@ install(FILES ${bridge_yaml} DESTINATION share/${PROJECT_NAME}/config)
 # Composed simulation model. model.sdf is GENERATED from model.sdf.xacro at build
 # time (reads blueboat_description/config/blueboat.yaml, adds the Gazebo plugins).
 # xacro_add_files (no DESTINATION) installs it to share/${PROJECT_NAME}/model.sdf,
-# next to the static model.config; xacro --deps re-triggers on config/xacro change.
-xacro_add_files(model.sdf.xacro INSTALL)
+# next to the static model.config. The config dependency is EXPLICIT: the
+# configure time xacro --deps snapshot cannot resolve $(find) and fails with
+# only a warning, leaving the rule without deps.
+xacro_add_files(model.sdf.xacro DEPENDS ${vehicle_config} TARGET model_raw)
+
+# Stamp model.sdf with the same model specs comment the installed URDF
+# carries (the numbers come from that URDF, the loadout from the config).
+set(stamper
+  ${blueboat_description_DIR}/../../../lib/blueboat_description/stamp_model_specs.py)
+set(desc_urdf ${blueboat_description_DIR}/../urdf/blueboat.urdf)
+set(raw_sdf ${CMAKE_CURRENT_BINARY_DIR}/model.sdf)
+set(stamped_sdf ${CMAKE_CURRENT_BINARY_DIR}/stamped/model.sdf)
+add_custom_command(
+  OUTPUT ${stamped_sdf}
+  COMMAND Python3::Interpreter ${stamper}
+          --vehicle blueboat
+          --urdf ${desc_urdf}
+          --config ${vehicle_config}
+          --stamp ${raw_sdf}
+          --out ${stamped_sdf}
+  DEPENDS ${raw_sdf} ${desc_urdf} ${vehicle_config} ${stamper}
+  COMMENT "Stamping model.sdf with model specs")
+add_custom_target(${PROJECT_NAME}_model_specs ALL DEPENDS ${stamped_sdf})
+install(FILES ${stamped_sdf} DESTINATION share/${PROJECT_NAME})
 install(FILES
   model.config
   model.sdf.xacro
