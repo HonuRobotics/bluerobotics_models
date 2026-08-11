@@ -12,9 +12,9 @@ install(DIRECTORY
   models
   DESTINATION share/${PROJECT_NAME})
 
-install(PROGRAMS
-  scripts/import_part.py
-  DESTINATION lib/${PROJECT_NAME})
+# The import script (model.sdf collisions -> urdf.xacro) is not written yet.
+# Add its install rule alongside the script itself:
+#   install(PROGRAMS scripts/import_part.py DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
