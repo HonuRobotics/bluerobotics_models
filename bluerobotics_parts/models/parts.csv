@@ -1,0 +1,29 @@
+model_name,product_page,notes
+basestation_antenna,https://bluerobotics.com/store/boat/blueboat-accessories/basestation-directional-antenna-kit/,BaseStation directional antenna kit.
+blueboat_antenna_mast,https://bluerobotics.com/store/boat/blueboat-antenna-and-accessory-mast/,Antenna and accessory mast. General part - sold for the BlueBoat but not specific to it.
+blueboat_flag,https://bluerobotics.com/store/boat/blueboat-components-spares/blueboat-components/,Item 'L' in the exploded diagram. Excluded from blueboat_vessel and delivered separately.
+blueboat_payload_bracket,https://bluerobotics.com/store/boat/blueboat-accessories/payload-bracket/,"Bracket only, not the mounting hardware."
+blueboat_ping_singlebeam_mount,https://bluerobotics.com/store/boat/blueboat-accessories/blueboat-ping2-integration-kit/,"Mount only. No hardware, no cables."
+blueboat_vessel,https://bluerobotics.com/store/boat/blueboat-components-spares/blueboat-components/,"Complete vessel as shown in the exploded diagram, EXCLUDING the propellers and the flag. Prefer PBR textures. Four color variants: blue, red, green, orange. Collision: SDF primatives"
+bluerov2_heavy_vessel,https://bluerobotics.com/store/rov/bluerov2-accessories/brov2-heavy-kit/,"Complete vehicle in the Heavy configuration, as a single mesh and texture. Same exclusions as bluerov2_vessel: no tether, no propellers, but DO include the black thruster fairings/ducts."
+bluerov2_payload_skid,https://bluerobotics.com/store/rov/bluerov2-accessories/brov-payload-skid/,BlueROV2 payload skid.
+bluerov2_roof_rack,https://bluerobotics.com/store/rov/bluerov2-accessories/rov-roof-rack/,BlueROV2 roof rack.
+bluerov2_vessel,https://bluerobotics.com/store/rov/bluerov2/,Complete vehicle as a single mesh and texture. EXCLUDE the tether and the propellers. DO include the black thruster fairings/ducts. Collision: a single appropriately sized SDF box primitive from the Blender tool.
+explorehd_camera,https://bluerobotics.com/store/sensors-cameras/cameras/deepwater-exploration-explorehd-usb-camera/,DeepWater Exploration exploreHD USB camera.
+m200_weedless_prop_ccw,https://bluerobotics.com/store/thrusters/t100-t200-thrusters/weedless-propeller-set/,Yellow only. Counter-clockwise. Separate from the vessel so Gazebo can spin it on a joint.
+m200_weedless_prop_cw,https://bluerobotics.com/store/thrusters/t100-t200-thrusters/weedless-propeller-set/,Yellow only. Clockwise. Separate from the vessel so Gazebo can spin it on a joint.
+marinesitu_c3_stereocamera,https://bluerobotics.com/store/the-reef/marinesitu-c3-stereo-camera/,MarineSitu C3 stereo camera.
+newton_gripper_cylinder,https://bluerobotics.com/store/thrusters/grippers/newton-gripper-asm-r2-rp/,"Black cylinder. One of four meshes making up the gripper, split because a part carries no joints."
+newton_gripper_jaw,https://bluerobotics.com/store/thrusters/grippers/newton-gripper-asm-r2-rp/,"One jaw, used twice. QUESTION: are the two jaws mirror images needing separate meshes, or one mesh instantiated twice?"
+newton_gripper_shaft,https://bluerobotics.com/store/thrusters/grippers/newton-gripper-asm-r2-rp/,Shaft with the blue ball link.
+newton_sampler_cup,https://bluerobotics.com/store/thrusters/grippers/newton-sediment-sampler-attachment/,"One jaw with blue cup, used twice. Cylinder and shaft are shared with the newton_gripper parts, so only the cups are delivered here."
+omniscan_450_sidescan,https://bluerobotics.com/store/the-reef/cerulean-sidescan-sonar/,"Rectangular blue/black enclosure only, not the electronics inside. Stitch together with the black integration kit as a single mesh."
+omniscan_450fs_imaging,https://bluerobotics.com/store/sonars/imaging-sonars/cerulean-omniscan-450-fs-imaging-sonar/,Cerulean Omniscan 450 FS imaging sonar.
+ping_singlebeam,https://bluerobotics.com/store/sonars/echosounders/ping-sonar-r2-rp/,"Sensor only. No cable, no mounting bracket."
+ping360_scanning,https://bluerobotics.com/store/sonars/imaging-sonars/ping360-sonar-r1-rp/,"Sensor only, not cables or hardware."
+sonoptix_echo_multibeam,https://bluerobotics.com/store/sonars/imaging-sonars/sonoptix-echo/,Sonoptix ECHO multibeam imaging sonar.
+surveyor_multibeam,https://bluerobotics.com/store/sonars/echosounders/cerulean-surveyor-240-16-multibeam-echosounder/,Cerulean Surveyor 240-16 multibeam echosounder.
+t200_prop_ccw,https://bluerobotics.com/store/rov/bluerov2-components-spares/t200-thruster-brov2-spare-r1-vp/,Blue propeller only. Counter-clockwise. Added in Gazebo on a rotational joint.
+t200_prop_cw,https://bluerobotics.com/store/rov/bluerov2-components-spares/t200-thruster-brov2-spare-r1-vp/,Blue propeller only. Clockwise. Added in Gazebo on a rotational joint.
+t200_thruster,https://bluerobotics.com/store/thrusters/t100-t200-thrusters/t200-thruster-r2-rp/,"Thruster body (black fairing/duct) without the blue propeller. General part, independent of any vehicle - the vessel meshes include their own thruster bodies."
+waterlinked_a50_dvl,https://bluerobotics.com/store/the-reef/dvl-a50/,Water Linked DVL A50.
