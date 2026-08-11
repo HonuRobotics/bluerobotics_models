@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>bluerobotics_parts</name>
+  <version>0.1.0</version>
+  <description>
+    Shared part library for Blue Robotics vehicle models. Each part is a single
+    physical component - one mesh, no joints, geometry only - delivered by the
+    modeller as a .glb and a model.sdf, and exposed to vehicle descriptions as a
+    xacro macro. Parts are vehicle-agnostic; assemblies live in the per-vehicle
+    description packages.
+  </description>
+  <maintainer email="caguero@honurobotics.com">Carlos Agüero</maintainer>
+  <license>Apache-2.0</license>
+  <url type="repository">https://github.com/HonuRobotics/bluerobotics_models</url>
+  <url type="bugtracker">https://github.com/HonuRobotics/bluerobotics_models/issues</url>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>xacro</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
