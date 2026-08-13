@@ -22,6 +22,10 @@ models/blueboat_vessel/
 
 `model.sdf` keeps its conventional name; Gazebo and the import script both expect it. Collision meshes carry no materials or UVs, so STL is the leanest choice — any format Gazebo reads will work, but pick one and stay with it.
 
+**Collision geometry is specified by the modeller, in `model.sdf`, as primitive shapes in SDF `<geometry>`.** That file is the source of physical truth for the part's contact shape; nothing downstream invents it, and the URDF form is a translation of it rather than a second description.
+
+Two more files live in the same directory. The modeller does not write them — see [The three files per part](#the-three-files-per-part).
+
 ### Rules
 
 1. **The directory name is the part name.** Not the mesh's internal name, not the Blender object name. If the right directory is not in `parts.csv`, ask before inventing one.
@@ -33,7 +37,7 @@ Materials ride along inside the `.glb`. Gazebo loads glTF PBR directly, so nothi
 
 ### How part names are chosen
 
-Recorded so the catalogue stays coherent as it grows. All lowercase, snake_case:
+Recorded so the catalog stays coherent as it grows. All lowercase, snake_case:
 
 * **Named for the product as Blue Robotics sells it**, not for its function in a vehicle.
 * **Vehicle prefix only when the part physically fits that vehicle alone** — `blueboat_payload_bracket`, `bluerov2_payload_skid`. 
@@ -41,9 +45,105 @@ Recorded so the catalogue stays coherent as it grows. All lowercase, snake_case:
 * **Function suffix where the product name does not say what it is** — `_sidescan`, `_multibeam`, `_scanning`, `_stereocamera`.
 * **Articulated assemblies split into their moving pieces**, sharing a prefix so they sort together: `newton_gripper_cylinder`, `newton_gripper_shaft`, `newton_gripper_jaw`, `newton_sampler_cup`.
 
-## What happens next
+## The three files per part
 
-`scripts/import_part.py` reads `model.sdf`, converts the collision geometry into URDF form, and writes it into `<part_name>.urdf.xacro` between generated-content markers. It runs on every delivery, not once. `model.sdf` is kept afterwards as the record of what was delivered and as the input to re-import.
+A finished part is three files, and which of them is written by a person matters:
+
+| File | Written by | Contains |
+|---|---|---|
+| `model.sdf` | the modeller | Collision geometry, as SDF primitive shapes. Source of physical truth for the part's contact shape |
+| `<part>.collision.xacro` | `scripts/import_part.py` | The same collision geometry translated into a URDF macro |
+| `<part>.urdf.xacro` | hand-authored | The part macro assemblies call. Mass, inertia tensor and center-of-gravity pose — the source of truth for mass properties |
+
+`<part>.urdf.xacro` includes `<part>.collision.xacro` and calls its macro, so sourcing the generated geometry is a one-line include rather than a block pasted into the middle of a hand-written file.
+
+They are separate files on purpose. Generated content and hand-authored content in one file means a re-import either clobbers measured values or has to be careful not to; split apart, the generated file is overwritten wholesale and the hand-authored one is never touched by tooling at all.
+
+**The generated file is committed.** It is generated once, at design time, and checked into the repo like any other source. It is not a build artifact: nothing regenerates it during `colcon build`, and a fresh clone has a complete part without running the import. Re-running the import is something a person does when the modeller redelivers, not something the build does.
+
+Inertia is the half no mesh can supply. Mass, the inertia tensor and the center-of-gravity pose come from measurement or from the vendor, not from the primitive geometry, and they are the source of truth for that part. Assemblies compose them; nothing re-derives them from a box. See [AUR_BUOYANCY_DESIGN.md](../AUR_BUOYANCY_DESIGN.md) for how assemblies use them.
+
+Collision is optional per part at the point of use — an assembly can mount a part with `collision: false` and get the visual and the mass without the contact geometry.
+
+## Accepting a new part
+
+What to do when the modeller delivers. In order — the Gazebo check comes first because everything after it is work done on top of the delivery, and there is no point doing that work on a part that is the wrong scale or facing the wrong way.
+
+Run everything inside the drydock container, from `~/maritime_ws`.
+
+### 1. Files and names
+
+- [ ] Directory name matches a row in [`models/parts.csv`](models/parts.csv). If it does not, stop and ask — do not invent a row.
+- [ ] `<part>.visual.glb` and `model.sdf` are both present, named for the part.
+- [ ] Collision shapes in `model.sdf` are box, cylinder, sphere or mesh. **Never cone or plane** — URDF cannot express them and the import will reject them.
+- [ ] `model.sdf` parses:
+
+      gz sdf -p models/<part>/model.sdf
+
+### 2. Bring it into Gazebo
+
+Eyes on a render. None of this can be done from a terminal, and all of it is cheaper to catch now than after the part is wired into an assembly.
+
+```bash
+export SDF_PATH=$GZ_SIM_RESOURCE_PATH
+gz sim models/<part>/model.sdf
+```
+
+- [ ] **Scale.** Compare against something of known size in the world, not against intuition. This is the most common defect.
+- [ ] **Coordinate frame location.** Origin sits approximately at the centroid of the mesh, and in the place the part would sensibly be mounted from.
+- [ ] **Coordinate frame orientation.** x forward, y left, z up. A part delivered in another convention looks correct in isolation and is wrong in every assembly that uses it — worth being deliberate rather than glancing.
+- [ ] **Materials.** PBR renders as intended, not flat grey. Materials must be inside the `.glb`.
+- [ ] **Collision geometry.** Turn on collision display and confirm the primitives are a sensible envelope — not inside-out, not wildly oversized, not offset from the mesh.
+
+Anything wrong here goes back to the modeller. Do not work around it downstream.
+
+### 3. Generate the collision macro
+
+```bash
+ros2 run bluerobotics_parts import_part.py models/<part>
+```
+
+- [ ] `<part>.collision.xacro` is written, and the geometry in it matches what you just looked at.
+- [ ] Read it through. This is the only review it gets — nothing regenerates it afterwards.
+- [ ] Commit it. It is source, not a build artifact.
+
+> `scripts/import_part.py` is not written yet. Until it is, the collision macro is hand-written to the same shape, which makes the read-through matter more rather than less.
+
+### 4. Fill in the mass properties
+
+In `<part>.urdf.xacro`, from measurement or the vendor — not from the mesh, and not from the primitive:
+
+- [ ] `<mass>` in kg.
+- [ ] `<origin>` of the `<inertial>` block — the center-of-gravity pose in the part frame. Not assumed to be the origin; for anything long or asymmetric it will not be.
+- [ ] `<inertia>` tensor about that CoG.
+- [ ] No `TODO` markers left behind.
+
+### 5. Verify the part macro runs
+
+Add the include line to [`urdf/parts.xacro`](urdf/parts.xacro), alphabetically, then:
+
+```bash
+colcon build --merge-install --packages-select bluerobotics_parts
+source install/setup.bash
+PARTS=$(ros2 pkg prefix bluerobotics_parts)/share/bluerobotics_parts
+xacro $PARTS/urdf/part_probe.urdf.xacro part:=<part> > /tmp/probe.urdf
+check_urdf /tmp/probe.urdf
+```
+
+[`urdf/part_probe.urdf.xacro`](urdf/part_probe.urdf.xacro) mounts the part four ways in one pass, so this covers the things that actually break:
+
+- [ ] It instantiates at all.
+- [ ] Two instances coexist — `probe` and `probe_second` — with no name collision.
+- [ ] `probe_nocol` has the visual but no collision, so `collision:=false` works.
+- [ ] `probe_stacked` hangs off `probe` rather than `base_link`, so a part can parent to another part.
+- [ ] `check_urdf` parses and prints the tree.
+
+A part name that is not included yet fails with `unknown macro name: xacro:<part>`, which names the thing you forgot.
+
+### 6. In an assembly
+
+- [ ] Mount it on a real vehicle and confirm the aggregate mass properties move the way you would expect for something of that mass in that position.
+- [ ] For a USV, check the waterline still looks right; for a UUV, check trim has not been thrown off.
 
 ## Parts naming 
 
