@@ -2,46 +2,60 @@
 
 Status: draft design, for review. **Functional scope only** — what the feature does and why. Implementation is deliberately deferred.
 
+Revised after review with Carlos. The earlier draft proposed declaring mass, inertia and center of mass at the assembly level; that is no longer the design. See [What changed in review](#what-changed-in-review).
+
 ---
 
 ## Proposal
 
-The key concept is that both the inertia and displacement parameters of the vessel assembly be specified directly at the assembly level instead of indirectly by specifying the parameters of each part within the assembly.   The properties of the vessel assembly are termed the all-up-round (AUR) properites.  "All-up-round" is the assembled vehicle as it goes in the water: hull, thrusters, accessories, batteries, ballast, cabling and everything else, in the configuration being simulated.  
+The all-up-round (AUR) properties of a vessel are the properties of the assembled vehicle as it goes in the water: hull, thrusters, accessories, batteries, ballast, cabling and everything else, in the configuration being simulated.
+
+Mass properties and displacement are treated differently, and deliberately so:
+
+| Property | How it is obtained |
+|---|---|
+| Mass, moment of inertia, center of mass | **Derived** — composed from the parts, whose own values are the source of truth. The source of truth for a part's inertia (approximated to its physical characteristics) is the xacro macro file in the part directory |
+| Displacement and center of buoyancy | **Declared** at the assembly. For underwater vehicles (UUVs) the key design parameter is the overall buoyant balance (buoyant trim), which sets the amount of the summed buoyant force balance in units of Newtons. For surface vehicles (USVs) the details of the collision geometry — used to calculate the displacement, and from it the buoyancy force magnitude — need to be specified independent of the part collision geometry. This uses `<collision>` tags to communicate the geometry primitives to the buoyancy (or surface) plugin |
+
+Each part carries its own mass, inertia tensor and center-of-gravity pose, and the assembly's mass properties follow from composing them. Tools and utilities evaluate the aggregate at the assembly level, so that users can answer the questions — what is the mass, inertia tensor and location of the center of mass — for the AUR vessel.
+
+Displacement is the half that is declared, and for both vehicle types the declaration is at the assembly rather than implied by the parts. For a UUV that declaration is a net force: buoyancy is something the operator trims deliberately, so the simulation states it directly. For a USV the declaration is geometry: the vessel floats where displacement equals weight, so what has to be stated is the shape that displaces the water, independent of whatever collision geometry the parts happen to carry.
 
 ## Why
-For vehicles that float at the surface or subsea, the correct level of abstraction for defining mass and displacement (buoyancy) is at the AUR level, not at the individual part level.  This is the point of contact between sim and real and the natural point of connection to allow users to mimic hardware behavior through selecting the overall mass and dislaced volume of the entire robot/vehicle.   
 
-This also allows for configuring internal changes (e.g., additional battery mass) in a general purpose and reusable way.   For the battery use case (one of many), the user configures the inertial properties, in the standard URDF way, to mimic the effect of adding, subtracting or moving batteries internal to the hull - while leaving the overall vessel displacement unchanged.   The resulting change in simulated behavior mirrors the changes in vessel loadout. 
+For vehicles that float at the surface or subsea, the point of contact between sim and real is the assembled vehicle. That is where a user measures mass, and where they trim buoyancy.
 
-This also allows us to add sensors, payload, actuators, etc. without having to change the assembly.   For underwater vehicles, everytime you add a sensor you have to add ballast (lead) or buoyancy (foam) to mantain trim.  We dont need to do that same process in the sim and we can just add and subtract parts without affecting the neutral buoyancy ballance.  
+Deriving mass properties keeps a single source of truth per part and lets a loadout change — adding a battery, moving ballast, fitting a sensor — propagate on its own. What was missing is not a declaration but visibility: nothing today reports the aggregate, so the as-configured vehicle is not something you can inspect. Tooling at the assembly level closes that gap without moving the source of truth.
 
-## Current design 
+Displacement is different, in a way that differs again between the two vehicle types.
 
-**Nothing owns the aggregate.** Mass is summed upward from parts, there is not one source of truth for the as configured vehicle.  We want the expose this as a user-defined parameter because this is the point of connection between sim and real - measuring the mass of the real vessel.
+For a UUV, adding a sensor in the real vehicle means adding lead or foam to restore trim. In simulation we do not want to repeat that, so net buoyancy is stated for the assembly and holds across loadout changes.
 
-**Displacement and mass are handled by opposite philosophies.** In the same file, displacement (and hence buoyancy) is *declared* — state a target, back-solve the hull box, subtract accessory volume to hit it — while mass is *summed*. The declared approach is the one that works and we can reuse the same concept for mass as well.
+For a USV, nothing is trimmed — the vessel finds its own waterline. What matters is that the displacing shape is the hull, and only the hull. If displacement were summed from whatever the parts carry, then fitting a sensor or a bracket would change the draft of the boat by however much collision geometry that part happened to be modeled with, which is an artifact of the model rather than a property of the vessel. Declaring the hull's displacement geometry at the assembly keeps the waterline a consequence of the vessel and its load, not of modeling detail in the catalog.
 
-**Added mass is blocked on it.** `bluerov2_gazebo/model.sdf.xacro:254` records that added mass is intentionally zero because of a limitation of the summation approach.   Setting the mass of the entire assembly would allow us to set the added mass o fthe assembly at the AUR level as ell.  
+## What changed in review
 
+The earlier draft proposed that AUR mass, inertia and center of mass be declared directly on the assembly, with rigidly-attached parts carrying no inertia of their own.
 
-This also completes a rule the repo already adopted. `README.md` states that *the assembly owns displacement and parts own contact geometry*. Mass and inertia are the properties that rule did not yet cover.
+That is not the direction. Deriving from parts is retained, and assembly-level tooling is what makes the aggregate visible.
 
-## What the feature provides
+Introducing a displacement shape distinct from the collision mechanism was considered in the same review and rejected as too much change for now. The buoyancy plugin's only input is `<collision>` geometry, so displacement continues to be communicated that way. That is a separate question from *which* collision geometry displaces water — see [Open questions](#open-questions).
 
-The assembly declares, and the model is built to match:
+Consequently these are **not** part of the design:
 
-| Declaration | Meaning |
-|---|---|
-| **AUR dry mass** | Mass of the assembled vehicle in air, as configured |
-| **AUR inertia** | Rotational inertia of that assembled vehicle |
-| **Centre of mass** | Where that mass acts, in the vehicle frame |
-| **Flotation intent** | How the vehicle should behave in water — see the two cases below |
+- Assembly-declared mass, inertia or center of mass.
+- Rigidly-attached parts carrying no inertia.
+- A displacement primitive independent of the `<collision>` mechanism.
 
-These values are **set directly on the assembly**, not reconciled against anything. There is no nominal-versus-declared comparison and nothing to back-solve: the declaration simply is the vehicle body's inertial specification, written the ordinary URDF/SDF way.
+## Where each value lives
 
-A full inertia tensor is declared where it is known and derived from geometry and the declared mass where it is not — precision where we have it, a reasonable default everywhere else. There is deliberately no check against what the parts would have summed to: the sum is not a source of truth and is ignored from the start.
+Every part is delivered with a xacro macro that instantiates its link — visual, inertia, and optionally collision. The macro is the source of truth for that part's **mass, inertia tensor and center-of-gravity pose**, taken from physical reality rather than from primitive geometry.
 
-Rigidly-attached parts therefore contribute no inertia of their own — they are already inside the declared total, and giving them mass as well would double-count. Parts that articulate are the exception: a propeller spinning on a joint needs its own rotational inertia for the joint dynamics to mean anything, so it keeps it.
+Collision is optional per part. The starting point for a part that has one is a translation of the collision geometry already described in its `model.sdf`.
+
+Assemblies are composed from a parts-level YAML, generalizing the `accessories:` list that `bluerov2_description/config/bluerov2.yaml` uses today. The YAML selects which parts make up a configuration and generates the models from them. The chassis is not always included, so membership is a choice the file expresses rather than an assumption baked into the assembly.
+
+The delivery contract for a part is in [bluerobotics_parts/README.md](bluerobotics_parts/README.md).
 
 ## The two cases are not symmetric
 
@@ -49,88 +63,75 @@ This is the central point of the design, and the thing most likely to be got wro
 
 ### UUV — submerged, flotation is a free parameter
 
-UUVs such as the BlueROV2 operate fully submerged. Its displacement is fixed by hull geometry, and the operator sets net buoyancy deliberately by adding foam or lead until the vehicle behaves as wanted. Net buoyancy is a design choice, so the simulation must let us state it.
+UUVs such as the BlueROV2 operate fully submerged. Displacement is fixed by hull geometry, and the operator sets net buoyancy deliberately by adding foam or lead until the vehicle behaves as wanted. Net buoyancy is a design choice, so the simulation must let us state it.
 
 Typical intents:
 
 - **Neutral** — hangs in the column, neither rising nor sinking.
-- **Slightly positive** (the normal case) — drifts up slowly when unpowered, so a control failure surfaces the vehicle rather than losing it.
-- **A specific offset** — float or sink by a stated amount, for testing recovery or descent.
+- **Slightly positive (negative)**  — drifts up slowly when unpowered, so a control failure surfaces the vehicle rather than losing it.
 
-The behaviour we want to exercise is the slightly-positive case: the ROV rises gently with thrusters idle, and depth-holding control has something real to work against. That is the single most valuable behaviour this feature delivers.
 
 Changing payload changes mass. In the real vehicle the operator re-trims to restore the target buoyancy. The simulation should express those two independently: **mass is what it is, and net buoyancy is what we trimmed it to.**
 
-How the user states all of this is covered in [User interface intent](#user-interface-intent) below.
+Magnitude is only half of it. Where the two forces act matters as much as how large they are, so the user needs the **center of mass relative to the chassis origin** as well as the total, and needs to place the **center of buoyancy** against it.
+
+The separation between center of gravity and center of buoyancy is a key design choice. It sets the righting moment: a CB above the CG rights the vehicle when it is disturbed, and the size of the offset sets how stiffly. Get it wrong and the vehicle either refuses to hold attitude or snaps back unrealistically hard. Both quantities therefore have to be expressible as poses, not just as scalars.
 
 ### USV — floating, flotation is an outcome
 
-USVs such as BlueBoat float. It settles where displacement equals weight, so net buoyancy at rest is zero **by definition** 
+USVs such as BlueBoat float. The vessel settles where displacement equals weight, so net buoyancy at rest is zero by definition.
 
 What varies instead, and what matters:
 
 - **Draft** — how deep it sits, set by total mass.
-- **Trim** — fore-and-aft attitude, set by longitudinal centre of mass.
-- **List** — port-and-starboard attitude, set by lateral centre of mass.
+- **Trim** — fore-and-aft attitude, set by longitudinal center of mass.
+- **List** — port-and-starboard attitude, set by lateral center of mass.
 
-So for a surface vessel the declaration is **mass and centre of mass**, and the waterline is an outcome the water works out. Adding payload makes the boat sit deeper; putting it on one side makes the boat lean.
+So for a surface vessel the waterline is an outcome the water works out, from mass properties that are themselves derived. Adding payload makes the boat sit deeper; putting it on one side makes the boat lean.
 
-The behaviours worth exercising: correct resting waterline, recovery from a disturbance, and sensible response to asymmetric loading.
+The behaviors worth exercising: correct resting waterline, recovery from a disturbance, and sensible response to asymmetric loading. This is still all actively being tested with the general purpose buoyancy plugin, and moving away from the previous surface plugin for this.
 
-### Stated as one rule
 
-> The assembly declares its mass properties. For a submerged vehicle it also declares net buoyancy, because that is something the operator sets. For a floating vehicle it does not, because the water decides.
+## Buoyancy trim as it stands today
 
-## User interface intent
+The UUV already has trim control, but not in the form this design calls for. `bluerov2_description/urdf/bluerov2.urdf.xacro` declares:
 
-**Discussion point — the intent is settled, the mechanism is not.**
+| Property | Line | Value | Meaning |
+|---|---|---|---|
+| `buoyancy_margin` | 33 | `0.0002` | Excess displacement as a **dimensionless fraction** of total mass |
+| `buoyancy_cob_z` | 34 | `0.06` | Center of buoyancy in z, as the collision box center |
 
-The four quantities a user should be able to state for the assembled vehicle:
+Sizing is `water_density * volume = total_mass * (1 + buoyancy_margin)`, with the hull box height back-solved to hit it and fitted accessory volume subtracted.
 
-| Quantity | Sets |
-|---|---|
-| **Mass** | How much vehicle there is |
-| **Moment of inertia** | How it resists rotation |
-| **Centre of mass** | Where the weight acts |
-| **Total displacement** | The buoyant force |
-| **Centre of buoyancy** | Where that force acts |
+Both need to change:
 
-The first three are already stated directly and in a form users know — the ordinary URDF/SDF `<inertial>` block. That is the model to follow.
+**The trim parameter should be a force, not a fraction.** As a fraction it is also a trap: `0.0002` is 0.02%, so someone entering `0.02` intending "0.02%" overshoots a hundredfold. Stating net buoyancy in Newtons — or equivalently as a displaced mass in kg — is both unambiguous and the quantity an operator actually thinks in. It also stops the trim silently scaling with vehicle mass, which a fraction does.
 
-Displacement is not. Today it is *implied* by collision geometry: the buoyancy plugin sums collision volumes and derives a centre of volume from them, so the only way to say "this vehicle displaces 11.5 litres, centred here" is to construct a box that happens to work out that way. That is why the ROV back-solves a hull box height, and why fitted accessories have to be subtracted from it. The number the user cares about is never written down; a proxy for it is.
-
-**The intent is symmetry**: displacement and centre of buoyancy stated as plainly as mass and centre of mass, with the geometry following from the declaration rather than the other way round.
-
-Whether that is achievable is an implementation question, but it is not obviously blocked. The Buoyancy plugin exposes no SDF element for volume or centre of volume — its only inputs are `uniform_fluid_density`, `graded_buoyancy` and `enable`. However, it derives those quantities into `components::Volume` and `components::CenterOfVolume` and **skips the derivation entirely for any link that already has them**. So a declared value is something the plugin would honour if it were populated ahead of it.
-
-Two things to settle before designing this:
-
-1. Whether displacement is declared per vehicle or per buoyancy link, given that a USV wants distributed displacement for pitch response and a UUV wants a single body.
-2. Whether the collision geometry still has to exist for contact purposes once it is no longer carrying displacement duty — and if so, whether the two can finally be separate shapes rather than one box doing both jobs.
-
-## What this replaces
-
-- The hardcoded near-neutral buoyancy margin in the ROV, which becomes an explicit declaration.
-- The hand-maintained accessory volume table used to compensate displacement for fitted accessories.
-- Any need for a battery loadout feature. Everything a battery does to the engineering reaches the simulation through mass and net buoyancy, both covered here. A battery would only warrant being a part if it needed a *visible* model, which is a mesh question for the parts library rather than a physics one.
+**Center of buoyancy should be a full 3D pose, set directly.** `buoyancy_cob_z` positions the box in z, so x and y are pinned to zero by construction. CB could be set indirectly by manipulating the geometry, but the preference is to set it intentionally and directly so there is no ambiguity about where the force acts — particularly given the CG/CB relationship described above.
 
 ## Out of scope
 
 - Power, energy, state of charge, endurance, electrical faults. None of it is simulated, and no part of this feature implies it.
 - Identified hydrodynamic coefficients. Drag remains placeholder values; nothing here changes that.
-- Enabling added mass. This feature makes it *expressible*; turning it on is separate work.
-- Dynamic mass change during a run — shedding ballast, releasing a payload. Declaration is at build time.
+- Enabling added mass.
+- Dynamic mass change during a run — shedding ballast, releasing a payload. Composition is at build time.
+- A displacement primitive independent of the `<collision>` mechanism.
+- **Where the parts-level YAML lives** and how it relates to the existing per-vehicle config. Handled separately.
 
 ## Known constraints for the implementation
 
 Recorded so the design of *how* starts from the right place, without deciding it here.
 
 - **URDF cannot express `<fluid_added_mass>`.** It lives in an SDF `<inertial>`, so the ROS and Gazebo paths will see different things unless handled deliberately.
-- **The engine composes link inertias — but that is avoidable.** It only forces a back-solve if rigidly-attached parts carry inertia of their own. If they carry none, there is no sum to reconcile and the declaration is simply the body's `<inertial>`. Articulated parts keep their own inertia and compose on top, which is physically correct rather than a workaround.
+- **`bluerov2_gazebo/model.sdf.xacro:254` records added mass as intentionally zero** because of the summation approach. Since summation is retained, that constraint stands and is not resolved by this design.
 - **Graded buoyancy (floating vessels) accepts only box and sphere collisions**, and the buoyancy geometry doubles as contact geometry.
-- **Sensors need their own links** for TF frames, so not every part can be folded into the parent body.
+- **Sensors need their own links** for TF frames.
+- **The parts library is empty today.** `bluerobotics_parts/models/` holds placeholder directories and `parts.csv`; no meshes, no `model.sdf`, no xacros have been delivered. Nothing here is blocked by existing content, which is why the delivery contract is worth settling now.
 
 ## Open questions
 
-1. **Does the USV need a net-buoyancy override for non-equilibrium cases** such as swamping or a flooded hull, or is mass and centre of mass sufficient?
-2. **Where does the declaration live** — vehicle config, assembly, or both, and what happens when a configuration changes the loadout?
+1. **Do we ignore part collisions for buoyancy, or use them and add the difference?** Parts carry no collisions today, so displacement comes entirely from the hull box. Once parts have collision geometry, the buoyancy plugin will sum every collision in the model.
+
+   The preference is to let the user set the geometry and location of the displacement volume from scratch, ignoring the summed part geometry entirely — one declaration, no bookkeeping. The concern is that this may be difficult to implement against a plugin whose input is every `<collision>` in the model. The alternative, keeping the part collisions and having the hull box make up the difference, is what the accessory-volume subtraction does today, and it looks more error-prone: the correction has to be maintained by hand and silently goes wrong when a part's collision changes. Worth discussing before either is designed.
+
+2. **Does the design need to distinguish "collision for contact" from "collision for displacement" at the part level** to make the above work, given that introducing a separate displacement primitive is out of scope?  Yes, that is too drastic a change.

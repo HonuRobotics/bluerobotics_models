@@ -16,11 +16,14 @@ Into `models/<model_name>/`, using exactly the directory names listed in [`model
 models/blueboat_vessel/
   blueboat_vessel.visual.glb        # required — visual mesh, PBR materials embedded
   model.sdf                         # required — collision primitives
+  blueboat_vessel.urdf.xacro        # required — the part's macro; see below
   blueboat_vessel.collision.stl     # optional — only if a primitive will not do
   model.config                      # optional — harmless, unused
 ```
 
 `model.sdf` keeps its conventional name; Gazebo and the import script both expect it. Collision meshes carry no materials or UVs, so STL is the leanest choice — any format Gazebo reads will work, but pick one and stay with it.
+
+The `.urdf.xacro` is required for every part, but it is not something the modeller authors from scratch — see [The part macro](#the-part-macro).
 
 ### Rules
 
@@ -44,6 +47,31 @@ Recorded so the catalogue stays coherent as it grows. All lowercase, snake_case:
 ## What happens next
 
 `scripts/import_part.py` reads `model.sdf`, converts the collision geometry into URDF form, and writes it into `<part_name>.urdf.xacro` between generated-content markers. It runs on every delivery, not once. `model.sdf` is kept afterwards as the record of what was delivered and as the input to re-import.
+
+## The part macro
+
+Every part has a `<part_name>.urdf.xacro` defining one macro that instantiates the part as a link: visual mesh, inertia, and optionally collision. It is what assemblies consume — they include the macro rather than reaching into the mesh or the SDF.
+
+The file has two halves, and the distinction matters:
+
+| Content | Origin |
+|---|---|
+| Visual and collision geometry | **Generated** by `import_part.py`, between the markers, from `model.sdf` |
+| Mass, inertia tensor, center-of-gravity pose | **Hand-authored** outside the markers, from physical reality |
+
+Collision is optional per part — some parts need contact geometry, many do not — but where it exists, the starting point is a translation of what `model.sdf` already describes, so the modeller's collision primitives remain the single description of the part's shape.
+
+Inertia is the half no mesh can supply. Mass, the inertia tensor and the center-of-gravity pose come from measurement or from the vendor, not from the primitive geometry, and they are the source of truth for that part. Assemblies compose them; nothing re-derives them from a box. Because they live outside the generated markers, re-importing a redelivered mesh does not disturb them.
+
+This is what makes the part the unit of truth for mass properties. See [AUR_BUOYANCY_DESIGN.md](../AUR_BUOYANCY_DESIGN.md) for how assemblies use it.
+
+## Composing an assembly
+
+Assemblies are described by a parts-level YAML that lists which parts a configuration contains and where they sit, generalizing the `accessories:` list in `bluerov2_description/config/bluerov2.yaml`. The YAML generates the model.
+
+Membership is explicit rather than assumed — the chassis is not always included, so a configuration that is a subassembly, a bare frame or a test rig is expressible without a special case.
+
+Whether that file lives per assembly or once at the parts level is still open; see the design document.
 
 ## Parts naming 
 
