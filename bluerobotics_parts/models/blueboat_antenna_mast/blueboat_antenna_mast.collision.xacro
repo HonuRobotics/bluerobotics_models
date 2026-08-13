@@ -3,10 +3,11 @@
   GENERATED FILE — DO NOT EDIT.
 
   Written by scripts/import_part.py from model.sdf, and overwritten on every
-  re-import. Any hand edit here is lost the next time the modeller redelivers.
+  re-import. Any hand edit here is lost the next time the modeler redelivers.
 
   To change this collision geometry, edit model.sdf and re-run the import.
-  model.sdf is the source of physical truth for the collision geometry.
+  model.sdf is the modeler's work product; this file is what ROS and Gazebo
+  actually read.
 
   The macro is called from blueboat_antenna_mast.urdf.xacro, which is the
   hand-authored half and is never touched by the import.

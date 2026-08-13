@@ -15,9 +15,12 @@
 
   <xacro:include filename="$(find bluerobotics_parts)/urdf/parts.xacro"/>
 
-  <!-- Part name = macro name = directory name. No default: forgetting the
-       argument should fail loudly rather than probe nothing. -->
-  <xacro:arg name="part" default=""/>
+  <!-- Part name = macro name = directory name. Deliberately NOT declared with
+       <xacro:arg>: omitting part:= then fails with "Undefined substitution
+       argument part", which names what is missing. Declaring it with an empty
+       default instead expands to nothing and reports the useless "unknown
+       macro name: xacro:". Note that xacro:arg requires a default attribute,
+       so leaving the declaration out is the only way to get the good error. -->
   <xacro:property name="part" value="$(arg part)"/>
 
   <link name="base_link"/>

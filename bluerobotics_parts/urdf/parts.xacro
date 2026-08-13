@@ -3,21 +3,37 @@
   bluerobotics_parts — the parts-level macro library.
 
   PROTOTYPE. One part is wired up (blueboat_antenna_mast); the rest of the
-  catalog follows the same two lines once each part has a macro.
+  catalog follows the same one line once each part has a macro.
 
-  Include this once and you have every part available as a macro, plus the
-  dispatcher that mounts a list of them. An assembly should not include
-  individual part files directly — that is what this file is for.
+  Include this once and every part is available as a macro. An assembly should
+  not include individual part files directly — that is what this file is for.
 
       <xacro:include filename="$(find bluerobotics_parts)/urdf/parts.xacro"/>
-      <xacro:mount_parts items="${parts}" parent="base_link"/>
+      <xacro:blueboat_antenna_mast name="mast" parent="base_link" xyz="0 0 0.2"/>
 
-  Generalized from bluerov2_description/urdf/accessories.xacro, with one
-  deliberate difference. There, a central accessory_mass dict fed helper macros
-  that DERIVED inertia from primitive dimensions. Here each part carries its own
-  measured mass, inertia tensor and center-of-gravity pose in its own file, so
-  there is no table here and nothing central to keep in sync. The part is the
-  source of truth. See AUR_BUOYANCY_DESIGN.md.
+  ===== the part macro contract =====
+
+  Every macro included below takes exactly these parameters, in this order:
+
+      name       link name for this instance; the fixed joint is <name>_joint
+      parent     link to attach to
+      xyz / rpy  mount pose relative to parent (meters / radians)
+      collision  false to instantiate the part with no contact geometry
+
+  This is a contract, not a convention. A dispatcher that mounts parts from a
+  config list forwards exactly this set to whichever macro a `type` names, so a
+  macro that drops or renames one fails with `Invalid parameter "collision"`
+  instead of doing something surprising. The vessel macros will have to honor
+  it too.
+
+  That dispatcher (`mount_parts`, generalized from accessories.xacro) is not
+  here yet. It belongs with the assembly work, where it can be exercised
+  against a real vehicle rather than against itself.
+
+  Mass, inertia tensor and center-of-gravity pose are carried by each part in
+  its own file, hand-authored from measurement or the vendor. There is no
+  central mass table here and so nothing to keep in sync. See
+  AUR_BUOYANCY_DESIGN.md.
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
@@ -25,34 +41,5 @@
        One include per part. Keep alphabetical; the directory name, the file
        name and the macro name are all the part name from models/parts.csv. -->
   <xacro:include filename="$(find bluerobotics_parts)/models/blueboat_antenna_mast/blueboat_antenna_mast.urdf.xacro"/>
-
-  <!-- ===== dispatcher =====
-       Mounts each entry of `items` by calling the macro its `type` names, so an
-       unknown type fails the build loudly instead of silently mounting nothing.
-       Recursion rather than iteration because xacro has no loop construct.
-
-       Each item is a dict:
-         type       part name — must match a macro included above  (required)
-         name       link name for this instance                    (required)
-         xyz / rpy  mount pose relative to parent, default zero    (optional)
-         parent     override the dispatcher's parent               (optional)
-         collision  false to mount the part without contact geometry (optional)
-
-       `parent` per item is what lets a part hang off another part rather than
-       off the chassis — a sensor on the mast rather than on the hull. Order
-       matters when it is used: the parent must already be mounted.
-  -->
-  <xacro:macro name="mount_parts" params="items parent:=base_link">
-    <xacro:if value="${len(items) > 0}">
-      <xacro:property name="p" value="${items[0]}"/>
-      <xacro:call macro="${p['type']}"
-                  name="${p['name']}"
-                  parent="${p.get('parent', parent)}"
-                  xyz="${p.get('xyz', '0 0 0')}"
-                  rpy="${p.get('rpy', '0 0 0')}"
-                  collision="${p.get('collision', True)}"/>
-      <xacro:mount_parts items="${items[1:]}" parent="${parent}"/>
-    </xacro:if>
-  </xacro:macro>
 
 </robot>
