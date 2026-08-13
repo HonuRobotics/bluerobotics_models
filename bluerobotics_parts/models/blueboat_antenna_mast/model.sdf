@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
+  <model name="blueboat_antenna_mast">
+    <link name="blueboat_antenna_mast">
+      <visual name="blueboat_antenna_mast">
+        <geometry>
+          <mesh>
+            <uri>blueboat_antenna_mast.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="antenna_mastvisual_collider_cylinder">
+        <pose>-0.411788 0.298872 0.469531 0.0 -0.0 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.012466</radius>
+            <length>0.594541</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name="antenna_mastvisual_collider_cylinder.001">
+        <pose>-0.411439 0.298872 0.878465 0.0 -0.0 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.005164</radius>
+            <length>0.237214</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name="antenna_mastvisual_collider_box">
+        <pose>-0.379267 0.298872 0.165752 0.0 -0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.040085 0.08138 0.045179</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>
