@@ -39,7 +39,7 @@ import xml.etree.ElementTree as ET
 
 import yaml
 
-WATER_DENSITY = 1025.0
+DEFAULT_FLUID_DENSITY = 1025.0  # seawater; overridable via buoyancy: fluid_density
 
 STAMP_RE = re.compile(r'<!-- =+ model specs =+.*?=+ -->\n?', re.S)
 
@@ -148,7 +148,9 @@ def specs_comment(vehicle, urdf_root, cfg):
     """Build the model specs comment block for the stamped file."""
     total, com = mass_properties(urdf_root)
     volume, cob = buoyancy_properties(urdf_root)
-    displaced = WATER_DENSITY * volume
+    density = float((cfg.get('buoyancy') or {}).get(
+        'fluid_density', DEFAULT_FLUID_DENSITY))
+    displaced = density * volume
     rows = []
     if 'variant' in cfg:
         rows.append(('variant', cfg['variant']))
@@ -157,8 +159,8 @@ def specs_comment(vehicle, urdf_root, cfg):
         ('center of mass',
          f'[{com[0]:.4f}, {com[1]:.4f}, {com[2]:.4f}] m in base_link'),
         ('displaced volume',
-         f'{volume:.6f} m^3 = {displaced:.3f} kg of seawater '
-         f'at {WATER_DENSITY:.0f} kg/m^3'),
+         f'{volume:.6f} m^3 = {displaced:.3f} kg of fluid '
+         f'at {density:.0f} kg/m^3'),
         ('center of buoyancy',
          f'[{cob[0]:.4f}, {cob[1]:.4f}, {cob[2]:.4f}] m in base_link'),
         ('cob offset',
