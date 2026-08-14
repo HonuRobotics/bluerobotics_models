@@ -89,19 +89,28 @@ under `buoyancy:` in `config/bluerov2.yaml` (see `AUR_BUOYANCY_DESIGN.md`):
 ```yaml
 buoyancy:
   net_buoyancy: 0.002        # kg, positive floats up (default 0.002)
-  cob_offset: "0 0 0.046"    # m, center of buoyancy relative to the center of
-                             # mass; keep z positive (default "0 0 0.046")
+  cob_offset: "0 0 0.046"    # m, center of buoyancy relative to cob_frame
+  cob_frame: com             # com (default) or base_link
+  fluid_density: 1025.0      # kg/m^3, must match the world's Buoyancy plugin
 ```
 
-`net_buoyancy` is stated in kilograms, not as a fraction, so the trim does not
-scale silently with vehicle mass. `cob_offset` is the BG vector and sets the
-righting stiffness directly; because it is declared relative to the center of
-mass, a loadout change preserves the handling you tuned.
+Every key is optional; an absent block or key takes the default shown.
+
+`net_buoyancy` is stated in kilograms: not a fraction, so the trim does not
+scale silently with vehicle mass, and not Newtons, so no gravity value enters
+the declaration. With `cob_frame: com` (the default) `cob_offset` is the BG
+vector and sets the righting stiffness directly, so a loadout change preserves
+the handling you tuned; with `cob_frame: base_link` the CoB is pinned in the
+chassis frame like the physical hull, and a loadout change calls for an
+explicit re-trim, as on the real vehicle. `fluid_density` makes the density
+assumption overt: realizing a net mass as displaced volume requires it, and it
+must match what the world's Buoyancy plugin declares (a test in
+`bluerov2_gazebo` enforces the match for the shipped world).
 
 The `base_link` collision box is **not hand-tuned**: the xacro composes the total
 mass and center of mass (hull + thrusters + configured accessories) and solves the
-box height and center so that `water_density · displaced_volume = mass + net_buoyancy`
-and the combined collision centroid sits at `CoM + cob_offset`. Adding or removing
+box height and center so that `fluid_density · displaced_volume = mass + net_buoyancy`
+and the combined collision centroid sits at the declared CoB. Adding or removing
 accessories preserves both declared values automatically. The buoyancy *force* is
 applied by the world plugin in `bluerov2_gazebo`; the box just sets the displaced
 volume, and a declaration that would need a non-positive box volume fails the

@@ -187,3 +187,24 @@ def test_full_config_covers_catalog():
     assert config_types == catalog, (
         f'FULL_CONFIG drift: missing {catalog - config_types}, '
         f'unknown {config_types - catalog}')
+
+
+def test_world_fluid_density_matches_the_description():
+    """
+    The world's Buoyancy plugin density equals the declared fluid density.
+
+    The description turns net_buoyancy (kg) into displaced volume using its
+    declared fluid_density; the force the sim applies uses the density the
+    world plugin declares. If they disagree, the net buoyancy observed in sim
+    silently differs from the declared intent.
+    """
+    cfg = yaml.safe_load(
+        (DESC_SHARE / 'config' / 'bluerov2.yaml').read_text())
+    declared = float((cfg.get('buoyancy') or {}).get('fluid_density', 1025.0))
+    world = ET.parse(
+        GZ_SHARE / 'worlds' / 'bluerov2_playground.sdf').getroot()
+    densities = [float(d.text) for d in
+                 world.iter('default_density')]
+    assert densities, 'world has no graded buoyancy default_density'
+    assert all(d == declared for d in densities), (
+        f'world density {densities} != declared fluid density {declared}')

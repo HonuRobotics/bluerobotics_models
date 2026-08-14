@@ -28,14 +28,18 @@ Deriving mass keeps one source of truth per part: a loadout change, such as addi
 ```yaml
 buoyancy:
   net_buoyancy: 0.002        # kg, positive floats up
-  cob_offset: "0 0 0.046"    # m, center of buoyancy relative to the center of mass
+  cob_offset: "0 0 0.046"    # m, center of buoyancy relative to cob_frame
+  cob_frame: com             # com (default) or base_link
+  fluid_density: 1025.0      # kg/m^3, must match the world's Buoyancy plugin
 ```
 
-Both keys are optional; the values above are the defaults (a two gram fail safe rise, center of buoyancy 46 mm above the center of mass).
+Every key is optional; the values above are the defaults (a two gram fail safe rise, center of buoyancy 46 mm above the center of mass, seawater).
 
-`net_buoyancy` is a displaced mass in kilograms rather than a fraction: it is the quantity an operator actually handles, and it does not scale silently when the vehicle gets heavier.
+`net_buoyancy` is a displaced mass in kilograms. Not a fraction, so the trim does not scale silently when the vehicle gets heavier. Not Newtons either: the declaration is realized as a volume, so fluid density enters whatever the unit, but a force also drags a gravity value in, while a mass to mass comparison needs neither.
 
-`cob_offset` is the BG vector: where the buoyant force acts relative to where weight acts. It sets the righting stiffness directly, since the righting moment of a submerged vehicle is (m + b) g BG sin(theta). It is declared relative to the center of mass so a loadout change preserves both the mass and the tuned handling. Keep the z component positive; a center of buoyancy at or below the center of mass is unstable.
+`cob_offset` places the center of buoyancy, where the buoyant force acts. With `cob_frame: com` (the default) it is the BG vector and sets the righting stiffness directly, since the righting moment of a submerged vehicle is (m + b) g BG sin(theta); a loadout change then preserves the tuned handling. With `cob_frame: base_link` the CoB is pinned in the chassis frame like the physical hull, and a loadout change calls for an explicit re-trim, as on the real vehicle. Both are legitimate; the choice is which invariant survives a loadout change. Either way, keep the CoB above the center of mass or the vehicle is upside down stable, and the derived BG vector is what tooling reports and what gets matched between sim and real.
+
+`fluid_density` makes the one unavoidable assumption overt. Turning a declared net mass into displaced volume requires a density, and the force the sim applies uses the density the world's Buoyancy plugin declares; if the two disagree, the simulated net buoyancy silently differs from the declared intent. Declaring the density beside the trim keeps the assumption visible, and a test asserts it matches the shipped world.
 
 The generation composes the total mass and center of mass from the same data that builds the links, then solves the height and full 3D center of the `base_link` collision box so both declarations hold for the configured loadout. Accessories that carry collision volume displace too; the box makes up the difference, derived from the same tables on every build, with each accessory's collision taken as displacing at its mount pose. A declaration that cannot be met, because it would need a non positive box volume, fails the build loudly.
 

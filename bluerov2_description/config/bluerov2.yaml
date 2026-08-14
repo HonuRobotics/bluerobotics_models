@@ -7,17 +7,29 @@
 #                              heavy frame mesh; standard = 6 thrusters)
 variant: standard
 
-# Buoyancy declaration (optional). Two keys tune the buoyant behavior of the
-# assembled vehicle; the collision box is solved so both hold for the
-# configured loadout (see AUR_BUOYANCY_DESIGN.md):
-#   net_buoyancy: net buoyant force as displaced mass, in kg. Positive floats
-#                 up. Default 0.002 (fail-safe slow rise).
-#   cob_offset:   "x y z" in meters: center of buoyancy relative to the center
-#                 of mass. Sets the righting stiffness; keep z positive.
-#                 Default "0 0 0.046".
+# Buoyancy declaration (optional). Declares the buoyant behavior of the
+# assembled vehicle; the collision box is solved so the declaration holds for
+# the configured loadout (see AUR_BUOYANCY_DESIGN.md). Every key is optional:
+# an absent block or key takes the default shown, which reproduces the
+# behavior of the previous fixed geometry (near neutral, CoB 46 mm above the
+# center of mass).
+#   net_buoyancy:  net buoyancy as displaced mass, in kg. Positive floats up.
+#                  Default 0.002 (fail safe slow rise).
+#   cob_offset:    "x y z" in meters: center of buoyancy, relative to
+#                  cob_frame. Keep the CoB above the CoM. Default "0 0 0.046".
+#   cob_frame:     com (default) or base_link. com declares the BG vector, so
+#                  a loadout change preserves the tuned righting stiffness;
+#                  base_link pins the CoB in the chassis frame like the
+#                  physical hull, and a loadout change then calls for an
+#                  explicit re-trim.
+#   fluid_density: kg/m^3, default 1025 (seawater). Must match the density the
+#                  world's Buoyancy plugin declares; a test enforces it for
+#                  the shipped world.
 # buoyancy:
 #   net_buoyancy: 0.002
 #   cob_offset: "0 0 0.046"
+#   cob_frame: com
+#   fluid_density: 1025.0
 
 # Topic namespace: sensor/claw topics default to /<topic_namespace>/<name>/...
 topic_namespace: bluerov2
