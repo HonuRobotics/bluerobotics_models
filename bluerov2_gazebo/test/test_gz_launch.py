@@ -60,7 +60,8 @@ def sim_seconds(env):
                         f'/world/{WORLD_NAME}/stats', '-n', '1', timeout=15)
     block = re.search(r'sim_time\s*{([^}]*)}', out)
     assert code == 0 and block, f'cannot read world stats:\n{out}\n{err}'
-    sec = re.search(r'sec:\s*(\d+)', block.group(1))
+    # \b so 'sec:' cannot match inside 'nsec:' when sec is omitted (== 0).
+    sec = re.search(r'\bsec:\s*(\d+)', block.group(1))
     nsec = re.search(r'nsec:\s*(\d+)', block.group(1))
     return (int(sec.group(1)) if sec else 0) + \
         (int(nsec.group(1)) if nsec else 0) / 1e9
@@ -69,7 +70,15 @@ def sim_seconds(env):
 def wait_sim_seconds(env, seconds, timeout=120):
     """Block until the sim clock advances `seconds`, whatever the RTF."""
     start = sim_seconds(env)
-    poll_until(lambda: sim_seconds(env) - start >= seconds, timeout,
+
+    def advanced():
+        now = sim_seconds(env)
+        assert now > start - 1.0, (
+            f'sim clock went backward ({start:.3f} -> {now:.3f} s): '
+            'server restart or corrupt stats read')
+        return now - start >= seconds
+
+    poll_until(advanced, timeout,
                f'sim advanced less than {seconds}s in {timeout}s of wall time',
                interval=0.5)
 
@@ -216,12 +225,15 @@ def test_forward_thrust_mix_surges(sim):
     """
     teleport(sim, 0, 0, -3.0)
     wait_sim_seconds(sim, 3)
-    procs = latch_thrusters(sim, {1: -10.0, 2: -10.0, 3: 10.0, 4: 10.0})
+    # 5 N per thruster: the run must FIT IN THE POOL (walls at +/-12.55 m).
+    # At 10 N the steady ~1 m/s over both windows reaches the wall and
+    # the vehicle slides along it, reading as crab.
+    procs = latch_thrusters(sim, {1: -5.0, 2: -5.0, 3: 5.0, 4: 5.0})
     try:
-        wait_sim_seconds(sim, 8)      # onset transient: spin damps, speed builds
+        wait_sim_seconds(sim, 6)      # onset transient: spin damps, speed builds
         t1 = sim_seconds(sim)
         x1, y1, _, _, _, yaw1 = model_pose(sim)
-        wait_sim_seconds(sim, 8)
+        wait_sim_seconds(sim, 6)
         t2 = sim_seconds(sim)
         x2, y2, _, _, _, yaw2 = model_pose(sim)
     finally:
