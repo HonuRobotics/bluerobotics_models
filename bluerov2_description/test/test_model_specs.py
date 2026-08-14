@@ -48,6 +48,14 @@ def test_specs_comment_matches_the_model():
         volume += lx * ly * lz
     stamped_volume = float(spec(text, 'displaced volume').split()[0])
     assert stamped_volume == pytest.approx(volume, abs=5e-7)
+    offset = spec(text, 'cob offset')
+    com = [float(v) for v in re.findall(r'-?\d+\.\d+',
+                                        spec(text, 'center of mass'))[:3]]
+    cob = [float(v) for v in re.findall(r'-?\d+\.\d+',
+                                        spec(text, 'center of buoyancy'))[:3]]
+    stamped_offset = [float(v) for v in re.findall(r'-?\d+\.\d+', offset)[:3]]
+    for k in range(3):
+        assert stamped_offset[k] == pytest.approx(cob[k] - com[k], abs=1e-3)
     net = float(spec(text, 'net buoyancy').split()[0])
     assert net == pytest.approx(WATER_DENSITY * volume - total, abs=5e-4)
 

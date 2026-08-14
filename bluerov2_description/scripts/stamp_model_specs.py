@@ -161,6 +161,9 @@ def specs_comment(vehicle, urdf_root, cfg):
          f'at {WATER_DENSITY:.0f} kg/m^3'),
         ('center of buoyancy',
          f'[{cob[0]:.4f}, {cob[1]:.4f}, {cob[2]:.4f}] m in base_link'),
+        ('cob offset',
+         f'[{cob[0] - com[0]:.4f}, {cob[1] - com[1]:.4f}, '
+         f'{cob[2] - com[2]:.4f}] m from the center of mass (BG vector)'),
     ]
     if vehicle == 'bluerov2':
         rows.append(('net buoyancy', f'{displaced - total:+.4f} kg'))
