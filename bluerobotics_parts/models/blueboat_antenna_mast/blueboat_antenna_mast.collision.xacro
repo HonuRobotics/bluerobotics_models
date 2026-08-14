@@ -9,6 +9,11 @@
   model.sdf is the modeler's work product; this file is what ROS and Gazebo
   actually read.
 
+  model.sdf sits beside this file only while the catalog is being built. On a
+  released default branch it lives on the dev branch instead, and this file is
+  the collision geometry — which is why it is committed rather than generated
+  at build time. See the package README, "Where each file lives".
+
   The macro is called from blueboat_antenna_mast.urdf.xacro, which is the
   hand-authored half and is never touched by the import.
 -->

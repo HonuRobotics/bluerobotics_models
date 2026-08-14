@@ -24,7 +24,7 @@ models/blueboat_vessel/
 
 **Collision geometry is specified by the modeler, in `model.sdf`, as primitive shapes in SDF `<geometry>`.** Nothing downstream invents the contact shape: the URDF form is a translation of that file rather than a second description of the same thing.
 
-Two more files live in the same directory. The modeler does not write them — see [The three files per part](#the-three-files-per-part).
+Two more files live in the same directory. The modeler does not write them — see [The three files per part](#the-three-files-per-part). `model.sdf` itself only stays alongside them while the catalog is being built; [Where each file lives](#where-each-file-lives) has the arrangement.
 
 ### Rules
 
@@ -47,7 +47,7 @@ Recorded so the catalog stays coherent as it grows. All lowercase, snake_case:
 
 ## The three files per part
 
-A finished part is three files, and which of them is written by a person matters:
+Making a part takes three files, and which of them is written by a person matters. A *released* part is the last two — see [Where each file lives](#where-each-file-lives).
 
 | File | Written by | Contains |
 |---|---|---|
@@ -57,13 +57,29 @@ A finished part is three files, and which of them is written by a person matters
 
 **Who authors what, and what reads what.** The modeler works in SDF — that is what their tooling produces, and `model.sdf` is their work product. ROS and Gazebo read the xacro. `scripts/import_part.py` is the seam between the two.
 
-SDF is not an interim format on the way to something else, and `model.sdf` is not deleted once a part is finished. It stays in version control as the record of what was delivered, which is what you go back to when a part's geometry is later disputed. The import script stays for the same reason, plus one more: it has to keep working every time a part is redelivered.
+### Where each file lives
+
+The SDF half of that seam is how the catalog gets built. It is not something a user of this package should have to learn, so it is kept without being put in front of them:
+
+| | while the catalog is being built | once the models are released |
+|---|---|---|
+| `<part>.visual.glb` | default branch | default branch |
+| `<part>.urdf.xacro`, `<part>.collision.xacro` | default branch | default branch |
+| `model.sdf`, `scripts/import_part.py` | default branch, temporarily | dev branch only |
+
+While part assets are actively being processed, `model.sdf` and the import script sit on the production branch — currently `lyrical` — because that is where the work is happening and where the acceptance workflow below is being run. When the models are released they come off it.
+
+They are not deleted. A dev branch, kept in sync with the default branch, carries them, so every delivered SDF and the script that converted it stay available for reuse, re-import and inspection. Both halves of the decision matter: the SDF pipeline is worth keeping, and it is worth keeping out of the released package.
+
+What a user of the released package sees is URDF: the xacro macros stating each part's inertia and collision. Getting a part into an assembly requires none of SDF, the import script, or an account of how the catalog was built. A user delivering their own part is free to hand-author the xacro and skip the SDF route entirely — nothing downstream knows or cares which way a part arrived.
 
 `<part>.urdf.xacro` includes `<part>.collision.xacro` and calls its macro, so sourcing the generated geometry is a one-line include rather than a block pasted into the middle of a hand-written file.
 
 They are separate files on purpose. Generated content and hand-authored content in one file means a re-import either clobbers measured values or has to be careful not to; split apart, the generated file is overwritten wholesale and the hand-authored one is never touched by tooling at all.
 
 **The generated file is committed.** It is generated once, at design time, and checked into the repo like any other source. It is not a build artifact: nothing regenerates it during `colcon build`, and a fresh clone has a complete part without running the import. Re-running the import is something a person does when the modeler redelivers, not something the build does.
+
+Committing it is also what makes the split above work. Once `model.sdf` comes off the default branch, `<part>.collision.xacro` is the collision geometry there — a released part is complete on its own, with nothing to regenerate and nothing to fetch from another branch.
 
 Inertia is the half no mesh can supply. Mass, the inertia tensor and the center-of-gravity pose come from measurement or from the vendor, not from the primitive geometry, and they are stated once — in the part, and nowhere else. Assemblies compose them; nothing re-derives them from a box. See [AUR_BUOYANCY_DESIGN.md](../AUR_BUOYANCY_DESIGN.md) for how assemblies use them.
 
@@ -112,6 +128,8 @@ ros2 run bluerobotics_parts import_part.py models/<part>
 - [ ] Commit it. It is source, not a build artifact.
 
 > `scripts/import_part.py` is not written yet. Until it is, the collision macro is hand-written to the same shape, which makes the read-through matter more rather than less.
+
+This step needs `model.sdf` and the import script, so it runs on whichever branch carries them — the production branch while the catalog is being built, the dev branch afterwards. See [Where each file lives](#where-each-file-lives). The output, `<part>.collision.xacro`, is committed to the default branch either way.
 
 ### 4. Fill in the mass properties
 
