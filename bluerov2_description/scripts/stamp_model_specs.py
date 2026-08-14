@@ -166,7 +166,16 @@ def specs_comment(vehicle, urdf_root, cfg):
          f'{cob[2] - com[2]:.4f}] m from the center of mass (BG vector)'),
     ]
     if vehicle == 'bluerov2':
-        rows.append(('net buoyancy', f'{displaced - total:+.4f} kg'))
+        declared = cfg.get('buoyancy') or {}
+        net_declared = float(declared.get('net_buoyancy', 0.002))
+        cob_declared = [float(v) for v in
+                        str(declared.get('cob_offset', '0 0 0.046')).split()]
+        rows.append(('net buoyancy',
+                     f'{displaced - total:+.4f} kg '
+                     f'(declared {net_declared:+.4f})'))
+        rows.append(('declared cob offset',
+                     f'[{cob_declared[0]:.4f}, {cob_declared[1]:.4f}, '
+                     f'{cob_declared[2]:.4f}] m'))
     else:
         rows.append(('reserve buoyancy',
                      f'{displaced - total:+.3f} kg at full submersion'))

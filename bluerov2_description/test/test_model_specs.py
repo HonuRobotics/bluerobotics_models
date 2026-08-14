@@ -60,6 +60,22 @@ def test_specs_comment_matches_the_model():
     assert net == pytest.approx(WATER_DENSITY * volume - total, abs=5e-4)
 
 
+def test_measured_values_recover_the_declaration():
+    """The stamp's measured numbers agree with the declared buoyancy block."""
+    text = URDF.read_text()
+    cfg = yaml.safe_load((SHARE / 'config' / 'bluerov2.yaml').read_text())
+    declared = cfg.get('buoyancy') or {}
+    net_declared = float(declared.get('net_buoyancy', 0.002))
+    cob_declared = [float(v) for v in
+                    str(declared.get('cob_offset', '0 0 0.046')).split()]
+    net = float(spec(text, 'net buoyancy').split()[0])
+    assert net == pytest.approx(net_declared, abs=1e-4)
+    offset = [float(v) for v in
+              re.findall(r'-?\d+\.\d+', spec(text, 'cob offset'))[:3]]
+    for k in range(3):
+        assert offset[k] == pytest.approx(cob_declared[k], abs=1e-3)
+
+
 def test_specs_comment_reports_the_loadout():
     """The accessories row reflects the shipped default config."""
     text = URDF.read_text()
