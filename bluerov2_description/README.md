@@ -83,13 +83,29 @@ edit them. Two supported ways to customize the loadout:
    model and bridge) consistently. See the `bluerov2_gazebo` README.
 
 ## Buoyancy
-The `base_link` collision box is **not hand-tuned**: the xacro sums the total mass
-(hull + thrusters + configured accessories) and solves the box height so that
-`water_density · volume = mass · (1 + margin)`. So adding/removing accessories keeps
-the vehicle slightly positive automatically. Tunables (top of `bluerov2.urdf.xacro`):
-`water_density`, `buoyancy_margin` (default 0.0002), `buoyancy_cob_z`. The buoyancy
-*force* is applied by the world plugin in `bluerov2_gazebo`; this box just sets the
-displaced volume.
+Buoyant behavior is declared for the assembled vehicle, with two optional keys
+under `buoyancy:` in `config/bluerov2.yaml` (see `AUR_BUOYANCY_DESIGN.md`):
+
+```yaml
+buoyancy:
+  net_buoyancy: 0.002        # kg, positive floats up (default 0.002)
+  cob_offset: "0 0 0.046"    # m, center of buoyancy relative to the center of
+                             # mass; keep z positive (default "0 0 0.046")
+```
+
+`net_buoyancy` is stated in kilograms, not as a fraction, so the trim does not
+scale silently with vehicle mass. `cob_offset` is the BG vector and sets the
+righting stiffness directly; because it is declared relative to the center of
+mass, a loadout change preserves the handling you tuned.
+
+The `base_link` collision box is **not hand-tuned**: the xacro composes the total
+mass and center of mass (hull + thrusters + configured accessories) and solves the
+box height and center so that `water_density · displaced_volume = mass + net_buoyancy`
+and the combined collision centroid sits at `CoM + cob_offset`. Adding or removing
+accessories preserves both declared values automatically. The buoyancy *force* is
+applied by the world plugin in `bluerov2_gazebo`; the box just sets the displaced
+volume, and a declaration that would need a non-positive box volume fails the
+build loudly.
 
 ## View in RViz
 ```bash

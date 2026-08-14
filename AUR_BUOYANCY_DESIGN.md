@@ -15,7 +15,7 @@ Mass properties and displacement are treated differently, and deliberately so:
 | Property | How it is obtained |
 |---|---|
 | Mass, moment of inertia, center of mass | **Derived** — composed from the parts, whose own values are the source of truth. The source of truth for a part's inertia (approximated to its physical characteristics) is the xacro macro file in the part directory |
-| Displacement and center of buoyancy | **Declared** at the assembly. For underwater vehicles (UUVs) the key design parameter is the overall buoyant balance (buoyant trim), which sets the amount of the summed buoyant force balance in units of Newtons. For surface vehicles (USVs) the details of the collision geometry — used to calculate the displacement, and from it the buoyancy force magnitude — need to be specified independent of the part collision geometry. This uses `<collision>` tags to communicate the geometry primitives to the buoyancy (or surface) plugin |
+| Displacement and center of buoyancy | **Declared** at the assembly. For underwater vehicles (UUVs) the key design parameter is the overall buoyant balance, stated as a displaced mass in kilograms. For surface vehicles (USVs) the details of the collision geometry — used to calculate the displacement, and from it the buoyancy force magnitude — need to be specified independent of the part collision geometry. This uses `<collision>` tags to communicate the geometry primitives to the buoyancy (or surface) plugin |
 
 Each part carries its own mass, inertia tensor and center-of-gravity pose, and the assembly's mass properties follow from composing them. Tools and utilities evaluate the aggregate at the assembly level, so that users can answer the questions — what is the mass, inertia tensor and location of the center of mass — for the AUR vessel.
 
@@ -92,22 +92,23 @@ So for a surface vessel the waterline is an outcome the water works out, from ma
 The behaviors worth exercising: correct resting waterline, recovery from a disturbance, and sensible response to asymmetric loading. This is still all actively being tested with the general purpose buoyancy plugin, and moving away from the previous surface plugin for this.
 
 
-## Buoyancy trim as it stands today
+## The UUV parameters as implemented
 
-The UUV already has trim control, but not in the form this design calls for. `bluerov2_description/urdf/bluerov2.urdf.xacro` declares:
+`config/bluerov2.yaml` accepts an optional `buoyancy:` block with two keys:
 
-| Property | Line | Value | Meaning |
-|---|---|---|---|
-| `buoyancy_margin` | 33 | `0.0002` | Excess displacement as a **dimensionless fraction** of total mass |
-| `buoyancy_cob_z` | 34 | `0.06` | Center of buoyancy in z, as the collision box center |
+```yaml
+buoyancy:
+  net_buoyancy: 0.002        # kg, positive floats up
+  cob_offset: "0 0 0.046"    # m, center of buoyancy relative to the center of mass
+```
 
-Sizing is `water_density * volume = total_mass * (1 + buoyancy_margin)`, with the hull box height back-solved to hit it and fitted accessory volume subtracted.
+Both are optional, and the defaults preserve the previous behavior: a two gram fail safe rise, with the center of buoyancy about 46 mm above the center of mass. The USV does not use them.
 
-Both need to change:
+`net_buoyancy` is a displaced mass in kilograms rather than a fraction. That is the quantity an operator actually handles, since foam and lead are bought in grams, and it does not scale silently when the vehicle gets heavier. The earlier `buoyancy_margin` fraction, and the hundredfold trap that came with it, are gone.
 
-**The trim parameter should be a force, not a fraction.** As a fraction it is also a trap: `0.0002` is 0.02%, so someone entering `0.02` intending "0.02%" overshoots a hundredfold. Stating net buoyancy in Newtons — or equivalently as a displaced mass in kg — is both unambiguous and the quantity an operator actually thinks in. It also stops the trim silently scaling with vehicle mass, which a fraction does.
+`cob_offset` is the BG vector: where the buoyant force acts relative to where weight acts. It sets the righting stiffness directly, because the righting moment of a submerged vehicle is (m + b) g BG sin(theta). It is declared relative to the center of mass rather than in the chassis frame on purpose: mass is what it is, and handling is what we tuned it to, so a loadout change preserves both. Keep the z component positive, since a center of buoyancy at or below the center of mass is unstable.
 
-**Center of buoyancy should be a full 3D pose, set directly.** `buoyancy_cob_z` positions the box in z, so x and y are pinned to zero by construction. CB could be set indirectly by manipulating the geometry, but the preference is to set it intentionally and directly so there is no ambiguity about where the force acts — particularly given the CG/CB relationship described above.
+The generation composes the total mass and center of mass from the same data that builds the links, then solves the height and the full 3D center of the `base_link` collision box so that both declarations hold for the configured loadout. The earlier `buoyancy_cob_z` positioned the box in z only, pinning x and y to zero; the new solve places all three axes. A declaration that cannot be met, because it would need a non positive box volume, fails the build loudly.
 
 ## Out of scope
 
@@ -130,8 +131,8 @@ Recorded so the design of *how* starts from the right place, without deciding it
 
 ## Open questions
 
-1. **Do we ignore part collisions for buoyancy, or use them and add the difference?** Parts carry no collisions today, so displacement comes entirely from the hull box. Once parts have collision geometry, the buoyancy plugin will sum every collision in the model.
+1. **Resolved: the hull box makes up the difference, but the correction is derived, not maintained.** The concern with keeping part collisions was hand maintained corrections that silently go wrong. In the implementation nothing is maintained by hand: the same accessory tables that generate the collision geometry feed the solve, so the box height and center re derive on every build and the combined centroid of every collision in the model lands on the declared center of buoyancy. Each accessory's collision is taken as displacing at its mount pose, an approximation worth well under a millimeter of CoB for the current catalog.
 
-   The preference is to let the user set the geometry and location of the displacement volume from scratch, ignoring the summed part geometry entirely — one declaration, no bookkeeping. The concern is that this may be difficult to implement against a plugin whose input is every `<collision>` in the model. The alternative, keeping the part collisions and having the hull box make up the difference, is what the accessory-volume subtraction does today, and it looks more error-prone: the correction has to be maintained by hand and silently goes wrong when a part's collision changes. Worth discussing before either is designed.
+   Ignoring part collisions entirely through the buoyancy plugin's per link `<enable>` was considered and set aside: the enable list lives in the world file, which stays vehicle agnostic, and scoped link names would couple it to the internals of one model. If worlds become generated artifacts this is worth revisiting.
 
 2. **Does the design need to distinguish "collision for contact" from "collision for displacement" at the part level** to make the above work, given that introducing a separate displacement primitive is out of scope?  Yes, that is too drastic a change.

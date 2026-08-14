@@ -7,6 +7,18 @@
 #                              heavy frame mesh; standard = 6 thrusters)
 variant: standard
 
+# Buoyancy declaration (optional). Two keys tune the buoyant behavior of the
+# assembled vehicle; the collision box is solved so both hold for the
+# configured loadout (see AUR_BUOYANCY_DESIGN.md):
+#   net_buoyancy: net buoyant force as displaced mass, in kg. Positive floats
+#                 up. Default 0.002 (fail-safe slow rise).
+#   cob_offset:   "x y z" in meters: center of buoyancy relative to the center
+#                 of mass. Sets the righting stiffness; keep z positive.
+#                 Default "0 0 0.046".
+# buoyancy:
+#   net_buoyancy: 0.002
+#   cob_offset: "0 0 0.046"
+
 # Topic namespace: sensor/claw topics default to /<topic_namespace>/<name>/...
 topic_namespace: bluerov2
 
