@@ -8,8 +8,11 @@ find_package(ament_cmake REQUIRED)
 ament_environment_hooks("hooks/resource_paths.dsv.in")
 ament_environment_hooks("hooks/resource_paths.sh.in")
 
+# models/ carries the meshes, model.sdf and each part's macro; urdf/ carries the
+# parts-level library that includes them.
 install(DIRECTORY
   models
+  urdf
   DESTINATION share/${PROJECT_NAME})
 
 # The import script (model.sdf collisions -> urdf.xacro) is not written yet.
