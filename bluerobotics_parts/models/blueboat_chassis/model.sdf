@@ -10,7 +10,7 @@
         </geometry>
       </visual>
       <collision name="blueboat_chassis_collider_box">
-        <pose>-0_2666 -0.368156 0.131239 0.0 0.0 0.0</pose>
+        <pose>-0.002666 -0.368156 0.131239 0.0 0.0 0.0</pose>
         <geometry>
           <box>
             <size>0.439118 0.157103 0.079944</size>
@@ -18,7 +18,7 @@
         </geometry>
       </collision>
       <collision name="blueboat_chassis_collider_box_1">
-        <pose>-0_2666 0.368156 0.131239 0.0 -0.0 0.0</pose>
+        <pose>-0.002666 0.368156 0.131239 0.0 -0.0 0.0</pose>
         <geometry>
           <box>
             <size>0.439118 0.157103 0.079944</size>

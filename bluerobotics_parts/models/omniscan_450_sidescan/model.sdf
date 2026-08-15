@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
+  <model name="Scene">
+    <link name="omniscan_450_sidescan_link">
+      <visual name="omniscan_450_sidescan_visual">
+        <geometry>
+          <mesh>
+            <uri>omniscan_450_sidescan.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="omniscan_450_sidescan_collider_box">
+        <pose>0.0 0.000924 0.026878 0.0 -0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.288405 0.0283 0.015639</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="omniscan_450_sidescan_collider_box_1">
+        <pose>0.0 -0.009413 0.021011 0.0 -0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.332663 0.059971 0.005112</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="omniscan_450_sidescan_collider_box_2">
+        <pose>-0.0 -0.003749 0.012993 -0.288675 -0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.332663 0.054792 0.005613</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="omniscan_450_sidescan_collider_box_3">
+        <pose>0.0 0.002529 0.016576 0.0 -0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.332663 0.037167 0.004801</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="omniscan_450_sidescan_collider_box_4">
+        <pose>-0.0 0.011328 0.011715 0.0 -0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.332663 0.020919 0.005972</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

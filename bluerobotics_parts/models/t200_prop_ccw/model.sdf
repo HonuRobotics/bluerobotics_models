@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
+  <model name="Scene">
+    <link name="t200_prop_ccw_link">
+      <visual name="t200_prop_ccw_visual">
+        <geometry>
+          <mesh>
+            <uri>t200_prop_ccw.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="t200_prop_ccw_collider_cylinder">
+        <pose>5.2e-05 0.002765 0.000116 0.0 0.0 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.015727</radius>
+            <length>0.03976</length>
+          </cylinder>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

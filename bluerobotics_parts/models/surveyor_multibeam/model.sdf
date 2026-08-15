@@ -1,0 +1,48 @@
+<?xml version="1.0" ?>
+<sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
+  <model name="Scene">
+    <link name="surveyor_multibeam_link">
+      <visual name="surveyor_multibeam_visual">
+        <geometry>
+          <mesh>
+            <uri>surveyor_multibeam.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="surveyor_multibeam_collider_box">
+        <pose>0.002898 -0.00148 0.029385 0.0 -0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.146896 0.067019 0.056353</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="surveyor_multibeam_collider_box_1">
+        <pose>0.002097 -0.001357 0.005457 0.0 -0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.171913 0.090927 0.008497</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="surveyor_multibeam_collider_cylinder">
+        <pose>0.091058 -0.016462 0.024055 0.0 -0.0 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.015908</radius>
+            <length>0.016133</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name="surveyor_multibeam_collider_cylinder_1">
+        <pose>0.086229 0.013666 0.024055 0.0 -0.0 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.011079</radius>
+            <length>0.016133</length>
+          </cylinder>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

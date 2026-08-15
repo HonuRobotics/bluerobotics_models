@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
+  <model name="Scene">
+    <link name="t200_thruster_link">
+      <visual name="t200_thruster_visual">
+        <geometry>
+          <mesh>
+            <uri>t200_thruster.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="t200_thruster_collider_cylinder">
+        <pose>-0.010188 0.002851 -0.000255 0.0 0.0 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.021814</radius>
+            <length>0.097597</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name="t200_thruster_collider_cylinder_1">
+        <pose>0.001508 0.002867 5.9e-05 0.0 0.0 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.051596</radius>
+            <length>0.039826</length>
+          </cylinder>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>
