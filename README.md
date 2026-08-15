@@ -161,7 +161,7 @@ When adding new parts to the repo, we run a few manual tests to verify the compo
 
 ### Parts gallery
 
-To quickly review all the parts in the `blueboat_parts/models` directory, an AI generated simple world file is included that arranges all the parts in a grid with lighting conducive to reviewing the shapes and textures.
+To quickly review all the parts in the `bluerobotics_parts/models` directory, an AI generated simple world file is included that arranges all the parts in a grid with lighting conducive to reviewing the shapes and textures.
 
 After following the typical build instructions (see above), run Gazebo with the model gallery world:
 ```
