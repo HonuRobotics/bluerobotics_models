@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!--
+  Test harness for a single part macro. Not part of any vehicle.
+
+      PARTS=$(ros2 pkg prefix bluerobotics_parts)/share/bluerobotics_parts
+      xacro $PARTS/urdf/part_probe.urdf.xacro part:=blueboat_antenna_mast > /tmp/probe.urdf
+      check_urdf /tmp/probe.urdf
+
+  Mounts the named part four ways, so one command exercises the things that
+  actually break: instantiating at all, two instances without a name collision,
+  collision:=false, and a part parented to another part rather than to the
+  chassis. See "Accepting a new part" in the package README.
+-->
+<robot name="part_probe" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/parts.xacro"/>
+
+  <!-- Part name = macro name = directory name. Deliberately NOT declared with
+       <xacro:arg>: omitting part:= then fails with "Undefined substitution
+       argument part", which names what is missing. Declaring it with an empty
+       default instead expands to nothing and reports the useless "unknown
+       macro name: xacro:". Note that xacro:arg requires a default attribute,
+       so leaving the declaration out is the only way to get the good error. -->
+  <xacro:property name="part" value="$(arg part)"/>
+
+  <link name="base_link"/>
+
+  <xacro:call macro="${part}" name="probe"          parent="base_link"
+              xyz="0 0 0"   rpy="0 0 0"       collision="${True}"/>
+  <xacro:call macro="${part}" name="probe_second"   parent="base_link"
+              xyz="1 0 0"   rpy="0 0 1.5708" collision="${True}"/>
+  <xacro:call macro="${part}" name="probe_nocol"    parent="base_link"
+              xyz="2 0 0"   rpy="0 0 0"      collision="${False}"/>
+  <xacro:call macro="${part}" name="probe_stacked"  parent="probe"
+              xyz="0 0 0.5" rpy="0 0 0"      collision="${True}"/>
+
+</robot>
