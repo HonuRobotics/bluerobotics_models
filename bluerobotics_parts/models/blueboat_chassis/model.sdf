@@ -1,15 +1,15 @@
 <?xml version="1.0" ?>
 <sdf version="1.6">
-  <model name="blueboat_vessel">
-    <link name="blueboat_vessel">
-      <visual name="blueboat_vessel">
+  <model name="blueboat_chassis">
+    <link name="blueboat_chassis">
+      <visual name="blueboat_chassis">
         <geometry>
           <mesh>
-            <uri>blueboat_vessel.visual.glb</uri>
+            <uri>blueboat_chassis.visual.glb</uri>
           </mesh>
         </geometry>
       </visual>
-      <collision name="blueboat_vessel_collider_box">
+      <collision name="blueboat_chassis_collider_box">
         <pose>-0.104158 -0.295896 -0.043697 0.0 0.0 0.0</pose>
         <geometry>
           <box>
@@ -17,7 +17,7 @@
           </box>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_box_2">
+      <collision name="blueboat_chassis_collider_box_2">
         <pose>-0.012113 -0.363698 0.083833 0.0 0.0 0.0</pose>
         <geometry>
           <box>
@@ -25,7 +25,7 @@
           </box>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_cylinder">
+      <collision name="blueboat_chassis_collider_cylinder">
         <pose>-0.017902 -0.360024 0.01984 0.0 0.0 0.0</pose>
         <geometry>
           <cylinder>
@@ -34,7 +34,7 @@
           </cylinder>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_box_6">
+      <collision name="blueboat_chassis_collider_box_6">
         <pose>-0.522288 -0.295896 -0.211583 0.0 0.0 0.0</pose>
         <geometry>
           <box>
@@ -42,7 +42,7 @@
           </box>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_cylinder_1">
+      <collision name="blueboat_chassis_collider_cylinder_1">
         <pose>-0.033923 -0.323371 -0.052308 0.0 0.0 0.0</pose>
         <geometry>
           <cylinder>
@@ -51,7 +51,7 @@
           </cylinder>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_box_4">
+      <collision name="blueboat_chassis_collider_box_4">
         <pose>-0.467242 -0.314934 0.038698 0.0 0.0 0.0</pose>
         <geometry>
           <box>
@@ -59,7 +59,7 @@
           </box>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_box_8">
+      <collision name="blueboat_chassis_collider_box_8">
         <pose>0.488345 -0.302387 0.086141 0.0 0.0 0.0</pose>
         <geometry>
           <box>
@@ -67,7 +67,7 @@
           </box>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_cylinder_2">
+      <collision name="blueboat_chassis_collider_cylinder_2">
         <pose>0.406722 -0.321877 0.030426 0.0 0.0 0.0</pose>
         <geometry>
           <cylinder>
@@ -76,7 +76,7 @@
           </cylinder>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_cylinder_3">
+      <collision name="blueboat_chassis_collider_cylinder_3">
         <pose>0.283564 -0.295886 -0.045978 0.0 0.0 0.0</pose>
         <geometry>
           <cylinder>
@@ -85,7 +85,7 @@
           </cylinder>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_cylinder_4">
+      <collision name="blueboat_chassis_collider_cylinder_4">
         <pose>-0.447734 -0.30143 -0.126513 0.0 0.0 0.0</pose>
         <geometry>
           <cylinder>
@@ -94,7 +94,7 @@
           </cylinder>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_box_1">
+      <collision name="blueboat_chassis_collider_box_1">
         <pose>0.488345 0.302388 0.086141 0.0 0.0 0.0</pose>
         <geometry>
           <box>
@@ -102,7 +102,7 @@
           </box>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_cylinder_5">
+      <collision name="blueboat_chassis_collider_cylinder_5">
         <pose>0.406722 0.321876 0.030426 0.0 0.0 0.0</pose>
         <geometry>
           <cylinder>
@@ -111,7 +111,7 @@
           </cylinder>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_cylinder_6">
+      <collision name="blueboat_chassis_collider_cylinder_6">
         <pose>-0.017902 0.360024 0.01984 0.0 0.0 0.0</pose>
         <geometry>
           <cylinder>
@@ -120,7 +120,7 @@
           </cylinder>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_box_3">
+      <collision name="blueboat_chassis_collider_box_3">
         <pose>-0.012113 0.363698 0.083833 0.0 0.0 0.0</pose>
         <geometry>
           <box>
@@ -128,7 +128,7 @@
           </box>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_cylinder_7">
+      <collision name="blueboat_chassis_collider_cylinder_7">
         <pose>0.283564 0.295886 -0.045978 0.0 0.0 0.0</pose>
         <geometry>
           <cylinder>
@@ -137,7 +137,7 @@
           </cylinder>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_box_5">
+      <collision name="blueboat_chassis_collider_box_5">
         <pose>-0.104158 0.295896 -0.043697 0.0 0.0 0.0</pose>
         <geometry>
           <box>
@@ -145,7 +145,7 @@
           </box>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_cylinder_8">
+      <collision name="blueboat_chassis_collider_cylinder_8">
         <pose>-0.447734 0.30143 -0.126513 0.0 0.0 0.0</pose>
         <geometry>
           <cylinder>
@@ -154,7 +154,7 @@
           </cylinder>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_box_7">
+      <collision name="blueboat_chassis_collider_box_7">
         <pose>0.299059 -0.0 0.142501 0.0 0.0 0.0</pose>
         <geometry>
           <box>
@@ -162,7 +162,7 @@
           </box>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_box_9">
+      <collision name="blueboat_chassis_collider_box_9">
         <pose>-0.300152 0.0 0.142501 0.0 0.0 0.0</pose>
         <geometry>
           <box>
@@ -170,7 +170,7 @@
           </box>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_box.010">
+      <collision name="blueboat_chassis_collider_box.010">
         <pose>0.298121 -0.317568 0.130778 0.0 0.0 0.0</pose>
         <geometry>
           <box>
@@ -178,7 +178,7 @@
           </box>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_box.011">
+      <collision name="blueboat_chassis_collider_box.011">
         <pose>-0.29897 -0.317568 0.130778 0.0 0.0 0.0</pose>
         <geometry>
           <box>
@@ -186,7 +186,7 @@
           </box>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_box.012">
+      <collision name="blueboat_chassis_collider_box.012">
         <pose>-0.29897 0.317568 0.130778 0.0 0.0 0.0</pose>
         <geometry>
           <box>
@@ -194,7 +194,7 @@
           </box>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_box.013">
+      <collision name="blueboat_chassis_collider_box.013">
         <pose>0.298121 0.317568 0.130778 0.0 0.0 0.0</pose>
         <geometry>
           <box>
@@ -202,7 +202,7 @@
           </box>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_cylinder_9">
+      <collision name="blueboat_chassis_collider_cylinder_9">
         <pose>-0.253322 -0_144 0.117093 0.0 0.0 0.0</pose>
         <geometry>
           <cylinder>
@@ -211,7 +211,7 @@
           </cylinder>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_box.014">
+      <collision name="blueboat_chassis_collider_box.014">
         <pose>0_3337 -0.36614 0.160429 0.0 0.0 0.0</pose>
         <geometry>
           <box>
@@ -219,7 +219,7 @@
           </box>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_box.015">
+      <collision name="blueboat_chassis_collider_box.015">
         <pose>0_3337 0.36614 0.160429 0.0 0.0 0.0</pose>
         <geometry>
           <box>
@@ -227,7 +227,7 @@
           </box>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_box.016">
+      <collision name="blueboat_chassis_collider_box.016">
         <pose>-0.467242 0.314935 0.038698 0.0 0.0 0.0</pose>
         <geometry>
           <box>
@@ -235,7 +235,7 @@
           </box>
         </geometry>
       </collision>
-      <collision name="blueboat_vessel_collider_box.017">
+      <collision name="blueboat_chassis_collider_box.017">
         <pose>-0.522288 0.295896 -0.211583 0.0 0.0 0.0</pose>
         <geometry>
           <box>
