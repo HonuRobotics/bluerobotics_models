@@ -173,7 +173,7 @@ gz sim ~/maritime_ws/src/bluerobotics_models/bluerobotics_parts/models/parts_gal
 It is also possible to load the individual parts, by loading the individual `model.sdf` files, e.g.,
 
 ```
-gz sim ~/maritime_ws/src/bluerobotics_models/bluerobotics_parts/models/blueboat_chassis/model.sdf 
+gz sim ~/maritime_ws/src/bluerobotics_models/bluerobotics_parts/models/blueboat_chassis/model.sdf
 ```
 
 Because there is no world file, the lighting is default and not representative of the maritime environments, but it is a convenient standalone test.
