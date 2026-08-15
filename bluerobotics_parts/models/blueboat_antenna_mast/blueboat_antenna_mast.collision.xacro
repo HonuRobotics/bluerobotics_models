@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!--
+  GENERATED FILE — DO NOT EDIT.
+
+  Written by scripts/import_part.py from model.sdf, and overwritten on every
+  re-import. Any hand edit here is lost the next time the modeler redelivers.
+
+  To change this collision geometry, edit model.sdf and re-run the import.
+  model.sdf is the modeler's work product; this file is what ROS and Gazebo
+  actually read.
+
+  model.sdf sits beside this file only while the catalog is being built. On a
+  released default branch it lives on the dev branch instead, and this file is
+  the collision geometry — which is why it is committed rather than generated
+  at build time. See the package README, "Where each file lives".
+
+  The macro is called from blueboat_antenna_mast.urdf.xacro, which is the
+  hand-authored half and is never touched by the import.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Emits the <collision> element(s) for this part. Takes no parameters: the
+       geometry is a property of the part, and where it ends up is decided by
+       the link the caller puts it in. A part with several collision primitives
+       emits several elements here. -->
+  <xacro:macro name="blueboat_antenna_mast_collision">
+
+    <!-- TODO: no model.sdf delivered yet. Placeholder box standing in for the
+         mast envelope so the part composes; the import replaces this file
+         wholesale. -->
+    <collision>
+      <origin xyz="0 0 0.5" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.05 1.0"/>
+      </geometry>
+    </collision>
+
+  </xacro:macro>
+
+</robot>

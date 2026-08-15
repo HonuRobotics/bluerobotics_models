@@ -7,17 +7,15 @@
 #                              heavy frame mesh; standard = 6 thrusters)
 variant: standard
 
-# Buoyancy declaration (optional). Two keys tune the buoyant behavior of the
-# assembled vehicle; the collision box is solved so both hold for the
-# configured loadout (see AUR_BUOYANCY_DESIGN.md):
-#   net_buoyancy: net buoyant force as displaced mass, in kg. Positive floats
-#                 up. Default 0.002 (fail-safe slow rise).
-#   cob_offset:   "x y z" in meters: center of buoyancy relative to the center
-#                 of mass. Sets the righting stiffness; keep z positive.
-#                 Default "0 0 0.046".
+# Buoyancy declaration (optional). Every key has a default; leaving the block
+# out builds the same near neutral vehicle as before. The full contract is
+# documented where it is implemented: urdf/bluerov2.urdf.xacro, section
+# "Buoyancy declaration".
 # buoyancy:
-#   net_buoyancy: 0.002
-#   cob_offset: "0 0 0.046"
+#   net_buoyancy: 0.002      # kg, positive floats up
+#   cob_offset: "0 0 0.046"  # m, relative to cob_frame
+#   cob_frame: com           # com or base_link
+#   fluid_density: 1025.0    # kg/m^3, must match the world's Buoyancy plugin
 
 # Topic namespace: sensor/claw topics default to /<topic_namespace>/<name>/...
 topic_namespace: bluerov2

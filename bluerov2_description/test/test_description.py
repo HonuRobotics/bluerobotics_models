@@ -241,6 +241,30 @@ def test_buoyancy_declaration_honored():
         assert abs(cob[k] - com[k] - want) < 2e-3
 
 
+def test_cob_frame_and_fluid_density_honored():
+    """base_link frame pins the CoB absolutely; density rescales the volume."""
+    root = generate_urdf(make_config(buoyancy={
+        'net_buoyancy': 0.05, 'cob_offset': '"0.02 0 0.1"',
+        'cob_frame': 'base_link', 'fluid_density': 1000.0}))
+    assert abs(1000.0 * collision_volume(root) - total_mass(root) - 0.05) < 1e-6
+    cob = center_of_buoyancy(root)
+    for k, want in enumerate((0.02, 0.0, 0.1)):
+        assert abs(cob[k] - want) < 1e-6  # in base_link, not relative to CoM
+
+
+def test_invalid_cob_frame_fails_loudly():
+    """A cob_frame that is neither com nor base_link refuses to build."""
+    config = make_config(buoyancy={'cob_frame': 'flange'})
+    with tempfile.NamedTemporaryFile('w', suffix='.yaml', delete=False) as f:
+        f.write(config)
+        config_path = f.name
+    out = subprocess.run(
+        ['xacro', str(TOP_XACRO), f'config_file:={config_path}'],
+        capture_output=True, text=True, timeout=60)
+    assert out.returncode != 0
+    assert 'cob_frame' in out.stderr
+
+
 def test_unbuildable_declaration_fails_loudly():
     """A net buoyancy the hull box cannot realize fails the build by name."""
     config = make_config(buoyancy={'net_buoyancy': -100.0})

@@ -44,29 +44,44 @@
         dict(number=6, xyz='0.0 0.109 0.077',  rpy='0 0 0', spin='cw',  visual_rpy='1.571 0 1.571')])}"/>
 
   <!-- ==================== Buoyancy declaration ====================
-       Two optional keys under `buoyancy:` in the config declare the vehicle's
-       buoyant behavior for the assembled loadout (see AUR_BUOYANCY_DESIGN.md):
+       Optional keys under `buoyancy:` in the config declare the vehicle's
+       buoyant behavior for the assembled loadout (see AUR_BUOYANCY_DESIGN.md).
+       An absent block or key takes its default below:
 
-         net_buoyancy   net buoyant force as displaced mass, in kg. Positive
-                        floats up. Kilograms rather than a fraction so the trim
-                        does not scale silently with vehicle mass.
-         cob_offset     "x y z" in meters: the center of buoyancy relative to
-                        the center of mass (the BG vector). It sets the righting
-                        stiffness directly; keep z positive or the vehicle is
-                        upside-down stable.
+         net_buoyancy    net buoyancy as displaced mass, in kg. Positive floats
+                         up. Kilograms rather than a fraction so the trim does
+                         not scale silently with vehicle mass, and rather than
+                         Newtons so no gravity value enters the declaration.
+         cob_offset      "x y z" in meters: where the center of buoyancy sits,
+                         relative to cob_frame.
+         cob_frame       `com` (default) or `base_link`. `com` declares the BG
+                         vector, so a loadout change preserves the tuned
+                         righting stiffness; `base_link` pins the CoB in the
+                         chassis frame like the physical hull, and a loadout
+                         change then calls for an explicit re-trim.
+         fluid_density   kg/m^3, default 1025 (seawater). Realizing a net mass
+                         as a volume requires it; MUST match the density the
+                         world's Buoyancy plugin declares or the simulated net
+                         buoyancy differs from the declared intent (a test in
+                         bluerov2_gazebo enforces the match for the shipped
+                         world).
 
        The Buoyancy world plugin (in bluerov2_gazebo) derives displaced volume
        from the model's collisions, so the declaration is realized as geometry:
        base_link carries one analytic box sized and placed below so that
-         water_density * displaced_volume = total_mass + net_buoyancy
-       and the combined centroid of every collision lands at CoM + cob_offset.
+         fluid_density * displaced_volume = total_mass + net_buoyancy
+       and the combined centroid of every collision lands on the declared CoB.
        The footprint stays the real one per variant (the box doubles as the
        contact shape); only the height and center are solved. -->
-  <xacro:property name="water_density" value="1025.0"/>   <!-- seawater kg/m^3 -->
   <xacro:property name="buoyancy_cfg"  value="${cfg.get('buoyancy') or dict()}"/>
+  <xacro:property name="water_density" value="${float(buoyancy_cfg.get('fluid_density', 1025.0))}"/>
   <xacro:property name="net_buoyancy"  value="${float(buoyancy_cfg.get('net_buoyancy', 0.002))}"/>
   <xacro:property name="cob_offset"
     value="${[float(v) for v in str(buoyancy_cfg.get('cob_offset', '0 0 0.046')).split()]}"/>
+  <xacro:property name="cob_frame" value="${str(buoyancy_cfg.get('cob_frame', 'com'))}"/>
+  <xacro:unless value="${cob_frame in ['com', 'base_link']}">
+    <xacro:ERROR_cob_frame_must_be_com_or_base_link/>
+  </xacro:unless>
   <xacro:property name="footprint_x" value="0.457"/>
   <xacro:property name="footprint_y" value="${0.575 if heavy else 0.338}"/>
 
@@ -111,8 +126,11 @@
   </xacro:unless>
   <xacro:property name="buoyancy_height"
     value="${buoyancy_volume / (footprint_x * footprint_y)}"/>
+  <xacro:property name="cob_target" value="${
+      [(([com_x, com_y, com_z][i] if cob_frame == 'com' else 0.0) + cob_offset[i])
+       for i in [0, 1, 2]]}"/>
   <xacro:property name="box_center" value="${
-      [(displaced_volume * ([com_x, com_y, com_z][i] + cob_offset[i])
+      [(displaced_volume * cob_target[i]
         - fsum([accessory_volume[a['type']] * float(str(a['xyz']).split()[i])
                 for a in acc_items]))
        / buoyancy_volume for i in [0, 1, 2]]}"/>
