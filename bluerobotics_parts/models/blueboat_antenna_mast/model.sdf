@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
-  <model name="Scene">
+  <model name="blueboat_antenna_mast">
     <link name="blueboat_antenna_mast_link">
       <visual name="blueboat_antenna_mast_visual">
         <geometry>
