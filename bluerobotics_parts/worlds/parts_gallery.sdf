@@ -1,0 +1,190 @@
+<?xml version="1.0"?>
+<!--
+  Gallery of the BlueBoat parts delivered in PR #5, laid out for visual review.
+
+  Each part is pulled in with <include> pointing straight at its model.sdf, so
+  this file holds layout only - the visual mesh and the collision geometry come
+  from the part itself and a redelivered part shows up here without touching
+  this file. Only the poses below need regenerating when parts land.
+
+  The <uri> is a path to the .sdf file rather than to the directory: the parts
+  carry no model.config, so the directory and model:// forms cannot resolve
+  them. It is resolved against GZ_SIM_RESOURCE_PATH, not against this file -
+  sdformat looks includes up on the search path and does not accept ".."  -
+  so the path is package qualified and the search path must contain the
+  directory holding bluerobotics_parts. Building the package sets this up via
+  hooks/resource_paths; to run from the source tree, point GZ_SIM_RESOURCE_PATH
+  at src/bluerobotics_models instead.
+
+  Covers every part under models/ that ships both a mesh and a model.sdf -
+  14 of 28 directories.
+
+  Run:  gz sim <this file>
+
+  Laid out in groups, +y between groups, +x within a group:
+    vessel       blueboat_chassis
+    masts        basestation_antenna blueboat_antenna_mast blueboat_flag
+    mounts       blueboat_payload_bracket blueboat_ping_singlebeam_mount
+    propulsion   m200_weedless_prop_ccw m200_weedless_prop_cw t200_prop_ccw t200_prop_cw t200_thruster
+    sensors      omniscan_450_sidescan ping_singlebeam surveyor_multibeam
+
+  Every part's ORIGIN sits at z = 1.0, clear of the ground plane so nothing is
+  obscured from below. The origins are coplanar, so origin convention is still
+  comparable part to part: a part origined at its base sits entirely above the
+  line its neighbours straddle. The ground plane at z = 0 and the 1 m grid are
+  spatial reference only.
+
+  Turn on View -> Collisions to check contact geometry against the mesh.
+
+  Not yet delivered (directory exists, no mesh or model.sdf):
+    bluerov2_chassis
+    bluerov2_heavy_chassis
+    bluerov2_payload_skid
+    bluerov2_roof_rack
+    explorehd_camera
+    marinesitu_c3_stereocamera
+    newton_gripper_cylinder
+    newton_gripper_jaw
+    newton_gripper_shaft
+    newton_sampler_cup
+    omniscan_450fs_imaging
+    ping360_scanning
+    sonoptix_echo_multibeam
+    waterlinked_a50_dvl
+-->
+<sdf version="1.10">
+  <world name="parts_gallery">
+
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+    </physics>
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+
+    <scene>
+      <ambient>0.6 0.6 0.6</ambient>
+      <background>0.25 0.27 0.30</background>
+      <grid>true</grid>
+    </scene>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>2 -2 4 0 0 0</pose>
+      <diffuse>1 1 1 1</diffuse>
+      <specular>0.4 0.4 0.4 1</specular>
+      <direction>-0.4 0.3 -0.85</direction>
+    </light>
+    <light type="directional" name="fill">
+      <cast_shadows>false</cast_shadows>
+      <pose>-2 3 3 0 0 0</pose>
+      <diffuse>0.45 0.45 0.5 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <direction>0.6 -0.4 -0.6</direction>
+    </light>
+
+    <model name="reference_plane">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>4.5 4.5</size></plane></geometry>
+          <material>
+            <ambient>0.30 0.30 0.33 1</ambient>
+            <diffuse>0.38 0.38 0.42 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- vessel -->
+    <include>
+      <uri>bluerobotics_parts/models/blueboat_chassis/model.sdf</uri>
+      <name>blueboat_chassis</name>
+      <pose>0.596 0.0 1.0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <!-- masts -->
+    <include>
+      <uri>bluerobotics_parts/models/basestation_antenna/model.sdf</uri>
+      <name>basestation_antenna</name>
+      <pose>0.06 1.015 1.0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>bluerobotics_parts/models/blueboat_antenna_mast/model.sdf</uri>
+      <name>blueboat_antenna_mast</name>
+      <pose>0.508 1.015 1.0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>bluerobotics_parts/models/blueboat_flag/model.sdf</uri>
+      <name>blueboat_flag</name>
+      <pose>0.904 1.015 1.0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <!-- mounts -->
+    <include>
+      <uri>bluerobotics_parts/models/blueboat_payload_bracket/model.sdf</uri>
+      <name>blueboat_payload_bracket</name>
+      <pose>0.038 1.718 1.0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>bluerobotics_parts/models/blueboat_ping_singlebeam_mount/model.sdf</uri>
+      <name>blueboat_ping_singlebeam_mount</name>
+      <pose>0.546 1.718 1.0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <!-- propulsion -->
+    <include>
+      <uri>bluerobotics_parts/models/m200_weedless_prop_ccw/model.sdf</uri>
+      <name>m200_weedless_prop_ccw</name>
+      <pose>0.034 2.316 1.0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>bluerobotics_parts/models/m200_weedless_prop_cw/model.sdf</uri>
+      <name>m200_weedless_prop_cw</name>
+      <pose>0.452 2.316 1.0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>bluerobotics_parts/models/t200_prop_ccw/model.sdf</uri>
+      <name>t200_prop_ccw</name>
+      <pose>0.851 2.316 1.0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>bluerobotics_parts/models/t200_prop_cw/model.sdf</uri>
+      <name>t200_prop_cw</name>
+      <pose>1.232 2.316 1.0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>bluerobotics_parts/models/t200_thruster/model.sdf</uri>
+      <name>t200_thruster</name>
+      <pose>1.654 2.316 1.0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <!-- sensors -->
+    <include>
+      <uri>bluerobotics_parts/models/omniscan_450_sidescan/model.sdf</uri>
+      <name>omniscan_450_sidescan</name>
+      <pose>0.166 2.81 1.0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>bluerobotics_parts/models/ping_singlebeam/model.sdf</uri>
+      <name>ping_singlebeam</name>
+      <pose>0.708 2.81 1.0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>bluerobotics_parts/models/surveyor_multibeam/model.sdf</uri>
+      <name>surveyor_multibeam</name>
+      <pose>1.178 2.81 1.0 0 0 0</pose>
+      <static>true</static>
+    </include>
+
+  </world>
+</sdf>
