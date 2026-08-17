@@ -10,11 +10,11 @@
         </geometry>
       </visual>
       <collision name="m200_weedless_prop_cw_collision">
-        <pose>0.030663 0.0 0.0 0.0 -0.0 0.0</pose>
+        <pose>0.000336 3e-05 -5e-06 -0.0 1.570796 0.0</pose>
         <geometry>
           <cylinder>
-            <radius>0.031129</radius>
-            <length>0.039026</length>
+            <radius>0.019513</radius>
+            <length>0.062258</length>
           </cylinder>
         </geometry>
       </collision>

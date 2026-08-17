@@ -10,15 +10,15 @@
         </geometry>
       </visual>
       <collision name="surveyor_multibeam_collider_box">
-        <pose>0.002898 -0.00148 0.029385 0.0 -0.0 0.0</pose>
+        <pose>-0.003761 -8.9e-05 0.002653 0.0 -0.0 0.0</pose>
         <geometry>
           <box>
             <size>0.146896 0.067019 0.056353</size>
           </box>
         </geometry>
       </collision>
-      <collision name="surveyor_multibeam_collider_box_1">
-        <pose>0.002097 -0.001357 0.005457 0.0 -0.0 0.0</pose>
+      <collision name="surveyor_multibeam_collider_box.001">
+        <pose>-0.004562 3.4e-05 -0.021276 0.0 -0.0 0.0</pose>
         <geometry>
           <box>
             <size>0.171913 0.090927 0.008497</size>
@@ -26,20 +26,20 @@
         </geometry>
       </collision>
       <collision name="surveyor_multibeam_collider_cylinder">
-        <pose>0.091058 -0.016462 0.024055 0.0 -0.0 0.0</pose>
+        <pose>0.084398 -0.015071 -0.002678 -0.0 1.570796 0.0</pose>
         <geometry>
           <cylinder>
-            <radius>0.015908</radius>
-            <length>0.016133</length>
+            <radius>0.008067</radius>
+            <length>0.031815</length>
           </cylinder>
         </geometry>
       </collision>
-      <collision name="surveyor_multibeam_collider_cylinder_1">
-        <pose>0.086229 0.013666 0.024055 0.0 -0.0 0.0</pose>
+      <collision name="surveyor_multibeam_collider_cylinder.001">
+        <pose>0.07957 0.015057 -0.002678 -0.0 1.570796 0.0</pose>
         <geometry>
           <cylinder>
-            <radius>0.011079</radius>
-            <length>0.016133</length>
+            <radius>0.008067</radius>
+            <length>0.022158</length>
           </cylinder>
         </geometry>
       </collision>

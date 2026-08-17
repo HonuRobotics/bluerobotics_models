@@ -42,20 +42,20 @@
         </geometry>
       </collision>
       <collision name="blueboat_chassis_collider_cylinder">
-        <pose>0.026602 -0.36148 0.059302 0.0 0.0 0.0</pose>
+        <pose>0.026602 -0.36148 0.059302 -0.0 1.570796 0.0</pose>
         <geometry>
           <cylinder>
-            <radius>0.525418</radius>
-            <length>0.183428</length>
+            <radius>0.091714</radius>
+            <length>1.050837</length>
           </cylinder>
         </geometry>
       </collision>
       <collision name="blueboat_chassis_collider_cylinder_1">
-        <pose>0.026602 0.36148 0.059302 0.0 -0.0 0.0</pose>
+        <pose>0.026602 0.36148 0.059302 -0.0 1.570796 0.0</pose>
         <geometry>
           <cylinder>
-            <radius>0.525418</radius>
-            <length>0.183428</length>
+            <radius>0.091714</radius>
+            <length>1.050837</length>
           </cylinder>
         </geometry>
       </collision>

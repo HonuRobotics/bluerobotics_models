@@ -10,7 +10,7 @@
         </geometry>
       </visual>
       <collision name="blueboat_payload_bracket_collider_box">
-        <pose>0.037365 -0.150051 0.002293 0.0 -0.0 0.0</pose>
+        <pose>0.016201 0.0 -0.009094 0.0 -0.0 0.0</pose>
         <geometry>
           <box>
             <size>0.075215 0.24657 0.004049</size>

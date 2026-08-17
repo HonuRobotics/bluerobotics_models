@@ -9,8 +9,8 @@
           </mesh>
         </geometry>
       </visual>
-      <collision name="blueboat_antenna_mast_collider_cylinder">
-        <pose>-0.032859 0.0 0.413914 0.0 -0.0 0.0</pose>
+      <collision name="blueboat_antenna_mastvisual_collider_cylinder">
+        <pose>-0.004079 -4.3e-05 0.100422 0.0 -0.0 0.0</pose>
         <geometry>
           <cylinder>
             <radius>0.011041</radius>

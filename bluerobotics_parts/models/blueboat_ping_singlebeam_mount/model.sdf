@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
   <model name="blueboat_ping_singlebeam_mount">
-    <link name="blueboat_ping_singlebeam_mount">
+    <link name="blueboat_ping_singlebeam_mount_link">
       <visual name="blueboat_ping_singlebeam_mount_visual">
         <geometry>
           <mesh>
@@ -9,7 +9,7 @@
           </mesh>
         </geometry>
       </visual>
-      <collision name="blueboat_ping_singlebeam_mount_collision">
+      <collision name="blueboat_ping_singlebeam_mount_collider_mesh">
         <geometry>
           <mesh>
             <uri>blueboat_ping_singlebeam_mount.collision.stl</uri>

@@ -10,16 +10,16 @@
         </geometry>
       </visual>
       <collision name="ping_singlebeam_collider_cylinder">
-        <pose>0.0 0.00419 0.045899 0.0 -0.0 0.0</pose>
+        <pose>-1e-06 -0.000647 0.001365 1.570796 -0.0 0.0</pose>
         <geometry>
           <cylinder>
             <radius>0.024141</radius>
-            <length>0.048282</length>
+            <length>0.039739</length>
           </cylinder>
         </geometry>
       </collision>
       <collision name="ping_singlebeam_collider_cylinder_1">
-        <pose>-0.0 -0.000224 0.012797 0.0 -0.0 0.0</pose>
+        <pose>-1e-06 -0.00506 -0.031736 0.0 -0.0 0.0</pose>
         <geometry>
           <cylinder>
             <radius>0.005802</radius>

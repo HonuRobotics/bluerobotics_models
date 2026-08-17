@@ -10,7 +10,7 @@
         </geometry>
       </visual>
       <collision name="basestation_antenna_collider_box">
-        <pose>0.0 0.0 -0.03741 0.0 -0.0 0.0</pose>
+        <pose>0.0 -6.4e-05 -0.165655 0.0 -0.0 0.0</pose>
         <geometry>
           <box>
             <size>0.120973 0.140125 0.035479</size>
@@ -18,7 +18,7 @@
         </geometry>
       </collision>
       <collision name="basestation_antenna_collider_box_1">
-        <pose>0.0 0.0 0.434385 0.0 -0.0 0.0</pose>
+        <pose>0.0 -6.4e-05 0.30614 0.0 -0.0 0.0</pose>
         <geometry>
           <box>
             <size>0.016528 0.019144 0.918495</size>

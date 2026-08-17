@@ -10,11 +10,11 @@
         </geometry>
       </visual>
       <collision name="blueboat_flag_collider_cylinder">
-        <pose>-0.0 0.000257 0.500813 0.0 -0.0 0.0</pose>
+        <pose>0.0 -0.000467 -0.013148 0.0 -0.0 0.0</pose>
         <geometry>
           <cylinder>
-            <radius>0.002865</radius>
-            <length>1.001365</length>
+            <radius>0.002635</radius>
+            <length>0.9948</length>
           </cylinder>
         </geometry>
       </collision>
