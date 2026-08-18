@@ -117,6 +117,25 @@ gz sim models/<part>/model.sdf
 
 Anything wrong here goes back to the modeler. Do not work around it downstream.
 
+To see the whole catalog at once instead of one part at a time, [`worlds/parts_gallery.sdf`](worlds/parts_gallery.sdf) lays out every part that has a mesh and a `model.sdf`, grouped by kind:
+
+```bash
+gz sim $(ros2 pkg prefix --share bluerobotics_parts)/worlds/parts_gallery.sdf
+```
+
+That works once the package is built and sourced — the environment hook puts the install share directory on `GZ_SIM_RESOURCE_PATH`, which is what the world's `<include>` URIs resolve against. To run it straight from the source tree without building:
+
+```bash
+cd ~/maritime_ws/src/bluerobotics_models
+export GZ_SIM_RESOURCE_PATH=$PWD
+export SDF_PATH=$GZ_SIM_RESOURCE_PATH
+gz sim bluerobotics_parts/worlds/parts_gallery.sdf
+```
+
+Either way the search path has to contain the directory that *holds* `bluerobotics_parts`, since the URIs are package qualified. The gallery `<include>`s each part's `model.sdf` rather than copying it, so a redelivered part appears without editing the world; only the poses need regenerating when new parts land.
+
+Every part sits with its origin at `z = 1`, above the ground plane so nothing is hidden from below. The origins are coplanar, which makes the origin convention comparable across parts at a glance.
+
 ### 3. Generate the collision macro
 
 ```bash

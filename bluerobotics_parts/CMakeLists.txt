@@ -13,6 +13,7 @@ ament_environment_hooks("hooks/resource_paths.sh.in")
 install(DIRECTORY
   models
   urdf
+  worlds
   DESTINATION share/${PROJECT_NAME})
 
 # The import script (model.sdf collisions -> urdf.xacro) is not written yet.

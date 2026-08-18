@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
+  <model name="blueboat_payload_bracket">
+    <link name="blueboat_payload_bracket_link">
+      <visual name="blueboat_payload_bracket_visual">
+        <geometry>
+          <mesh>
+            <uri>blueboat_payload_bracket.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="blueboat_payload_bracket_collider_box">
+        <pose>0.016201 0.0 -0.009094 0.0 -0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.075215 0.24657 0.004049</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

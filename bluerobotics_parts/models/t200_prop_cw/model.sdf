@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
+  <model name="t200_prop_cw">
+    <link name="t200_prop_cw_link">
+      <visual name="t200_prop_cw_visual">
+        <geometry>
+          <mesh>
+            <uri>t200_prop_cw.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="t200_prop_cw_collider_cylinder">
+        <pose>5.2e-05 0.002765 0.000116 -0.0 1.570796 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.01988</radius>
+            <length>0.031454</length>
+          </cylinder>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

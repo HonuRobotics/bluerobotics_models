@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+<sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
+  <model name="basestation_antenna">
+    <link name="basestation_antenna_link">
+      <visual name="basestation_antenna_visual">
+        <geometry>
+          <mesh>
+            <uri>basestation_antenna.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="basestation_antenna_collider_box">
+        <pose>0.0 -6.4e-05 -0.165655 0.0 -0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.120973 0.140125 0.035479</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="basestation_antenna_collider_box_1">
+        <pose>0.0 -6.4e-05 0.30614 0.0 -0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.016528 0.019144 0.918495</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

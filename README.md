@@ -155,6 +155,29 @@ The import script enforces:
 | Dimensions sane against the part's real size | catches export scale errors |
 | `<inertial>` present with plausible mass | parts contribute mass to the assembly |
 
+## Parts tests
+
+When adding new parts to the repo, we run a few manual tests to verify the components (meshes and SDF files) are consistent with the standard workflow and conventions.
+
+### Parts gallery
+
+To quickly review all the parts in the `bluerobotics_parts/models` directory, an AI generated simple world file is included that arranges all the parts in a grid with lighting conducive to reviewing the shapes and textures.
+
+After following the typical build instructions (see above), run Gazebo with the model gallery world:
+```
+gz sim ~/maritime_ws/src/bluerobotics_models/bluerobotics_parts/models/parts_gallery.sdf
+```
+
+### Parts standalone
+
+It is also possible to load the individual parts, by loading the individual `model.sdf` files, e.g.,
+
+```
+gz sim ~/maritime_ws/src/bluerobotics_models/bluerobotics_parts/models/blueboat_chassis/model.sdf
+```
+
+Because there is no world file, the lighting is default and not representative of the maritime environments, but it is a convenient standalone test.
+
 ## Assemblies
 
 Developers write a xacro macro per part; assemblies instantiate them and add the
