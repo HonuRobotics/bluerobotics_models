@@ -28,7 +28,7 @@ jobs:
         run: |
           printf 'Acquire::Retries "3";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' \
             > /etc/apt/apt.conf.d/80-network-hardening
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           path: src/bluerobotics_models
       - name: Install dependencies
