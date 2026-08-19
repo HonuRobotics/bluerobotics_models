@@ -1,0 +1,24 @@
+# Documentation site: https://honurobotics.github.io/bluerobotics_models/
+# Built and deployed by the shared workflow from HonuRobotics/honu-docs.
+# Add each new distribution branch to push.branches as it is created.
+
+name: Documentation
+
+on:
+  push:
+    branches: [lyrical]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+
+jobs:
+  docs:
+    uses: HonuRobotics/honu-docs/.github/workflows/docs.yml@v0.1.0
+    permissions:
+      contents: write
+    with:
+      default_version: lyrical
