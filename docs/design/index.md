@@ -6,6 +6,6 @@ How the models are built and why.
 :maxdepth: 1
 
 architecture
-buoyancy
 parts
+buoyancy
 ```

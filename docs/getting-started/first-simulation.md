@@ -16,4 +16,10 @@ In a second terminal (also sourced), watch the camera:
 ros2 topic echo /bluerov2/camera/camera_info --once
 ```
 
+Or inspect the model and its frames in RViz:
+
+```bash
+ros2 launch bluerov2_description display.launch.xml
+```
+
 Next: [drive it](../vehicles/bluerov2/driving.md).
