@@ -3,6 +3,7 @@ project(blueboat_description)
 
 find_package(ament_cmake REQUIRED)
 find_package(xacro REQUIRED)
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 # Put this package's share dir on GZ_SIM_RESOURCE_PATH so package:// URIs into it
 # (the generated URDF that blueboat_gazebo merge-includes) resolve
@@ -10,15 +11,38 @@ find_package(xacro REQUIRED)
 ament_environment_hooks("hooks/resource_paths.dsv.in")
 ament_environment_hooks("hooks/resource_paths.sh.in")
 
-# Expand the xacro into a concrete URDF at *build* time and install it. The
-# config yaml (accessories) is passed as the config_file arg; xacro's --deps
-# reports the xacro includes AND the load_yaml'd config, so editing the config
-# or any xacro re-triggers this on the next colcon build.
+# Expand the xacro into a concrete URDF at *build* time. The config yaml is
+# passed as the config_file arg. Dependencies are listed EXPLICITLY: the
+# configure time `xacro --deps` snapshot only warns on failure and is not
+# refreshed until the next reconfigure, so on its own a config or include
+# edit can silently fail to regenerate the URDF.
 xacro_add_files(
   urdf/blueboat.urdf.xacro
     REMAP config_file:=${CMAKE_CURRENT_SOURCE_DIR}/config/blueboat.yaml
-    INSTALL DESTINATION urdf
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/config/blueboat.yaml
+    TARGET urdf_raw
 )
+
+# Stamp the generated URDF with a model specs comment (total mass, centers of
+# mass and buoyancy, net buoyancy, accessories) and install the stamped copy
+# under the same urdf/ name every consumer resolves.
+set(raw_urdf ${CMAKE_CURRENT_BINARY_DIR}/urdf/blueboat.urdf)
+set(stamped_urdf ${CMAKE_CURRENT_BINARY_DIR}/stamped/blueboat.urdf)
+add_custom_command(
+  OUTPUT ${stamped_urdf}
+  COMMAND Python3::Interpreter
+          ${CMAKE_CURRENT_SOURCE_DIR}/scripts/stamp_model_specs.py
+          --vehicle blueboat
+          --urdf ${raw_urdf}
+          --config ${CMAKE_CURRENT_SOURCE_DIR}/config/blueboat.yaml
+          --stamp ${raw_urdf}
+          --out ${stamped_urdf}
+  DEPENDS ${raw_urdf}
+          ${CMAKE_CURRENT_SOURCE_DIR}/config/blueboat.yaml
+          ${CMAKE_CURRENT_SOURCE_DIR}/scripts/stamp_model_specs.py
+  COMMENT "Stamping blueboat.urdf with model specs")
+add_custom_target(${PROJECT_NAME}_model_specs ALL DEPENDS ${stamped_urdf})
+install(FILES ${stamped_urdf} DESTINATION share/${PROJECT_NAME}/urdf)
 
 install(DIRECTORY
   urdf
@@ -26,12 +50,16 @@ install(DIRECTORY
   launch
   config
   DESTINATION share/${PROJECT_NAME})
+install(PROGRAMS
+  scripts/stamp_model_specs.py
+  DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
   find_package(ament_cmake_pytest REQUIRED)
   ament_add_pytest_test(test_description test/test_description.py TIMEOUT 180)
+  ament_add_pytest_test(test_model_specs test/test_model_specs.py TIMEOUT 60)
 endif()
 
 ament_package()
