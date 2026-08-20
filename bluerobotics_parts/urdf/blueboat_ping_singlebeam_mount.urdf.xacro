@@ -46,7 +46,7 @@
                       joint="${joint}" axis="${axis}" attach="0 0 0"/>
 
     <!-- Sockets: frames where other parts mount, in the part frame. -->
-    <xacro:part_socket name="${name}_sensor" parent="${name}" xyz="0 0 0"/>  <!-- the Ping clamps in the plate hole, transducer down -->
+    <xacro:part_socket name="${name}_sensor" parent="${name}" xyz="0 0 -0.01"/>  <!-- the Ping is pushed up into the plate hole from below, flange under the plate, transducer down -->
 
   </xacro:macro>
 

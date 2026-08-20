@@ -86,7 +86,7 @@
     <xacro:part_socket name="${name}_mast_socket" parent="${name}" xyz="-0.298 0 0.147"/>
     <xacro:part_socket name="${name}_flag_socket" parent="${name}" xyz="-0.298 0.2 0.147"/>
     <xacro:part_socket name="${name}_payload" parent="${name}" xyz="0.299 0 0.147"/>
-    <xacro:part_socket name="${name}_ping_mount" parent="${name}" xyz="-0.15 -0.29 -0.03"/>  <!-- inner side of the starboard hull at keel level, plate just below the hull, Ping hanging inboard -->
+    <xacro:part_socket name="${name}_ping_mount" parent="${name}" xyz="0 -0.259 0.01"/>  <!-- Ping2 integration kit: bracket wall against the inner face of the starboard hull (y -0.283), lower edge 1 cm above the hull bottom, plate projecting inboard, mid hull under the hatch -->
 
   </xacro:macro>
 
