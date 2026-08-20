@@ -1,0 +1,2 @@
+mounts:
+  sensor: [0, 0, -0.06, 0, 0, 0]   # where the Ping hangs below the bracket (approximate)

@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!--
+  blueboat_ping_singlebeam_mount part macro. GENERATED FILE, DO NOT EDIT.
+
+  Written by scripts/import_part.py from models/blueboat_ping_singlebeam_mount/model.sdf (the
+  modeler delivery) and models/blueboat_ping_singlebeam_mount/blueboat_ping_singlebeam_mount.yaml (measured values and
+  mounts); rerun the import to change anything here.
+
+  Inertia: auto inertia from the delivered collision geometry at 1000 kg/m^3.
+
+  Macro contract: name parent xyz rpy collision, plus joint (fixed by
+  default) and axis for parts that spin. parent="" emits the link alone,
+  for the part that serves as the assembly root.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Mount sockets: named poses on this part where other parts attach,
+       [x, y, z, roll, pitch, yaw] in the part frame. -->
+  <xacro:property name="blueboat_ping_singlebeam_mount_mounts" value="${dict(
+      sensor=[0, 0, -0.06, 0, 0, 0]
+  )}"/>
+
+  <xacro:macro name="blueboat_ping_singlebeam_mount"
+               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='0 0 1'">
+
+    <link name="${name}">
+      <inertial>
+        <origin xyz="0.00102118 -0.00184678 0.00452042" rpy="0 0 0"/>
+        <mass value="0.0586769"/>
+        <inertia ixx="2.90082e-05" ixy="-3.72562e-20" ixz="-3.49252e-13"
+                 iyy="0.000291832" iyz="-1.0888e-12"
+                 izz="0.000301922"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://bluerobotics_parts/models/blueboat_ping_singlebeam_mount/blueboat_ping_singlebeam_mount.visual.glb"/>
+        </geometry>
+      </visual>
+      <xacro:if value="${collision}">
+        <collision>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry>
+            <mesh filename="package://bluerobotics_parts/models/blueboat_ping_singlebeam_mount/blueboat_ping_singlebeam_mount.collision.stl" scale="1 1 1"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+    </link>
+
+    <xacro:if value="${parent != ''}">
+      <joint name="${name}_joint" type="${joint}">
+        <parent link="${parent}"/>
+        <child link="${name}"/>
+        <origin xyz="${xyz}" rpy="${rpy}"/>
+        <xacro:if value="${joint != 'fixed'}">
+          <axis xyz="${axis}"/>
+        </xacro:if>
+      </joint>
+    </xacro:if>
+
+  </xacro:macro>
+
+</robot>

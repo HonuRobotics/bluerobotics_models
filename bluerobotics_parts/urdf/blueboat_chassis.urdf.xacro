@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<!--
+  blueboat_chassis part macro. GENERATED FILE, DO NOT EDIT.
+
+  Written by scripts/import_part.py from models/blueboat_chassis/model.sdf (the
+  modeler delivery) and models/blueboat_chassis/blueboat_chassis.yaml (measured values and
+  mounts); rerun the import to change anything here.
+
+  Inertia: auto inertia shape from the collision geometry, scaled from 68.139 kg (at 1000 kg/m^3) to the stated mass 12 kg.
+
+  Macro contract: name parent xyz rpy collision, plus joint (fixed by
+  default) and axis for parts that spin. parent="" emits the link alone,
+  for the part that serves as the assembly root.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Mount sockets: named poses on this part where other parts attach,
+       [x, y, z, roll, pitch, yaw] in the part frame. -->
+  <xacro:property name="blueboat_chassis_mounts" value="${dict(
+      motor_port=[-0.52, 0.301, -0.117, 0, 0, 0],
+      motor_stbd=[-0.52, -0.301, -0.117, 0, 0, 0],
+      mast_socket=[-0.298, 0, 0.147, 0, 0, 0],
+      flag_socket=[-0.298, 0.2, 0.147, 0, 0, 0],
+      payload=[0.299, 0, 0.147, 0, 0, 0],
+      ping_mount=[0, -0.12, 0.1, 0, 0, 0]
+  )}"/>
+
+  <xacro:macro name="blueboat_chassis"
+               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='0 0 1'">
+
+    <link name="${name}">
+      <inertial>
+        <origin xyz="0.0212659 0 0.0724998" rpy="0 0 0"/>
+        <mass value="12"/>
+        <inertia ixx="1.6043" ixy="-1.22202e-18" ixz="0.00372803"
+                 iyy="0.988314" iyz="4.88808e-18"
+                 izz="2.53089"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://bluerobotics_parts/models/blueboat_chassis/blueboat_chassis.visual.glb"/>
+        </geometry>
+      </visual>
+      <xacro:if value="${collision}">
+        <collision>
+          <origin xyz="-0.002666 -0.368156 0.131239" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.439118 0.157103 0.079944"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="-0.002666 0.368156 0.131239" rpy="0 -0 0"/>
+          <geometry>
+            <box size="0.439118 0.157103 0.079944"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0.299228 0 0.126654" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.033317 0.572185 0.041201"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="-0.297919 0 0.126654" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.033317 0.572185 0.041201"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0.026602 -0.36148 0.059302" rpy="-0 1.5708 0"/>
+          <geometry>
+            <cylinder radius="0.091714" length="1.05084"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0.026602 0.36148 0.059302" rpy="-0 1.5708 0"/>
+          <geometry>
+            <cylinder radius="0.091714" length="1.05084"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+    </link>
+
+    <xacro:if value="${parent != ''}">
+      <joint name="${name}_joint" type="${joint}">
+        <parent link="${parent}"/>
+        <child link="${name}"/>
+        <origin xyz="${xyz}" rpy="${rpy}"/>
+        <xacro:if value="${joint != 'fixed'}">
+          <axis xyz="${axis}"/>
+        </xacro:if>
+      </joint>
+    </xacro:if>
+
+  </xacro:macro>
+
+</robot>

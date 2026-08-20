@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!--
+  t200_thruster part macro. GENERATED FILE, DO NOT EDIT.
+
+  Written by scripts/import_part.py from models/t200_thruster/model.sdf (the
+  modeler delivery) and models/t200_thruster/t200_thruster.yaml (measured values and
+  mounts); rerun the import to change anything here.
+
+  Inertia: auto inertia shape from the collision geometry, scaled from 0.455 kg (at 1000 kg/m^3) to the stated mass 0.344 kg.
+
+  Macro contract: name parent xyz rpy collision, plus joint (fixed by
+  default) and axis for parts that spin. parent="" emits the link alone,
+  for the part that serves as the assembly root.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="t200_thruster"
+               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='1 0 0'">
+
+    <link name="${name}">
+      <inertial>
+        <origin xyz="-0.00688307 0.00285552 -0.000166273" rpy="0 0 0"/>
+        <mass value="0.344"/>
+        <inertia ixx="0.00031312" ixy="-1.30503e-08" ixz="-2.56102e-07"
+                 iyy="0.00029151" iyz="-3.50359e-10"
+                 izz="0.000291503"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://bluerobotics_parts/models/t200_thruster/t200_thruster.visual.glb"/>
+        </geometry>
+      </visual>
+      <xacro:if value="${collision}">
+        <collision>
+          <origin xyz="-0.010188 0.002851 -0.000255" rpy="-0 1.5708 0"/>
+          <geometry>
+            <cylinder radius="0.048798" length="0.043629"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0.001508 0.002867 5.9e-05" rpy="-0 1.5708 0"/>
+          <geometry>
+            <cylinder radius="0.019913" length="0.103193"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+    </link>
+
+    <xacro:if value="${parent != ''}">
+      <joint name="${name}_joint" type="${joint}">
+        <parent link="${parent}"/>
+        <child link="${name}"/>
+        <origin xyz="${xyz}" rpy="${rpy}"/>
+        <xacro:if value="${joint != 'fixed'}">
+          <axis xyz="${axis}"/>
+        </xacro:if>
+      </joint>
+    </xacro:if>
+
+  </xacro:macro>
+
+</robot>

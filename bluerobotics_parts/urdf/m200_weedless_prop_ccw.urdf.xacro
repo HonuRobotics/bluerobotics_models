@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!--
+  m200_weedless_prop_ccw part macro. GENERATED FILE, DO NOT EDIT.
+
+  Written by scripts/import_part.py from models/m200_weedless_prop_ccw/model.sdf (the
+  modeler delivery) and models/m200_weedless_prop_ccw/m200_weedless_prop_ccw.yaml (measured values and
+  mounts); rerun the import to change anything here.
+
+  Inertia: auto inertia from the delivered collision geometry at 1000 kg/m^3.
+
+  Macro contract: name parent xyz rpy collision, plus joint (fixed by
+  default) and axis for parts that spin. parent="" emits the link alone,
+  for the part that serves as the assembly root.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="m200_weedless_prop_ccw"
+               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='1 0 0'">
+
+    <link name="${name}">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.074472"/>
+        <inertia ixx="1.41779e-05" ixy="0" ixz="5.54437e-12"
+                 iyy="3.11438e-05" iyz="0"
+                 izz="3.11438e-05"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://bluerobotics_parts/models/m200_weedless_prop_ccw/m200_weedless_prop_ccw.visual.glb"/>
+        </geometry>
+      </visual>
+      <xacro:if value="${collision}">
+        <collision>
+          <origin xyz="0 0 0" rpy="-0 -1.5708 0"/>
+          <geometry>
+            <cylinder radius="0.019513" length="0.062258"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+    </link>
+
+    <xacro:if value="${parent != ''}">
+      <joint name="${name}_joint" type="${joint}">
+        <parent link="${parent}"/>
+        <child link="${name}"/>
+        <origin xyz="${xyz}" rpy="${rpy}"/>
+        <xacro:if value="${joint != 'fixed'}">
+          <axis xyz="${axis}"/>
+        </xacro:if>
+      </joint>
+    </xacro:if>
+
+  </xacro:macro>
+
+</robot>

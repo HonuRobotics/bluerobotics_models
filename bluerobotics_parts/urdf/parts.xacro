@@ -1,45 +1,40 @@
 <?xml version="1.0"?>
 <!--
-  bluerobotics_parts — the parts-level macro library.
+  bluerobotics_parts: the parts level macro library. GENERATED include list,
+  written by scripts/import_part.py; rerun the import after adding a part.
 
-  PROTOTYPE. One part is wired up (blueboat_antenna_mast); the rest of the
-  catalog follows the same one line once each part has a macro.
-
-  Include this once and every part is available as a macro. An assembly should
-  not include individual part files directly — that is what this file is for.
+  Include this once and every part is available as a macro:
 
       <xacro:include filename="$(find bluerobotics_parts)/urdf/parts.xacro"/>
-      <xacro:blueboat_antenna_mast name="mast" parent="base_link" xyz="0 0 0.2"/>
+      <xacro:t200_thruster name="thruster_port" parent="base_link" xyz="-0.5 0.3 -0.1"/>
 
-  ===== the part macro contract =====
+  Macro contract, identical for every part:
 
-  Every macro included below takes exactly these parameters, in this order:
-
-      name       link name for this instance; the fixed joint is <name>_joint
-      parent     link to attach to
+      name       link name for this instance; the joint is <name>_joint
+      parent     link to attach to; "" emits the link alone (assembly root)
       xyz / rpy  mount pose relative to parent (meters / radians)
-      collision  false to instantiate the part with no contact geometry
+      collision  false to instantiate the part without contact geometry
+      joint      fixed (default) or continuous / revolute for parts that spin
+      axis       joint axis in the part frame, used when joint is not fixed
 
-  This is a contract, not a convention. A dispatcher that mounts parts from a
-  config list forwards exactly this set to whichever macro a `type` names, so a
-  macro that drops or renames one fails with `Invalid parameter "collision"`
-  instead of doing something surprising. The vessel macros will have to honor
-  it too.
-
-  That dispatcher (`mount_parts`, generalized from accessories.xacro) is not
-  here yet. It belongs with the assembly work, where it can be exercised
-  against a real vehicle rather than against itself.
-
-  Mass, inertia tensor and center-of-gravity pose are carried by each part in
-  its own file, hand-authored from measurement or the vendor. There is no
-  central mass table here and so nothing to keep in sync. See
-  AUR_BUOYANCY_DESIGN.md.
+  Mount sockets and attach frames are in mounts.yaml, consumed by the
+  dispatcher in assembly.xacro.
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <!-- ===== catalog =====
-       One include per part. Keep alphabetical; the directory name, the file
-       name and the macro name are all the part name from models/parts.csv. -->
-  <xacro:include filename="$(find bluerobotics_parts)/models/blueboat_antenna_mast/blueboat_antenna_mast.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/basestation_antenna.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/blueboat_antenna_mast.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/blueboat_chassis.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/blueboat_flag.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/blueboat_payload_bracket.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/blueboat_ping_singlebeam_mount.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/m200_weedless_prop_ccw.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/m200_weedless_prop_cw.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/omniscan_450_sidescan.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/ping_singlebeam.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/surveyor_multibeam.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/t200_prop_ccw.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/t200_prop_cw.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/t200_thruster.urdf.xacro"/>
 
 </robot>

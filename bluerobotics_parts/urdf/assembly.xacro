@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<!--
+  Assembly dispatcher: builds a vehicle from a parts list. HAND AUTHORED;
+  the part macros and mounts.yaml it consumes are generated.
+
+  A vehicle description calls
+
+      <xacro:include filename="$(find bluerobotics_parts)/urdf/assembly.xacro"/>
+      <xacro:assemble base="${cfg['base']}" parts="${cfg['parts']}"/>
+
+  with a config like
+
+      base: {type: blueboat_chassis, name: base_link, collision: false}
+      parts:
+        - {type: m200_weedless_prop_cw, name: prop_stbd, mount: motor_stbd, joint: continuous}
+        - {type: blueboat_antenna_mast, name: mast, mount: mast_socket}
+        - {type: ping_singlebeam, name: ping, parent: ping_mount, mount: sensor}
+        - {type: explorehd_camera, name: cam, xyz: "0.3 0 0.2", rpy: "0 0 0"}
+
+  The base part is the assembly root: its link IS the named root link (no
+  joint). Every other entry is one part instance. Where it goes is either a
+  named socket of its parent (mount:) or an explicit pose (xyz/rpy); the
+  parent defaults to the base link. A part with a spin axis mounts on a
+  continuous joint with joint:.
+
+  Sockets and attach frames come from mounts.yaml. A socket is a pose on the
+  parent where something bolts on; the child's attach frame is where it bolts
+  on. The two are composed through a massless <name>_socket link: fixed to the
+  parent at the socket, carrying the child at minus its attach offset. That
+  costs no trigonometry in xacro, lumps away in Gazebo (fixed joints are
+  reduced) and leaves TF a frame at every mount point.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/parts.xacro"/>
+  <xacro:property name="part_mounts"
+                  value="${xacro.load_yaml('$(find bluerobotics_parts)/urdf/mounts.yaml')}"/>
+
+  <!-- One part instance. `types` maps instance names to part types so a
+       socket can be looked up on any parent, not only the base. -->
+  <xacro:macro name="place_part" params="item types">
+    <xacro:property name="ptype" value="${item['type']}"/>
+    <xacro:property name="pname" value="${item['name']}"/>
+    <xacro:property name="parent" value="${item.get('parent', 'base_link')}"/>
+    <xacro:property name="attach" value="${part_mounts[ptype]['attach']}"/>
+
+    <xacro:if value="${'mount' in item}">
+      <xacro:property name="pose"
+                      value="${part_mounts[types[parent]]['mounts'][item['mount']]}"/>
+    </xacro:if>
+    <xacro:unless value="${'mount' in item}">
+      <xacro:property name="pose"
+                      value="${[float(v) for v in item.get('xyz', '0 0 0').split()]
+                              + [float(v) for v in item.get('rpy', '0 0 0').split()]}"/>
+    </xacro:unless>
+
+    <joint name="${pname}_socket_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${pname}_socket"/>
+      <origin xyz="${pose[0]} ${pose[1]} ${pose[2]}" rpy="${pose[3]} ${pose[4]} ${pose[5]}"/>
+    </joint>
+    <link name="${pname}_socket"/>
+
+    <xacro:call macro="${ptype}" name="${pname}" parent="${pname}_socket"
+                xyz="${-attach[0]} ${-attach[1]} ${-attach[2]}" rpy="0 0 0"
+                collision="${item.get('collision', True)}"
+                joint="${item.get('joint', 'fixed')}"
+                axis="${item.get('axis', part_mounts[ptype]['axis'])}"/>
+  </xacro:macro>
+
+  <!-- xacro has no loop; recurse over the list. -->
+  <xacro:macro name="mount_parts" params="items types">
+    <xacro:if value="${len(items) > 0}">
+      <xacro:place_part item="${items[0]}" types="${types}"/>
+      <xacro:mount_parts items="${items[1:]}" types="${types}"/>
+    </xacro:if>
+  </xacro:macro>
+
+  <xacro:macro name="assemble" params="base parts">
+    <xacro:property name="base_name" value="${base.get('name', 'base_link')}"/>
+    <xacro:call macro="${base['type']}" name="${base_name}" parent=""
+                collision="${base.get('collision', True)}"/>
+    <xacro:property name="types"
+                    value="${dict([(p['name'], p['type']) for p in parts]
+                                  + [(base_name, base['type'])])}"/>
+    <xacro:mount_parts items="${parts}" types="${types}"/>
+  </xacro:macro>
+
+</robot>

@@ -1,0 +1,15 @@
+# Hand authored data for blueboat_chassis that the delivery does not carry.
+# Read by scripts/import_part.py on every import.
+#
+# PROTOTYPE VALUES. Mass is a placeholder pending a measured figure; the
+# sockets were measured from the delivered mesh (thruster ducts by vertex
+# clustering, crossbeam tops from the collision boxes) and need the
+# modeler to confirm them, ideally by delivering them as SDF <frame>s.
+mass: 12.0                    # kg, placeholder: hull with both thruster bodies, no props
+mounts:                       # [x, y, z, roll, pitch, yaw] in the chassis frame
+  motor_port:   [-0.52,  0.301, -0.117, 0, 0, 0]   # propeller center in the port duct, spins about x
+  motor_stbd:   [-0.52, -0.301, -0.117, 0, 0, 0]
+  mast_socket:  [-0.298, 0.0,    0.147, 0, 0, 0]   # top of the aft crossbeam, centerline
+  flag_socket:  [-0.298, 0.20,   0.147, 0, 0, 0]   # aft crossbeam, port side
+  payload:      [ 0.299, 0.0,    0.147, 0, 0, 0]   # top of the forward crossbeam
+  ping_mount:   [ 0.0,  -0.12,   0.10,  0, 0, 0]   # under the deck between the hulls

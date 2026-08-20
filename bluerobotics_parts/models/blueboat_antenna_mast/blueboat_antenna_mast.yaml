@@ -1,0 +1,2 @@
+# The mast bolts on at its base; the delivered origin is the mesh centroid.
+attach: [0, 0, -0.331, 0, 0, 0]
