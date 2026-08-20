@@ -1,2 +1,0 @@
-mass: 0.344        # kg in air, Blue Robotics T200 specification
-axis: 1 0 0        # duct axis; the propeller spins about it

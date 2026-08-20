@@ -1,16 +1,13 @@
 <?xml version="1.0"?>
 <!--
-  m200_weedless_prop_cw part macro. GENERATED FILE, DO NOT EDIT.
+  m200_weedless_prop_cw part macro.
 
-  Written by scripts/import_part.py from models/m200_weedless_prop_cw/model.sdf (the
-  modeler delivery) and models/m200_weedless_prop_cw/m200_weedless_prop_cw.yaml (measured values and
-  mounts); rerun the import to change anything here.
+  Bootstrapped from models/m200_weedless_prop_cw/model.sdf by scripts/sdf_to_part.py on
+  2026-08-20. This file is the part: maintain it by hand from here on.
 
-  Inertia: auto inertia from the delivered collision geometry at 1000 kg/m^3.
+  Inertia: estimated from the delivered collision geometry at 1000 kg/m^3 (SDF auto inertia); replace with measured values.
 
-  Macro contract: name parent xyz rpy collision, plus joint (fixed by
-  default) and axis for parts that spin. parent="" emits the link alone,
-  for the part that serves as the assembly root.
+  Contract (see parts.xacro): name parent xyz rpy collision joint axis.
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
@@ -41,16 +38,10 @@
       </xacro:if>
     </link>
 
-    <xacro:if value="${parent != ''}">
-      <joint name="${name}_joint" type="${joint}">
-        <parent link="${parent}"/>
-        <child link="${name}"/>
-        <origin xyz="${xyz}" rpy="${rpy}"/>
-        <xacro:if value="${joint != 'fixed'}">
-          <axis xyz="${axis}"/>
-        </xacro:if>
-      </joint>
-    </xacro:if>
+    <!-- attach: where this part bolts onto its parent, in the part frame;
+         the joint places that point at the requested pose. -->
+    <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
+                      joint="${joint}" axis="${axis}" attach="0 0 0"/>
 
   </xacro:macro>
 

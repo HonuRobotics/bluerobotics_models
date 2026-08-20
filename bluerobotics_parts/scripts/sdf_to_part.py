@@ -13,27 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Generate a part's URDF xacro macro from the modeler's delivery.
+Bootstrap a part macro (urdf/<part>.urdf.xacro) from a modeler's SDF delivery.
 
-PROTOTYPE. Reads models/<part>/model.sdf (collision primitives and the
-visual mesh reference as delivered) and writes urdf/<part>.urdf.xacro: one
-macro emitting a link with inertia, visual and optional collision, plus the
-joint that mounts it. Nothing here is hand edited afterwards; the inputs
-that are not in the delivery (a measured mass, mount sockets, a spin axis)
-live in models/<part>/<part>.yaml and are folded in on every run.
+The URDF xacro is the part. This tool only writes its first version, from
+models/<part>/model.sdf: the visual mesh reference, the collision primitives
+translated to URDF, and an inertia estimated by SDF auto inertia from those
+primitives (or integrated from a collision mesh) at a uniform density, scaled
+to --mass when one is known. Mount sockets, the attach offset and the spin
+axis can be seeded from the command line. After that the file is maintained
+by hand like any other source; rerunning refuses to overwrite unless --force.
 
-Inertia comes from SDF auto inertia: the delivered collision primitives are
-run through `gz sdf --expand-auto-inertials` at a uniform density, giving a
-mass, a center of mass and a full tensor. When <part>.yaml states a mass
-the tensor is scaled to it (inertia is linear in density, so the shape of
-the tensor and the center of mass are unchanged). Mesh collisions are
-integrated directly (the gz CLI has no mesh calculator).
+A part can equally be written by hand without ever having an SDF.
 
-    import_part.py models/t200_thruster            # one part
-    import_part.py --all models                    # every delivered part
+    sdf_to_part.py models/t200_thruster --mass 0.344 --axis "1 0 0"
+    sdf_to_part.py models/blueboat_chassis --mass 12
+        --socket motor_port=-0.52,0.301,-0.117 --socket motor_stbd=-0.52,-0.301,-0.117
+    sdf_to_part.py --all models            # first version of every delivered part
 """
 
 import argparse
+import datetime
 import pathlib
 import re
 import shutil
@@ -43,15 +42,13 @@ import sys
 import tempfile
 import xml.etree.ElementTree as ET
 
-import yaml
-
 PACKAGE = 'bluerobotics_parts'
 DEFAULT_DENSITY = 1000.0  # kg/m^3, fresh water: a neutral default for parts
 
 URDF_SHAPES = ('box', 'cylinder', 'sphere', 'mesh')
 
 
-class ImportError_(Exception):
+class ConversionError(Exception):
     pass
 
 
@@ -62,33 +59,33 @@ class ImportError_(Exception):
 def parse_pose(text):
     vals = [float(v) for v in (text or '0 0 0 0 0 0').split()]
     if len(vals) != 6:
-        raise ImportError_(f'bad pose: {text!r}')
+        raise ConversionError(f'bad pose: {text!r}')
     return vals
 
 
 def read_delivery(part_dir):
     """
-    Return (link_name, visuals, collisions, frames) read from model.sdf.
+    Return (visuals, collisions) read from model.sdf.
 
     collisions: list of dicts {name, pose, shape, params} with params in
     URDF terms (size / radius+length / radius / filename+scale).
     """
     sdf_path = part_dir / 'model.sdf'
     if not sdf_path.exists():
-        raise ImportError_(f'{sdf_path} missing')
+        raise ConversionError(f'{sdf_path} missing')
     model = ET.parse(sdf_path).getroot().find('model')
     links = model.findall('link')
     if len(links) != 1:
-        raise ImportError_(f'{sdf_path}: expected one link, found {len(links)}')
+        raise ConversionError(f'{sdf_path}: expected one link, found {len(links)}')
     link = links[0]
 
     visuals = []
     for vis in link.findall('visual'):
         uri = vis.findtext('geometry/mesh/uri')
         if uri is None:
-            raise ImportError_(f'{sdf_path}: visual without a mesh uri')
+            raise ConversionError(f'{sdf_path}: visual without a mesh uri')
         if not (part_dir / uri).exists():
-            raise ImportError_(f'{sdf_path}: visual mesh {uri} not delivered')
+            raise ConversionError(f'{sdf_path}: visual mesh {uri} not delivered')
         visuals.append({'uri': uri, 'pose': parse_pose(vis.findtext('pose'))})
 
     collisions = []
@@ -96,7 +93,7 @@ def read_delivery(part_dir):
         geom = col.find('geometry')
         shape_el = next(iter(geom)) if geom is not None and len(geom) else None
         if shape_el is None or shape_el.tag not in URDF_SHAPES:
-            raise ImportError_(
+            raise ConversionError(
                 f'{sdf_path}: collision {col.get("name")!r} uses '
                 f'{shape_el.tag if shape_el is not None else "no"} geometry; '
                 f'URDF expresses only {", ".join(URDF_SHAPES)}')
@@ -112,40 +109,11 @@ def read_delivery(part_dir):
         else:
             uri = shape_el.findtext('uri')
             if not (part_dir / uri).exists():
-                raise ImportError_(f'{sdf_path}: collision mesh {uri} not delivered')
+                raise ConversionError(f'{sdf_path}: collision mesh {uri} not delivered')
             entry['filename'] = uri
             entry['scale'] = [float(v) for v in (shape_el.findtext('scale') or '1 1 1').split()]
         collisions.append(entry)
-
-    # Frames are the preferred channel for attachment data: a frame named
-    # `attach` is where this part bolts onto its parent, frames named
-    # `mount_<socket>` are where other parts bolt onto this one. Nothing in
-    # the deliveries carries them yet; <part>.yaml supplies the same data.
-    frames = {}
-    for fr in model.findall('frame') + link.findall('frame'):
-        frames[fr.get('name')] = parse_pose(fr.findtext('pose'))
-
-    return link.get('name'), visuals, collisions, frames
-
-
-def load_spec(part_dir, frames):
-    """
-    Load the per part data that is not in the delivery, or overrides it.
-
-    Keys: mass, density, com, axis, attach, mounts. Delivered frames seed
-    attach and mounts; the yaml wins on conflict.
-    """
-    part = part_dir.name
-    spec_path = part_dir / f'{part}.yaml'
-    spec = (yaml.safe_load(spec_path.read_text()) or {}) if spec_path.exists() else {}
-    mounts = {name[len('mount_'):]: pose for name, pose in frames.items()
-              if name.startswith('mount_')}
-    mounts.update(spec.get('mounts', {}))
-    if mounts:
-        spec['mounts'] = mounts
-    if 'attach' in frames and 'attach' not in spec:
-        spec['attach'] = frames['attach']
-    return spec
+    return visuals, collisions
 
 
 # --------------------------------------------------------------------------
@@ -183,7 +151,7 @@ def auto_inertia_primitives(part_dir, density):
         out = subprocess.run(['gz', 'sdf', '-p', '--expand-auto-inertials', 'model.sdf'],
                              cwd=tmp, capture_output=True, text=True)
     if out.returncode != 0 or '<inertial' not in out.stdout:
-        raise ImportError_(f'gz sdf auto inertia failed for {part_dir.name}:\n{out.stderr}')
+        raise ConversionError(f'gz sdf auto inertia failed for {part_dir.name}:\n{out.stderr}')
     expanded = ET.fromstring(out.stdout[out.stdout.index('<sdf'):])
     inert = expanded.find('model/link/inertial')
     mass = float(inert.findtext('mass'))
@@ -194,7 +162,7 @@ def auto_inertia_primitives(part_dir, density):
 
 
 def read_stl(path):
-    """Triangles of a binary or ASCII STL as a list of 3 vertex tuples."""
+    """Return the triangles of a binary or ASCII STL as lists of 3 vertices."""
     data = path.read_bytes()
     if data[:5] == b'solid' and b'facet' in data[:400]:
         nums = [float(v) for v in re.findall(rb'vertex\s+(\S+)\s+(\S+)\s+(\S+)', data)
@@ -220,7 +188,6 @@ def mesh_inertia(path, scale, density):
     tris = read_stl(path)
     vol = 0.0
     com = [0.0, 0.0, 0.0]
-    # second moments accumulated about the origin
     xx = yy = zz = xy = yz = xz = 0.0
     for tri in tris:
         a, b, c = [[v[i] * scale[i] for i in range(3)] for v in tri]
@@ -247,10 +214,9 @@ def mesh_inertia(path, scale, density):
         yz += f11(1, 2)
         xz += f11(0, 2)
     if vol <= 0:
-        raise ImportError_(f'{path.name}: mesh volume {vol:.3g}, not a closed outward mesh')
+        raise ConversionError(f'{path.name}: mesh volume {vol:.3g}, not a closed outward mesh')
     com = [c / vol for c in com]
     mass = density * vol
-    # tensor about origin, then shift to the center of mass
     ixx = density * (yy + zz)
     iyy = density * (xx + zz)
     izz = density * (xx + yy)
@@ -268,7 +234,7 @@ def mesh_inertia(path, scale, density):
 
 
 def combine(bodies):
-    """Combine (mass, com, tensor-about-own-com) bodies into one."""
+    """Combine (mass, com, tensor about own com) bodies into one."""
     mass = sum(b[0] for b in bodies)
     com = [sum(b[0] * b[1][i] for b in bodies) / mass for i in range(3)]
     tot = {k: 0.0 for k in ('ixx', 'ixy', 'ixz', 'iyy', 'iyz', 'izz')}
@@ -283,8 +249,7 @@ def combine(bodies):
     return mass, com, tot
 
 
-def compute_inertia(part_dir, collisions, spec):
-    density = float(spec.get('density', DEFAULT_DENSITY))
+def estimate_inertia(part_dir, collisions, density, mass_override):
     bodies = []
     prim = auto_inertia_primitives(part_dir, density)
     if prim:
@@ -292,24 +257,20 @@ def compute_inertia(part_dir, collisions, spec):
     for col in collisions:
         if col['shape'] == 'mesh':
             m, c, t = mesh_inertia(part_dir / col['filename'], col['scale'], density)
-            # the collision pose places the mesh in the link frame; rotation
-            # of mesh collisions is not handled by this prototype
             c = [c[i] + col['pose'][i] for i in range(3)]
             bodies.append((m, c, t))
     if not bodies:
-        return None, 'no collision geometry: inertia must be stated in the yaml'
+        raise ConversionError('no collision geometry to estimate inertia from; '
+                              'write the part by hand')
     mass, com, tensor = combine(bodies)
-    source = f'auto inertia from the delivered collision geometry at {density:g} kg/m^3'
-    if 'mass' in spec:
-        target = float(spec['mass'])
-        k = target / mass
+    source = (f'estimated from the delivered collision geometry at {density:g} kg/m^3 '
+              f'(SDF auto inertia); replace with measured values')
+    if mass_override is not None:
+        k = mass_override / mass
         tensor = {key: v * k for key, v in tensor.items()}
-        source = (f'auto inertia shape from the collision geometry, scaled from '
-                  f'{mass:.3f} kg (at {density:g} kg/m^3) to the stated mass {target:g} kg')
-        mass = target
-    if 'com' in spec:
-        com = [float(v) for v in spec['com']]
-        source += '; center of mass overridden by the yaml'
+        source = (f'tensor shape estimated from the collision geometry, scaled from '
+                  f'{mass:.3f} kg at {density:g} kg/m^3 to the stated {mass_override:g} kg')
+        mass = mass_override
     return (mass, com, tensor), source
 
 
@@ -325,50 +286,40 @@ def fmt_xyz(vals):
     return ' '.join(fmt(v) for v in vals)
 
 
-def emit_macro(part, visuals, collisions, inertia, source, spec):
-    mounts = spec.get('mounts', {})
-    default_axis = spec.get('axis', '0 0 1')
+def emit_macro(part, visuals, collisions, inertia, source, axis, attach, sockets):
+    mass, com, t = inertia
+    today = datetime.date.today().isoformat()
     lines = []
     w = lines.append
     w('<?xml version="1.0"?>')
     w('<!--')
-    w(f'  {part} part macro. GENERATED FILE, DO NOT EDIT.')
+    w(f'  {part} part macro.')
     w('')
-    w(f'  Written by scripts/import_part.py from models/{part}/model.sdf (the')
-    w(f'  modeler delivery) and models/{part}/{part}.yaml (measured values and')
-    w('  mounts); rerun the import to change anything here.')
+    w(f'  Bootstrapped from models/{part}/model.sdf by scripts/sdf_to_part.py on')
+    w(f'  {today}. This file is the part: maintain it by hand from here on.')
     w('')
     w(f'  Inertia: {source}.')
     w('')
-    w('  Macro contract: name parent xyz rpy collision, plus joint (fixed by')
-    w('  default) and axis for parts that spin. parent="" emits the link alone,')
-    w('  for the part that serves as the assembly root.')
+    w('  Contract (see parts.xacro): name parent xyz rpy collision joint axis.')
+    if sockets:
+        w('  Sockets other parts mount on, as frames <name>_<socket>:')
+        for name in sockets:
+            w(f'    {name}')
     w('-->')
     w('<robot xmlns:xacro="http://ros.org/wiki/xacro">')
     w('')
-    if mounts:
-        w('  <!-- Mount sockets: named poses on this part where other parts attach,')
-        w('       [x, y, z, roll, pitch, yaw] in the part frame. -->')
-        w(f'  <xacro:property name="{part}_mounts" value="${{dict(')
-        for i, (key, pose) in enumerate(mounts.items()):
-            sep = ',' if i < len(mounts) - 1 else ''
-            w(f'      {key}=[{", ".join(fmt(float(v)) for v in pose)}]{sep}')
-        w('  )}"/>')
-        w('')
     w(f'  <xacro:macro name="{part}"')
     w(f'               params="name parent xyz:=\'0 0 0\' rpy:=\'0 0 0\' collision:=true '
-      f'joint:=fixed axis:=\'{default_axis}\'">')
+      f'joint:=fixed axis:=\'{axis}\'">')
     w('')
     w('    <link name="${name}">')
-    if inertia:
-        mass, com, t = inertia
-        w('      <inertial>')
-        w(f'        <origin xyz="{fmt_xyz(com)}" rpy="0 0 0"/>')
-        w(f'        <mass value="{fmt(mass)}"/>')
-        w(f'        <inertia ixx="{fmt(t["ixx"])}" ixy="{fmt(t["ixy"])}" ixz="{fmt(t["ixz"])}"')
-        w(f'                 iyy="{fmt(t["iyy"])}" iyz="{fmt(t["iyz"])}"')
-        w(f'                 izz="{fmt(t["izz"])}"/>')
-        w('      </inertial>')
+    w('      <inertial>')
+    w(f'        <origin xyz="{fmt_xyz(com)}" rpy="0 0 0"/>')
+    w(f'        <mass value="{fmt(mass)}"/>')
+    w(f'        <inertia ixx="{fmt(t["ixx"])}" ixy="{fmt(t["ixy"])}" ixz="{fmt(t["ixz"])}"')
+    w(f'                 iyy="{fmt(t["iyy"])}" iyz="{fmt(t["iyz"])}"')
+    w(f'                 izz="{fmt(t["izz"])}"/>')
+    w('      </inertial>')
     for vis in visuals:
         w('      <visual>')
         w(f'        <origin xyz="{fmt_xyz(vis["pose"][:3])}" rpy="{fmt_xyz(vis["pose"][3:])}"/>')
@@ -398,16 +349,17 @@ def emit_macro(part, visuals, collisions, inertia, source, spec):
         w('      </xacro:if>')
     w('    </link>')
     w('')
-    w('    <xacro:if value="${parent != \'\'}">')
-    w('      <joint name="${name}_joint" type="${joint}">')
-    w('        <parent link="${parent}"/>')
-    w('        <child link="${name}"/>')
-    w('        <origin xyz="${xyz}" rpy="${rpy}"/>')
-    w('        <xacro:if value="${joint != \'fixed\'}">')
-    w('          <axis xyz="${axis}"/>')
-    w('        </xacro:if>')
-    w('      </joint>')
-    w('    </xacro:if>')
+    w('    <!-- attach: where this part bolts onto its parent, in the part frame;')
+    w('         the joint places that point at the requested pose. -->')
+    w('    <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"')
+    w(f'                      joint="${{joint}}" axis="${{axis}}" attach="{attach}"/>')
+    if sockets:
+        w('')
+        w('    <!-- Sockets: frames where other parts mount, in the part frame. -->')
+        for name, pose in sockets.items():
+            rpy = '' if all(abs(v) < 1e-12 for v in pose[3:]) else f' rpy="{fmt_xyz(pose[3:])}"'
+            w(f'    <xacro:part_socket name="${{name}}_{name}" parent="${{name}}" '
+              f'xyz="{fmt_xyz(pose[:3])}"{rpy}/>')
     w('')
     w('  </xacro:macro>')
     w('')
@@ -415,96 +367,62 @@ def emit_macro(part, visuals, collisions, inertia, source, spec):
     return '\n'.join(lines) + '\n'
 
 
-def import_part(part_dir, urdf_dir):
+def convert(part_dir, out_dir, args):
     part = part_dir.name
-    link_name, visuals, collisions, frames = read_delivery(part_dir)
-    spec = load_spec(part_dir, frames)
-    inertia, source = compute_inertia(part_dir, collisions, spec)
-    if inertia is None and 'mass' not in spec:
-        raise ImportError_(f'{part}: {source}')
-    out = urdf_dir / f'{part}.urdf.xacro'
-    out.write_text(emit_macro(part, visuals, collisions, inertia, source, spec))
-    mass = inertia[0] if inertia else float(spec['mass'])
-    mount_data = {'attach': [float(v) for v in spec.get('attach', [0, 0, 0, 0, 0, 0])],
-                  'axis': str(spec.get('axis', '0 0 1')),
-                  'mounts': {k: [float(v) for v in pose]
-                             for k, pose in spec.get('mounts', {}).items()}}
-    return out, mass, len(collisions), mount_data
-
-
-PARTS_XACRO_HEADER = """\
-<?xml version="1.0"?>
-<!--
-  bluerobotics_parts: the parts level macro library. GENERATED include list,
-  written by scripts/import_part.py; rerun the import after adding a part.
-
-  Include this once and every part is available as a macro:
-
-      <xacro:include filename="$(find bluerobotics_parts)/urdf/parts.xacro"/>
-      <xacro:t200_thruster name="thruster_port" parent="base_link" xyz="-0.5 0.3 -0.1"/>
-
-  Macro contract, identical for every part:
-
-      name       link name for this instance; the joint is <name>_joint
-      parent     link to attach to; "" emits the link alone (assembly root)
-      xyz / rpy  mount pose relative to parent (meters / radians)
-      collision  false to instantiate the part without contact geometry
-      joint      fixed (default) or continuous / revolute for parts that spin
-      axis       joint axis in the part frame, used when joint is not fixed
-
-  Mount sockets and attach frames are in mounts.yaml, consumed by the
-  dispatcher in assembly.xacro.
--->
-<robot xmlns:xacro="http://ros.org/wiki/xacro">
-
-"""
-
-
-def write_library(urdf_dir, imported):
-    lines = [PARTS_XACRO_HEADER]
-    for part in sorted(imported):
-        lines.append(f'  <xacro:include filename="$(find {PACKAGE})/urdf/{part}.urdf.xacro"/>\n')
-    lines.append('\n</robot>\n')
-    (urdf_dir / 'parts.xacro').write_text(''.join(lines))
-    mounts = {part: imported[part] for part in sorted(imported)}
-    header = ('# GENERATED by scripts/import_part.py: attach frame and mount sockets\n'
-              '# per part, [x, y, z, roll, pitch, yaw] in the part frame. Edit the\n'
-              '# per part <part>.yaml (or deliver SDF frames) and rerun the import.\n')
-    (urdf_dir / 'mounts.yaml').write_text(
-        header + yaml.safe_dump(mounts, sort_keys=False, default_flow_style=None, width=120))
+    out = out_dir / f'{part}.urdf.xacro'
+    if out.exists() and not args.force:
+        raise ConversionError(f'{out} exists; it is the part now. Use --force to overwrite')
+    visuals, collisions = read_delivery(part_dir)
+    inertia, source = estimate_inertia(part_dir, collisions, args.density, args.mass)
+    sockets = {}
+    for spec in args.socket or []:
+        name, _, nums = spec.partition('=')
+        vals = [float(v) for v in nums.split(',')]
+        if not name or len(vals) not in (3, 6):
+            raise ConversionError(f'bad --socket {spec!r}; expected name=x,y,z[,r,p,y]')
+        sockets[name] = vals + [0.0] * (6 - len(vals))
+    out.write_text(emit_macro(part, visuals, collisions, inertia, source,
+                              args.axis, args.attach, sockets))
+    return out, inertia[0], len(collisions)
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
-    ap.add_argument('paths', nargs='+', help='part directories, or the models/ dir with --all')
+    ap.add_argument('paths', nargs='+', help='part directory, or the models/ dir with --all')
     ap.add_argument('--all', action='store_true',
-                    help='import every delivered part under the given dir')
-    ap.add_argument('--urdf-dir', help='output directory (default: ../urdf next to models/)')
+                    help='bootstrap every delivered part under the given dir')
+    ap.add_argument('--out-dir', help='where the macros go (default: ../urdf next to models/)')
+    ap.add_argument('--mass', type=float, help='known mass in kg; the estimate is scaled to it')
+    ap.add_argument('--density', type=float, default=DEFAULT_DENSITY,
+                    help='density for the estimate, kg/m^3 (default %(default)s)')
+    ap.add_argument('--axis', default='1 0 0', help='spin axis default for the macro')
+    ap.add_argument('--attach', default='0 0 0',
+                    help='attach point in the part frame, "x y z"')
+    ap.add_argument('--socket', action='append', metavar='NAME=x,y,z[,r,p,y]',
+                    help='mount socket to declare (repeatable)')
+    ap.add_argument('--force', action='store_true', help='overwrite an existing macro')
     args = ap.parse_args(argv)
 
     if args.all:
-        roots = [pathlib.Path(args.paths[0])]
-        parts = sorted(p for p in roots[0].iterdir() if (p / 'model.sdf').exists())
+        root = pathlib.Path(args.paths[0])
+        parts = sorted(p for p in root.iterdir() if (p / 'model.sdf').exists())
     else:
         parts = [pathlib.Path(p) for p in args.paths]
     if not parts:
         sys.exit('no delivered parts found')
-    urdf_dir = pathlib.Path(args.urdf_dir) if args.urdf_dir else parts[0].parent.parent / 'urdf'
-    urdf_dir.mkdir(parents=True, exist_ok=True)
+    out_dir = pathlib.Path(args.out_dir) if args.out_dir else parts[0].parent.parent / 'urdf'
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     failures = 0
-    imported = {}
     for part_dir in parts:
         try:
-            out, mass, ncol, mount_data = import_part(part_dir, urdf_dir)
-            imported[part_dir.name] = mount_data
-            print(f'{part_dir.name:34s} mass={mass:8.3f} kg  collisions={ncol}  -> {out.name}')
-        except ImportError_ as exc:
+            out, mass, ncol = convert(part_dir, out_dir, args)
+            print(f'{part_dir.name:34s} mass={mass:8.3f} kg  collisions={ncol}  -> {out}')
+        except ConversionError as exc:
             failures += 1
             print(f'{part_dir.name:34s} FAILED: {exc}', file=sys.stderr)
-    if args.all:
-        write_library(urdf_dir, imported)
-        print(f'library: {urdf_dir / "parts.xacro"}, {urdf_dir / "mounts.yaml"}')
+    if not failures:
+        print('next: add the include line to urdf/parts.xacro and review the file')
     sys.exit(1 if failures else 0)
 
 

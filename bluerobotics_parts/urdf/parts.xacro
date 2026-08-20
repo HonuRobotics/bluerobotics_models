@@ -1,27 +1,85 @@
 <?xml version="1.0"?>
 <!--
-  bluerobotics_parts: the parts level macro library. GENERATED include list,
-  written by scripts/import_part.py; rerun the import after adding a part.
+  bluerobotics_parts: the parts level macro library.
 
   Include this once and every part is available as a macro:
 
       <xacro:include filename="$(find bluerobotics_parts)/urdf/parts.xacro"/>
       <xacro:t200_thruster name="thruster_port" parent="base_link" xyz="-0.5 0.3 -0.1"/>
 
-  Macro contract, identical for every part:
+  ===== the part macro contract =====
+
+  Every part macro takes exactly these parameters:
 
       name       link name for this instance; the joint is <name>_joint
       parent     link to attach to; "" emits the link alone (assembly root)
       xyz / rpy  mount pose relative to parent (meters / radians)
       collision  false to instantiate the part without contact geometry
-      joint      fixed (default) or continuous / revolute for parts that spin
+      joint      fixed (default), or continuous / revolute for parts that spin
       axis       joint axis in the part frame, used when joint is not fixed
 
-  Mount sockets and attach frames are in mounts.yaml, consumed by the
-  dispatcher in assembly.xacro.
+  and emits one link (inertia, visual, optional collision), the joint that
+  mounts it, and any mount sockets it offers. A socket is a massless frame
+  named <name>_<socket> that other parts can take as their parent; it shows
+  up in TF and is lumped away in Gazebo. The part's attach offset (where it
+  bolts on, in its own frame) is baked into the part_joint call, so mounting
+  at a socket needs no arithmetic from the caller.
+
+  The URDF xacro is the part. It may be bootstrapped from a modeler's SDF
+  with scripts/sdf_to_part.py or written by hand; nothing downstream knows
+  or cares which. Mass, inertia and center of gravity are stated in the part
+  and nowhere else; assemblies compose them (AUR_BUOYANCY_DESIGN.md).
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
+  <!-- ===== helpers used by every part macro ===== -->
+
+  <!-- The mounting joint. attach is the bolt on point in the part frame:
+       the child frame is placed at xyz/rpy minus the rotated attach offset,
+       so that point lands exactly on the requested pose. parent="" means
+       root: no joint is emitted. -->
+  <xacro:macro name="part_joint"
+               params="name parent xyz rpy joint:=fixed axis:='1 0 0' attach:='0 0 0'">
+    <xacro:if value="${parent != ''}">
+      <xacro:property name="_t" value="${[float(v) for v in xyz.split()]}"/>
+      <xacro:property name="_r" value="${[float(v) for v in rpy.split()]}"/>
+      <xacro:property name="_a" value="${[-float(v) for v in attach.split()]}"/>
+      <xacro:property name="_cr" value="${cos(_r[0])}"/>
+      <xacro:property name="_sr" value="${sin(_r[0])}"/>
+      <xacro:property name="_cp" value="${cos(_r[1])}"/>
+      <xacro:property name="_sp" value="${sin(_r[1])}"/>
+      <xacro:property name="_cy" value="${cos(_r[2])}"/>
+      <xacro:property name="_sy" value="${sin(_r[2])}"/>
+      <xacro:property name="_ox"
+        value="${_t[0] + _cy*_cp*_a[0] + (_cy*_sp*_sr - _sy*_cr)*_a[1] + (_cy*_sp*_cr + _sy*_sr)*_a[2]}"/>
+      <xacro:property name="_oy"
+        value="${_t[1] + _sy*_cp*_a[0] + (_sy*_sp*_sr + _cy*_cr)*_a[1] + (_sy*_sp*_cr - _cy*_sr)*_a[2]}"/>
+      <xacro:property name="_oz"
+        value="${_t[2] - _sp*_a[0] + _cp*_sr*_a[1] + _cp*_cr*_a[2]}"/>
+      <joint name="${name}_joint" type="${joint}">
+        <parent link="${parent}"/>
+        <child link="${name}"/>
+        <origin xyz="${_ox} ${_oy} ${_oz}" rpy="${rpy}"/>
+        <xacro:if value="${joint != 'fixed'}">
+          <axis xyz="${axis}"/>
+        </xacro:if>
+      </joint>
+    </xacro:if>
+  </xacro:macro>
+
+  <!-- A mount socket: massless frame fixed to the part. -->
+  <xacro:macro name="part_socket" params="name parent xyz rpy:='0 0 0'">
+    <link name="${name}"/>
+    <joint name="${name}_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${name}"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- ===== catalog =====
+       One include per part, alphabetical. The file name and the macro name
+       are the part name. -->
   <xacro:include filename="$(find bluerobotics_parts)/urdf/basestation_antenna.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/blueboat_antenna_mast.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/blueboat_chassis.urdf.xacro"/>

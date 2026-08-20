@@ -4,34 +4,49 @@ Shared part library for all Blue Robotics vehicle models.
 
 A **part** is a single physical component: one mesh, **no joints**, geometry only — visual, collision and inertia.
 
-Parts are vehicle-agnostic. A part lives here whether one vehicle uses it or both. Assemblies — parts plus the joints between them — live in the per-vehicle `*_description` packages.
+Parts are vehicle-agnostic. A part lives here whether one vehicle uses it or both. Assemblies — parts plus the joints between them — live in the per-vehicle `*_description` packages and are composed from a parts list by [`urdf/assembly.xacro`](urdf/assembly.xacro).
 
 See the [repository README](../README.md) for the full design.
+
+## The part is a URDF xacro macro
+
+`urdf/<part>.urdf.xacro` is the part. It is hand-maintained source, committed like any other, and complete on its own: a link with inertia, the visual mesh, optional collision geometry, the joint that mounts the part, and any mount sockets the part offers. [`urdf/parts.xacro`](urdf/parts.xacro) includes every part and documents the macro contract:
+
+```
+name       link name for this instance; the joint is <name>_joint
+parent     link to attach to; "" emits the link alone (assembly root)
+xyz / rpy  mount pose relative to parent (meters / radians)
+collision  false to instantiate the part without contact geometry
+joint      fixed (default), or continuous / revolute for parts that spin
+axis       joint axis in the part frame, used when joint is not fixed
+```
+
+Two helpers in `parts.xacro` carry the mechanics every part shares. `part_joint` emits the mounting joint and folds in the part's **attach** offset (where it bolts on, in its own frame), so a mast whose origin is at its centroid still stands on the deck when mounted at a deck socket. `part_socket` emits a **socket**: a massless frame named `<name>_<socket>` where other parts mount; it is visible in TF and lumped away in Gazebo.
+
+How the file came to exist does not matter downstream. It can be written by hand from a datasheet, or bootstrapped from a modeler's SDF delivery with `scripts/sdf_to_part.py` (below). Mass, inertia tensor and center of gravity are stated in the part and nowhere else; assemblies compose them, see [AUR_BUOYANCY_DESIGN.md](../AUR_BUOYANCY_DESIGN.md).
 
 ## What the modeler delivers
 
 Into `models/<model_name>/`, using exactly the directory names listed in [`models/parts.csv`](models/parts.csv). Filenames are explicit — they repeat the part name, so a file still identifies itself once it has been moved, attached to a message or opened on its own:
 
 ```
-models/blueboat_vessel/
-  blueboat_vessel.visual.glb        # required — visual mesh, PBR materials embedded
-  model.sdf                         # required — collision primitives
-  blueboat_vessel.collision.stl     # optional — only if a primitive will not do
-  model.config                      # optional — harmless, unused
+models/blueboat_chassis/
+  blueboat_chassis.visual.glb        # required — visual mesh, PBR materials embedded
+  model.sdf                          # collision primitives, as delivered
+  blueboat_chassis.collision.stl     # optional — only if a primitive will not do
 ```
 
-`model.sdf` keeps its conventional name; Gazebo and the import script both expect it. Collision meshes carry no materials or UVs, so STL is the leanest choice — any format Gazebo reads will work, but pick one and stay with it.
+The `.glb` is what the part macro's visual points at, so it stays in the repository. `model.sdf` is the modeler's work product: the collision primitives, and the input to the bootstrap below. Nothing in ROS or Gazebo reads it; once a part's macro exists the SDF is reference material, and the plan is to keep the SDF deliveries on a separate branch so the released package carries only what it uses.
 
-**Collision geometry is specified by the modeler, in `model.sdf`, as primitive shapes in SDF `<geometry>`.** Nothing downstream invents the contact shape: the URDF form is a translation of that file rather than a second description of the same thing.
-
-Two more files live in the same directory. The modeler does not write them — see [The three files per part](#the-three-files-per-part). `model.sdf` itself only stays alongside them while the catalog is being built; [Where each file lives](#where-each-file-lives) has the arrangement.
+**Collision geometry is specified by the modeler, in `model.sdf`, as primitive shapes in SDF `<geometry>`.** The bootstrap translates it; nothing downstream invents the contact shape.
 
 ### Rules
 
 1. **The directory name is the part name.** Not the mesh's internal name, not the Blender object name. If the right directory is not in `parts.csv`, ask before inventing one.
-2. **Origin and orientation.** The origin of the part's body-centered frame sits at the **centroid of the mesh** — the center of the geometry, equivalently its center of mass if uniform density is assumed. The frame is aligned per [REP 103](https://www.ros.org/reps/rep-0103.html): **x forward, y left, z up**. Note that the centroid of the mesh is not the part's center of gravity, which depends on where the mass actually sits and is stated separately in `<part>.urdf.xacro`.
-3. **Collision shapes: box, cylinder, sphere or mesh — never cone or plane.** URDF cannot express cone or plane at all, and the import will reject them. Prefer primitives; a coarse approximation of the mesh is what is wanted.
+2. **Origin and orientation.** The origin of the part's body-centered frame sits at the **centroid of the mesh** — the center of the geometry, equivalently its center of mass if uniform density is assumed. The frame is aligned per [REP 103](https://www.ros.org/reps/rep-0103.html): **x forward, y left, z up**. Note that the centroid of the mesh is not the part's center of gravity, which depends on where the mass actually sits and is stated separately in the part macro.
+3. **Collision shapes: box, cylinder, sphere or mesh — never cone or plane.** URDF cannot express cone or plane at all, and the bootstrap rejects them. Prefer primitives; a coarse approximation of the mesh is what is wanted.
 4. **No spaces or `.001`-style suffixes in any name.** Collision and link names become ROS frame and topic names downstream.
+5. **Attachment points, when known, as SDF frames.** A `<frame name="attach">` where the part bolts onto its parent and `<frame name="mount_<socket>">` for each place other parts bolt onto it save a measurement downstream. Not required; the bootstrap also takes them on the command line.
 
 Materials ride along inside the `.glb`. Gazebo loads glTF PBR directly, so nothing needs declaring anywhere else — but the `.glb` must actually carry them.
 
@@ -45,163 +60,89 @@ Recorded so the catalog stays coherent as it grows. All lowercase, snake_case:
 * **Function suffix where the product name does not say what it is** — `_sidescan`, `_multibeam`, `_scanning`, `_stereocamera`.
 * **Articulated assemblies split into their moving pieces**, sharing a prefix so they sort together: `newton_gripper_cylinder`, `newton_gripper_shaft`, `newton_gripper_jaw`, `newton_sampler_cup`.
 
-## The three files per part
+## Bootstrapping a part from an SDF delivery
 
-Making a part takes three files, and which of them is written by a person matters. A *released* part is the last two — see [Where each file lives](#where-each-file-lives).
+`scripts/sdf_to_part.py` writes the first version of `urdf/<part>.urdf.xacro` from `models/<part>/model.sdf`:
 
-| File | Written by | Contains |
-|---|---|---|
-| `model.sdf` | the modeler | Collision geometry, as SDF primitive shapes |
-| `<part>.collision.xacro` | `scripts/import_part.py` | The same collision geometry translated into a URDF macro |
-| `<part>.urdf.xacro` | hand-authored | The part macro assemblies call. Mass, inertia tensor and center-of-gravity pose |
+* the visual, pointing at the delivered `.glb`;
+* the collision primitives, translated to URDF (a collision mesh is referenced as delivered);
+* an **inertia estimate**: the primitives are run through SDF auto inertia (`gz sdf --expand-auto-inertials`) at a uniform density, which yields mass, center of mass and the full tensor; a collision mesh is integrated directly. With `--mass` the tensor is scaled to the known mass, keeping its shape and center.
 
-**Who authors what, and what reads what.** The modeler works in SDF — that is what their tooling produces, and `model.sdf` is their work product. ROS and Gazebo read the xacro. `scripts/import_part.py` is the seam between the two.
+Sockets, the attach offset and a spin axis can be seeded on the command line, or come from SDF frames when the modeler delivered them:
 
-### Where each file lives
+```bash
+ros2 run bluerobotics_parts sdf_to_part.py models/t200_thruster --mass 0.344
+ros2 run bluerobotics_parts sdf_to_part.py models/blueboat_antenna_mast --attach "0 0 -0.331"
+ros2 run bluerobotics_parts sdf_to_part.py models/blueboat_chassis --mass 12 \
+    --socket motor_port=-0.52,0.301,-0.117 --socket motor_stbd=-0.52,-0.301,-0.117
+```
 
-The SDF half of that seam is how the catalog gets built. It is not something a user of this package should have to learn, so it is kept without being put in front of them:
-
-| | while the catalog is being built | once the models are released |
-|---|---|---|
-| `<part>.visual.glb` | default branch | default branch |
-| `<part>.urdf.xacro`, `<part>.collision.xacro` | default branch | default branch |
-| `model.sdf`, `scripts/import_part.py` | default branch, temporarily | dev branch only |
-
-While part assets are actively being processed, `model.sdf` and the import script sit on the production branch — currently `lyrical` — because that is where the work is happening and where the acceptance workflow below is being run. When the models are released they come off it.
-
-They are not deleted. A dev branch, kept in sync with the default branch, carries them, so every delivered SDF and the script that converted it stay available for reuse, re-import and inspection. Both halves of the decision matter: the SDF pipeline is worth keeping, and it is worth keeping out of the released package.
-
-What a user of the released package sees is URDF: the xacro macros stating each part's inertia and collision. Getting a part into an assembly requires none of SDF, the import script, or an account of how the catalog was built. A user delivering their own part is free to hand-author the xacro and skip the SDF route entirely — nothing downstream knows or cares which way a part arrived.
-
-`<part>.urdf.xacro` includes `<part>.collision.xacro` and calls its macro, so sourcing the generated geometry is a one-line include rather than a block pasted into the middle of a hand-written file.
-
-They are separate files on purpose. Generated content and hand-authored content in one file means a re-import either clobbers measured values or has to be careful not to; split apart, the generated file is overwritten wholesale and the hand-authored one is never touched by tooling at all.
-
-**The generated file is committed.** It is generated once, at design time, and checked into the repo like any other source. It is not a build artifact: nothing regenerates it during `colcon build`, and a fresh clone has a complete part without running the import. Re-running the import is something a person does when the modeler redelivers, not something the build does.
-
-Committing it is also what makes the split above work. Once `model.sdf` comes off the default branch, `<part>.collision.xacro` is the collision geometry there — a released part is complete on its own, with nothing to regenerate and nothing to fetch from another branch.
-
-Inertia is the half no mesh can supply. Mass, the inertia tensor and the center-of-gravity pose come from measurement or from the vendor, not from the primitive geometry, and they are stated once — in the part, and nowhere else. Assemblies compose them; nothing re-derives them from a box. See [AUR_BUOYANCY_DESIGN.md](../AUR_BUOYANCY_DESIGN.md) for how assemblies use them.
-
-Collision is optional per part at the point of use — an assembly can mount a part with `collision: false` and get the visual and the mass without the contact geometry.
+The tool refuses to overwrite an existing macro unless told to with `--force`: once written, the file is maintained by hand, and a redelivery is compared against it rather than stamped over it. Nothing regenerates it during `colcon build`.
 
 ## Accepting a new part
 
-What to do when the modeler delivers. In order — the Gazebo check comes first because everything after it is work done on top of the delivery, and there is no point doing that work on a part that is the wrong scale or facing the wrong way.
-
-Run everything inside the drydock container, from `~/maritime_ws`.
+In order — the Gazebo check comes first because everything after it is work done on top of the delivery.
 
 ### 1. Files and names
 
 - [ ] Directory name matches a row in [`models/parts.csv`](models/parts.csv). If it does not, stop and ask — do not invent a row.
 - [ ] `<part>.visual.glb` and `model.sdf` are both present, named for the part.
-- [ ] Collision shapes in `model.sdf` are box, cylinder, sphere or mesh. **Never cone or plane** — URDF cannot express them and the import will reject them.
-- [ ] `model.sdf` parses:
+- [ ] Collision shapes in `model.sdf` are box, cylinder, sphere or mesh. **Never cone or plane.**
+- [ ] `model.sdf` parses: `gz sdf -p models/<part>/model.sdf`
 
-      gz sdf -p models/<part>/model.sdf
-
-### 2. Bring it into Gazebo
-
-Eyes on a render. None of this can be done from a terminal, and all of it is cheaper to catch now than after the part is wired into an assembly.
+### 2. Look at the delivery in Gazebo
 
 ```bash
 export SDF_PATH=$GZ_SIM_RESOURCE_PATH
 gz sim models/<part>/model.sdf
 ```
 
-- [ ] **Scale.** Compare against something of known size in the world, not against intuition. This is the most common defect.
-- [ ] **Coordinate frame location.** Origin sits at the centroid of the mesh — not at the base, and not at the point the part happens to bolt on.
-- [ ] **Coordinate frame orientation.** Per [REP 103](https://www.ros.org/reps/rep-0103.html): x forward, y left, z up. A part delivered in another convention looks correct in isolation and is wrong in every assembly that uses it — worth being deliberate rather than glancing.
-- [ ] **Materials.** PBR renders as intended, not flat grey. Materials must be inside the `.glb`.
-- [ ] **Collision geometry.** Turn on collision display and confirm the primitives are a sensible envelope — not inside-out, not wildly oversized, not offset from the mesh.
+- [ ] **Scale.** Compare against something of known size, not against intuition. This is the most common defect.
+- [ ] **Frame location.** Origin at the centroid of the mesh — not at the base, not at the bolt-on point.
+- [ ] **Frame orientation.** x forward, y left, z up.
+- [ ] **Materials.** PBR renders as intended, not flat grey.
+- [ ] **Collision geometry.** A sensible envelope: not inside-out, not oversized, not offset.
 
-Anything wrong here goes back to the modeler. Do not work around it downstream.
+Anything wrong here goes back to the modeler. To see every delivery at once, [`worlds/parts_gallery.sdf`](worlds/parts_gallery.sdf) lays out all the `model.sdf` files.
 
-To see the whole catalog at once instead of one part at a time, [`worlds/parts_gallery.sdf`](worlds/parts_gallery.sdf) lays out every part that has a mesh and a `model.sdf`, grouped by kind:
-
-```bash
-gz sim $(ros2 pkg prefix --share bluerobotics_parts)/worlds/parts_gallery.sdf
-```
-
-That works once the package is built and sourced — the environment hook puts the install share directory on `GZ_SIM_RESOURCE_PATH`, which is what the world's `<include>` URIs resolve against. To run it straight from the source tree without building:
+### 3. Bootstrap the macro and review it
 
 ```bash
-cd ~/maritime_ws/src/bluerobotics_models
-export GZ_SIM_RESOURCE_PATH=$PWD
-export SDF_PATH=$GZ_SIM_RESOURCE_PATH
-gz sim bluerobotics_parts/worlds/parts_gallery.sdf
+ros2 run bluerobotics_parts sdf_to_part.py models/<part> [--mass KG] [--attach "x y z"] [--socket NAME=x,y,z]
 ```
 
-Either way the search path has to contain the directory that *holds* `bluerobotics_parts`, since the URIs are package qualified. The gallery `<include>`s each part's `model.sdf` rather than copying it, so a redelivered part appears without editing the world; only the poses need regenerating when new parts land.
+- [ ] Read `urdf/<part>.urdf.xacro` through. This is the review it gets; it is source from here on.
+- [ ] Mass: stated if known (`--mass`), otherwise the density estimate, flagged in the file header for replacement.
+- [ ] Sockets and attach offset, if the part has them.
+- [ ] Add the include line to [`urdf/parts.xacro`](urdf/parts.xacro), alphabetically.
 
-Every part sits with its origin at `z = 1`, above the ground plane so nothing is hidden from below. The origins are coplanar, which makes the origin convention comparable across parts at a glance.
-
-### 3. Generate the collision macro
+### 4. Verify the macro
 
 ```bash
-ros2 run bluerobotics_parts import_part.py models/<part>
+colcon build --merge-install --packages-select bluerobotics_parts && source install/setup.bash
+PARTS=$(ros2 pkg prefix --share bluerobotics_parts)
+xacro $PARTS/urdf/part_probe.urdf.xacro part:=<part> > /tmp/probe.urdf && check_urdf /tmp/probe.urdf
 ```
 
-- [ ] `<part>.collision.xacro` is written, and the geometry in it matches what you just looked at.
-- [ ] Read it through. This is the only review it gets — nothing regenerates it afterwards.
-- [ ] Commit it. It is source, not a build artifact.
+[`urdf/part_probe.urdf.xacro`](urdf/part_probe.urdf.xacro) mounts the part four ways in one pass: two instances coexist, `collision:=false` works, and a part can parent to another part. `check_urdf` does not resolve `package://`; check mesh URIs resolve separately if in doubt.
 
-> `scripts/import_part.py` is not written yet. Until it is, the collision macro is hand-written to the same shape, which makes the read-through matter more rather than less.
-
-This step needs `model.sdf` and the import script, so it runs on whichever branch carries them — the production branch while the catalog is being built, the dev branch afterwards. See [Where each file lives](#where-each-file-lives). The output, `<part>.collision.xacro`, is committed to the default branch either way.
-
-### 4. Fill in the mass properties
-
-In `<part>.urdf.xacro`, from measurement or the vendor — not from the mesh, and not from the primitive:
-
-- [ ] `<mass>` in kg.
-- [ ] `<origin>` of the `<inertial>` block — the center-of-gravity pose in the part frame.
-- [ ] `<inertia>` tensor about that CoG.
-- [ ] No `TODO` markers left behind.
-
-### 5. Verify the part macro runs
-
-Add the include line to [`urdf/parts.xacro`](urdf/parts.xacro), alphabetically, then:
+### 5. Check inertia, collisions and visuals together
 
 ```bash
-colcon build --merge-install --packages-select bluerobotics_parts
-source install/setup.bash
-PARTS=$(ros2 pkg prefix bluerobotics_parts)/share/bluerobotics_parts
-xacro $PARTS/urdf/part_probe.urdf.xacro part:=<part> > /tmp/probe.urdf
-check_urdf /tmp/probe.urdf
+ros2 run bluerobotics_parts parts_check_world.py --out $PARTS/worlds/parts_check.sdf
+gz sim $PARTS/worlds/parts_check.sdf
 ```
 
-[`urdf/part_probe.urdf.xacro`](urdf/part_probe.urdf.xacro) mounts the part four ways in one pass, so this covers the things that actually break:
-
-- [ ] It instantiates at all.
-- [ ] Two instances coexist — `probe` and `probe_second` — with no name collision.
-- [ ] `probe_nocol` has the visual but no collision, so `collision:=false` works.
-- [ ] `probe_stacked` hangs off `probe` rather than `base_link`, so a part can parent to another part.
-- [ ] `check_urdf` parses and prints the tree.
-
-`check_urdf` validates the XML but does not resolve `package://`, so it passes even when the mesh file is missing entirely. Check the URIs separately:
-
-```bash
-for u in $(grep -o 'package://[^"]*' /tmp/probe.urdf | sort -u); do
-  pkg=${u#package://}; rel=${pkg#*/}; pkg=${pkg%%/*}
-  d=$(ros2 pkg prefix --share "$pkg" 2>/dev/null)
-  [ -n "$d" ] && [ -f "$d/$rel" ] && echo "ok       $u" || echo "MISSING  $u"
-done
-```
-
-- [ ] Every mesh URI resolves to a file that exists.
-
-Two failure modes worth recognizing. A part name that is not included yet fails with `unknown macro name: xacro:<part>`, which names the thing you forgot. Omitting `part:=` altogether fails with `Undefined substitution argument part`.
+[`worlds/parts_check.sdf`](worlds/parts_check.sdf) lays out every part **from its macro** — each expanded and converted to SDF exactly as the assembled vehicle is — as its own static model on a grid. Right click a part, View → Collisions / Inertia / Center of Mass / Transparent, and compare against the mesh. The committed world is regenerated whenever a macro changes.
 
 ### 6. In an assembly
 
-- [ ] Mount it on a real vehicle and confirm the aggregate mass properties move the way you would expect for something of that mass in that position.
+- [ ] Add it to a vehicle's parts config and confirm the aggregate mass properties move the way you would expect.
 - [ ] For a USV, check the waterline still looks right; for a UUV, check trim has not been thrown off.
 
 ## Parts naming
 
-Parts catalog is [`models/parts.csv`](models/parts.csv) — one row per part.  Blue Robotics publish renderings, dimensions and CAD for most parts on the product pages linked there.
-
+Parts catalog is [`models/parts.csv`](models/parts.csv) — one row per part. Blue Robotics publish renderings, dimensions and CAD for most parts on the product pages linked there.
 
 ```bash
 column -s, -t models/parts.csv | less -S     # readable view

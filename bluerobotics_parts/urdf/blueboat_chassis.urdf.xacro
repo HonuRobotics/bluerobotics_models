@@ -1,32 +1,25 @@
 <?xml version="1.0"?>
 <!--
-  blueboat_chassis part macro. GENERATED FILE, DO NOT EDIT.
+  blueboat_chassis part macro.
 
-  Written by scripts/import_part.py from models/blueboat_chassis/model.sdf (the
-  modeler delivery) and models/blueboat_chassis/blueboat_chassis.yaml (measured values and
-  mounts); rerun the import to change anything here.
+  Bootstrapped from models/blueboat_chassis/model.sdf by scripts/sdf_to_part.py on
+  2026-08-20. This file is the part: maintain it by hand from here on.
 
-  Inertia: auto inertia shape from the collision geometry, scaled from 68.139 kg (at 1000 kg/m^3) to the stated mass 12 kg.
+  Inertia: tensor shape estimated from the collision geometry, scaled from 68.139 kg at 1000 kg/m^3 to the stated 12 kg.
 
-  Macro contract: name parent xyz rpy collision, plus joint (fixed by
-  default) and axis for parts that spin. parent="" emits the link alone,
-  for the part that serves as the assembly root.
+  Contract (see parts.xacro): name parent xyz rpy collision joint axis.
+  Sockets other parts mount on, as frames <name>_<socket>:
+    motor_port
+    motor_stbd
+    mast_socket
+    flag_socket
+    payload
+    ping_mount
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <!-- Mount sockets: named poses on this part where other parts attach,
-       [x, y, z, roll, pitch, yaw] in the part frame. -->
-  <xacro:property name="blueboat_chassis_mounts" value="${dict(
-      motor_port=[-0.52, 0.301, -0.117, 0, 0, 0],
-      motor_stbd=[-0.52, -0.301, -0.117, 0, 0, 0],
-      mast_socket=[-0.298, 0, 0.147, 0, 0, 0],
-      flag_socket=[-0.298, 0.2, 0.147, 0, 0, 0],
-      payload=[0.299, 0, 0.147, 0, 0, 0],
-      ping_mount=[0, -0.12, 0.1, 0, 0, 0]
-  )}"/>
-
   <xacro:macro name="blueboat_chassis"
-               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='0 0 1'">
+               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='1 0 0'">
 
     <link name="${name}">
       <inertial>
@@ -82,16 +75,18 @@
       </xacro:if>
     </link>
 
-    <xacro:if value="${parent != ''}">
-      <joint name="${name}_joint" type="${joint}">
-        <parent link="${parent}"/>
-        <child link="${name}"/>
-        <origin xyz="${xyz}" rpy="${rpy}"/>
-        <xacro:if value="${joint != 'fixed'}">
-          <axis xyz="${axis}"/>
-        </xacro:if>
-      </joint>
-    </xacro:if>
+    <!-- attach: where this part bolts onto its parent, in the part frame;
+         the joint places that point at the requested pose. -->
+    <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
+                      joint="${joint}" axis="${axis}" attach="0 0 0"/>
+
+    <!-- Sockets: frames where other parts mount, in the part frame. -->
+    <xacro:part_socket name="${name}_motor_port" parent="${name}" xyz="-0.52 0.301 -0.117"/>
+    <xacro:part_socket name="${name}_motor_stbd" parent="${name}" xyz="-0.52 -0.301 -0.117"/>
+    <xacro:part_socket name="${name}_mast_socket" parent="${name}" xyz="-0.298 0 0.147"/>
+    <xacro:part_socket name="${name}_flag_socket" parent="${name}" xyz="-0.298 0.2 0.147"/>
+    <xacro:part_socket name="${name}_payload" parent="${name}" xyz="0.299 0 0.147"/>
+    <xacro:part_socket name="${name}_ping_mount" parent="${name}" xyz="0 -0.12 0.1"/>
 
   </xacro:macro>
 

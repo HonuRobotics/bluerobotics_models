@@ -188,6 +188,42 @@
             </geometry>
           </visual>
         </link>
+        <frame name='blueboat_chassis_flag_socket_joint' attached_to='blueboat_chassis'>
+          <pose>-0.29799999999999999 0.20000000000000001 0.14699999999999999 0 0 0</pose>
+        </frame>
+        <frame name='blueboat_chassis_flag_socket' attached_to='blueboat_chassis_flag_socket_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='blueboat_chassis_mast_socket_joint' attached_to='blueboat_chassis'>
+          <pose>-0.29799999999999999 0 0.14699999999999999 0 0 0</pose>
+        </frame>
+        <frame name='blueboat_chassis_mast_socket' attached_to='blueboat_chassis_mast_socket_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='blueboat_chassis_motor_port_joint' attached_to='blueboat_chassis'>
+          <pose>-0.52000000000000002 0.30099999999999999 -0.11700000000000001 0 0 0</pose>
+        </frame>
+        <frame name='blueboat_chassis_motor_port' attached_to='blueboat_chassis_motor_port_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='blueboat_chassis_motor_stbd_joint' attached_to='blueboat_chassis'>
+          <pose>-0.52000000000000002 -0.30099999999999999 -0.11700000000000001 0 0 0</pose>
+        </frame>
+        <frame name='blueboat_chassis_motor_stbd' attached_to='blueboat_chassis_motor_stbd_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='blueboat_chassis_payload_joint' attached_to='blueboat_chassis'>
+          <pose>0.29899999999999999 0 0.14699999999999999 0 0 0</pose>
+        </frame>
+        <frame name='blueboat_chassis_payload' attached_to='blueboat_chassis_payload_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='blueboat_chassis_ping_mount_joint' attached_to='blueboat_chassis'>
+          <pose>0 -0.12 0.10000000000000001 0 0 0</pose>
+        </frame>
+        <frame name='blueboat_chassis_ping_mount' attached_to='blueboat_chassis_ping_mount_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
       </model>
     <model name='blueboat_flag'>
           <static>true</static>
@@ -295,6 +331,12 @@
             </geometry>
           </visual>
         </link>
+        <frame name='blueboat_ping_singlebeam_mount_sensor_joint' attached_to='blueboat_ping_singlebeam_mount'>
+          <pose>0 0 -0.059999999999999998 0 0 0</pose>
+        </frame>
+        <frame name='blueboat_ping_singlebeam_mount_sensor' attached_to='blueboat_ping_singlebeam_mount_sensor_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
       </model>
     <model name='m200_weedless_prop_ccw'>
           <static>true</static>

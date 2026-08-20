@@ -19,7 +19,7 @@ install(DIRECTORY
 # The import script (model.sdf + <part>.yaml -> urdf/<part>.urdf.xacro). Run
 # by a person when the modeler delivers, never by the build.
 install(PROGRAMS
-  scripts/import_part.py
+  scripts/sdf_to_part.py
   scripts/parts_check_world.py
   DESTINATION lib/${PROJECT_NAME})
 
