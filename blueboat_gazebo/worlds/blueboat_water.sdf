@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<!--
+  Water only world for the BlueBoat: the playground without the vehicle.
+  Sun, a seabed plane at z -3, graded buoyancy (seawater below z 0, air
+  above), a visual water surface at the waterline and the core systems.
+  Spawn a model named "blueboat" into it and the buoyancy plugin acts on it;
+  parts_preview.launch.xml does exactly that with the parts driven URDF.
+
+  Run it directly, no ROS:  gz sim <this file>
+-->
+<sdf version="1.12">
+  <world name="blueboat_water">
+
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster"/>
+
+    <!-- Graded buoyancy: seawater (1025) below z=0, air above. Displacement
+         comes from box collisions only (graded mode ignores other shapes). -->
+    <plugin filename="gz-sim-buoyancy-system"
+            name="gz::sim::systems::Buoyancy">
+      <graded_buoyancy>
+        <default_density>1025</default_density>
+        <density_change>
+          <above_depth>0</above_depth>
+          <density>1</density>
+        </density_change>
+      </graded_buoyancy>
+      <enable>blueboat</enable>
+    </plugin>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- Seabed 3 m down; a safety floor if buoyancy is mistuned. -->
+    <model name="seabed">
+      <static>true</static>
+      <pose>0 0 -3 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane><normal>0 0 1</normal><size>200 200</size></plane>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane><normal>0 0 1</normal><size>200 200</size></plane>
+          </geometry>
+          <material>
+            <ambient>0.30 0.28 0.20 1</ambient>
+            <diffuse>0.35 0.32 0.24 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Visual only water surface at the z=0 graded buoyancy waterline. -->
+    <model name="water_surface">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <transparency>0.4</transparency>
+          <geometry>
+            <plane><normal>0 0 1</normal><size>200 200</size></plane>
+          </geometry>
+          <material>
+            <ambient>0.10 0.30 0.50 1</ambient>
+            <diffuse>0.10 0.35 0.55 1</diffuse>
+            <specular>0.20 0.30 0.40 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

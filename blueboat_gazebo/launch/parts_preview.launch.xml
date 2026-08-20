@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!--
+  Preview the parts driven BlueBoat in Gazebo: the water only world, the URDF
+  expanded from blueboat_parts.urdf.xacro published by robot_state_publisher
+  and spawned from that topic as the model "blueboat" (so the world's graded
+  buoyancy acts on it). Geometry, inertia and displacement only: no thruster
+  plugins, sensors or bridge yet; those still come from sim.launch.xml and
+  the composed model. The world starts paused; press play and the boat
+  settles to its static draft.
+
+      ros2 launch blueboat_gazebo parts_preview.launch.xml
+      ros2 launch blueboat_gazebo parts_preview.launch.xml config_file:=/path/my_loadout.yaml
+-->
+<launch>
+  <arg name="world"
+       default="$(find-pkg-share blueboat_gazebo)/worlds/blueboat_water.sdf"
+       description="World SDF without a vehicle (defaults to the water only world)."/>
+  <arg name="gui" default="true" description="Launch the Gazebo GUI."/>
+  <arg name="config_file"
+       default="$(find-pkg-share blueboat_description)/config/blueboat_parts.yaml"
+       description="Parts config (base part, parts list, hull displacement)."/>
+
+  <gz_server world_sdf_file="$(var world)"
+             container_name="ros_gz_container"
+             create_own_container="true"
+             use_composition="true"/>
+
+  <executable cmd="gz sim -g" output="screen" if="$(var gui)"/>
+
+  <node pkg="robot_state_publisher" exec="robot_state_publisher"
+        name="robot_state_publisher">
+    <param name="robot_description"
+           value="$(command 'xacro $(find-pkg-share blueboat_description)/urdf/blueboat_parts.urdf.xacro config_file:=$(var config_file)')"
+           type="str"/>
+  </node>
+
+  <!-- Spawn from the robot_description topic; Gazebo converts the URDF. -->
+  <node pkg="ros_gz_sim" exec="create" name="spawn_blueboat" output="screen"
+        args="-topic robot_description -name blueboat -z 0.25"/>
+</launch>
