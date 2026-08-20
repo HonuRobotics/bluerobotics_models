@@ -219,7 +219,7 @@
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='blueboat_chassis_ping_mount_joint' attached_to='blueboat_chassis'>
-          <pose>0 -0.12 0.10000000000000001 0 0 0</pose>
+          <pose>0 -0.28999999999999998 -0.029999999999999999 0 0 0</pose>
         </frame>
         <frame name='blueboat_chassis_ping_mount' attached_to='blueboat_chassis_ping_mount_joint'>
           <pose>0 0 0 0 0 0</pose>
@@ -332,7 +332,7 @@
           </visual>
         </link>
         <frame name='blueboat_ping_singlebeam_mount_sensor_joint' attached_to='blueboat_ping_singlebeam_mount'>
-          <pose>0 0 -0.059999999999999998 0 0 0</pose>
+          <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='blueboat_ping_singlebeam_mount_sensor' attached_to='blueboat_ping_singlebeam_mount_sensor_joint'>
           <pose>0 0 0 0 0 0</pose>
