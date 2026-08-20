@@ -6,7 +6,8 @@
   buoyancy acts on it). Geometry, inertia and displacement only: no thruster
   plugins, sensors or bridge yet; those still come from sim.launch.xml and
   the composed model. The world starts paused; press play and the boat
-  settles to its static draft.
+  floats at its static draft. It is spawned at the expected waterline: there is no
+  hydrodynamic damping here, so a drop from height would bob for a long time.
 
       ros2 launch blueboat_gazebo parts_preview.launch.xml
       ros2 launch blueboat_gazebo parts_preview.launch.xml config_file:=/path/my_loadout.yaml
@@ -36,5 +37,5 @@
 
   <!-- Spawn from the robot_description topic; Gazebo converts the URDF. -->
   <node pkg="ros_gz_sim" exec="create" name="spawn_blueboat" output="screen"
-        args="-topic robot_description -name blueboat -z 0.25"/>
+        args="-topic robot_description -name blueboat -z 0.0"/>
 </launch>
