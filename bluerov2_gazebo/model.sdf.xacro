@@ -75,9 +75,9 @@
 
   <!-- Wrapper: a near-massless sensor link fixed to base_link at `pose`, holding
        the <sensor> block passed in. The accessory's real mass/geometry already
-       live in base_link via the description; 1e-5 kg keeps each wrapper under
-       0.5% of the 0.02% buoyancy margin, so a full sensor loadout cannot tip
-       the trim negative. -->
+       live in base_link via the description; at 1e-5 kg a full sensor loadout
+       stays orders of magnitude under the default 0.002 kg net_buoyancy, so
+       the wrappers cannot tip the trim negative. -->
   <xacro:macro name="sensor_link" params="name pose *sensor">
     <link name="${name}_sensor">
       <pose relative_to="base_link">${pose}</pose>

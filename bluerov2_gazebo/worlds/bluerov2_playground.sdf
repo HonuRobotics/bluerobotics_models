@@ -5,7 +5,7 @@
   the vehicle pulled in via <include>. Started directly with `gz sim` it comes
   up paused; press play and the near-neutral vehicle drifts up very slowly,
   damped by its hydrodynamics, until it floats essentially awash at the
-  surface (the 0.02% margin leaves almost no freeboard).
+  surface (the default 0.002 kg net_buoyancy leaves almost no freeboard).
 
   Run it directly, no ROS:  gz sim <this file>
 -->
@@ -36,7 +36,7 @@
     <!-- Graded buoyancy: seawater (1025) below z=0, air above, so the vehicle
          has a real free surface (and can share a world with surface vessels).
          Displaced volume comes from the model's collision, sized analytically
-         in bluerov2_description so density*volume = mass*(1+margin); the
+         in bluerov2_description so density*volume = mass + net_buoyancy; the
          model's Hydrodynamics plugin damps the slow rise. -->
     <plugin filename="gz-sim-buoyancy-system"
             name="gz::sim::systems::Buoyancy">

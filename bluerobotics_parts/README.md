@@ -2,7 +2,7 @@
 
 Shared part library for all Blue Robotics vehicle models.
 
-A **part** is a single physical component: one mesh, **no joints**, geometry only — visual, collision and inertia. 
+A **part** is a single physical component: one mesh, **no joints**, geometry only — visual, collision and inertia.
 
 Parts are vehicle-agnostic. A part lives here whether one vehicle uses it or both. Assemblies — parts plus the joints between them — live in the per-vehicle `*_description` packages.
 
@@ -40,7 +40,7 @@ Materials ride along inside the `.glb`. Gazebo loads glTF PBR directly, so nothi
 Recorded so the catalog stays coherent as it grows. All lowercase, snake_case:
 
 * **Named for the product as Blue Robotics sells it**, not for its function in a vehicle.
-* **Vehicle prefix only when the part physically fits that vehicle alone** — `blueboat_payload_bracket`, `bluerov2_payload_skid`. 
+* **Vehicle prefix only when the part physically fits that vehicle alone** — `blueboat_payload_bracket`, `bluerov2_payload_skid`.
 * **Vendor prefix only when the product name alone is ambiguous** — `waterlinked_a50_dvl` and `marinesitu_c3_stereocamera` need it; `omniscan_450_sidescan`, `sonoptix_echo_multibeam` and `explorehd_camera` do not.
 * **Function suffix where the product name does not say what it is** — `_sidescan`, `_multibeam`, `_scanning`, `_stereocamera`.
 * **Articulated assemblies split into their moving pieces**, sharing a prefix so they sort together: `newton_gripper_cylinder`, `newton_gripper_shaft`, `newton_gripper_jaw`, `newton_sampler_cup`.
@@ -155,7 +155,7 @@ This step needs `model.sdf` and the import script, so it runs on whichever branc
 In `<part>.urdf.xacro`, from measurement or the vendor — not from the mesh, and not from the primitive:
 
 - [ ] `<mass>` in kg.
-- [ ] `<origin>` of the `<inertial>` block — the center-of-gravity pose in the part frame. 
+- [ ] `<origin>` of the `<inertial>` block — the center-of-gravity pose in the part frame.
 - [ ] `<inertia>` tensor about that CoG.
 - [ ] No `TODO` markers left behind.
 
@@ -198,7 +198,7 @@ Two failure modes worth recognizing. A part name that is not included yet fails 
 - [ ] Mount it on a real vehicle and confirm the aggregate mass properties move the way you would expect for something of that mass in that position.
 - [ ] For a USV, check the waterline still looks right; for a UUV, check trim has not been thrown off.
 
-## Parts naming 
+## Parts naming
 
 Parts catalog is [`models/parts.csv`](models/parts.csv) — one row per part.  Blue Robotics publish renderings, dimensions and CAD for most parts on the product pages linked there.
 
@@ -206,4 +206,3 @@ Parts catalog is [`models/parts.csv`](models/parts.csv) — one row per part.  B
 ```bash
 column -s, -t models/parts.csv | less -S     # readable view
 ```
-
