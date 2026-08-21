@@ -48,12 +48,7 @@
                  iyy="0.988314" iyz="4.88808e-18"
                  izz="2.53089"/>
       </inertial>
-      <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-          <mesh filename="package://bluerobotics_parts/models/blueboat_chassis/blueboat_chassis.visual.glb"/>
-        </geometry>
-      </visual>
+      <xacro:part_visual mesh="package://bluerobotics_parts/models/blueboat_chassis/blueboat_chassis.visual.glb"/>
       <xacro:if value="${collision}">
         <collision>
           <origin xyz="-0.002666 -0.368156 0.131239" rpy="0 0 0"/>

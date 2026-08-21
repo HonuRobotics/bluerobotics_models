@@ -35,12 +35,7 @@
                  iyy="7.07841e-06" iyz="0"
                  izz="7.07841e-06"/>
       </inertial>
-      <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-          <mesh filename="package://bluerobotics_parts/models/t200_prop_ccw/t200_prop_ccw.visual.glb"/>
-        </geometry>
-      </visual>
+      <xacro:part_visual mesh="package://bluerobotics_parts/models/t200_prop_ccw/t200_prop_ccw.visual.glb"/>
       <xacro:if value="${collision}">
         <collision>
           <origin xyz="5.2e-05 0.002765 0.000116" rpy="-0 1.5708 0"/>

@@ -7,8 +7,12 @@ contract is in [Parts](../design/parts.md). There are two ways to write it.
 ## From a modeler's SDF delivery
 
 The modeler delivers `models/<part>/<part>.visual.glb` (PBR materials
-embedded) and `models/<part>/model.sdf` (the collision primitives), following
-the rules in [Parts](../design/parts.md). Then:
+embedded, Y-up as the glTF specification requires) and
+`models/<part>/model.sdf` (the collision primitives), following the rules in
+[Parts](../design/parts.md). If the mesh shows rolled 90 degrees in RViz but
+fine in Gazebo, it was exported Z-up: run
+`ros2 run bluerobotics_parts gltf_to_yup.py models/<part>/<part>.visual.glb`
+once. Then:
 
 1. Look at the delivery in Gazebo: scale, origin at the mesh centroid, x
    forward / y left / z up, materials, collision envelope.
@@ -67,7 +71,7 @@ one slot on top:
         <mass value="0.5"/>
         <inertia ixx="0.000833" ixy="0" ixz="0" iyy="0.000833" iyz="0" izz="0.000833"/>
       </inertial>
-      <visual>
+      <visual>   <!-- a glTF mesh would go through <xacro:part_visual mesh="package://..."/> -->
         <geometry><box size="0.1 0.1 0.1"/></geometry>
       </visual>
       <xacro:if value="${collision}">

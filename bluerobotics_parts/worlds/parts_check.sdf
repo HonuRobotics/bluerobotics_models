@@ -66,7 +66,7 @@
             </geometry>
           </collision>
           <visual name='basestation_antenna_visual'>
-            <pose>0 0 0 0 0 0</pose>
+            <pose>0 0 0 1.5708 0 0</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
@@ -102,7 +102,7 @@
             </geometry>
           </collision>
           <visual name='blueboat_antenna_mast_visual'>
-            <pose>0 0 0 0 0 0</pose>
+            <pose>0 0 0 1.5708 0 0</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
@@ -179,7 +179,7 @@
             </geometry>
           </collision>
           <visual name='blueboat_chassis_visual'>
-            <pose>0 0 0 0 0 0</pose>
+            <pose>0 0 0 1.5708 0 0</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
@@ -251,7 +251,7 @@
             </geometry>
           </collision>
           <visual name='blueboat_flag_visual'>
-            <pose>0 0 0 0 0 0</pose>
+            <pose>0 0 0 1.5708 0 0</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
@@ -286,7 +286,7 @@
             </geometry>
           </collision>
           <visual name='blueboat_payload_bracket_visual'>
-            <pose>0 0 0 0 0 0</pose>
+            <pose>0 0 0 1.5708 0 0</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
@@ -322,7 +322,7 @@
             </geometry>
           </collision>
           <visual name='blueboat_ping_singlebeam_mount_visual'>
-            <pose>0 0 0 0 0 0</pose>
+            <pose>0 0 0 1.5708 0 0</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
@@ -364,7 +364,7 @@
             </geometry>
           </collision>
           <visual name='m200_weedless_prop_ccw_visual'>
-            <pose>0 0 0 0 0 0</pose>
+            <pose>0 0 0 1.5708 0 0</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
@@ -400,7 +400,7 @@
             </geometry>
           </collision>
           <visual name='m200_weedless_prop_cw_visual'>
-            <pose>0 0 0 0 0 0</pose>
+            <pose>0 0 0 1.5708 0 0</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
@@ -467,7 +467,7 @@
             </geometry>
           </collision>
           <visual name='omniscan_450_sidescan_visual'>
-            <pose>0 0 0 0 0 0</pose>
+            <pose>0 0 0 1.5708 0 0</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
@@ -512,7 +512,7 @@
             </geometry>
           </collision>
           <visual name='ping_singlebeam_visual'>
-            <pose>0 0 0 0 0 0</pose>
+            <pose>0 0 0 1.5708 0 0</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
@@ -579,7 +579,7 @@
             </geometry>
           </collision>
           <visual name='surveyor_multibeam_visual'>
-            <pose>0 0 0 0 0 0</pose>
+            <pose>0 0 0 1.5708 0 0</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
@@ -615,7 +615,7 @@
             </geometry>
           </collision>
           <visual name='t200_prop_ccw_visual'>
-            <pose>0 0 0 0 0 0</pose>
+            <pose>0 0 0 1.5708 0 0</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
@@ -651,7 +651,7 @@
             </geometry>
           </collision>
           <visual name='t200_prop_cw_visual'>
-            <pose>0 0 0 0 0 0</pose>
+            <pose>0 0 0 1.5708 0 0</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
@@ -696,7 +696,7 @@
             </geometry>
           </collision>
           <visual name='t200_thruster_visual'>
-            <pose>0 0 0 0 0 0</pose>
+            <pose>0 0 0 1.5708 0 0</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>

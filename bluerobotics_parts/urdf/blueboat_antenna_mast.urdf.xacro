@@ -35,12 +35,7 @@
                  iyy="0.0159029" iyz="0"
                  izz="1.85026e-05"/>
       </inertial>
-      <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-          <mesh filename="package://bluerobotics_parts/models/blueboat_antenna_mast/blueboat_antenna_mast.visual.glb"/>
-        </geometry>
-      </visual>
+      <xacro:part_visual mesh="package://bluerobotics_parts/models/blueboat_antenna_mast/blueboat_antenna_mast.visual.glb"/>
       <xacro:if value="${collision}">
         <collision>
           <origin xyz="-0.004079 -4.3e-05 0.100422" rpy="0 -0 0"/>

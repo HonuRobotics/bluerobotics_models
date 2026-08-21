@@ -38,12 +38,7 @@
                  iyy="0.000291832" iyz="-1.0888e-12"
                  izz="0.000301922"/>
       </inertial>
-      <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-          <mesh filename="package://bluerobotics_parts/models/blueboat_ping_singlebeam_mount/blueboat_ping_singlebeam_mount.visual.glb"/>
-        </geometry>
-      </visual>
+      <xacro:part_visual mesh="package://bluerobotics_parts/models/blueboat_ping_singlebeam_mount/blueboat_ping_singlebeam_mount.visual.glb"/>
       <xacro:if value="${collision}">
         <collision>
           <origin xyz="0 0 0" rpy="0 0 0"/>

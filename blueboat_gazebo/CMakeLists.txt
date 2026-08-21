@@ -38,6 +38,25 @@ add_custom_command(
 add_custom_target(${PROJECT_NAME}_bridge_yaml ALL DEPENDS ${bridge_yaml})
 install(FILES ${bridge_yaml} DESTINATION share/${PROJECT_NAME}/config)
 
+# The URDF Gazebo merges: the same description expanded with gltf_up:=z, which
+# pre-rotates the (Y-up, spec conforming) glTF visuals for Gazebo, which does
+# not convert the glTF up axis as ROS tools do. Installed next to the model.
+# (An explicit command rather than xacro_add_files: that macro writes its
+# output next to the input, which here is blueboat_description's INSTALLED
+# xacro, i.e. into another package's install tree.)
+find_program(XACRO_EXECUTABLE xacro REQUIRED)
+set(desc_xacro ${blueboat_description_DIR}/../urdf/blueboat.urdf.xacro)
+set(gazebo_urdf ${CMAKE_CURRENT_BINARY_DIR}/gazebo/blueboat.urdf)
+add_custom_command(
+  OUTPUT ${gazebo_urdf}
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/gazebo
+  COMMAND ${XACRO_EXECUTABLE} ${desc_xacro}
+          config_file:=${vehicle_config} gltf_up:=z -o ${gazebo_urdf}
+  DEPENDS ${desc_xacro} ${vehicle_config} ${desc_urdf}
+  COMMENT "Expanding the Gazebo flavoured blueboat.urdf (gltf_up:=z)")
+add_custom_target(${PROJECT_NAME}_gazebo_urdf ALL DEPENDS ${gazebo_urdf})
+install(FILES ${gazebo_urdf} DESTINATION share/${PROJECT_NAME}/models/blueboat)
+
 # Composed simulation model. model.sdf is GENERATED from model.sdf.xacro at build
 # time (reads blueboat_description/config/blueboat.yaml, adds the Gazebo plugins).
 # Only the STAMPED copy below is installed (as models/blueboat/model.sdf next to

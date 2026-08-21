@@ -27,6 +27,10 @@ unless --force.
 
 A part can equally be written by hand without ever having an SDF.
 
+The visual .glb must be Y-up as the glTF specification requires (see
+gltf_to_yup.py for deliveries exported Z-up); part_visual in parts.xacro
+handles the Gazebo side.
+
     sdf_to_part.py models/t200_thruster --mass 0.344 --axis "1 0 0"
     sdf_to_part.py models/blueboat_chassis --mass 12
         --slot "motor_port=-0.52,0.301,-0.117;accepts=m200_weedless_prop_ccw;
@@ -362,12 +366,11 @@ def emit_macro(part, visuals, collisions, inertia, source, axis, attach, slots, 
     w(f'                 izz="{fmt(t["izz"])}"/>')
     w('      </inertial>')
     for vis in visuals:
-        w('      <visual>')
-        w(f'        <origin xyz="{fmt_xyz(vis["pose"][:3])}" rpy="{fmt_xyz(vis["pose"][3:])}"/>')
-        w('        <geometry>')
-        w(f'          <mesh filename="package://{PACKAGE}/models/{part}/{vis["uri"]}"/>')
-        w('        </geometry>')
-        w('      </visual>')
+        if any(abs(v) > 1e-9 for v in vis['pose'][3:]):
+            raise ConversionError(f'{part}: visual pose with a rotation is not supported; '
+                                  'deliver the mesh in the part frame')
+        w(f'      <xacro:part_visual mesh="package://{PACKAGE}/models/{part}/{vis["uri"]}"'
+          f' xyz="{fmt_xyz(vis["pose"][:3])}"/>')
     if collisions:
         w('      <xacro:if value="${collision}">')
         for col in collisions:

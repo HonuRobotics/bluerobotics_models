@@ -39,8 +39,8 @@
          joint      fixed (default), or continuous / revolute for parts that spin
          axis       joint axis in the part frame, used when joint is not fixed
 
-     and emitting one link (inertia, visual, optional collision), the
-     mounting joint (part_joint), and its slots and frames as massless links
+     and emitting one link (inertia, visual via part_visual, optional
+     collision), the mounting joint (part_joint), and its slots and frames as massless links
      named <name>_<slot> / <name>_<frame> (part_slots, part_frames). They
      show up in TF and are lumped away in Gazebo, where they survive as
      frames of the same name.
@@ -53,6 +53,24 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
   <!-- ===== helpers used by every part macro ===== -->
+
+  <!-- glTF meshes are Y-up by specification and the delivered .glb files
+       conform. RViz and other ROS tools rotate them to Z-up on load; Gazebo
+       does not (it shows the data as is), so the URDF Gazebo merges is
+       expanded with gltf_up:=z, which pre-rotates every glTF visual by +90
+       degrees about x. The installed ROS URDF keeps gltf_up=y (no rotation). -->
+  <xacro:arg name="gltf_up" default="y"/>
+  <xacro:property name="gltf_visual_rpy" value="${'1.5708 0 0' if '$(arg gltf_up)' == 'z' else '0 0 0'}"/>
+
+  <!-- A part's visual mesh, with the glTF up axis handling above. -->
+  <xacro:macro name="part_visual" params="mesh xyz:='0 0 0'">
+    <visual>
+      <origin xyz="${xyz}" rpy="${gltf_visual_rpy}"/>
+      <geometry>
+        <mesh filename="${mesh}"/>
+      </geometry>
+    </visual>
+  </xacro:macro>
 
   <!-- The mounting joint. attach is the bolt on point in the part frame:
        the child frame is placed at xyz/rpy minus the rotated attach offset,

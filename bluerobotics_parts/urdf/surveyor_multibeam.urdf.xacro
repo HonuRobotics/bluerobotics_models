@@ -35,12 +35,7 @@
                  iyy="0.00161571" iyz="2.95116e-07"
                  izz="0.00170839"/>
       </inertial>
-      <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-          <mesh filename="package://bluerobotics_parts/models/surveyor_multibeam/surveyor_multibeam.visual.glb"/>
-        </geometry>
-      </visual>
+      <xacro:part_visual mesh="package://bluerobotics_parts/models/surveyor_multibeam/surveyor_multibeam.visual.glb"/>
       <xacro:if value="${collision}">
         <collision>
           <origin xyz="-0.003761 -8.9e-05 0.002653" rpy="0 -0 0"/>

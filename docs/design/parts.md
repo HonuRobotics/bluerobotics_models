@@ -56,7 +56,11 @@ Rules:
    mount point): they save a measurement downstream. Not required.
 
 Materials ride inside the `.glb`; Gazebo loads glTF PBR directly. The
-`.glb` stays in the repository (the part's visual points at it). `model.sdf`
+`.glb` must be **Y-up**, as the glTF specification requires (the default
+of any glTF exporter); a delivery exported Z-up shows correctly in Gazebo
+but rolled 90 degrees in RViz and every other ROS tool, and is fixed once
+with `gltf_to_yup.py`, which bakes the rotation into the file. The `.glb`
+stays in the repository (the part's visual points at it). `model.sdf`
 is the modeler's work product and the bootstrap input; nothing in ROS or
 Gazebo reads it, and the plan is to keep the SDF deliveries on a side branch
 so the released packages carry only what they use.

@@ -189,6 +189,27 @@ def test_pontoons_tile_and_float_the_boat():
     assert draft < HULL['height'], 'waterline above the pontoon tops'
 
 
+def test_installed_model_merges_the_gazebo_flavoured_urdf():
+    """
+    The model merges the Gazebo flavoured URDF installed next to it.
+
+    model://blueboat/blueboat.urdf is the gltf_up:=z expansion: glTF visuals
+    pre-rotated for Gazebo, same parts as the ROS URDF.
+    """
+    model_dir = GZ_SHARE / 'models' / 'blueboat'
+    root = ET.parse(model_dir / 'model.sdf').getroot()
+    assert next(root.iter('include')).find('uri').text == 'model://blueboat/blueboat.urdf'
+    gz_urdf = ET.parse(model_dir / 'blueboat.urdf').getroot()
+    ros_urdf = ET.parse(DESC_SHARE / 'urdf' / 'blueboat.urdf').getroot()
+    assert {li.get('name') for li in gz_urdf.findall('link')} == \
+        {li.get('name') for li in ros_urdf.findall('link')}
+    gz_rpys = {v.find('origin').get('rpy') for v in gz_urdf.iter('visual')
+               if v.find('geometry/mesh') is not None}
+    ros_rpys = {v.find('origin').get('rpy') for v in ros_urdf.iter('visual')
+                if v.find('geometry/mesh') is not None}
+    assert gz_rpys == {'1.5708 0 0'} and ros_rpys == {'0 0 0'}
+
+
 def test_installed_model_sdf_carries_the_specs_comment():
     """The stamped model.sdf repeats the URDF specs; the masses agree."""
     text = (GZ_SHARE / 'models' / 'blueboat' / 'model.sdf').read_text()

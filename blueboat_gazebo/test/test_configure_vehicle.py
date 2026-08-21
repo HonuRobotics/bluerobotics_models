@@ -44,7 +44,8 @@ def links(urdf_path):
 def test_default_config_reproduces_the_installed_artifacts(tmp_path):
     """Run on the shipped config, the tool regenerates what the build installed."""
     out = configure(DEFAULT_CONFIG, tmp_path / 'v')
-    for name in ('blueboat.urdf', 'model.sdf', 'model.config', 'ros_gz_bridge.yaml'):
+    for name in ('blueboat.urdf', 'blueboat.gazebo.urdf', 'model.sdf', 'model.config',
+                 'ros_gz_bridge.yaml'):
         assert (out / name).is_file(), f'{name} not generated'
     assert links(out / 'blueboat.urdf') == links(DESC_SHARE / 'urdf' / 'blueboat.urdf')
     assert yaml.safe_load((out / 'ros_gz_bridge.yaml').read_text()) == \
@@ -54,9 +55,18 @@ def test_default_config_reproduces_the_installed_artifacts(tmp_path):
     assert [s.get('name') for s in generated.iter('sensor')] == \
         [s.get('name') for s in installed.iter('sensor')]
     assert len(list(generated.iter('plugin'))) == len(list(installed.iter('plugin')))
-    # The generated model merges the generated URDF, not the installed one.
+    # The generated model merges the generated Gazebo flavoured URDF.
     uri = next(generated.iter('include')).find('uri').text
-    assert uri == f'file://{out / "blueboat.urdf"}'
+    assert uri == f'file://{out / "blueboat.gazebo.urdf"}'
+    # Same parts in both flavours; only the glTF visual orientation differs.
+    assert links(out / 'blueboat.gazebo.urdf') == links(out / 'blueboat.urdf')
+    gz_root = ET.parse(out / 'blueboat.gazebo.urdf').getroot()
+    ros_root = ET.parse(out / 'blueboat.urdf').getroot()
+    gz_rpys = {v.find('origin').get('rpy') for v in gz_root.iter('visual')
+               if v.find('geometry/mesh') is not None}
+    ros_rpys = {v.find('origin').get('rpy') for v in ros_root.iter('visual')
+                if v.find('geometry/mesh') is not None}
+    assert ros_rpys == {'0 0 0'} and gz_rpys == {'1.5708 0 0'}
 
 
 def test_custom_loadout_flows_to_every_artifact(tmp_path):

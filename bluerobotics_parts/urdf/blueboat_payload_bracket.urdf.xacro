@@ -35,12 +35,7 @@
                  iyy="3.5504e-05" iyz="0"
                  izz="0.000415846"/>
       </inertial>
-      <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-          <mesh filename="package://bluerobotics_parts/models/blueboat_payload_bracket/blueboat_payload_bracket.visual.glb"/>
-        </geometry>
-      </visual>
+      <xacro:part_visual mesh="package://bluerobotics_parts/models/blueboat_payload_bracket/blueboat_payload_bracket.visual.glb"/>
       <xacro:if value="${collision}">
         <collision>
           <origin xyz="0.016201 0 -0.009094" rpy="0 -0 0"/>

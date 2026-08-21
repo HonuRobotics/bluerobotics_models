@@ -25,7 +25,9 @@ model to hand to somebody else):
 ros2 run blueboat_gazebo configure_vehicle.py --config my_loadout.yaml --out-dir ~/my_models/blueboat
 ```
 
-writes `blueboat.urdf`, `model.sdf`, `model.config` and `ros_gz_bridge.yaml`.
+writes `blueboat.urdf`, `blueboat.gazebo.urdf` (the copy the model merges,
+glTF visuals pre-rotated for Gazebo), `model.sdf`, `model.config` and
+`ros_gz_bridge.yaml`.
 The directory is a Gazebo model: with `~/my_models` prepended to
 `GZ_SIM_RESOURCE_PATH` it is `model://blueboat`, shadowing the installed
 default, so a world can `<include>` it, or spawn it with

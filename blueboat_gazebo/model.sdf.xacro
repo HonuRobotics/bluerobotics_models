@@ -19,10 +19,11 @@
   <xacro:arg name="config_file"
              default="$(find blueboat_description)/config/blueboat.yaml"/>
   <xacro:property name="cfg" value="${xacro.load_yaml('$(arg config_file)')}"/>
-  <!-- The URDF to merge: the installed default, or (configure_vehicle.py,
-       launch time loadouts) a file:// URI of a URDF generated from the same
-       config. -->
-  <xacro:arg name="urdf_uri" default="package://blueboat_description/urdf/blueboat.urdf"/>
+  <!-- The URDF to merge: the Gazebo flavoured expansion (gltf_up:=z, glTF
+       visuals pre-rotated because Gazebo does not convert the glTF up axis)
+       installed next to this model, or (configure_vehicle.py, launch time
+       loadouts) a file:// URI of one generated from the same config. -->
+  <xacro:arg name="urdf_uri" default="model://blueboat/blueboat.urdf"/>
 
   <!-- Topic namespace for sensor topics: /<topic_namespace>/<part name>/...
        Per part, `gz_topic` / `topic` override the gz-side base (the bridge

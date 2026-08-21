@@ -91,7 +91,8 @@ WORLD_TAIL = """  </world>
 def part_model(part, tmp):
     probe = tmp / f'{part}.urdf.xacro'
     probe.write_text(PROBE.format(part=part))
-    urdf = subprocess.run(['xacro', str(probe)], check=True, capture_output=True, text=True).stdout
+    urdf = subprocess.run(['xacro', str(probe), 'gltf_up:=z'], check=True,
+                          capture_output=True, text=True).stdout
     urdf_path = tmp / f'{part}.urdf'
     urdf_path.write_text(urdf)
     sdf = subprocess.run(['gz', 'sdf', '-p', str(urdf_path)], check=True,

@@ -37,12 +37,7 @@
                  iyy="2.41653e-05" iyz="-3.73701e-07"
                  izz="2.02698e-05"/>
       </inertial>
-      <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-          <mesh filename="package://bluerobotics_parts/models/ping_singlebeam/ping_singlebeam.visual.glb"/>
-        </geometry>
-      </visual>
+      <xacro:part_visual mesh="package://bluerobotics_parts/models/ping_singlebeam/ping_singlebeam.visual.glb"/>
       <xacro:if value="${collision}">
         <collision>
           <origin xyz="-1e-06 -0.000647 0.001365" rpy="1.5708 -0 0"/>

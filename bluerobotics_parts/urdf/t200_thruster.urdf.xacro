@@ -35,12 +35,7 @@
                  iyy="0.00029151" iyz="-3.50359e-10"
                  izz="0.000291503"/>
       </inertial>
-      <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-          <mesh filename="package://bluerobotics_parts/models/t200_thruster/t200_thruster.visual.glb"/>
-        </geometry>
-      </visual>
+      <xacro:part_visual mesh="package://bluerobotics_parts/models/t200_thruster/t200_thruster.visual.glb"/>
       <xacro:if value="${collision}">
         <collision>
           <origin xyz="-0.010188 0.002851 -0.000255" rpy="-0 1.5708 0"/>

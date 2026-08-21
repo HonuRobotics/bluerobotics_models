@@ -22,6 +22,13 @@ session; headless machines need working EGL (CI installs
 `libegl1 libgl1 libgl1-mesa-dri libglvnd0`). The bridge is lazy: ranges flow
 once something subscribes on the ROS side.
 
+## A part looks rolled 90 degrees in RViz but fine in Gazebo
+
+Its `.glb` was exported Z-up. glTF is Y-up by specification; RViz converts
+on load and Gazebo does not. Convert the file once with
+`ros2 run bluerobotics_parts gltf_to_yup.py <part>.visual.glb` (see
+[Parts](../design/parts.md)).
+
 ## "Cannot locate rosdep definition"
 
 Run `rosdep update` first; fresh containers ship without the database.

@@ -21,6 +21,7 @@ install(DIRECTORY
 install(PROGRAMS
   scripts/sdf_to_part.py
   scripts/parts_check_world.py
+  scripts/gltf_to_yup.py
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)

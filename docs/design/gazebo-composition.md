@@ -5,7 +5,15 @@ without the description knowing Gazebo exists.
 
 ## Merge include and lumping
 
-`model.sdf.xacro` merge includes the URDF (`<include merge="true">`) and
+`model.sdf.xacro` merge includes the URDF (`<include merge="true">`): not
+the installed ROS one but a **Gazebo flavoured** expansion of the same
+xacro (`gltf_up:=z`, installed as `model://blueboat/blueboat.urdf`). The
+difference is one thing: glTF is Y-up by specification and the part meshes
+conform; RViz and the ROS tools rotate them to Z-up on load, Gazebo does not
+(it shows the data as is), so the Gazebo copy pre-rotates every glTF visual
+by +90 degrees about x. Same parts, same frames, same manifest; only the
+visual orientation differs. `configure_vehicle.py` writes both copies too
+(`blueboat.urdf`, `blueboat.gazebo.urdf`). The model then adds
 adds the hull displacement link (the box pontoons from the config's
 `hull_displacement`, the only link the worlds enable buoyancy on), the
 hydrodynamics plugin, one Thruster plugin per motor joint, the joint state

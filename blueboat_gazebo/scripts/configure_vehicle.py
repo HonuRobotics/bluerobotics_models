@@ -15,7 +15,8 @@
 """
 Generate every artifact of a BlueBoat loadout from one config file.
 
-Writes into an output directory the URDF, the composed Gazebo model
+Writes into an output directory the URDF, its Gazebo flavoured copy (glTF
+visuals pre-rotated, merged by the model), the composed Gazebo model
 (model.sdf plus model.config, so the directory works as a model:// root on
 GZ_SIM_RESOURCE_PATH) and the ros_gz bridge config, all derived from the
 same config through the same generators the build uses. This is what lets a
@@ -65,12 +66,18 @@ def configure(config, out_dir):
     out_dir.mkdir(parents=True, exist_ok=True)
     config = pathlib.Path(config).resolve()
 
+    vehicle_xacro = str(desc / 'urdf' / 'blueboat.urdf.xacro')
     urdf = out_dir / 'blueboat.urdf'
-    urdf.write_text(run(['xacro', str(desc / 'urdf' / 'blueboat.urdf.xacro'),
-                         f'config_file:={config}'], 'URDF generation'))
+    urdf.write_text(run(['xacro', vehicle_xacro, f'config_file:={config}'],
+                        'URDF generation'))
+    # The copy Gazebo merges: glTF visuals pre-rotated (Gazebo does not
+    # convert the glTF up axis; ROS tools do).
+    gz_urdf = out_dir / 'blueboat.gazebo.urdf'
+    gz_urdf.write_text(run(['xacro', vehicle_xacro, f'config_file:={config}', 'gltf_up:=z'],
+                           'Gazebo URDF generation'))
     sdf = out_dir / 'model.sdf'
     sdf.write_text(run(['xacro', str(gz / 'model.sdf.xacro'),
-                        f'config_file:={config}', f'urdf_uri:=file://{urdf}'],
+                        f'config_file:={config}', f'urdf_uri:=file://{gz_urdf}'],
                        'model generation'))
     (out_dir / 'model.config').write_text(MODEL_CONFIG)
     run([sys.executable, str(gz_lib / 'generate_bridge_config.py'),
@@ -93,7 +100,8 @@ def main(argv=None):
     if args.temp:
         sys.stdout.write(str(out_dir))
     else:
-        print(f'wrote blueboat.urdf, model.sdf, model.config, ros_gz_bridge.yaml to {out_dir}')
+        print(f'wrote blueboat.urdf, blueboat.gazebo.urdf, model.sdf, model.config, '
+              f'ros_gz_bridge.yaml to {out_dir}')
 
 
 if __name__ == '__main__':
