@@ -23,6 +23,12 @@
     <plugin filename="gz-sim-scene-broadcaster-system"
             name="gz::sim::systems::SceneBroadcaster"/>
 
+    <!-- Renders the echosounder (gpu_lidar) sensor; needs a GPU + ogre2. -->
+    <plugin filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
     <!-- Graded buoyancy: seawater (1025) below z=0, air above. Displacement
          comes from box collisions only (graded mode ignores other shapes). -->
     <plugin filename="gz-sim-buoyancy-system"

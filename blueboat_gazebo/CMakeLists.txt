@@ -67,6 +67,7 @@ install(FILES
   DESTINATION share/${PROJECT_NAME})
 install(PROGRAMS
   scripts/generate_bridge_config.py
+  scripts/configure_vehicle.py
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
@@ -75,6 +76,8 @@ if(BUILD_TESTING)
   find_package(ament_cmake_pytest REQUIRED)
   ament_add_pytest_test(test_bridge_generator test/test_bridge_generator.py
     TIMEOUT 60)
+  ament_add_pytest_test(test_configure_vehicle test/test_configure_vehicle.py
+    TIMEOUT 300)
   ament_add_pytest_test(test_model_generation test/test_model_generation.py
     TIMEOUT 180)
   # NOCAPTURE so the sim output printed at teardown reaches the test logs

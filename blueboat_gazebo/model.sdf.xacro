@@ -19,6 +19,10 @@
   <xacro:arg name="config_file"
              default="$(find blueboat_description)/config/blueboat.yaml"/>
   <xacro:property name="cfg" value="${xacro.load_yaml('$(arg config_file)')}"/>
+  <!-- The URDF to merge: the installed default, or (configure_vehicle.py,
+       launch time loadouts) a file:// URI of a URDF generated from the same
+       config. -->
+  <xacro:arg name="urdf_uri" default="package://blueboat_description/urdf/blueboat.urdf"/>
 
   <!-- Topic namespace for sensor topics: /<topic_namespace>/<part name>/...
        Per part, `gz_topic` / `topic` override the gz-side base (the bridge
@@ -126,7 +130,7 @@
 
   <model name="blueboat">
     <include merge="true">
-      <uri>package://blueboat_description/urdf/blueboat.urdf</uri>
+      <uri>$(arg urdf_uri)</uri>
     </include>
 
     <!-- Hydrodynamic damping for the surface hull (Fossen). USV placeholder
