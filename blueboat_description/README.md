@@ -1,26 +1,29 @@
 # blueboat_description
 
-URDF/xacro **description** of the Blue Robotics BlueBoat (twin-hull USV):
-geometry and an RViz view. Pure description: **no Gazebo or simulator code**
-(that lives in [`blueboat_gazebo`](../blueboat_gazebo)).
+URDF/xacro **description** of the Blue Robotics BlueBoat (twin-hull USV),
+assembled from the shared part library in
+[`bluerobotics_parts`](../bluerobotics_parts). Pure description: **no Gazebo
+or simulator code** (that lives in [`blueboat_gazebo`](../blueboat_gazebo)).
 
 ## What it provides
 
-- The BlueBoat hull (`base_link`) with primitive catamaran visuals and two
-  outboard **T200 propellers** (`motor_port/stbd_link`, `continuous` joints)
-  for differential drive.
-- **Config-driven accessory mounts** (masts, sonars, brackets, flag) from
-  `config/blueboat.yaml`.
-- **Distributed pontoon buoyancy collisions**: each pontoon is a row of box
-  segments so graded buoyancy restores pitch/roll correctly (see
+- A **default BlueBoat that needs no configuration**: the chassis, the two
+  outboard propellers (`motor_port`/`motor_stbd`, `continuous` joints), the
+  flag and the Ping2 integration kit, as the boat is most often run. The
+  URDF is generated from it at build time: `urdf/blueboat.urdf`.
+- A **configurable loadout** for anyone who wants the exact parts:
+  `config/blueboat.yaml` lists the parts and where they mount; every part
+  type in the `bluerobotics_parts` catalog can be fitted, at a named socket
+  or at an explicit pose.
+- **Hull displacement** declared at the assembly: each pontoon is a row of
+  box segments so graded buoyancy restores pitch and roll correctly (see
   [Buoyancy](#buoyancy)).
-- The URDF is **generated from xacro at build time** (`urdf/blueboat.urdf`).
 
 ## Layout
 
 ```
-urdf/     blueboat.urdf.xacro (top), thruster.xacro, accessories.xacro
-config/   blueboat.yaml   (accessory loadout + topic namespace)
+urdf/     blueboat.urdf.xacro   (assembles the parts listed in the config)
+config/   blueboat.yaml         (default loadout, topic namespace, hull displacement)
 rviz/     blueboat.rviz
 launch/   display.launch.xml
 ```
@@ -28,31 +31,49 @@ launch/   display.launch.xml
 ## Build
 
 ```bash
-colcon build --merge-install --packages-select blueboat_description
+colcon build --merge-install --packages-select bluerobotics_parts blueboat_description
 source install/setup.bash
 ```
 
-## Configure accessories
+## Configure the loadout
 
-Edit `config/blueboat.yaml` and rebuild; it is a list of
-`{type, name, xyz, rpy}` entries (pose relative to `base_link`, metres and
-radians). See [`ACCESSORIES.md`](ACCESSORIES.md) for the catalog. The default
-loadout is the Ping2 echosounder only; the rest of the catalog ships as
-commented entries. The composed Gazebo model and the ros_gz bridge config
-regenerate from this file on rebuild, so sensors and their ROS topics always
-match. Topics default to `/<topic_namespace>/<name>/...` and can be
-overridden per accessory (`topic`, or `gz_topic`/`ros_topic` for different
-names on each side).
+`config/blueboat.yaml` is a parts list:
+
+```yaml
+base: {type: blueboat_chassis, name: base_link, collision: false}
+parts:
+  - {type: m200_weedless_prop_ccw, name: motor_port, mount: motor_port, joint: continuous}
+  - {type: m200_weedless_prop_cw,  name: motor_stbd, mount: motor_stbd, joint: continuous}
+  - {type: blueboat_flag,          name: flag,       mount: flag_socket}
+  - {type: blueboat_ping_singlebeam_mount, name: ping_mount, mount: ping_mount}
+  - {type: ping_singlebeam,        name: ping,       parent: ping_mount, mount: sensor}
+```
+
+`type` is a part from the catalog (`bluerobotics_parts/urdf/parts.xacro`),
+`name` the instance (its link and TF frame). Where it goes is either
+`mount:` a socket of its parent (a frame the parent part declares; the
+parent defaults to `base_link`) or an explicit `xyz`/`rpy` relative to the
+parent link. `joint: continuous` mounts a part that spins about the axis it
+declares. See [`ACCESSORIES.md`](ACCESSORIES.md) for the catalog and the
+sockets the BlueBoat chassis offers.
+
+Edit the file and rebuild, or pass `config_file:=<your.yaml>` to the
+launches to try a loadout without rebuilding. The composed Gazebo model and
+the ros_gz bridge config regenerate from the same file, so sensors and their
+ROS topics always match. Topics default to `/<topic_namespace>/<name>/...`
+and can be overridden per part (`topic`, or `gz_topic`/`ros_topic` for
+different names on each side).
 
 ## Buoyancy
 
 The BlueBoat floats at the waterline via **graded buoyancy** in
-`blueboat_gazebo`, which requires primitive collisions: each pontoon is a row
-of `pontoon_segments` box segments, so a pitching hull submerges the down-end
-segments more and rights itself. Tunables at the top of
-`blueboat.urdf.xacro`: `pontoon_length/width/height`, `pontoon_x/y/z`,
-`pontoon_segments`. The boat self-settles to a draft of roughly
-`mass / (water_density * 2 * pontoon_length * pontoon_width)`.
+`blueboat_gazebo`, which requires primitive collisions: the config's
+`hull_displacement` block declares each pontoon as a row of box segments, so
+a pitching hull submerges the down-end segments more and rights itself
+([AUR_BUOYANCY_DESIGN.md](../AUR_BUOYANCY_DESIGN.md)). The chassis part's own
+collision geometry is switched off for that reason. The boat self-settles to
+a draft of roughly `mass / (water_density * 2 * length * width)`, which puts
+`base_link` at the waterline.
 
 ## API
 
@@ -62,18 +83,20 @@ This package exposes files and frames, no runtime nodes:
 |----------|------|
 | Generated URDF | `share/blueboat_description/urdf/blueboat.urdf` |
 | Vehicle config | `share/blueboat_description/config/blueboat.yaml` |
-| Xacro sources | `share/blueboat_description/urdf/*.xacro` |
+| Xacro source | `share/blueboat_description/urdf/blueboat.urdf.xacro` |
 
 Frames and joints (published as TF by `robot_state_publisher`):
 
 | Name | Kind | Notes |
 |------|------|-------|
-| `base_link` | link (root) | hull; carries the pontoon buoyancy collisions |
-| `motor_port_link`, `motor_stbd_link` + `motor_*_joint` | links, continuous joints | outboard propellers |
-| `<accessory name>` | link, fixed joint | one frame per configured accessory |
+| `base_link` | link (root) | the chassis part, in the frame the modeler delivered (mesh centroid, x forward, y left, z up) |
+| `motor_port`, `motor_stbd` + `motor_*_joint` | links, continuous joints | outboard propellers |
+| `<part name>` | link, fixed joint | one frame per configured part |
+| `<parent>_<socket>` | massless link | one frame per socket a part declares (e.g. `base_link_motor_port`) |
+| `hull_displacement` | massless link | carries the pontoon buoyancy collisions |
 
-In Gazebo the fixed-joint accessory links are lumped into `base_link`; in
-RViz/TF they stay separate frames.
+In Gazebo the fixed-joint links are lumped into `base_link` (their frames
+survive by name); in RViz/TF they stay separate frames.
 
 ### Known warning (harmless, do not "fix")
 

@@ -144,10 +144,12 @@ def buoyancy_properties(root):
     return volume, tuple(m / volume for m in moment)
 
 
-def accessory_summary(cfg):
-    """One `type (name)` item per configured accessory."""
-    return [f'{a["type"]} ({a["name"]})'
-            for a in cfg.get('accessories') or []]
+def parts_summary(cfg):
+    """One `type (name)` item per configured part (or legacy accessory)."""
+    items = cfg.get('parts')
+    if items is None:
+        items = cfg.get('accessories') or []
+    return [f'{a["type"]} ({a["name"]})' for a in items]
 
 
 def specs_comment(vehicle, urdf_root, cfg):
@@ -187,8 +189,8 @@ def specs_comment(vehicle, urdf_root, cfg):
     else:
         rows.append(('reserve buoyancy',
                      f'{displaced - total:+.3f} kg at full submersion'))
-    accessories = accessory_summary(cfg) or ['none']
-    rows.append(('accessories', '; '.join(accessories)))
+    parts = parts_summary(cfg) or ['none']
+    rows.append(('parts', '; '.join(parts)))
     width = max(len(label) for label, _ in rows) + 2
     body = '\n'.join(f'  {label + ":":<{width}}{value}'
                      for label, value in rows)

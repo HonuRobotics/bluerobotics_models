@@ -1,16 +1,18 @@
 <?xml version="1.0"?>
 <!--
-  BlueBoat unmanned surface vessel (twin outboard configuration).
+  BlueBoat unmanned surface vessel, assembled from bluerobotics_parts.
 
-  The two propellers are articulated links; accessories are mounted from
-  config/blueboat.yaml. No Gazebo tags or plugins here (those belong in
-  blueboat_gazebo). Inertia and link poses reproduce the reference BlueBoat
-  layout.
+  Everything about the vehicle comes from the config (which parts, where) and
+  from the part macros (geometry, inertia); the only vehicle level declaration
+  is the hull displacement, per AUR_BUOYANCY_DESIGN.md. No Gazebo tags or
+  plugins here (those belong in blueboat_gazebo).
+
+      xacro blueboat.urdf.xacro > blueboat.urdf                     # default loadout
+      xacro blueboat.urdf.xacro config_file:=/path/my_loadout.yaml  # custom
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="blueboat">
 
-  <xacro:include filename="thruster.xacro"/>
-  <xacro:include filename="accessories.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/assembly.xacro"/>
 
   <!-- Config file: REMAP'd to the source config at build time; the default is
        the installed copy for manual/runtime use. -->
@@ -18,345 +20,39 @@
              default="$(find blueboat_description)/config/blueboat.yaml"/>
   <xacro:property name="cfg" value="${xacro.load_yaml('$(arg config_file)')}"/>
 
-  <!-- Buoyancy hull. Graded buoyancy (surface vessel) rejects mesh collisions, so
-       each catamaran pontoon is a primitive box that both displaces water and does
-       contact. With graded buoyancy the boat self-settles to a draft roughly
-       total_mass / (water_density * 2 * pontoon_length * pontoon_width); tune these
-       for the waterline you want (verify the float on a GPU). Dims/offsets approx.
-       the two pontoons from the hull collision mesh (~1.19 m long, centres y~0.3). -->
-  <xacro:property name="thruster_mass" value="0.344"/>
-  <xacro:property name="pontoon_length" value="1.1"/>
-  <xacro:property name="pontoon_width"  value="0.19"/>
-  <xacro:property name="pontoon_height" value="0.19"/>
-  <xacro:property name="pontoon_x"      value="-0.05"/>   <!-- long. centre = hull CoM x, so buoyancy sits UNDER the CoM (no pitch trim) -->
-  <xacro:property name="pontoon_y"      value="0.30"/>    <!-- lateral offset of each pontoon -->
-  <xacro:property name="pontoon_z"      value="-0.22"/>   <!-- vertical centre in base_link -->
-  <xacro:property name="pontoon_segments" value="6"/>     <!-- box segments per pontoon (distributed buoyancy) -->
+  <!-- Chassis as the root, every other part mounted on it. -->
+  <xacro:assemble base="${cfg['base']}" parts="${cfg.get('parts') or []}"/>
 
-  <!-- Distribute each pontoon's buoyancy into N box segments along its length so
-       graded buoyancy models the tilted waterplane correctly: each short box
-       responds to its OWN local depth, so pitching submerges the down-end segments
-       more and restores strongly. A single long box keys off the box-centre depth
-       and barely restores pitch (marginal, wave-sensitive). Also the natural base
-       for wave response later. Recursive: xacro has no for-loop; i counts 0..n-1. -->
-  <xacro:macro name="pontoon" params="side y n i:=0">
+  <!-- ===== hull displacement (assembly declared) =====
+       Box pontoons on a link fixed to the base: graded buoyancy accepts only
+       boxes and spheres, so the displacing shape is declared here rather than
+       taken from the chassis part. Fixed joints are lumped in Gazebo, so the
+       boxes end up on base_link exactly as if written there. -->
+  <xacro:macro name="pontoon" params="hull side y n i:=0">
     <xacro:if value="${i != n}">
-      <xacro:property name="seg_len" value="${pontoon_length / n}"/>
-      <xacro:property name="seg_x"   value="${pontoon_x - pontoon_length/2.0 + seg_len*(i + 0.5)}"/>
+      <xacro:property name="seg_len" value="${hull['length'] / n}"/>
       <collision name="pontoon_${side}_${i}">
-        <origin xyz="${seg_x} ${y} ${pontoon_z}" rpy="0 0 0"/>
+        <origin xyz="${hull['x'] - hull['length']/2.0 + seg_len*(i + 0.5)} ${y} ${hull['z']}"
+                rpy="0 0 0"/>
         <geometry>
-          <box size="${seg_len} ${pontoon_width} ${pontoon_height}"/>
+          <box size="${seg_len} ${hull['width']} ${hull['height']}"/>
         </geometry>
       </collision>
-      <xacro:pontoon side="${side}" y="${y}" n="${n}" i="${i + 1}"/>
+      <xacro:pontoon hull="${hull}" side="${side}" y="${y}" n="${n}" i="${i + 1}"/>
     </xacro:if>
   </xacro:macro>
 
-  <!-- Primitive hull visuals: one box per pontoon (matching the buoyancy
-       collision), a deck plate and the two outboard motor housings. -->
-  <xacro:macro name="hull_visuals">
-    <visual>
-      <origin xyz="${pontoon_x} ${pontoon_y} ${pontoon_z}" rpy="0 0 0"/>
-      <geometry><box size="${pontoon_length} ${pontoon_width} ${pontoon_height}"/></geometry>
-      <material name="pontoon_mat"><color rgba="0.12 0.30 0.55 1"/></material>
-    </visual>
-    <visual>
-      <origin xyz="${pontoon_x} ${-pontoon_y} ${pontoon_z}" rpy="0 0 0"/>
-      <geometry><box size="${pontoon_length} ${pontoon_width} ${pontoon_height}"/></geometry>
-      <material name="pontoon_mat"><color rgba="0.12 0.30 0.55 1"/></material>
-    </visual>
-    <visual>
-      <origin xyz="${pontoon_x} 0 -0.10" rpy="0 0 0"/>
-      <geometry><box size="0.55 0.75 0.04"/></geometry>
-      <material name="deck_mat"><color rgba="0.75 0.75 0.78 1"/></material>
-    </visual>
-    <visual>
-      <origin xyz="-0.488 0.295 -0.16" rpy="0 0 0"/>
-      <geometry><box size="0.07 0.06 0.18"/></geometry>
-      <material name="motor_mat"><color rgba="0.15 0.15 0.15 1"/></material>
-    </visual>
-    <visual>
-      <origin xyz="-0.488 -0.295 -0.16" rpy="0 0 0"/>
-      <geometry><box size="0.07 0.06 0.18"/></geometry>
-      <material name="motor_mat"><color rgba="0.15 0.15 0.15 1"/></material>
-    </visual>
-  </xacro:macro>
-
-  <!-- ===================== Base link (hull) ===================== -->
-  <link name="base_link">
-    <inertial>
-      <origin xyz="-0.05 0 -0.20" rpy="0 0 0"/>
-      <mass value="30.0"/>
-      <inertia ixx="2.42369" ixy="0.0" ixz="0.0"
-               iyy="3.9235025" iyz="0.0" izz="5.6403125"/>
-    </inertial>
-
-    <!-- Pontoon buoyancy/contact, distributed into pontoon_segments boxes each. -->
-    <xacro:pontoon side="port" y="${pontoon_y}"  n="${pontoon_segments}"/>
-    <xacro:pontoon side="stbd" y="${-pontoon_y}" n="${pontoon_segments}"/>
-
-    <xacro:hull_visuals/>
-
-    <!-- TODO: Verify I'm doing this right -->
-    <!-- Can I remove the line above and replace it with this reference to the visual?  -->
-    <!-- Also, how does the path reference work?  -->
-    
-    <!-- Visual for the blueboat
-    
-    <visual name="Blueboat_visual">
-      <geometry>
-        <mesh>
-          <uri>blueboat.visual.glb</uri>
-        </mesh>
-      </geometry>
-    </visual> -->
-
-    <!-- Collision exported from SDF Gen -->
-    <!-- 
-    <collision name="blue usv_collider_box">
-        <pose>-0.104158 -0.295896 -0.043697 0.0 0.0 0.0</pose>
-        <geometry>
-          <box>
-            <size>0.696765 0.018217 0.370259</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_box.002">
-        <pose>-0.012113 -0.363698 0.083833 0.0 0.0 0.0</pose>
-        <geometry>
-          <box>
-            <size>0.872756 0.125557 0.116921</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_cylinder">
-        <pose>-0.017902 -0.360024 0.01984 0.0 0.0 0.0</pose>
-        <geometry>
-          <cylinder>
-            <radius>0.411411</radius>
-            <length>0.135532</length>
-          </cylinder>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_box.006">
-        <pose>-0.522288 -0.295896 -0.211583 0.0 0.0 0.0</pose>
-        <geometry>
-          <box>
-            <size>0.150178 0.018217 0.034487</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_cylinder.001">
-        <pose>-0.033923 -0.323371 -0.052308 0.0 0.0 0.0</pose>
-        <geometry>
-          <cylinder>
-            <radius>0.421063</radius>
-            <length>0.056977</length>
-          </cylinder>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_box.004">
-        <pose>-0.467242 -0.314934 0.038698 0.0 0.0 0.0</pose>
-        <geometry>
-          <box>
-            <size>0.127101 0.074541 0.20022</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_box.008">
-        <pose>0.488345 -0.302387 0.086141 0.0 0.0 0.0</pose>
-        <geometry>
-          <box>
-            <size>0.197621 0.049447 0.105333</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_cylinder.002">
-        <pose>0.406722 -0.321877 0.030426 0.0 0.0 0.0</pose>
-        <geometry>
-          <cylinder>
-            <radius>0.111828</radius>
-            <length>0.223656</length>
-          </cylinder>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_cylinder.003">
-        <pose>0.283564 -0.295886 -0.045978 0.0 0.0 0.0</pose>
-        <geometry>
-          <cylinder>
-            <radius>0.132203</radius>
-            <length>0.264407</length>
-          </cylinder>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_cylinder.004">
-        <pose>-0.447734 -0.30143 -0.126513 0.0 0.0 0.0</pose>
-        <geometry>
-          <cylinder>
-            <radius>0.040196</radius>
-            <length>0.040861</length>
-          </cylinder>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_box.001">
-        <pose>0.488345 0.302388 0.086141 0.0 0.0 0.0</pose>
-        <geometry>
-          <box>
-            <size>0.197621 0.049447 0.105333</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_cylinder.005">
-        <pose>0.406722 0.321876 0.030426 0.0 0.0 0.0</pose>
-        <geometry>
-          <cylinder>
-            <radius>0.111828</radius>
-            <length>0.223656</length>
-          </cylinder>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_cylinder.006">
-        <pose>-0.017902 0.360024 0.01984 0.0 0.0 0.0</pose>
-        <geometry>
-          <cylinder>
-            <radius>0.411411</radius>
-            <length>0.135532</length>
-          </cylinder>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_box.003">
-        <pose>-0.012113 0.363698 0.083833 0.0 0.0 0.0</pose>
-        <geometry>
-          <box>
-            <size>0.872756 0.125557 0.116921</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_cylinder.007">
-        <pose>0.283564 0.295886 -0.045978 0.0 0.0 0.0</pose>
-        <geometry>
-          <cylinder>
-            <radius>0.132203</radius>
-            <length>0.264407</length>
-          </cylinder>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_box.005">
-        <pose>-0.104158 0.295896 -0.043697 0.0 0.0 0.0</pose>
-        <geometry>
-          <box>
-            <size>0.696765 0.018217 0.370259</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_cylinder.008">
-        <pose>-0.447734 0.30143 -0.126513 0.0 0.0 0.0</pose>
-        <geometry>
-          <cylinder>
-            <radius>0.040196</radius>
-            <length>0.040861</length>
-          </cylinder>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_box.007">
-        <pose>0.299059 -0.0 0.142501 0.0 0.0 0.0</pose>
-        <geometry>
-          <box>
-            <size>0.0257 0.500356 0.037959</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_box.009">
-        <pose>-0.300152 0.0 0.142501 0.0 0.0 0.0</pose>
-        <geometry>
-          <box>
-            <size>0.0257 0.500356 0.037959</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_box.010">
-        <pose>0.298121 -0.317568 0.130778 0.0 0.0 0.0</pose>
-        <geometry>
-          <box>
-            <size>0.043582 0.183315 0.063965</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_box.011">
-        <pose>-0.29897 -0.317568 0.130778 0.0 0.0 0.0</pose>
-        <geometry>
-          <box>
-            <size>0.043582 0.183315 0.063965</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_box.012">
-        <pose>-0.29897 0.317568 0.130778 0.0 0.0 0.0</pose>
-        <geometry>
-          <box>
-            <size>0.043582 0.183315 0.063965</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_box.013">
-        <pose>0.298121 0.317568 0.130778 0.0 0.0 0.0</pose>
-        <geometry>
-          <box>
-            <size>0.043582 0.183315 0.063965</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_cylinder.009">
-        <pose>-0.253322 -0.00144 0.117093 0.0 0.0 0.0</pose>
-        <geometry>
-          <cylinder>
-            <radius>0.016745</radius>
-            <length>0.03349</length>
-          </cylinder>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_box.014">
-        <pose>0.003337 -0.36614 0.160429 0.0 0.0 0.0</pose>
-        <geometry>
-          <box>
-            <size>0.415567 0.151904 0.045952</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_box.015">
-        <pose>0.003337 0.36614 0.160429 0.0 0.0 0.0</pose>
-        <geometry>
-          <box>
-            <size>0.415567 0.151904 0.045952</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_box.016">
-        <pose>-0.467242 0.314935 0.038698 0.0 0.0 0.0</pose>
-        <geometry>
-          <box>
-            <size>0.127101 0.074541 0.20022</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="blue usv_collider_box.017">
-        <pose>-0.522288 0.295896 -0.211583 0.0 0.0 0.0</pose>
-        <geometry>
-          <box>
-            <size>0.150178 0.018217 0.034487</size>
-          </box>
-        </geometry>
-      </collision>
-
-      -->
-  </link>
-
-  <!-- ===================== Thrusters (props) ===================== -->
-  <xacro:blueboat_thruster side="port" xyz="-0.488 0.295 -0.272"/>
-  <xacro:blueboat_thruster side="stbd" xyz="-0.488 -0.295 -0.272"/>
-
-  <!-- ===================== Accessories (from config) ===================== -->
-  <xacro:mount_accessories items="${cfg.get('accessories') or []}"/>
+  <xacro:if value="${'hull_displacement' in cfg}">
+    <xacro:property name="hull" value="${cfg['hull_displacement']}"/>
+    <link name="hull_displacement">
+      <xacro:pontoon hull="${hull}" side="port" y="${hull['y']}"  n="${hull['segments']}"/>
+      <xacro:pontoon hull="${hull}" side="stbd" y="${-hull['y']}" n="${hull['segments']}"/>
+    </link>
+    <joint name="hull_displacement_joint" type="fixed">
+      <parent link="${cfg['base'].get('name', 'base_link')}"/>
+      <child link="hull_displacement"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+  </xacro:if>
 
 </robot>

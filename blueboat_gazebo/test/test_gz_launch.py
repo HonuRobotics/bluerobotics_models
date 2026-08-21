@@ -163,9 +163,9 @@ def test_boat_recovers_from_submersion(sim):
     t0 = sim_seconds(sim)
     wait_sim_seconds(sim, 6)
     t1, z1 = sim_seconds(sim), model_pose(sim)[2]
-    assert z1 > 0.1, (
+    assert z1 > -0.08, (
         f'no reserve buoyancy recovery: z {z1:.2f} after {t1 - t0:.1f} sim s '
-        f'(float equilibrium is about +0.24)')
+        f'(float equilibrium puts base_link at about z 0, the waterline)')
 
 
 def test_forward_thrust_surges(sim):

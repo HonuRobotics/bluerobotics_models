@@ -4,7 +4,7 @@
   z -3, graded buoyancy (seawater below z 0, air above), a visual water
   surface at the waterline, the core systems and the vehicle pulled in via
   <include>. Started directly it comes up paused; press play and the boat
-  settles to its static draft (about 70 mm) and floats level. Hydrodynamic
+  settles to its static draft and floats level (base_link at the waterline). Hydrodynamic
   damping lives in the included model; tuning the coefficients against the
   real vehicle is the deferred part.
 
@@ -100,7 +100,7 @@
     <include>
       <uri>model://blueboat_gazebo</uri>
       <name>blueboat</name>
-      <pose>0 0 0.25 0 0 0</pose>
+      <pose>0 0 0.05 0 0 0</pose>
     </include>
 
   </world>

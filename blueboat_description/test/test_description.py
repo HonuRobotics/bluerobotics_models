@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Generation-pipeline tests: config yaml -> URDF (validity, pontoons, catalog)."""
+"""Generation pipeline tests: parts config yaml -> URDF (validity, hull, catalog)."""
 
 from pathlib import Path
 import re
@@ -24,39 +24,44 @@ import pytest
 import yaml
 
 SHARE = Path(get_package_share_directory('blueboat_description'))
+PARTS_SHARE = Path(get_package_share_directory('bluerobotics_parts'))
 TOP_XACRO = SHARE / 'urdf' / 'blueboat.urdf.xacro'
-ACCESSORIES_XACRO = SHARE / 'urdf' / 'accessories.xacro'
+PARTS_XACRO = PARTS_SHARE / 'urdf' / 'parts.xacro'
+DEFAULT_CONFIG = (SHARE / 'config' / 'blueboat.yaml').read_text()
 
 WATER_DENSITY = 1025.0
-
-# Full accessory catalog: type -> demo pose.
-CATALOG = {
-    'flag': '-0.3 0 -0.08',
-    'antenna_mast': '-0.35 0 0.45',
-    'basestation_antenna': '-0.35 0 0.78',
-    'ping_sonar': '0 0 -0.05',
-    'ping_mount': '0 -0.12 -0.02',
-    'payload_bracket': '0.1 0 0.15',
-    'omniscan_450': '0.2 0.22 -0.03',
-    'surveyor_multibeam': '0.35 0 -0.08',
-}
+HULL = yaml.safe_load(DEFAULT_CONFIG)['hull_displacement']
+DRIVETRAIN = {'base_link', 'motor_port', 'motor_stbd'}
+# The Ping2 transducer face sits this far below the part origin (delivered mesh).
+PING_FACE_BELOW_ORIGIN = 0.044
 
 
-def make_config(accessories=()):
-    """Return vehicle-config yaml text for the given loadout."""
-    lines = ['accessories:']
-    if not accessories:
-        lines = ['accessories: []']
-    for type_name, name, xyz in accessories:
-        lines.append(
-            f'  - {{type: {type_name}, name: {name}, '
-            f'xyz: "{xyz}", rpy: "0 0 0"}}')
-    return '\n'.join(lines) + '\n'
+def catalog():
+    """Part types the library offers: the include list of parts.xacro."""
+    names = re.findall(r'/urdf/([a-z0-9_]+)\.urdf\.xacro', PARTS_XACRO.read_text())
+    return sorted(set(names) - {'part_probe'})
 
 
-def full_catalog_accessories():
-    """Return one accessory entry per catalog type."""
-    return [(t, f'acc_{t}', pose) for t, pose in CATALOG.items()]
+def part(type_name, name, **extra):
+    """Build a parts config entry."""
+    return {'type': type_name, 'name': name, **extra}
+
+
+def make_config(parts=(), hull=True):
+    """Vehicle config yaml: chassis base, the given parts, hull displacement."""
+    cfg = {'base': {'type': 'blueboat_chassis', 'name': 'base_link',
+                    'collision': False},
+           'parts': [dict(p) for p in parts]}
+    if hull:
+        cfg['hull_displacement'] = dict(HULL)
+    return yaml.safe_dump(cfg, sort_keys=False)
+
+
+def full_catalog_parts():
+    """One instance of every catalog type but the chassis, on explicit poses."""
+    types = [t for t in catalog() if t != 'blueboat_chassis']
+    return [part(t, f'acc_{t}', xyz=f'{0.1 * i - 0.6:.2f} 0 0.5', rpy='0 0 0')
+            for i, t in enumerate(types)]
 
 
 def xacro_output(config_text):
@@ -66,7 +71,7 @@ def xacro_output(config_text):
         config_path = f.name
     out = subprocess.run(
         ['xacro', str(TOP_XACRO), f'config_file:={config_path}'],
-        capture_output=True, text=True, timeout=60)
+        capture_output=True, text=True, timeout=120)
     assert out.returncode == 0, (
         f'xacro failed ({out.returncode})\n--- stderr ---\n{out.stderr}')
     return out.stdout
@@ -89,35 +94,61 @@ def total_mass(root):
 
 
 def pontoon_boxes(root):
-    """Return [(name, x, y, z, lx, ly, lz)] for the pontoon collisions."""
-    base = next(li for li in root.findall('link')
-                if li.get('name') == 'base_link')
+    """Return [(name, x, y, z, lx, ly, lz)] for the hull displacement boxes."""
     boxes = []
-    for coll in base.findall('collision'):
-        name = coll.get('name') or ''
-        if not name.startswith('pontoon_'):
-            continue
-        x, y, z = (float(v) for v in
-                   coll.find('origin').get('xyz').split())
-        lx, ly, lz = (float(v) for v in
-                      coll.find('./geometry/box').get('size').split())
-        boxes.append((name, x, y, z, lx, ly, lz))
+    for link in root.findall('link'):
+        for coll in link.findall('collision'):
+            name = coll.get('name') or ''
+            if not name.startswith('pontoon_'):
+                continue
+            x, y, z = (float(v) for v in coll.find('origin').get('xyz').split())
+            lx, ly, lz = (float(v) for v in
+                          coll.find('./geometry/box').get('size').split())
+            boxes.append((name, x, y, z, lx, ly, lz))
     return boxes
 
 
-def test_default_config_ping_only():
-    """The shipped default config builds two motors and the echosounder."""
-    default = (SHARE / 'config' / 'blueboat.yaml').read_text()
-    links = link_names(generate_urdf(default))
-    assert {'base_link', 'motor_port_link', 'motor_stbd_link', 'ping'} <= links
-    accessory_links = links - {'base_link', 'motor_port_link',
-                               'motor_stbd_link'}
-    assert accessory_links == {'ping'}
+def joints_by_child(root):
+    """Map child link -> (parent link, origin xyz) over every joint."""
+    table = {}
+    for joint in root.findall('joint'):
+        origin = joint.find('origin')
+        xyz = [float(v) for v in (origin.get('xyz') if origin is not None
+                                  else '0 0 0').split()]
+        table[joint.find('child').get('link')] = (joint.find('parent').get('link'), xyz)
+    return table
 
 
-def test_pontoon_buoyancy_invariant():
+def position_in_base(root, link):
+    """
+    Return the position of a link origin in base_link.
+
+    Follows the joint origins up the tree; every joint in it has zero
+    rotation, so translations simply add.
+    """
+    table = joints_by_child(root)
+    pos = [0.0, 0.0, 0.0]
+    while link in table:
+        link, xyz = table[link]
+        pos = [pos[i] + xyz[i] for i in range(3)]
+    return pos
+
+
+def test_default_config_builds_the_standard_loadout():
+    """The shipped config yields the chassis, two motors, flag and Ping kit."""
+    root = generate_urdf(DEFAULT_CONFIG)
+    assert DRIVETRAIN | {'flag', 'ping_mount', 'ping'} <= link_names(root)
+    motors = {j.get('name'): j for j in root.findall('joint')
+              if j.get('name') in ('motor_port_joint', 'motor_stbd_joint')}
+    assert set(motors) == {'motor_port_joint', 'motor_stbd_joint'}
+    for joint in motors.values():
+        assert joint.get('type') == 'continuous'
+        assert joint.find('axis') is not None
+
+
+def test_hull_displacement_invariant():
     """Segmented pontoons tile fully and give positive reserve buoyancy."""
-    root = generate_urdf(make_config(full_catalog_accessories()))
+    root = generate_urdf(make_config(full_catalog_parts()))
     boxes = pontoon_boxes(root)
     sides = {'port': [], 'stbd': []}
     for name, x, _, _, lx, _, lz in boxes:
@@ -139,31 +170,66 @@ def test_pontoon_buoyancy_invariant():
     assert draft < height, 'waterline above the pontoon tops'
 
 
+def test_pontoons_are_a_symmetric_catamaran():
+    """Both pontoons mirror across y and their segments tile without gaps."""
+    boxes = pontoon_boxes(generate_urdf(DEFAULT_CONFIG))
+    assert len(boxes) == 2 * HULL['segments']
+    sides = {}
+    for name, x, y, z, lx, ly, lz in boxes:
+        sides.setdefault(name.split('_')[1], []).append((x, y, z, lx, ly, lz))
+    assert set(sides) == {'port', 'stbd'}
+    seg_len = HULL['length'] / HULL['segments']
+    for side, sign in (('port', +1), ('stbd', -1)):
+        segments = sorted(sides[side])
+        assert len(segments) == HULL['segments']
+        for x, y, z, lx, ly, lz in segments:
+            assert y == pytest.approx(sign * HULL['y'])
+            assert z == pytest.approx(HULL['z'])
+            assert (lx, ly, lz) == pytest.approx(
+                (seg_len, HULL['width'], HULL['height']))
+        for (x0, *_), (x1, *_) in zip(segments, segments[1:]):
+            assert x1 - x0 == pytest.approx(seg_len), f'{side}: gap or overlap'
+
+
 def test_catalog_completeness_and_toggle():
-    """Every accessory type generates its link, and only when configured."""
+    """Every part type generates its link, and only when configured."""
     empty_links = link_names(generate_urdf(make_config()))
-    for type_name, pose in CATALOG.items():
+    assert 'base_link' in empty_links
+    for type_name in catalog():
+        if type_name == 'blueboat_chassis':
+            continue
         name = f'acc_{type_name}'
-        root = generate_urdf(make_config([(type_name, name, pose)]))
+        root = generate_urdf(make_config([part(type_name, name, xyz='0 0 0.5')]))
         assert name in link_names(root), f'{type_name} missing link'
         assert name not in empty_links
-    # The dispatcher invokes the config type directly as a macro, so every
-    # catalog type must have a same-named macro.
-    macros = set(re.findall(r'<xacro:macro name="([a-z]\w*)"',
-                            ACCESSORIES_XACRO.read_text()))
-    assert set(CATALOG) <= macros, f'missing macros: {set(CATALOG) - macros}'
 
 
-def test_no_mesh_assets():
-    """Licensing guard: the package ships no meshes, visuals are primitive."""
-    root = generate_urdf(make_config(full_catalog_accessories()))
-    assert not root.findall('.//mesh'), 'unexpected mesh reference in URDF'
-    assert not (SHARE / 'meshes').exists(), 'unexpected meshes directory'
+def test_unknown_part_type_fails_loudly():
+    """A typo in type: fails the build naming the type, never mounts nothing."""
+    with tempfile.NamedTemporaryFile('w', suffix='.yaml', delete=False) as f:
+        f.write(make_config([part('no_such_part', 'x', xyz='0 0 0')]))
+        config_path = f.name
+    out = subprocess.run(['xacro', str(TOP_XACRO), f'config_file:={config_path}'],
+                         capture_output=True, text=True, timeout=120)
+    assert out.returncode != 0
+    assert 'no_such_part' in out.stderr
+
+
+def test_mesh_assets_resolve():
+    """Every mesh the URDF references ships in bluerobotics_parts."""
+    root = generate_urdf(make_config(full_catalog_parts()))
+    meshes = list(root.iter('mesh'))
+    assert meshes, 'the parts based model must reference the delivered meshes'
+    prefix = 'package://bluerobotics_parts/'
+    for mesh in meshes:
+        uri = mesh.get('filename')
+        assert uri.startswith(prefix), f'mesh outside the parts package: {uri}'
+        assert (PARTS_SHARE / uri[len(prefix):]).is_file(), f'missing asset {uri}'
 
 
 def test_check_urdf_accepts_generated():
     """The urdfdom validator accepts the generated URDF."""
-    text = xacro_output(make_config(full_catalog_accessories()))
+    text = xacro_output(make_config(full_catalog_parts()))
     with tempfile.NamedTemporaryFile('w', suffix='.urdf', delete=False) as f:
         f.write(text)
         urdf_path = f.name
@@ -174,55 +240,39 @@ def test_check_urdf_accepts_generated():
         f'--- stdout ---\n{out.stdout}\n--- stderr ---\n{out.stderr}')
 
 
-PONTOON = {'length': 1.1, 'width': 0.19, 'height': 0.19,
-           'x': -0.05, 'y': 0.30, 'z': -0.22, 'segments': 6}
+def test_explicit_pose_propagates():
+    """An explicit mount pose lands on the part's joint (zero attach part)."""
+    root = generate_urdf(make_config(
+        [part('ping_singlebeam', 'acc_ping', xyz='0.11 -0.22 0.33', rpy='0 0 0')]))
+    joint = next(j for j in root.findall('joint') if j.get('name') == 'acc_ping_joint')
+    xyz = [float(v) for v in joint.find('origin').get('xyz').split()]
+    assert xyz == pytest.approx([0.11, -0.22, 0.33])
+    assert joint.find('parent').get('link') == 'base_link'
 
 
-def test_pontoons_are_a_symmetric_catamaran():
-    """Both pontoons mirror across y and their segments tile without gaps."""
-    boxes = pontoon_boxes(generate_urdf(make_config(full_catalog_accessories())))
-    assert len(boxes) == 2 * PONTOON['segments']
-    sides = {}
-    for name, x, y, z, lx, ly, lz in boxes:
-        sides.setdefault(name.split('_')[1], []).append((x, y, z, lx, ly, lz))
-    assert set(sides) == {'port', 'stbd'}
-    seg_len = PONTOON['length'] / PONTOON['segments']
-    for side, sign in (('port', +1), ('stbd', -1)):
-        segments = sorted(sides[side])
-        assert len(segments) == PONTOON['segments']
-        for x, y, z, lx, ly, lz in segments:
-            assert y == pytest.approx(sign * PONTOON['y']), (
-                f'{side} pontoon at y={y}, expected {sign * PONTOON["y"]}')
-            assert z == pytest.approx(PONTOON['z'])
-            assert (lx, ly, lz) == pytest.approx(
-                (seg_len, PONTOON['width'], PONTOON['height']))
-        for (x0, *_), (x1, *_) in zip(segments, segments[1:]):
-            assert x1 - x0 == pytest.approx(seg_len), f'{side}: gap or overlap'
-
-
-def test_accessory_pose_propagates():
-    """The config mount pose lands verbatim on the accessory's fixed joint."""
-    root = generate_urdf(make_config([('flag', 'acc_flag', '0.11 -0.22 0.33')]))
-    joint = next(j for j in root.findall('joint')
-                 if j.get('name') == 'acc_flag_joint')
-    assert joint.find('origin').get('xyz') == '0.11 -0.22 0.33'
+def test_socket_mounting_chains_through_the_parent_part():
+    """mount: on a part resolves to that part's socket frame, not base_link."""
+    table = joints_by_child(generate_urdf(DEFAULT_CONFIG))
+    assert table['ping'][0] == 'ping_mount_sensor'
+    assert table['ping_mount_sensor'][0] == 'ping_mount'
+    assert table['ping_mount'][0] == 'base_link_ping_mount'
+    assert table['base_link_ping_mount'][0] == 'base_link'
+    assert table['motor_port'][0] == 'base_link_motor_port'
 
 
 def test_echosounder_mounted_below_waterline():
     """
-    The default ping mount is submerged at rest.
+    The default Ping transducer is submerged at rest.
 
-    The gpu_lidar returns seabed ranges from anywhere, so a transducer mounted
-    in the air fails silently; lock the mount below the static waterline
-    computed from mass and waterplane area.
+    The gpu_lidar returns seabed ranges from anywhere, so a transducer in the
+    air fails silently; lock its face below the static waterline computed from
+    mass and waterplane area.
     """
-    config = (SHARE / 'config' / 'blueboat.yaml').read_text()
-    ping = next(a for a in yaml.safe_load(config)['accessories']
-                if a['type'] == 'ping_sonar')
-    ping_z = float(ping['xyz'].split()[2])
-    area = 2 * PONTOON['length'] * PONTOON['width']
-    draft = total_mass(generate_urdf(config)) / (WATER_DENSITY * area)
-    waterline_z = PONTOON['z'] - PONTOON['height'] / 2 + draft
-    assert ping_z < waterline_z, (
-        f'ping transducer at z {ping_z} is above the static waterline '
-        f'{waterline_z:.3f}')
+    root = generate_urdf(DEFAULT_CONFIG)
+    face_z = position_in_base(root, 'ping')[2] - PING_FACE_BELOW_ORIGIN
+    area = 2 * HULL['length'] * HULL['width']
+    draft = total_mass(root) / (WATER_DENSITY * area)
+    waterline_z = HULL['z'] - HULL['height'] / 2 + draft
+    assert face_z < waterline_z - 0.02, (
+        f'ping transducer face at z {face_z:.3f} is not below the static '
+        f'waterline {waterline_z:.3f}')

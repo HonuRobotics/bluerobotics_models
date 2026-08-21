@@ -31,15 +31,14 @@ def entries_for(cfg):
     return {e['ros_topic_name']: e for e in entries}
 
 
-def accessory(type_name, name, **extra):
-    """Build a minimal accessory config entry."""
-    return {'type': type_name, 'name': name,
-            'xyz': '0 0 0', 'rpy': '0 0 0', **extra}
+def part(type_name, name, **extra):
+    """Build a minimal parts config entry."""
+    return {'type': type_name, 'name': name, 'xyz': '0 0 0', **extra}
 
 
 def test_thrusters_always_bridged():
-    """Drivetrain thrust commands exist even with no accessories."""
-    entries = entries_for({'accessories': []})
+    """Drivetrain thrust commands exist even with no parts."""
+    entries = entries_for({'parts': []})
     assert set(entries) == {'/clock', '/joint_states',
                             '/blueboat/thrusters/port/thrust',
                             '/blueboat/thrusters/stbd/thrust'}
@@ -49,20 +48,20 @@ def test_thrusters_always_bridged():
         '/model/blueboat/joint/motor_port_joint/cmd_thrust'
 
 
-def test_ping_sonar_topics():
-    """The echosounder produces its LaserScan entry, lazily."""
-    entries = entries_for({'accessories': [accessory('ping_sonar', 'ping')]})
+def test_ping_topics():
+    """The echosounder part produces its LaserScan entry, lazily."""
+    entries = entries_for({'parts': [part('ping_singlebeam', 'ping')]})
     ping = entries['/blueboat/ping/range']
     assert ping['ros_type_name'] == 'sensor_msgs/msg/LaserScan'
     assert ping['lazy'] is True
 
 
-def test_non_sensor_accessories_produce_nothing():
-    """Geometry-only accessories add no bridge entries."""
-    cfg = {'accessories': [accessory('flag', 'flag'),
-                           accessory('antenna_mast', 'mast'),
-                           accessory('omniscan_450', 'sidescan'),
-                           accessory('surveyor_multibeam', 'multibeam')]}
+def test_geometry_only_parts_produce_nothing():
+    """Parts without a sensor model add no bridge entries."""
+    cfg = {'parts': [part('blueboat_flag', 'flag'),
+                     part('blueboat_antenna_mast', 'mast'),
+                     part('omniscan_450_sidescan', 'sidescan'),
+                     part('surveyor_multibeam', 'multibeam')]}
     assert set(entries_for(cfg)) == {'/clock', '/joint_states',
                                      '/blueboat/thrusters/port/thrust',
                                      '/blueboat/thrusters/stbd/thrust'}
@@ -70,9 +69,9 @@ def test_non_sensor_accessories_produce_nothing():
 
 def test_topic_override_precedence():
     """Gz_topic/ros_topic > topic > /<namespace>/<name>."""
-    cfg = {'topic_namespace': 'boat_a', 'accessories': [
-        accessory('ping_sonar', 'ping',
-                  gz_topic='boat_a/ping_raw', ros_topic='/sensors/ping'),
+    cfg = {'topic_namespace': 'boat_a', 'parts': [
+        part('ping_singlebeam', 'ping',
+             gz_topic='boat_a/ping_raw', ros_topic='/sensors/ping'),
     ]}
     entries = entries_for(cfg)
     ping = entries['/sensors/ping/range']
@@ -86,5 +85,5 @@ def test_extra_bridge_topics_verbatim():
              'gz_topic_name': '/model/blueboat/odom',
              'ros_type_name': 'nav_msgs/msg/Odometry',
              'gz_type_name': 'gz.msgs.Odometry', 'direction': 'GZ_TO_ROS'}
-    cfg = {'accessories': [], 'extra_bridge_topics': [dict(extra)]}
+    cfg = {'parts': [], 'extra_bridge_topics': [dict(extra)]}
     assert entries_for(cfg)['/odom'] == extra

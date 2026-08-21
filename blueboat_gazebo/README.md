@@ -9,13 +9,14 @@ simulator code.
 ## What it provides
 
 - `model.sdf`: **generated at build time** from `model.sdf.xacro`. It
-  `<include merge="true">`s the description URDF and adds two **`Thruster`**
+  `<include merge="true">`s the description URDF (the BlueBoat assembled
+  from `bluerobotics_parts`) and adds two **`Thruster`**
   plugins (counter-rotating, T200 thrust limits), a **`Hydrodynamics`**
   plugin, and the **Ping2 echosounder** as a single-beam down `gpu_lidar`.
 - `worlds/blueboat_playground.sdf`: **graded buoyancy** (water below z=0), a
   seabed and a visual water surface; the boat floats at the waterline.
 - `config/ros_gz_bridge.yaml`: **generated at build time** from the same
-  vehicle config, so bridge topics always match the configured accessories.
+  vehicle config, so bridge topics always match the configured parts.
 - `launch/sim.launch.xml`, `model.config` (`model://blueboat_gazebo`).
 
 ## Build
@@ -44,7 +45,7 @@ ros2 launch blueboat_gazebo sim.launch.xml   # gui:=false  use_composition:=fals
 
 ## API
 
-Topic bases default to `/<topic_namespace>/<accessory name>`; per-accessory
+Topic bases default to `/<topic_namespace>/<part name>`; per-part
 config keys (`topic`, `gz_topic`, `ros_topic`) override them.
 
 ### ROS interface (via the generated bridge)
@@ -53,7 +54,7 @@ config keys (`topic`, `gz_topic`, `ros_topic`) override them.
 |-----------|------|-----------|----------------|
 | `/blueboat/thrusters/port/thrust` | `std_msgs/msg/Float64` | subscribes | always (drivetrain) |
 | `/blueboat/thrusters/stbd/thrust` | `std_msgs/msg/Float64` | subscribes | always (drivetrain) |
-| `/blueboat/ping/range` | `sensor_msgs/msg/LaserScan` | publishes | default (`ping_sonar`) |
+| `/blueboat/ping/range` | `sensor_msgs/msg/LaserScan` | publishes | default (`ping_singlebeam`) |
 | `/clock` | `rosgraph_msgs/msg/Clock` | publishes | always |
 
 `robot_state_publisher` (started by the launch) additionally publishes
@@ -90,7 +91,7 @@ publish continuously are unaffected by the onset ordering.
 
 Never edit the generated `config/ros_gz_bridge.yaml`; edit the vehicle config
 and rebuild. Native bridge options (`lazy`, queue sizes, ...) go in each
-accessory's `bridge:` dict, and arbitrary extra entries in the top-level
+part's `bridge:` dict, and arbitrary extra entries in the top-level
 `extra_bridge_topics:` list.
 
 ## Binary (deb) installs
@@ -114,7 +115,7 @@ overlay workspace is the recommended path for anything long-lived.
    <include>
      <uri>model://blueboat_gazebo</uri>
      <name>blueboat</name>
-     <pose>0 0 0.25 0 0 0</pose>
+     <pose>0 0 0.05 0 0 0</pose>
    </include>
    ```
 
@@ -122,6 +123,6 @@ overlay workspace is the recommended path for anything long-lived.
 3. Or spawn at runtime:
 
    ```bash
-   ros2 run ros_gz_sim create -world <your_world> -name blueboat -z 0.25 \
+   ros2 run ros_gz_sim create -world <your_world> -name blueboat -z 0.05 \
      -file $(ros2 pkg prefix --share blueboat_gazebo)/model.sdf
    ```

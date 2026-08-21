@@ -61,9 +61,9 @@ def test_specs_comment_matches_the_model():
 
 
 def test_specs_comment_reports_the_loadout():
-    """The accessories row reflects the shipped default config."""
+    """The parts row reflects the shipped default config."""
     text = URDF.read_text()
     cfg = yaml.safe_load((SHARE / 'config' / 'blueboat.yaml').read_text())
-    accessories = spec(text, 'accessories')
-    for accessory in cfg.get('accessories') or []:
-        assert accessory['type'] in accessories
+    parts = spec(text, 'parts')
+    for part in cfg.get('parts') or []:
+        assert part['type'] in parts

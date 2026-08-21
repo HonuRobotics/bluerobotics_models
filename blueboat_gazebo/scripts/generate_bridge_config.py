@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Generate the ros_gz bridge config from the vehicle accessory config.
+Generate the ros_gz bridge config from the vehicle parts config.
 
 Run at build time (see CMakeLists.txt): emits /clock, the two thruster command
 topics (part of the drivetrain, always present) and one entry per topic of each
-configured accessory. Topic bases follow /<topic_namespace>/<accessory name>,
-overridable per accessory with `topic` (both sides), `gz_topic` (Gazebo side)
+configured sensor part. Topic bases follow /<topic_namespace>/<part name>,
+overridable per part with `topic` (both sides), `gz_topic` (Gazebo side)
 and `ros_topic` (ROS side). This is the single point that must agree with the
 sensor <topic>s emitted by model.sdf.xacro; both read the same config, so they
 cannot drift.
@@ -31,8 +31,9 @@ import sys
 import yaml
 
 # type -> [(topic suffix, ROS type, gz type, direction)]
-ACCESSORY_TOPICS = {
-    'ping_sonar': [
+# Sensor parts (bluerobotics_parts types) and the topics each produces.
+PART_TOPICS = {
+    'ping_singlebeam': [
         ('range', 'sensor_msgs/msg/LaserScan', 'gz.msgs.LaserScan',
          'GZ_TO_ROS'),
     ],
@@ -69,7 +70,7 @@ def bridge_entries(cfg):
         'gz_type_name': 'gz.msgs.Model',
         'direction': 'GZ_TO_ROS',
     })
-    # Twin outboard thrusters: drivetrain, not accessories. Thrust in newtons.
+    # Twin outboard thrusters: drivetrain, always present. Thrust in newtons.
     for side in ('port', 'stbd'):
         entries.append({
             'ros_topic_name': absolute(f'{ns}/thrusters/{side}/thrust'),
@@ -79,12 +80,12 @@ def bridge_entries(cfg):
             'gz_type_name': 'gz.msgs.Double',
             'direction': 'ROS_TO_GZ',
         })
-    for acc in cfg.get('accessories') or []:
-        default_base = f"{ns}/{acc['name']}"
-        gz_base = acc.get('gz_topic', acc.get('topic', default_base))
-        ros_base = acc.get('ros_topic', acc.get('topic', default_base))
+    for part in cfg.get('parts') or []:
+        default_base = f"{ns}/{part['name']}"
+        gz_base = part.get('gz_topic', part.get('topic', default_base))
+        ros_base = part.get('ros_topic', part.get('topic', default_base))
         for suffix, ros_type, gz_type, direction in \
-                ACCESSORY_TOPICS.get(acc['type'], []):
+                PART_TOPICS.get(part['type'], []):
             entry = {
                 'ros_topic_name': absolute(f'{ros_base}/{suffix}'),
                 'gz_topic_name': absolute(f'{gz_base}/{suffix}'),
@@ -95,9 +96,9 @@ def bridge_entries(cfg):
             if direction == 'GZ_TO_ROS':
                 # Defer the gz subscription until a ROS subscriber shows up.
                 entry['lazy'] = True
-            # Pass-through: native ros_gz_bridge keys from the accessory's
+            # Pass-through: native ros_gz_bridge keys from the part's
             # `bridge:` dict override the defaults above.
-            entry.update(acc.get('bridge') or {})
+            entry.update(part.get('bridge') or {})
             entries.append(entry)
     # Verbatim extra entries (native ros_gz_bridge syntax).
     entries.extend(cfg.get('extra_bridge_topics') or [])
