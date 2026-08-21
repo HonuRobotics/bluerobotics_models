@@ -8,7 +8,7 @@ ros2 launch blueboat_gazebo sim.launch.xml
 
 Starts the Gazebo server (composed in one container with the ros_gz bridge
 and `robot_state_publisher`), the Gazebo GUI, and spawns the boat into the
-vehicle free water world. The world starts paused; press play.
+vehicle free water world. The simulation starts running.
 
 | Argument | Default | Meaning |
 |---|---|---|
@@ -25,7 +25,8 @@ is expected and harmless.
 
 ## Gazebo only, no ROS
 
-The playground world includes the default composed model:
+The playground world includes the default composed model (started this way
+the world comes up paused; press play):
 
 ```bash
 gz sim $(ros2 pkg prefix --share blueboat_gazebo)/worlds/blueboat_playground.sdf

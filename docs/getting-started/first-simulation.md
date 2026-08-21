@@ -7,10 +7,11 @@ robot_state_publisher and the Gazebo GUI):
 ros2 launch blueboat_gazebo sim.launch.xml
 ```
 
-The world starts **paused**; press play. The boat is spawned at its static
-waterline and floats there: two hulls, the two outboard propellers, the flag
-and the Ping2 echosounder fitted under the starboard hull. That is the
-default loadout; no configuration was involved.
+The simulation starts running, with the camera a few meters off the boat's
+port quarter. The boat is spawned at its static waterline and floats there:
+two hulls, the two outboard propellers, the flag and the Ping2 echosounder
+fitted under the starboard hull. That is the default loadout; no
+configuration was involved.
 
 In a second terminal (also sourced), watch the echosounder and spin the
 propellers:

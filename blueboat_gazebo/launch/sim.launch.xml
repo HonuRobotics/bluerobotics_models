@@ -9,8 +9,8 @@
   (blueboat_water.sdf by default) and the generated model is spawned into it
   as "blueboat". With use_composition (default), gz_server, the bridge and
   robot_state_publisher run as composable nodes in ONE container process;
-  the Gazebo GUI runs as a separate process. The world starts paused; press
-  play and the boat floats at its static draft.
+  the Gazebo GUI runs as a separate process. The simulation starts running
+  and the boat floats at its static draft.
 
       ros2 launch blueboat_gazebo sim.launch.xml
       ros2 launch blueboat_gazebo sim.launch.xml config_file:=/path/my_loadout.yaml
