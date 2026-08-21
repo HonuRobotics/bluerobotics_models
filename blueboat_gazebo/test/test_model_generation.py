@@ -130,6 +130,65 @@ def test_sensors_follow_their_part_frame():
     assert sensor.find('frame_id').text == 'ping_beam'
 
 
+HULL = yaml.safe_load(DEFAULT_CONFIG)['hull_displacement']
+WATER_DENSITY = 1025.0
+
+
+def pontoon_boxes(model_root):
+    """Return [(name, x, y, z, lx, ly, lz)] of the hull_displacement link's boxes."""
+    link = next(li for li in model_root.iter('link') if li.get('name') == 'hull_displacement')
+    boxes = []
+    for coll in link.findall('collision'):
+        x, y, z = (float(v) for v in coll.find('pose').text.split()[:3])
+        lx, ly, lz = (float(v) for v in coll.find('geometry/box/size').text.split())
+        boxes.append((coll.get('name'), x, y, z, lx, ly, lz))
+    return boxes
+
+
+def test_hull_displacement_is_its_own_enabled_link():
+    """
+    Displacement lives on a dedicated link the worlds enable by name.
+
+    Fixed to base_link; the parts' collisions never displace.
+    """
+    root, _ = xacro(MODEL_XACRO, DEFAULT_CONFIG)
+    link = next(li for li in root.iter('link') if li.get('name') == 'hull_displacement')
+    assert link.find('pose').get('relative_to') == 'base_link'
+    joint = next(j for j in root.iter('joint') if j.get('name') == 'hull_displacement_joint')
+    assert joint.get('type') == 'fixed'
+    assert joint.find('parent').text == 'base_link'
+    assert joint.find('child').text == 'hull_displacement'
+    for world in ('blueboat_water.sdf', 'blueboat_playground.sdf'):
+        text = (GZ_SHARE / 'worlds' / world).read_text()
+        assert '<enable>blueboat::hull_displacement</enable>' in text, world
+        assert '<enable>blueboat</enable>' not in text, f'{world}: must not enable the whole model'
+
+
+def test_pontoons_tile_and_float_the_boat():
+    """Segmented pontoons mirror across y, tile, and give positive reserve buoyancy."""
+    root, _ = xacro(MODEL_XACRO, DEFAULT_CONFIG)
+    boxes = pontoon_boxes(root)
+    assert len(boxes) == 2 * HULL['segments']
+    sides = {}
+    for name, x, y, z, lx, ly, lz in boxes:
+        sides.setdefault(name.split('_')[1], []).append((x, y, z, lx, ly, lz))
+    assert set(sides) == {'port', 'stbd'}
+    seg_len = HULL['length'] / HULL['segments']
+    for side, sign in (('port', +1), ('stbd', -1)):
+        segments = sorted(sides[side])
+        for x, y, z, lx, ly, lz in segments:
+            assert y == pytest.approx(sign * HULL['y']) and z == pytest.approx(HULL['z'])
+            assert (lx, ly, lz) == pytest.approx((seg_len, HULL['width'], HULL['height']))
+        for (x0, *_), (x1, *_) in zip(segments, segments[1:]):
+            assert x1 - x0 == pytest.approx(seg_len), f'{side}: gap or overlap'
+    urdf_root = ET.parse(DESC_SHARE / 'urdf' / 'blueboat.urdf').getroot()
+    mass = sum(float(m.get('value')) for m in urdf_root.findall('.//inertial/mass'))
+    volume = sum(lx * ly * lz for *_, lx, ly, lz in boxes)
+    assert WATER_DENSITY * volume > mass, 'boat would sink fully loaded'
+    draft = mass / (WATER_DENSITY * 2 * HULL['length'] * HULL['width'])
+    assert draft < HULL['height'], 'waterline above the pontoon tops'
+
+
 def test_installed_model_sdf_carries_the_specs_comment():
     """The stamped model.sdf repeats the URDF specs; the masses agree."""
     text = (GZ_SHARE / 'model.sdf').read_text()

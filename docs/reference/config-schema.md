@@ -9,7 +9,7 @@ passed as `config_file:=`) is one YAML document:
 | `base` | yes | the root part: `{type, name (default base_link), collision (default true)}` |
 | `parts` | no (`[]`) | slot entries and free placements, see below |
 | `slots` | no | ad hoc slots: `{on (instance, default base_link), name, xyz, rpy (default "0 0 0"), accepts (list, optional), default (type or none)}` |
-| `hull_displacement` | USV | the box pontoons declared at the assembly: `{length, width, height, x, y, z, segments}` |
+| `hull_displacement` | USV | the box pontoons the Gazebo composition places on the `hull_displacement` link: `{length, width, height, x, y, z, segments}` |
 | `buoyancy` | UUV (BlueROV2) | `{net_buoyancy, cob_offset, cob_frame, fluid_density}`, see [Buoyancy](../design/buoyancy.md) |
 | `extra_bridge_topics` | no | list appended verbatim to the generated ros_gz bridge config (native syntax) |
 

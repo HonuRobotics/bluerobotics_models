@@ -31,10 +31,10 @@
       <render_engine>ogre2</render_engine>
     </plugin>
 
-    <!-- Graded buoyancy: seawater (1025) below z=0, air above -> the BlueBoat
-         floats at the z=0 waterline. Displacement comes from the pontoon-box
-         collisions (graded mode rejects the mesh hull); the boat self-settles to
-         its draft. -->
+    <!-- Graded buoyancy: seawater (1025) below z=0, air above, acting on the
+         boat's dedicated hull_displacement link only (the box pontoons the
+         composed model declares); the parts' own collisions are contact
+         geometry and never displace. -->
     <plugin filename="gz-sim-buoyancy-system"
             name="gz::sim::systems::Buoyancy">
       <graded_buoyancy>
@@ -44,7 +44,7 @@
           <density>1</density>
         </density_change>
       </graded_buoyancy>
-      <enable>blueboat</enable>
+      <enable>blueboat::hull_displacement</enable>
     </plugin>
 
     <light type="directional" name="sun">

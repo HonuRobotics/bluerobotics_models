@@ -158,10 +158,26 @@ def parts_summary(urdf_root, cfg):
             for a in (cfg.get('parts') or cfg.get('accessories') or [])]
 
 
+def declared_displacement(cfg):
+    """
+    Return (volume, center of buoyancy) from a config hull_displacement block.
+
+    A USV declares its displacement as segmented box pontoons that the Gazebo
+    composition places on a dedicated link; the URDF carries no displacement
+    geometry, so the numbers come straight from the declaration. Returns
+    None when the config has no such block (UUV: read the URDF collisions).
+    """
+    hull = cfg.get('hull_displacement')
+    if not hull:
+        return None
+    volume = 2.0 * float(hull['length']) * float(hull['width']) * float(hull['height'])
+    return volume, (float(hull['x']), 0.0, float(hull['z']))
+
+
 def specs_comment(vehicle, urdf_root, cfg):
     """Build the model specs comment block for the stamped file."""
     total, com = mass_properties(urdf_root)
-    volume, cob = buoyancy_properties(urdf_root)
+    volume, cob = declared_displacement(cfg) or buoyancy_properties(urdf_root)
     density = float((cfg.get('buoyancy') or {}).get(
         'fluid_density', DEFAULT_FLUID_DENSITY))
     displaced = density * volume

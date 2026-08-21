@@ -1,9 +1,11 @@
 # Run in your own world
 
 The composed model needs two things from the world: **graded buoyancy**
-(water below z = 0, `gz-sim-buoyancy-system` with `<enable>blueboat</enable>`
-or enabling all models) and, for the echosounder, `gz-sim-sensors-system`
-with the ogre2 render engine. Copy both plugin blocks from
+(water below z = 0, `gz-sim-buoyancy-system` enabled on the boat's
+displacement link, `<enable>blueboat::hull_displacement</enable>`; enabling
+the whole model `blueboat` also works, with warnings about the parts'
+non box collisions) and, for the echosounder, `gz-sim-sensors-system` with
+the ogre2 render engine. Copy both plugin blocks from
 `blueboat_gazebo/worlds/blueboat_water.sdf`.
 
 ## Include the default model

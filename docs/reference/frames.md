@@ -10,7 +10,9 @@ BlueBoat loadout):
 | `flag`, `ping_mount`, `ping` | links, fixed joints | one frame per fitted part, named after its slot or its `name` |
 | `base_link_motor_port`, `base_link_motor_stbd`, `base_link_flag`, `base_link_mast`, `base_link_payload`, `base_link_ping_mount`, `ping_mount_ping` | massless links | one per slot a part declares, whether filled or not |
 | `ping_beam` | massless link | the Ping's transducer face; `frame_id` of its range messages |
-| `hull_displacement` | massless link | carries the pontoon buoyancy collisions |
+
+The displacement pontoons are not in the URDF: `blueboat_gazebo` adds them
+as the `hull_displacement` link of the composed model.
 
 In Gazebo every fixed joint is lumped into `base_link`; the names survive as
 SDF frames, which is how sensors are placed. See

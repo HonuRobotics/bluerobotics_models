@@ -6,8 +6,10 @@ without the description knowing Gazebo exists.
 ## Merge include and lumping
 
 `model.sdf.xacro` merge includes the URDF (`<include merge="true">`) and
-adds the hydrodynamics plugin, one Thruster plugin per motor joint, the
-joint state publisher and the sensors. Gazebo's URDF conversion **lumps
+adds the hull displacement link (the box pontoons from the config's
+`hull_displacement`, the only link the worlds enable buoyancy on), the
+hydrodynamics plugin, one Thruster plugin per motor joint, the joint state
+publisher and the sensors. Gazebo's URDF conversion **lumps
 every fixed joint**: the chassis, slots, flag, bracket and Ping all collapse
 into one `base_link` body; only the propellers stay separate links on their
 continuous joints. Physically correct and cheaper. The conversion keeps a
@@ -52,6 +54,7 @@ launch.
 | Element | From |
 |---|---|
 | geometry, inertia, joints | the URDF (merge included) |
+| `hull_displacement` link | box pontoons from the config; `<enable>blueboat::hull_displacement</enable>` in the world |
 | `gz-sim-hydrodynamics-system` | placeholder USV damping coefficients, to be identified |
 | `gz-sim-thruster-system` x2 | on `motor_port_joint` / `motor_stbd_joint`, T200 limits, counter rotating |
 | `gz-sim-joint-state-publisher-system` | `/<ns>/joint_states`, bridged for RViz |

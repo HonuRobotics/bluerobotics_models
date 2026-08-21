@@ -14,10 +14,11 @@
 # Topic namespace: sensor topics default to /<topic_namespace>/<name>/...
 topic_namespace: blueboat
 
-# base: the part whose link is the assembly root, base_link. Its own
-# collision geometry is off because displacement and contact for a surface
-# vessel are declared under hull_displacement (docs: design/buoyancy).
-base: {type: blueboat_chassis, name: base_link, collision: false}
+# base: the part whose link is the assembly root, base_link. Its collision
+# geometry (hulls, crossbeams, hatches as the modeler delivered them) gives
+# contact; displacement comes from the box pontoons under hull_displacement,
+# since graded buoyancy reads only boxes and spheres (docs: design/buoyancy).
+base: {type: blueboat_chassis, name: base_link}
 
 # parts: overrides and additions. A slot entry picks what goes in a slot
 # (slot: the slot name, on: the instance carrying it, default base_link;
@@ -45,11 +46,12 @@ parts: []
 # slots:
 #   - {on: base_link, name: camera, xyz: "0.45 0 0.2", rpy: "0 0 0"}
 
-# Hull displacement, declared at the assembly (USV case): box pontoons that
-# both displace water under graded buoyancy and provide contact, sized from
-# the chassis hulls and split into segments so a pitched waterplane is
-# modeled per segment. The boat self settles to a draft of roughly
-# mass / (water_density * 2 * length * width).
+# Hull displacement (USV case), read by the Gazebo composition: box pontoons
+# on a dedicated hull_displacement link that is the only thing the world's
+# graded buoyancy is enabled on, sized from the chassis hulls and split into
+# segments so a pitched waterplane is modeled per segment. The boat self
+# settles to a draft of roughly mass / (water_density * 2 * length * width).
+# (docs: design/buoyancy)
 hull_displacement: {length: 1.05, width: 0.18, height: 0.18, x: 0.027, y: 0.361, z: 0.059, segments: 6}
 
 # extra_bridge_topics: optional top level list, appended VERBATIM to the

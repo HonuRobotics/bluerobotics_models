@@ -128,10 +128,55 @@
   <xacro:macro name="gz_no_slot" params="name parent xyz rpy:='0 0 0'">
   </xacro:macro>
 
+  <!-- ===================== Hull displacement =====================
+       Declared at the assembly, from the config's hull_displacement block:
+       box pontoons on a dedicated link that the world's graded buoyancy is
+       enabled on (<enable>blueboat::hull_displacement</enable>). A link of
+       its own, not lumped, so buoyancy never has to look at the parts'
+       collision geometry (the modeler's hull cylinders, hatch boxes, prop
+       hubs). Segmented so each box responds to its own local depth and a
+       pitched waterplane restores properly. The boxes also give contact.
+       Fixed jointed to base_link: physics sees one rigid body. -->
+  <xacro:macro name="pontoon" params="hull side y n i:=0">
+    <xacro:if value="${i != n}">
+      <xacro:property name="seg_len" value="${hull['length'] / n}"/>
+      <collision name="pontoon_${side}_${i}">
+        <pose>${hull['x'] - hull['length']/2.0 + seg_len*(i + 0.5)} ${y} ${hull['z']} 0 0 0</pose>
+        <geometry>
+          <box><size>${seg_len} ${hull['width']} ${hull['height']}</size></box>
+        </geometry>
+      </collision>
+      <xacro:pontoon hull="${hull}" side="${side}" y="${y}" n="${n}" i="${i + 1}"/>
+    </xacro:if>
+  </xacro:macro>
+
+  <xacro:macro name="hull_displacement" params="hull">
+    <link name="hull_displacement">
+      <pose relative_to="base_link">0 0 0 0 0 0</pose>
+      <inertial>
+        <mass>1e-5</mass>
+        <inertia>
+          <ixx>1e-8</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>1e-8</iyy><iyz>0</iyz><izz>1e-8</izz>
+        </inertia>
+      </inertial>
+      <xacro:pontoon hull="${hull}" side="port" y="${hull['y']}"  n="${hull['segments']}"/>
+      <xacro:pontoon hull="${hull}" side="stbd" y="${-hull['y']}" n="${hull['segments']}"/>
+    </link>
+    <joint name="hull_displacement_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>hull_displacement</child>
+    </joint>
+  </xacro:macro>
+
   <model name="blueboat">
     <include merge="true">
       <uri>$(arg urdf_uri)</uri>
     </include>
+
+    <xacro:if value="${'hull_displacement' in cfg}">
+      <xacro:hull_displacement hull="${cfg['hull_displacement']}"/>
+    </xacro:if>
 
     <!-- Hydrodynamic damping for the surface hull (Fossen). USV placeholder
          coefficients: strong sway/yaw resistance, moderate surge, plus

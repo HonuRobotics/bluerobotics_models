@@ -37,7 +37,7 @@ The chassis declares (table in [Parts catalog and slots](../../reference/parts-c
 
 ```yaml
 topic_namespace: blueboat
-base: {type: blueboat_chassis, name: base_link, collision: false}
+base: {type: blueboat_chassis, name: base_link}
 parts:
   - {slot: motor_port, type: t200_prop_ccw}          # another accepted option
   - {slot: motor_stbd, type: t200_prop_cw}

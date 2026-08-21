@@ -11,7 +11,7 @@
 
   with a config like
 
-      base: {type: blueboat_chassis, name: base_link, collision: false}
+      base: {type: blueboat_chassis, name: base_link}
       parts:
         - {slot: motor_port, type: t200_prop_ccw}          # another option for a slot
         - {slot: ping_mount, type: none}                   # leave a slot empty

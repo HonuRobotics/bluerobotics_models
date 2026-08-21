@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Generation pipeline tests: config yaml + part slots -> URDF."""
+"""Generation pipeline tests: config yaml + part slots -> URDF (displacement is Gazebo side)."""
 
 from pathlib import Path
 import re
@@ -107,21 +107,6 @@ def total_mass(root):
                for m in root.findall('.//inertial/mass'))
 
 
-def pontoon_boxes(root):
-    """Return [(name, x, y, z, lx, ly, lz)] for the hull displacement boxes."""
-    boxes = []
-    for link in root.findall('link'):
-        for coll in link.findall('collision'):
-            name = coll.get('name') or ''
-            if not name.startswith('pontoon_'):
-                continue
-            x, y, z = (float(v) for v in coll.find('origin').get('xyz').split())
-            lx, ly, lz = (float(v) for v in
-                          coll.find('./geometry/box').get('size').split())
-            boxes.append((name, x, y, z, lx, ly, lz))
-    return boxes
-
-
 def joints_by_child(root):
     """Map child link -> (parent link, origin xyz) over every joint."""
     table = {}
@@ -152,6 +137,9 @@ def test_default_config_is_the_default_loadout():
     """With no parts configured, the slots fill with their defaults."""
     root = generate_urdf(DEFAULT_CONFIG)
     assert manifest(root) == DEFAULT_LOADOUT
+    assert 'hull_displacement' not in link_names(root), 'displacement belongs to the Gazebo side'
+    base = next(li for li in root.findall('link') if li.get('name') == 'base_link')
+    assert base.findall('collision'), 'the chassis keeps its delivered contact geometry'
     assert set(DEFAULT_LOADOUT) <= link_names(root)
     motors = {j.get('name'): j for j in root.findall('joint')
               if j.get('name') in ('motor_port_joint', 'motor_stbd_joint')}
@@ -263,51 +251,6 @@ def test_catalog_completeness():
         root = generate_urdf(make_config(
             [{'type': type_name, 'name': f'acc_{type_name}', 'xyz': '0 0 0.5'}]))
         assert manifest(root)[f'acc_{type_name}'] == type_name
-
-
-def test_hull_displacement_invariant():
-    """Segmented pontoons tile fully and give positive reserve buoyancy."""
-    root = generate_urdf(DEFAULT_CONFIG)
-    boxes = pontoon_boxes(root)
-    sides = {'port': [], 'stbd': []}
-    for name, x, _, _, lx, _, lz in boxes:
-        sides[name.split('_')[1]].append((x, lx, lz))
-    volume = 0.0
-    for side, segments in sides.items():
-        assert len(segments) >= 2, f'{side}: pontoon not segmented'
-        segments.sort()
-        for (x0, l0, _), (x1, _, _) in zip(segments, segments[1:]):
-            assert abs((x0 + l0 / 2) - (x1 - l0 / 2)) < 1e-6, \
-                f'{side}: segments do not tile'
-    for _, x, y, z, lx, ly, lz in boxes:
-        volume += lx * ly * lz
-    mass = total_mass(root)
-    displacement = WATER_DENSITY * volume
-    assert displacement > mass, 'boat would sink fully loaded'
-    height = boxes[0][6]
-    draft = mass / (WATER_DENSITY * volume / height)
-    assert draft < height, 'waterline above the pontoon tops'
-
-
-def test_pontoons_are_a_symmetric_catamaran():
-    """Both pontoons mirror across y and their segments tile without gaps."""
-    boxes = pontoon_boxes(generate_urdf(DEFAULT_CONFIG))
-    assert len(boxes) == 2 * HULL['segments']
-    sides = {}
-    for name, x, y, z, lx, ly, lz in boxes:
-        sides.setdefault(name.split('_')[1], []).append((x, y, z, lx, ly, lz))
-    assert set(sides) == {'port', 'stbd'}
-    seg_len = HULL['length'] / HULL['segments']
-    for side, sign in (('port', +1), ('stbd', -1)):
-        segments = sorted(sides[side])
-        assert len(segments) == HULL['segments']
-        for x, y, z, lx, ly, lz in segments:
-            assert y == pytest.approx(sign * HULL['y'])
-            assert z == pytest.approx(HULL['z'])
-            assert (lx, ly, lz) == pytest.approx(
-                (seg_len, HULL['width'], HULL['height']))
-        for (x0, *_), (x1, *_) in zip(segments, segments[1:]):
-            assert x1 - x0 == pytest.approx(seg_len), f'{side}: gap or overlap'
 
 
 def test_mesh_assets_resolve():

@@ -19,6 +19,7 @@ import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import get_package_share_directory
 import pytest
+import yaml
 
 SHARE = Path(get_package_share_directory('blueboat_description'))
 URDF = SHARE / 'urdf' / 'blueboat.urdf'
@@ -41,10 +42,8 @@ def test_specs_comment_matches_the_model():
                 for m in root.findall('.//inertial/mass'))
     stamped_mass = float(spec(text, 'total mass').split()[0])
     assert stamped_mass == pytest.approx(total, abs=5e-4)
-    volume = 0.0
-    for box in root.findall('.//collision/geometry/box'):
-        lx, ly, lz = (float(v) for v in box.get('size').split())
-        volume += lx * ly * lz
+    hull = yaml.safe_load((SHARE / 'config' / 'blueboat.yaml').read_text())['hull_displacement']
+    volume = 2 * hull['length'] * hull['width'] * hull['height']
     stamped_volume = float(spec(text, 'displaced volume').split()[0])
     assert stamped_volume == pytest.approx(volume, abs=5e-7)
     offset = spec(text, 'cob offset')

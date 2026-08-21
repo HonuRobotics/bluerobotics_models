@@ -3,9 +3,9 @@
   BlueBoat unmanned surface vessel, assembled from bluerobotics_parts.
 
   Everything about the vehicle comes from the config (which parts, where) and
-  from the part macros (geometry, inertia); the only vehicle level declaration
-  is the hull displacement (docs: design/buoyancy). No Gazebo tags or
-  plugins here (those belong in blueboat_gazebo).
+  from the part macros (geometry, inertia). Displacement is a simulator
+  concern: blueboat_gazebo declares it from the same config (docs:
+  design/buoyancy). No Gazebo tags or plugins here.
 
       xacro blueboat.urdf.xacro > blueboat.urdf                     # default loadout
       xacro blueboat.urdf.xacro config_file:=/path/my_loadout.yaml  # custom
@@ -24,37 +24,5 @@
        the config overrides and adds. -->
   <xacro:assemble base="${cfg['base']}" parts="${cfg.get('parts') or []}"
                   slots="${cfg.get('slots') or []}"/>
-
-  <!-- ===== hull displacement (assembly declared) =====
-       Box pontoons on a link fixed to the base: graded buoyancy accepts only
-       boxes and spheres, so the displacing shape is declared here rather than
-       taken from the chassis part. Fixed joints are lumped in Gazebo, so the
-       boxes end up on base_link exactly as if written there. -->
-  <xacro:macro name="pontoon" params="hull side y n i:=0">
-    <xacro:if value="${i != n}">
-      <xacro:property name="seg_len" value="${hull['length'] / n}"/>
-      <collision name="pontoon_${side}_${i}">
-        <origin xyz="${hull['x'] - hull['length']/2.0 + seg_len*(i + 0.5)} ${y} ${hull['z']}"
-                rpy="0 0 0"/>
-        <geometry>
-          <box size="${seg_len} ${hull['width']} ${hull['height']}"/>
-        </geometry>
-      </collision>
-      <xacro:pontoon hull="${hull}" side="${side}" y="${y}" n="${n}" i="${i + 1}"/>
-    </xacro:if>
-  </xacro:macro>
-
-  <xacro:if value="${'hull_displacement' in cfg}">
-    <xacro:property name="hull" value="${cfg['hull_displacement']}"/>
-    <link name="hull_displacement">
-      <xacro:pontoon hull="${hull}" side="port" y="${hull['y']}"  n="${hull['segments']}"/>
-      <xacro:pontoon hull="${hull}" side="stbd" y="${-hull['y']}" n="${hull['segments']}"/>
-    </link>
-    <joint name="hull_displacement_joint" type="fixed">
-      <parent link="${cfg['base'].get('name', 'base_link')}"/>
-      <child link="hull_displacement"/>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-    </joint>
-  </xacro:if>
 
 </robot>

@@ -21,14 +21,17 @@ and lead, stated directly and held across loadouts.
 ## USV: hull displacement
 
 `hull_displacement` in the config declares each pontoon as a row of box
-segments (`length`, `width`, `height`, `x`, `y`, `z`, `segments`), placed on
-a massless `hull_displacement` link fixed to the base. Graded buoyancy
-accepts only boxes and spheres, so the chassis part's own collisions (the
-modeler's cylinders) are switched off in the base entry (`collision:
-false`) and these boxes provide both displacement and contact. Segmenting
-matters: each short box responds to its own local depth, so a pitched or
-rolled waterplane restores correctly, where a single long box keys off its
-center and barely restores. The boat self settles to a draft of roughly
+segments (`length`, `width`, `height`, `x`, `y`, `z`, `segments`). The Gazebo
+composition places them on a dedicated `hull_displacement` link, fixed to
+`base_link`, and the worlds enable graded buoyancy **on that link only**
+(`<enable>blueboat::hull_displacement</enable>`). Buoyancy is evaluated per
+link, so the parts' own collisions (the modeler's hull cylinders, hatch
+boxes, the prop hubs) stay what they are, contact geometry, and never
+displace; the chassis keeps them on. The URDF carries no displacement
+geometry at all: displacement is a simulator concern. Segmenting matters:
+each short box responds to its own local depth, so a pitched or rolled
+waterplane restores correctly, where a single long box keys off its center
+and barely restores. The boat self settles to a draft of roughly
 `mass / (water_density * 2 * length * width)`, which puts `base_link` at the
 waterline for the BlueBoat.
 
