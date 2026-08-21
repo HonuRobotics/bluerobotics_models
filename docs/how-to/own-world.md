@@ -31,7 +31,7 @@ ros2 run ros_gz_sim create -world <your_world> -name blueboat -z 0.05 \
 ## Use the stock launch with your world
 
 ```bash
-ros2 launch blueboat_gazebo sim.launch.xml world:=/path/my_world.sdf world_name:=my_world
+ros2 launch blueboat_gazebo sim.launch.xml world:=/path/my_world.sdf
 ```
 
 spawns the boat (default or `config_file:=` loadout) into it and starts the

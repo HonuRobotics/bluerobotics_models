@@ -14,7 +14,6 @@ vehicle free water world. The simulation starts running.
 |---|---|---|
 | `config_file` | the package default | loadout YAML; every artifact is regenerated from it at launch |
 | `world` | `blueboat_water.sdf` | a vehicle free world SDF to spawn into |
-| `world_name` | `blueboat_water` | the world element's name in that file |
 | `gui` | `true` | start the Gazebo GUI |
 | `use_composition` | `true` | server, bridge and state publisher in one process |
 | `name` | `blueboat` | model name to spawn as (the world's buoyancy and the bridge expect it) |

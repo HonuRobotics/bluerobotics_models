@@ -19,8 +19,6 @@
   <arg name="world"
        default="$(find-pkg-share blueboat_gazebo)/worlds/blueboat_water.sdf"
        description="Vehicle free world SDF to spawn the boat into."/>
-  <arg name="world_name" default="blueboat_water"
-       description="Name of the world element in that file (the spawn target)."/>
   <arg name="use_composition" default="true"
        description="Run gz_server, bridge and robot_state_publisher in one process."/>
   <arg name="gui" default="true" description="Launch the Gazebo GUI."/>
@@ -45,9 +43,9 @@
   <!-- Gazebo GUI (separate Qt process). -->
   <executable cmd="gz sim -g" output="screen" if="$(var gui)"/>
 
-  <!-- The vehicle, spawned from the generated model. -->
+  <!-- The vehicle, spawned from the generated model into the (only) world. -->
   <node pkg="ros_gz_sim" exec="create" name="spawn_blueboat" output="screen"
-        args="-world $(var world_name) -name $(var name) -z $(var z) -file $(var vehicle_dir)/model.sdf"/>
+        args="-name $(var name) -z $(var z) -file $(var vehicle_dir)/model.sdf"/>
 
   <!-- ros_gz bridge (composable) — joins the container; bridges the clock. -->
   <ros_gz_bridge bridge_name="ros_gz_bridge"
