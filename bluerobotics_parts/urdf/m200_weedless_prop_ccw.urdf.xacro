@@ -3,16 +3,29 @@
   m200_weedless_prop_ccw part macro.
 
   Bootstrapped from models/m200_weedless_prop_ccw/model.sdf by scripts/sdf_to_part.py on
-  2026-08-20. This file is the part: maintain it by hand from here on.
+  2026-08-21. This file is the part: maintain it by hand from here on.
 
   Inertia: estimated from the delivered collision geometry at 1000 kg/m^3 (SDF auto inertia); replace with measured values.
 
-  Contract (see parts.xacro): name parent xyz rpy collision joint axis.
+  Contract (see parts.xacro): <part>_info exports the metadata (attach,
+  axis, slots, frames); <part> instantiates the link, its mounting joint
+  and its slot / frame links.
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
+  <xacro:macro name="m200_weedless_prop_ccw_info">
+    <xacro:property name="part_info" scope="parent" value="${dict(
+        attach='0 0 0',
+        axis='1 0 0',
+        slots=dict(
+        ),
+        frames=dict(
+        ))}"/>
+  </xacro:macro>
+
   <xacro:macro name="m200_weedless_prop_ccw"
                params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='1 0 0'">
+    <xacro:m200_weedless_prop_ccw_info/>
 
     <link name="${name}">
       <inertial>
@@ -38,10 +51,10 @@
       </xacro:if>
     </link>
 
-    <!-- attach: where this part bolts onto its parent, in the part frame;
-         the joint places that point at the requested pose. -->
     <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
-                      joint="${joint}" axis="${axis}" attach="0 0 0"/>
+                      joint="${joint}" axis="${axis}" attach="${part_info['attach']}"/>
+    <xacro:part_slots name="${name}" items="${list(part_info['slots'].items())}"/>
+    <xacro:part_frames name="${name}" items="${list(part_info['frames'].items())}"/>
 
   </xacro:macro>
 

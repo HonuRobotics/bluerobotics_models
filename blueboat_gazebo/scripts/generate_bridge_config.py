@@ -17,16 +17,19 @@ Generate the ros_gz bridge config from the vehicle parts config.
 
 Run at build time (see CMakeLists.txt): emits /clock, the two thruster command
 topics (part of the drivetrain, always present) and one entry per topic of each
-configured sensor part. Topic bases follow /<topic_namespace>/<part name>,
-overridable per part with `topic` (both sides), `gz_topic` (Gazebo side)
-and `ros_topic` (ROS side). This is the single point that must agree with the
-sensor <topic>s emitted by model.sdf.xacro; both read the same config, so they
-cannot drift.
+sensor part in the assembly. The parts come from the generated URDF's
+<assembly_part> manifest (the resolved loadout, defaults included); topic
+bases follow /<topic_namespace>/<part name>, overridable per part in the
+vehicle config with `topic` (both sides), `gz_topic` (Gazebo side) and
+`ros_topic` (ROS side). This is the single point that must agree with the
+sensor <topic>s emitted by model.sdf.xacro; both derive from the same
+resolution, so they cannot drift.
 
-Usage: generate_bridge_config.py <vehicle_config.yaml> <output_bridge.yaml>
+Usage: generate_bridge_config.py <vehicle_config.yaml> <vehicle.urdf> <output_bridge.yaml>
 """
 
 import sys
+import xml.etree.ElementTree as ET
 
 import yaml
 
@@ -51,8 +54,31 @@ def absolute(topic):
 MODEL_NAME = 'blueboat'
 
 
-def bridge_entries(cfg):
-    """Build the list of bridge entries for a parsed vehicle config."""
+def instances_from_urdf(path):
+    """(type, name) of every part instance recorded in the URDF manifest."""
+    root = ET.parse(path).getroot()
+    return [(e.get('type'), e.get('name')) for e in root.findall('assembly_part')]
+
+
+def overrides_for(cfg, name):
+    """
+    Return the config entry that fitted instance `name`, or {}.
+
+    Slot entries name their occupant after the slot by default.
+    """
+    for entry in cfg.get('parts') or []:
+        if entry.get('name', entry.get('slot')) == name:
+            return entry
+    return {}
+
+
+def bridge_entries(cfg, instances):
+    """
+    Build the bridge entries for a vehicle.
+
+    `cfg` is the parsed vehicle config, `instances` the (type, name) part
+    instances of the assembled vehicle.
+    """
     ns = cfg.get('topic_namespace', 'blueboat')
     entries = [{
         'ros_topic_name': '/clock',
@@ -80,12 +106,12 @@ def bridge_entries(cfg):
             'gz_type_name': 'gz.msgs.Double',
             'direction': 'ROS_TO_GZ',
         })
-    for part in cfg.get('parts') or []:
-        default_base = f"{ns}/{part['name']}"
+    for ptype, name in instances:
+        part = overrides_for(cfg, name)
+        default_base = f'{ns}/{name}'
         gz_base = part.get('gz_topic', part.get('topic', default_base))
         ros_base = part.get('ros_topic', part.get('topic', default_base))
-        for suffix, ros_type, gz_type, direction in \
-                PART_TOPICS.get(part['type'], []):
+        for suffix, ros_type, gz_type, direction in PART_TOPICS.get(ptype, []):
             entry = {
                 'ros_topic_name': absolute(f'{ros_base}/{suffix}'),
                 'gz_topic_name': absolute(f'{gz_base}/{suffix}'),
@@ -107,16 +133,17 @@ def bridge_entries(cfg):
 
 def main():
     """Read the vehicle config and write the bridge yaml (see module doc)."""
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
         sys.exit(__doc__)
     with open(sys.argv[1]) as f:
         cfg = yaml.safe_load(f) or {}
-    with open(sys.argv[2], 'w') as f:
+    instances = instances_from_urdf(sys.argv[2])
+    with open(sys.argv[3], 'w') as f:
         f.write('# GENERATED from the vehicle config '
-                '(blueboat_description/config/blueboat.yaml)\n'
-                '# by generate_bridge_config.py. Do not edit; edit the vehicle '
-                'config and rebuild.\n')
-        yaml.safe_dump(bridge_entries(cfg), f, sort_keys=False)
+                '(blueboat_description/config/blueboat.yaml) and the assembled\n'
+                '# URDF by generate_bridge_config.py. Do not edit; edit the '
+                'vehicle config and rebuild.\n')
+        yaml.safe_dump(bridge_entries(cfg, instances), f, sort_keys=False)
 
 
 if __name__ == '__main__':

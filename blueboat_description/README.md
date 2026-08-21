@@ -9,12 +9,13 @@ or simulator code** (that lives in [`blueboat_gazebo`](../blueboat_gazebo)).
 
 - A **default BlueBoat that needs no configuration**: the chassis, the two
   outboard propellers (`motor_port`/`motor_stbd`, `continuous` joints), the
-  flag and the Ping2 integration kit, as the boat is most often run. The
-  URDF is generated from it at build time: `urdf/blueboat.urdf`.
+  flag and the Ping2 integration kit, as the boat is most often run. Each
+  comes from a slot the parts declare, filled with its default. The URDF is
+  generated at build time: `urdf/blueboat.urdf`.
 - A **configurable loadout** for anyone who wants the exact parts:
-  `config/blueboat.yaml` lists the parts and where they mount; every part
-  type in the `bluerobotics_parts` catalog can be fitted, at a named socket
-  or at an explicit pose.
+  `config/blueboat.yaml` overrides what goes in each slot or adds parts at
+  explicit poses; every part type in the `bluerobotics_parts` catalog can be
+  fitted.
 - **Hull displacement** declared at the assembly: each pontoon is a row of
   box segments so graded buoyancy restores pitch and roll correctly (see
   [Buoyancy](#buoyancy)).
@@ -37,32 +38,32 @@ source install/setup.bash
 
 ## Configure the loadout
 
-`config/blueboat.yaml` is a parts list:
+The shipped `config/blueboat.yaml` configures nothing: every slot of every
+part fills itself with its default, which is the standard boat. To change
+the loadout add entries:
 
 ```yaml
-base: {type: blueboat_chassis, name: base_link, collision: false}
 parts:
-  - {type: m200_weedless_prop_ccw, name: motor_port, mount: motor_port, joint: continuous}
-  - {type: m200_weedless_prop_cw,  name: motor_stbd, mount: motor_stbd, joint: continuous}
-  - {type: blueboat_flag,          name: flag,       mount: flag_socket}
-  - {type: blueboat_ping_singlebeam_mount, name: ping_mount, mount: ping_mount}
-  - {type: ping_singlebeam,        name: ping,       parent: ping_mount, mount: sensor}
+  - {slot: motor_port, type: t200_prop_ccw}        # another accepted option for a slot
+  - {slot: ping_mount, type: none}                 # leave a slot empty
+  - {slot: mast, type: blueboat_antenna_mast}      # fill a slot that has no default
+  - {type: omniscan_450_sidescan, name: sidescan, xyz: "0.2 0.22 -0.03", rpy: "0 0 0"}  # free placement
 ```
 
-`type` is a part from the catalog (`bluerobotics_parts/urdf/parts.xacro`),
-`name` the instance (its link and TF frame). Where it goes is either
-`mount:` a socket of its parent (a frame the parent part declares; the
-parent defaults to `base_link`) or an explicit `xyz`/`rpy` relative to the
-parent link. `joint: continuous` mounts a part that spins about the axis it
-declares. See [`ACCESSORIES.md`](ACCESSORIES.md) for the catalog and the
-sockets the BlueBoat chassis offers.
+Slots are declared by the parts (the chassis: motors, flag, mast, payload,
+Ping kit; the Ping bracket: its Ping) with the types that fit and a default;
+see [`ACCESSORIES.md`](ACCESSORIES.md) for the table and the catalog. Slot
+entries and free placements can be mixed; ad hoc slots can be declared under
+`slots:`. Mistakes (a part a slot does not accept, an unknown slot or type,
+a slot configured twice) fail the build naming the problem.
 
 Edit the file and rebuild, or pass `config_file:=<your.yaml>` to the
 launches to try a loadout without rebuilding. The composed Gazebo model and
-the ros_gz bridge config regenerate from the same file, so sensors and their
-ROS topics always match. Topics default to `/<topic_namespace>/<name>/...`
-and can be overridden per part (`topic`, or `gz_topic`/`ros_topic` for
-different names on each side).
+the ros_gz bridge config regenerate from the same resolution (the assembled
+URDF carries an `<assembly_part>` manifest of what was fitted), so sensors
+and their ROS topics always match. Topics default to
+`/<topic_namespace>/<name>/...` and can be overridden per part (`topic`, or
+`gz_topic`/`ros_topic` for different names on each side).
 
 ## Buoyancy
 
@@ -92,7 +93,7 @@ Frames and joints (published as TF by `robot_state_publisher`):
 | `base_link` | link (root) | the chassis part, in the frame the modeler delivered (mesh centroid, x forward, y left, z up) |
 | `motor_port`, `motor_stbd` + `motor_*_joint` | links, continuous joints | outboard propellers |
 | `<part name>` | link, fixed joint | one frame per configured part |
-| `<parent>_<socket>` | massless link | one frame per socket a part declares (e.g. `base_link_motor_port`) |
+| `<parent>_<slot>`, `<part>_<frame>` | massless links | one frame per slot a part declares (e.g. `base_link_motor_port`) and per reference frame (`ping_beam`) |
 | `hull_displacement` | massless link | carries the pontoon buoyancy collisions |
 
 In Gazebo the fixed-joint links are lumped into `base_link` (their frames

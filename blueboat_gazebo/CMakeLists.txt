@@ -4,6 +4,7 @@ project(blueboat_gazebo)
 find_package(ament_cmake REQUIRED)
 find_package(xacro REQUIRED)
 find_package(blueboat_description REQUIRED)
+find_package(bluerobotics_parts REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 # Put this package's share dir on GZ_SIM_RESOURCE_PATH so model://blueboat_gazebo
@@ -16,19 +17,21 @@ install(DIRECTORY
   worlds
   DESTINATION share/${PROJECT_NAME})
 
-# ros_gz bridge config is GENERATED from the vehicle config (same source the
-# model generation reads), so bridge topics always match the configured
-# accessories. Re-runs when the config or the generator changes.
+# ros_gz bridge config is GENERATED from the vehicle config plus the
+# assembled URDF (whose <assembly_part> manifest lists the resolved parts,
+# defaults included), so bridge topics always match the fitted sensors.
+# Re-runs when the config, the URDF or the generator changes.
 set(vehicle_config ${blueboat_description_DIR}/../config/blueboat.yaml)
+set(desc_urdf ${blueboat_description_DIR}/../urdf/blueboat.urdf)
 set(bridge_yaml ${CMAKE_CURRENT_BINARY_DIR}/ros_gz_bridge.yaml)
 add_custom_command(
   OUTPUT ${bridge_yaml}
   COMMAND Python3::Interpreter
           ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_bridge_config.py
-          ${vehicle_config} ${bridge_yaml}
-  DEPENDS ${vehicle_config}
+          ${vehicle_config} ${desc_urdf} ${bridge_yaml}
+  DEPENDS ${vehicle_config} ${desc_urdf}
           ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_bridge_config.py
-  COMMENT "Generating ros_gz_bridge.yaml from blueboat.yaml")
+  COMMENT "Generating ros_gz_bridge.yaml from blueboat.yaml and blueboat.urdf")
 add_custom_target(${PROJECT_NAME}_bridge_yaml ALL DEPENDS ${bridge_yaml})
 install(FILES ${bridge_yaml} DESTINATION share/${PROJECT_NAME}/config)
 
@@ -44,7 +47,6 @@ xacro_add_files(model.sdf.xacro DEPENDS ${vehicle_config} TARGET model_raw)
 # carries (the numbers come from that URDF, the loadout from the config).
 set(stamper
   ${blueboat_description_DIR}/../../../lib/blueboat_description/stamp_model_specs.py)
-set(desc_urdf ${blueboat_description_DIR}/../urdf/blueboat.urdf)
 set(raw_sdf ${CMAKE_CURRENT_BINARY_DIR}/model.sdf)
 set(stamped_sdf ${CMAKE_CURRENT_BINARY_DIR}/stamped/model.sdf)
 add_custom_command(

@@ -10,18 +10,12 @@ See the [repository README](../README.md) for the full design.
 
 ## The part is a URDF xacro macro
 
-`urdf/<part>.urdf.xacro` is the part. It is hand-maintained source, committed like any other, and complete on its own: a link with inertia, the visual mesh, optional collision geometry, the joint that mounts the part, and any mount sockets the part offers. [`urdf/parts.xacro`](urdf/parts.xacro) includes every part and documents the macro contract:
+`urdf/<part>.urdf.xacro` is the part. It is hand-maintained source, committed like any other, and complete on its own. It holds two macros ([`urdf/parts.xacro`](urdf/parts.xacro) documents the contract and includes every part):
 
-```
-name       link name for this instance; the joint is <name>_joint
-parent     link to attach to; "" emits the link alone (assembly root)
-xyz / rpy  mount pose relative to parent (meters / radians)
-collision  false to instantiate the part without contact geometry
-joint      fixed (default), or continuous / revolute for parts that spin
-axis       joint axis in the part frame, used when joint is not fixed
-```
+* `<part>_info` exports the part's metadata as the property `part_info`: the **attach** offset (where it bolts onto its parent), the spin **axis**, its **slots** and its **frames**.
+* `<part>` instantiates it: one link (inertia, visual, optional collision), the mounting joint (`part_joint`, which folds in the attach offset so a mast whose origin is at its centroid still stands on the deck), and its slots and frames as massless links `<name>_<slot>` / `<name>_<frame>`, visible in TF and lumped away in Gazebo where they survive as frames of the same name.
 
-Two helpers in `parts.xacro` carry the mechanics every part shares. `part_joint` emits the mounting joint and folds in the part's **attach** offset (where it bolts on, in its own frame), so a mast whose origin is at its centroid still stands on the deck when mounted at a deck socket. `part_socket` emits a **socket**: a massless frame named `<name>_<socket>` where other parts mount; it is visible in TF and lumped away in Gazebo.
+**Slots** are how parts fit together without anyone knowing coordinates: a slot is a named mount point with the part types that fit (`accepts`) and a `default` occupant (or `none`). The chassis declares `motor_port` (accepts the M200 weedless or T200 propellers, default M200), `ping_mount` (accepts the Ping2 bracket, default the bracket), `mast`, `flag`, `payload`; the bracket declares `ping` (default the Ping). An assembly fills every slot with its default and the vehicle config only states differences ([`urdf/assembly.xacro`](urdf/assembly.xacro)). Batteries will use the same mechanism: a battery is a part like any other, and the chassis will declare the bays. **Frames** mark reference points on a part, such as a sensor's beam origin; the Gazebo side places the sensor there.
 
 How the file came to exist does not matter downstream. It can be written by hand from a datasheet, or bootstrapped from a modeler's SDF delivery with `scripts/sdf_to_part.py` (below). Mass, inertia tensor and center of gravity are stated in the part and nowhere else; assemblies compose them, see [AUR_BUOYANCY_DESIGN.md](../AUR_BUOYANCY_DESIGN.md).
 
@@ -46,7 +40,7 @@ The `.glb` is what the part macro's visual points at, so it stays in the reposit
 2. **Origin and orientation.** The origin of the part's body-centered frame sits at the **centroid of the mesh** — the center of the geometry, equivalently its center of mass if uniform density is assumed. The frame is aligned per [REP 103](https://www.ros.org/reps/rep-0103.html): **x forward, y left, z up**. Note that the centroid of the mesh is not the part's center of gravity, which depends on where the mass actually sits and is stated separately in the part macro.
 3. **Collision shapes: box, cylinder, sphere or mesh — never cone or plane.** URDF cannot express cone or plane at all, and the bootstrap rejects them. Prefer primitives; a coarse approximation of the mesh is what is wanted.
 4. **No spaces or `.001`-style suffixes in any name.** Collision and link names become ROS frame and topic names downstream.
-5. **Attachment points, when known, as SDF frames.** A `<frame name="attach">` where the part bolts onto its parent and `<frame name="mount_<socket>">` for each place other parts bolt onto it save a measurement downstream. Not required; the bootstrap also takes them on the command line.
+5. **Attachment points, when known, as SDF frames.** A `<frame name="attach">` where the part bolts onto its parent and a frame per place other parts bolt onto it save a measurement downstream. Not required; the bootstrap takes slots and frames on the command line.
 
 Materials ride along inside the `.glb`. Gazebo loads glTF PBR directly, so nothing needs declaring anywhere else — but the `.glb` must actually carry them.
 
@@ -68,13 +62,15 @@ Recorded so the catalog stays coherent as it grows. All lowercase, snake_case:
 * the collision primitives, translated to URDF (a collision mesh is referenced as delivered);
 * an **inertia estimate**: the primitives are run through SDF auto inertia (`gz sdf --expand-auto-inertials`) at a uniform density, which yields mass, center of mass and the full tensor; a collision mesh is integrated directly. With `--mass` the tensor is scaled to the known mass, keeping its shape and center.
 
-Sockets, the attach offset and a spin axis can be seeded on the command line, or come from SDF frames when the modeler delivered them:
+Slots, frames, the attach offset and a spin axis can be seeded on the command line:
 
 ```bash
 ros2 run bluerobotics_parts sdf_to_part.py models/t200_thruster --mass 0.344
 ros2 run bluerobotics_parts sdf_to_part.py models/blueboat_antenna_mast --attach "0 0 -0.331"
+ros2 run bluerobotics_parts sdf_to_part.py models/ping_singlebeam --frame beam=0,0,-0.044
 ros2 run bluerobotics_parts sdf_to_part.py models/blueboat_chassis --mass 12 \
-    --socket motor_port=-0.52,0.301,-0.117 --socket motor_stbd=-0.52,-0.301,-0.117
+    --slot "motor_port=-0.52,0.301,-0.117;accepts=m200_weedless_prop_ccw,t200_prop_ccw;default=m200_weedless_prop_ccw;joint=continuous" \
+    --slot "ping_mount=0,-0.259,0.01;accepts=blueboat_ping_singlebeam_mount;default=blueboat_ping_singlebeam_mount"
 ```
 
 The tool refuses to overwrite an existing macro unless told to with `--force`: once written, the file is maintained by hand, and a redelivery is compared against it rather than stamped over it. Nothing regenerates it during `colcon build`.
@@ -108,12 +104,12 @@ Anything wrong here goes back to the modeler. To see every delivery at once, [`w
 ### 3. Bootstrap the macro and review it
 
 ```bash
-ros2 run bluerobotics_parts sdf_to_part.py models/<part> [--mass KG] [--attach "x y z"] [--socket NAME=x,y,z]
+ros2 run bluerobotics_parts sdf_to_part.py models/<part> [--mass KG] [--attach "x y z"] [--slot ...] [--frame ...]
 ```
 
 - [ ] Read `urdf/<part>.urdf.xacro` through. This is the review it gets; it is source from here on.
 - [ ] Mass: stated if known (`--mass`), otherwise the density estimate, flagged in the file header for replacement.
-- [ ] Sockets and attach offset, if the part has them.
+- [ ] Slots (with what fits and the default), frames and the attach offset, if the part has them.
 - [ ] Add the include line to [`urdf/parts.xacro`](urdf/parts.xacro), alphabetically.
 
 ### 4. Verify the macro

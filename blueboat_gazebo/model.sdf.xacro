@@ -11,6 +11,11 @@
 <sdf version="1.12" xmlns:xacro="http://ros.org/wiki/xacro"
      xmlns:gz="http://gazebosim.org/schema">
 
+  <!-- The assembly dispatcher, run here with Gazebo side emitters: the same
+       resolution of slots and defaults the URDF went through, emitting one
+       <sensor> per sensor part instead of links. -->
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/assembly.xacro"/>
+
   <xacro:arg name="config_file"
              default="$(find blueboat_description)/config/blueboat.yaml"/>
   <xacro:property name="cfg" value="${xacro.load_yaml('$(arg config_file)')}"/>
@@ -53,12 +58,13 @@
        gz-sim-sensors-system in the world (GPU). The two imaging sonars
        (omniscan_450 side-scan, surveyor_multibeam) are PARKED - no acoustic model
        ships for Jetty - so they stay geometry-only. -->
-  <xacro:macro name="sensor_link" params="name *sensor">
+  <xacro:macro name="sensor_link" params="name frame *sensor">
     <link name="${name}_sensor">
-      <!-- Posed at the part's own frame: the URDF conversion lumps the part
-           link into base_link but keeps a frame of the same name, so the
-           sensor follows the part wherever the config mounted it. -->
-      <pose relative_to="${name}">0 0 0 0 0 0</pose>
+      <!-- Posed at the frame the part declares for its sensing origin (its
+           `beam`, `lens`, ...): the URDF conversion lumps the part into
+           base_link but keeps every frame by name, so the sensor follows the
+           part wherever the config mounted it. -->
+      <pose relative_to="${frame}">0 0 0 0 0 0</pose>
       <inertial>
         <mass>1e-5</mass>
         <inertia>
@@ -76,14 +82,14 @@
 
   <!-- Ping2 single-beam echosounder: a 1-ray gpu_lidar pointing straight down
        (range to the seabed). Real Ping2 range ~0.5-100 m. -->
-  <xacro:macro name="echosounder_sensor" params="name topic_base">
-    <xacro:sensor_link name="${name}">
+  <xacro:macro name="echosounder_sensor" params="name frame topic_base">
+    <xacro:sensor_link name="${name}" frame="${frame}">
       <sensor name="${name}" type="gpu_lidar">
-        <!-- Pin frame_id to the part's own URDF link: that is the only
-             name TF carries (robot_state_publisher publishes the URDF links;
-             the ${name}_sensor wrapper link exists only here, and gz's derived
-             id is in neither). Body frame convention. -->
-        <frame_id>${name}</frame_id>
+        <!-- Pin frame_id to the part's beam frame: a URDF link, so TF
+             carries it (robot_state_publisher publishes the URDF links; the
+             ${name}_sensor wrapper exists only here, and gz's derived id is
+             in neither). -->
+        <frame_id>${frame}</frame_id>
         <topic>${topic_base}/range</topic>
         <update_rate>10</update_rate>
         <always_on>1</always_on>
@@ -101,17 +107,21 @@
     </xacro:sensor_link>
   </xacro:macro>
 
-  <!-- Recursive dispatcher over the configured parts: only the Ping2
-       echosounder is modelled; the imaging sonars are parked and every other
-       part is geometry only, so it emits nothing here. -->
-  <xacro:macro name="mount_sensors" params="items">
-    <xacro:if value="${len(items) > 0}">
-      <xacro:property name="a" value="${items[0]}"/>
-      <xacro:property name="t" value="${a['type']}"/>
-      <xacro:property name="tb" value="${a.get('gz_topic', a.get('topic', topic_ns + '/' + a['name']))}"/>
-      <xacro:if value="${t == 'ping_singlebeam'}"><xacro:echosounder_sensor name="${a['name']}" topic_base="${tb}"/></xacro:if>
-      <xacro:mount_sensors items="${items[1:]}"/>
+  <!-- Emitters for the assembly dispatcher. Per resolved part instance:
+       the Ping2 echosounder gets its sensor, every other part is geometry
+       only and emits nothing here. Topic overrides come from the config
+       entry that fitted the instance (slot entries default their name to
+       the slot). Ad hoc slots are URDF frames; nothing to emit. -->
+  <xacro:macro name="gz_part" params="ptype name parent xyz rpy collision joint axis">
+    <xacro:if value="${ptype == 'ping_singlebeam'}">
+      <xacro:property name="ovr"
+                      value="${[e for e in (cfg.get('parts') or []) if e.get('name', e.get('slot')) == name]}"/>
+      <xacro:property name="o" value="${ovr[0] if ovr else dict()}"/>
+      <xacro:echosounder_sensor name="${name}" frame="${name}_beam"
+                                topic_base="${o.get('gz_topic', o.get('topic', topic_ns + '/' + name))}"/>
     </xacro:if>
+  </xacro:macro>
+  <xacro:macro name="gz_no_slot" params="name parent xyz rpy:='0 0 0'">
   </xacro:macro>
 
   <model name="blueboat">
@@ -148,7 +158,8 @@
     <xacro:thruster side="port" coeff="0.02"/>
     <xacro:thruster side="stbd" coeff="-0.02"/>
 
-    <!-- Sensors: one per sensor part in config/blueboat.yaml. -->
-    <xacro:mount_sensors items="${cfg.get('parts') or []}"/>
+    <!-- Sensors: one per sensor part the assembly resolves to. -->
+    <xacro:assemble base="${cfg['base']}" parts="${cfg.get('parts') or []}"
+                    slots="${cfg.get('slots') or []}" emit="gz_part" emit_slot="gz_no_slot"/>
   </model>
 </sdf>

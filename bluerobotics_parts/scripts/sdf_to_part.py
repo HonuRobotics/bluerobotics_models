@@ -19,15 +19,19 @@ The URDF xacro is the part. This tool only writes its first version, from
 models/<part>/model.sdf: the visual mesh reference, the collision primitives
 translated to URDF, and an inertia estimated by SDF auto inertia from those
 primitives (or integrated from a collision mesh) at a uniform density, scaled
-to --mass when one is known. Mount sockets, the attach offset and the spin
-axis can be seeded from the command line. After that the file is maintained
-by hand like any other source; rerunning refuses to overwrite unless --force.
+to --mass when one is known. Slots (mount points with the part types that
+fit and a default occupant), reference frames, the attach offset and the
+spin axis can be seeded from the command line. After that the file is
+maintained by hand like any other source; rerunning refuses to overwrite
+unless --force.
 
 A part can equally be written by hand without ever having an SDF.
 
     sdf_to_part.py models/t200_thruster --mass 0.344 --axis "1 0 0"
     sdf_to_part.py models/blueboat_chassis --mass 12
-        --socket motor_port=-0.52,0.301,-0.117 --socket motor_stbd=-0.52,-0.301,-0.117
+        --slot "motor_port=-0.52,0.301,-0.117;accepts=m200_weedless_prop_ccw;
+                default=m200_weedless_prop_ccw;joint=continuous"
+    sdf_to_part.py models/ping_singlebeam --frame beam=0,0,-0.044
     sdf_to_part.py --all models            # first version of every delivered part
 """
 
@@ -286,7 +290,36 @@ def fmt_xyz(vals):
     return ' '.join(fmt(v) for v in vals)
 
 
-def emit_macro(part, visuals, collisions, inertia, source, axis, attach, sockets):
+def py_str(value):
+    return repr(str(value))
+
+
+def emit_info(part, axis, attach, slots, frames):
+    """Emit the <part>_info macro: metadata exported as the property part_info."""
+    lines = [f'  <xacro:macro name="{part}_info">',
+             '    <xacro:property name="part_info" scope="parent" value="${dict(',
+             f'        attach={py_str(attach)},',
+             f'        axis={py_str(axis)},',
+             '        slots=dict(']
+    for name, slot in slots.items():
+        fields = [f'xyz={py_str(slot["xyz"])}', f'rpy={py_str(slot["rpy"])}']
+        if 'accepts' in slot:
+            fields.append(f'accepts={slot["accepts"]!r}')
+        fields.append(f'default={py_str(slot.get("default", "none"))}')
+        if 'joint' in slot:
+            fields.append(f'joint={py_str(slot["joint"])}')
+        lines.append(f'            {name}=dict({", ".join(fields)}),')
+    lines.append('        ),')
+    lines.append('        frames=dict(')
+    for name, frame in frames.items():
+        lines.append(f'            {name}=dict(xyz={py_str(frame["xyz"])}, '
+                     f'rpy={py_str(frame["rpy"])}),')
+    lines.append('        ))}"/>')
+    lines.append('  </xacro:macro>')
+    return lines
+
+
+def emit_macro(part, visuals, collisions, inertia, source, axis, attach, slots, frames):
     mass, com, t = inertia
     today = datetime.date.today().isoformat()
     lines = []
@@ -300,17 +333,25 @@ def emit_macro(part, visuals, collisions, inertia, source, axis, attach, sockets
     w('')
     w(f'  Inertia: {source}.')
     w('')
-    w('  Contract (see parts.xacro): name parent xyz rpy collision joint axis.')
-    if sockets:
-        w('  Sockets other parts mount on, as frames <name>_<socket>:')
-        for name in sockets:
-            w(f'    {name}')
+    w('  Contract (see parts.xacro): <part>_info exports the metadata (attach,')
+    w('  axis, slots, frames); <part> instantiates the link, its mounting joint')
+    w('  and its slot / frame links.')
+    if slots:
+        w('  Slots other parts fit into, as frames <name>_<slot>:')
+        for name, slot in slots.items():
+            fits = ', '.join(slot.get('accepts', ['any part']))
+            w(f'    {name}: {fits}; default {slot.get("default", "none")}')
+    if frames:
+        w('  Reference frames, as <name>_<frame>: ' + ', '.join(frames))
     w('-->')
     w('<robot xmlns:xacro="http://ros.org/wiki/xacro">')
+    w('')
+    lines.extend(emit_info(part, axis, attach, slots, frames))
     w('')
     w(f'  <xacro:macro name="{part}"')
     w(f'               params="name parent xyz:=\'0 0 0\' rpy:=\'0 0 0\' collision:=true '
       f'joint:=fixed axis:=\'{axis}\'">')
+    w(f'    <xacro:{part}_info/>')
     w('')
     w('    <link name="${name}">')
     w('      <inertial>')
@@ -349,22 +390,47 @@ def emit_macro(part, visuals, collisions, inertia, source, axis, attach, sockets
         w('      </xacro:if>')
     w('    </link>')
     w('')
-    w('    <!-- attach: where this part bolts onto its parent, in the part frame;')
-    w('         the joint places that point at the requested pose. -->')
     w('    <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"')
-    w(f'                      joint="${{joint}}" axis="${{axis}}" attach="{attach}"/>')
-    if sockets:
-        w('')
-        w('    <!-- Sockets: frames where other parts mount, in the part frame. -->')
-        for name, pose in sockets.items():
-            rpy = '' if all(abs(v) < 1e-12 for v in pose[3:]) else f' rpy="{fmt_xyz(pose[3:])}"'
-            w(f'    <xacro:part_socket name="${{name}}_{name}" parent="${{name}}" '
-              f'xyz="{fmt_xyz(pose[:3])}"{rpy}/>')
+    w('                      joint="${joint}" axis="${axis}" attach="${part_info[\'attach\']}"/>')
+    w('    <xacro:part_slots name="${name}" items="${list(part_info[\'slots\'].items())}"/>')
+    w('    <xacro:part_frames name="${name}" items="${list(part_info[\'frames\'].items())}"/>')
     w('')
     w('  </xacro:macro>')
     w('')
     w('</robot>')
     return '\n'.join(lines) + '\n'
+
+
+def parse_pose_spec(spec, what):
+    """name=x,y,z[,r,p,y] -> (name, {'xyz': ..., 'rpy': ...}, remaining options)."""
+    head, *opts = spec.split(';')
+    name, _, nums = head.partition('=')
+    try:
+        vals = [float(v) for v in nums.split(',')]
+    except ValueError:
+        vals = []
+    if not name or len(vals) not in (3, 6):
+        raise ConversionError(f'bad {what} {spec!r}; expected name=x,y,z[,r,p,y]')
+    vals += [0.0] * (6 - len(vals))
+    return name, {'xyz': fmt_xyz(vals[:3]), 'rpy': fmt_xyz(vals[3:])}, opts
+
+
+def parse_slot(spec):
+    """name=x,y,z[,r,p,y][;accepts=a,b][;default=type|none][;joint=continuous]."""
+    name, slot, opts = parse_pose_spec(spec, '--slot')
+    for opt in opts:
+        key, _, val = opt.partition('=')
+        if key == 'accepts':
+            slot['accepts'] = [v for v in val.split(',') if v]
+        elif key == 'default':
+            slot['default'] = val
+        elif key == 'joint':
+            slot['joint'] = val
+        else:
+            raise ConversionError(f'bad --slot option {opt!r} in {spec!r}')
+    if 'accepts' in slot and slot.get('default', 'none') not in slot['accepts'] + ['none']:
+        raise ConversionError(f'--slot {name}: default {slot["default"]!r} is not in accepts')
+    return name, slot
 
 
 def convert(part_dir, out_dir, args):
@@ -374,15 +440,15 @@ def convert(part_dir, out_dir, args):
         raise ConversionError(f'{out} exists; it is the part now. Use --force to overwrite')
     visuals, collisions = read_delivery(part_dir)
     inertia, source = estimate_inertia(part_dir, collisions, args.density, args.mass)
-    sockets = {}
-    for spec in args.socket or []:
-        name, _, nums = spec.partition('=')
-        vals = [float(v) for v in nums.split(',')]
-        if not name or len(vals) not in (3, 6):
-            raise ConversionError(f'bad --socket {spec!r}; expected name=x,y,z[,r,p,y]')
-        sockets[name] = vals + [0.0] * (6 - len(vals))
+    slots = dict(parse_slot(spec) for spec in args.slot or [])
+    frames = {}
+    for spec in args.frame or []:
+        name, frame, opts = parse_pose_spec(spec, '--frame')
+        if opts:
+            raise ConversionError(f'--frame takes no options: {spec!r}')
+        frames[name] = frame
     out.write_text(emit_macro(part, visuals, collisions, inertia, source,
-                              args.axis, args.attach, sockets))
+                              args.axis, args.attach, slots, frames))
     return out, inertia[0], len(collisions)
 
 
@@ -398,8 +464,11 @@ def main(argv=None):
     ap.add_argument('--axis', default='1 0 0', help='spin axis default for the macro')
     ap.add_argument('--attach', default='0 0 0',
                     help='attach point in the part frame, "x y z"')
-    ap.add_argument('--socket', action='append', metavar='NAME=x,y,z[,r,p,y]',
-                    help='mount socket to declare (repeatable)')
+    ap.add_argument('--slot', action='append',
+                    metavar='NAME=x,y,z[,r,p,y][;accepts=a,b][;default=t][;joint=continuous]',
+                    help='mount slot to declare (repeatable)')
+    ap.add_argument('--frame', action='append', metavar='NAME=x,y,z[,r,p,y]',
+                    help='reference frame to declare (repeatable)')
     ap.add_argument('--force', action='store_true', help='overwrite an existing macro')
     args = ap.parse_args(argv)
 

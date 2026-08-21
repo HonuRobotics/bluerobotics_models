@@ -51,7 +51,7 @@ WORLD_HEAD = """<?xml version="1.0"?>
      static model, for reviewing inertia, collisions and visuals against the
      mesh. Right click a model > View > Collisions / Inertia / Center of Mass.
      Regenerate after an import. -->
-<sdf version="1.9">
+<sdf version="1.12">
   <world name="parts_check">
     <physics name="1ms" type="ode">
       <max_step_size>0.001</max_step_size>

@@ -1,14 +1,15 @@
-# BlueBoat build time configuration: the parts that make up the vehicle.
+# BlueBoat build time configuration.
 #
 # Edit this file and rebuild (colcon build) to regenerate the URDF, the
 # composed Gazebo model AND the ros_gz bridge config. To try a loadout without
 # rebuilding, pass config_file:=<your.yaml> to the launches.
 #
-# The default below is the vehicle as it is most often run: the chassis with
-# its two outboards, the flag, and the Ping2 integration kit. Nothing here
-# needs touching to use the BlueBoat. Every part comes from bluerobotics_parts
-# (urdf/parts.xacro lists the catalog); the sockets named under mount: are
-# frames the parts declare. See bluerobotics_parts/README.md.
+# The default BlueBoat needs nothing here: every slot of every part fills
+# itself with its default (the chassis fits its two outboards, the flag and
+# the Ping2 integration kit; the kit's bracket fits the Ping). The entries
+# below are how to change that. See bluerobotics_parts/urdf/assembly.xacro
+# for the full rules and blueboat_description/ACCESSORIES.md for the slots
+# and the catalog.
 #
 # Topic namespace: sensor topics default to /<topic_namespace>/<name>/...
 topic_namespace: blueboat
@@ -18,29 +19,31 @@ topic_namespace: blueboat
 # vessel are declared under hull_displacement (AUR_BUOYANCY_DESIGN.md).
 base: {type: blueboat_chassis, name: base_link, collision: false}
 
-# parts: one instance each. Where it goes is either a socket of its parent
-# (mount:, parent defaults to base_link) or an explicit pose (xyz/rpy,
-# meters / radians, relative to the parent link). joint: continuous for
-# parts that spin, about the axis the part declares.
-# Optional per part topic overrides for sensor parts (bases; the per sensor
-# suffix such as /range is appended):
+# parts: overrides and additions. A slot entry picks what goes in a slot
+# (slot: the slot name, on: the instance carrying it, default base_link;
+# type: an accepted part type, or none to leave it empty). An entry without
+# slot: is a free placement: type, name, xyz/rpy relative to parent (default
+# base_link). Optional per part topic overrides for sensor parts (bases; the
+# per sensor suffix such as /range is appended):
 #   topic:     base for BOTH the Gazebo and ROS sides
 #   gz_topic:  Gazebo side base   (overrides `topic`)
 #   ros_topic: ROS side base      (overrides `topic`)
 #   bridge:    dict of NATIVE ros_gz_bridge keys merged into that part's
 #              generated bridge entries
-parts:
-  - {type: m200_weedless_prop_ccw, name: motor_port, mount: motor_port, joint: continuous}
-  - {type: m200_weedless_prop_cw,  name: motor_stbd, mount: motor_stbd, joint: continuous}
-  - {type: blueboat_flag,          name: flag,       mount: flag_socket}
-  - {type: blueboat_ping_singlebeam_mount, name: ping_mount, mount: ping_mount}
-  - {type: ping_singlebeam,        name: ping,       parent: ping_mount, mount: sensor}
-  # The rest of the catalog, commented out; uncomment to fit:
-  # - {type: blueboat_antenna_mast,    name: mast,      mount: mast_socket}
-  # - {type: blueboat_payload_bracket, name: payload,   mount: payload}
-  # - {type: basestation_antenna,      name: radio,     xyz: "-0.35 0 0.5",    rpy: "0 0 0"}
-  # - {type: omniscan_450_sidescan,    name: sidescan,  xyz: "0.2 0.22 -0.03", rpy: "0 0 0"}
-  # - {type: surveyor_multibeam,       name: multibeam, xyz: "0.35 0 -0.08",   rpy: "0 0 0"}
+parts: []
+  # - {slot: ping_mount, type: none}                          # no Ping2 kit
+  # - {slot: motor_port, type: t200_prop_ccw}                 # the other propeller option
+  # - {slot: motor_stbd, type: t200_prop_cw}
+  # - {slot: mast, type: blueboat_antenna_mast}               # slots with no default
+  # - {slot: payload, type: blueboat_payload_bracket}
+  # - {slot: ping, on: ping_mount, type: ping_singlebeam, topic: sonar}   # rename the Ping topics
+  # - {type: basestation_antenna,   name: radio,     xyz: "-0.35 0 0.5",    rpy: "0 0 0"}
+  # - {type: omniscan_450_sidescan, name: sidescan,  xyz: "0.2 0.22 -0.03", rpy: "0 0 0"}
+  # - {type: surveyor_multibeam,    name: multibeam, xyz: "0.35 0 -0.08",   rpy: "0 0 0"}
+
+# slots: ad hoc slots on any instance, usable like the parts' own.
+# slots:
+#   - {on: base_link, name: camera, xyz: "0.45 0 0.2", rpy: "0 0 0"}
 
 # Hull displacement, declared at the assembly (USV case): box pontoons that
 # both displace water under graded buoyancy and provide contact, sized from

@@ -19,7 +19,6 @@ import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import get_package_share_directory
 import pytest
-import yaml
 
 SHARE = Path(get_package_share_directory('blueboat_description'))
 URDF = SHARE / 'urdf' / 'blueboat.urdf'
@@ -61,9 +60,10 @@ def test_specs_comment_matches_the_model():
 
 
 def test_specs_comment_reports_the_loadout():
-    """The parts row reflects the shipped default config."""
+    """The parts row lists every part the assembly resolved to."""
     text = URDF.read_text()
-    cfg = yaml.safe_load((SHARE / 'config' / 'blueboat.yaml').read_text())
     parts = spec(text, 'parts')
-    for part in cfg.get('parts') or []:
-        assert part['type'] in parts
+    manifest = ET.fromstring(text).findall('assembly_part')
+    assert manifest, 'the shipped URDF carries no assembly manifest'
+    for part in manifest:
+        assert f'{part.get("type")} ({part.get("name")})' in parts

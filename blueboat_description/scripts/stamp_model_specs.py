@@ -144,12 +144,18 @@ def buoyancy_properties(root):
     return volume, tuple(m / volume for m in moment)
 
 
-def parts_summary(cfg):
-    """One `type (name)` item per configured part (or legacy accessory)."""
-    items = cfg.get('parts')
-    if items is None:
-        items = cfg.get('accessories') or []
-    return [f'{a["type"]} ({a["name"]})' for a in items]
+def parts_summary(urdf_root, cfg):
+    """
+    Return one `type (name)` item per part in the assembly.
+
+    The assembled URDF carries an <assembly_part> manifest (defaults
+    included); configs of the older accessories form list them directly.
+    """
+    manifest = urdf_root.findall('assembly_part')
+    if manifest:
+        return [f'{e.get("type")} ({e.get("name")})' for e in manifest]
+    return [f'{a["type"]} ({a["name"]})'
+            for a in (cfg.get('parts') or cfg.get('accessories') or [])]
 
 
 def specs_comment(vehicle, urdf_root, cfg):
@@ -189,7 +195,7 @@ def specs_comment(vehicle, urdf_root, cfg):
     else:
         rows.append(('reserve buoyancy',
                      f'{displaced - total:+.3f} kg at full submersion'))
-    parts = parts_summary(cfg) or ['none']
+    parts = parts_summary(urdf_root, cfg) or ['none']
     rows.append(('parts', '; '.join(parts)))
     width = max(len(label) for label, _ in rows) + 2
     body = '\n'.join(f'  {label + ":":<{width}}{value}'

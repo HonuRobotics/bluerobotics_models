@@ -46,28 +46,34 @@ def catalog():
                   - {'part_probe'})
 
 
+# Types the chassis slots fit by default; everything else in the catalog is
+# added explicitly below so FULL_CONFIG exercises the whole library.
+DEFAULT_TYPES = {'blueboat_chassis', 'm200_weedless_prop_ccw', 'm200_weedless_prop_cw',
+                 'blueboat_flag', 'blueboat_ping_singlebeam_mount', 'ping_singlebeam'}
+SLOTTED_EXTRAS = {'blueboat_antenna_mast': 'mast', 'blueboat_payload_bracket': 'payload'}
+
+
 def full_config_text(extra=''):
     """
     Build a config exercising every catalog type.
 
-    The drivetrain stays on its sockets, everything else goes at explicit
-    poses; test_full_config_covers_catalog enforces that nothing is left out.
+    Defaults fill the chassis slots; the mast and payload bracket go in their
+    slots; every remaining type is free placed. test_full_config_covers_catalog
+    enforces that nothing is left out.
     """
     cfg = yaml.safe_load(DEFAULT_CONFIG)
-    motors = [p for p in cfg['parts'] if p['name'].startswith('motor_')]
-    used = {p['type'] for p in motors}
-    others = [{'type': t, 'name': f'acc_{t}', 'xyz': f'{0.1 * i - 0.6:.2f} 0 0.5',
-               'rpy': '0 0 0'}
-              for i, t in enumerate(t for t in catalog()
-                                    if t != 'blueboat_chassis' and t not in used)]
-    cfg['parts'] = motors + others
+    parts = [{'slot': slot, 'type': t} for t, slot in SLOTTED_EXTRAS.items()]
+    free = [t for t in catalog() if t not in DEFAULT_TYPES and t not in SLOTTED_EXTRAS]
+    parts += [{'type': t, 'name': f'acc_{t}', 'xyz': f'{0.1 * i - 0.6:.2f} 0 0.5',
+               'rpy': '0 0 0'} for i, t in enumerate(free)]
+    cfg['parts'] = parts
     return yaml.safe_dump(cfg, sort_keys=False) + extra
 
 
 FULL_CONFIG = full_config_text()
-EMPTY_CONFIG = yaml.safe_dump(
-    {k: v for k, v in yaml.safe_load(DEFAULT_CONFIG).items() if k != 'parts'}
-    | {'parts': []}, sort_keys=False)
+NO_SENSOR_CONFIG = yaml.safe_dump(
+    yaml.safe_load(DEFAULT_CONFIG) | {'parts': [{'slot': 'ping_mount', 'type': 'none'}]},
+    sort_keys=False)
 
 
 def xacro(top_file, config_text):
@@ -81,6 +87,12 @@ def xacro(top_file, config_text):
     return ET.fromstring(out.stdout), out.stdout
 
 
+def urdf_instances(config_text):
+    """(type, name) pairs of the assembled URDF for a config."""
+    root, _ = xacro(URDF_XACRO, config_text)
+    return [(e.get('type'), e.get('name')) for e in root.findall('assembly_part')]
+
+
 def plugins(root, filename):
     """Return the plugin elements with the given filename attribute."""
     return [p for p in root.iter('plugin') if p.get('filename') == filename]
@@ -90,23 +102,32 @@ def test_model_generation_follows_config():
     """Plugin and sensor counts track the config; no xacro residue."""
     root, text = xacro(MODEL_XACRO, FULL_CONFIG)
     assert 'xacro:' not in text and 'xmlns:xacro' not in text
+    assert 'assembly_part' not in text, 'manifest elements belong to the URDF only'
     assert len(plugins(root, 'gz-sim-thruster-system')) == 2
     assert len(plugins(root, 'gz-sim-hydrodynamics-system')) == 1
     sensors = list(root.iter('sensor'))
     assert {s.get('type') for s in sensors} == {'gpu_lidar'}
     assert len(sensors) == 1  # only the Ping2 emits a sensor
-    empty_root, _ = xacro(MODEL_XACRO, EMPTY_CONFIG)
-    assert not list(empty_root.iter('sensor'))
+    empty_root, _ = xacro(MODEL_XACRO, NO_SENSOR_CONFIG)
+    assert not list(empty_root.iter('sensor')), 'emptying the Ping slot removes the sensor'
     assert len(plugins(empty_root, 'gz-sim-thruster-system')) == 2
 
 
+def test_default_config_has_the_ping_sensor():
+    """The zero configuration model ships the echosounder, through the slot default."""
+    root, _ = xacro(MODEL_XACRO, DEFAULT_CONFIG)
+    sensors = list(root.iter('sensor'))
+    assert [s.get('name') for s in sensors] == ['ping']
+
+
 def test_sensors_follow_their_part_frame():
-    """A sensor link is posed at the part's frame, wherever the config put it."""
+    """A sensor link is posed at the part's declared sensing frame."""
     root, _ = xacro(MODEL_XACRO, DEFAULT_CONFIG)
     sensor_links = [li for li in root.iter('link') if li.get('name') == 'ping_sensor']
     assert len(sensor_links) == 1
-    pose = sensor_links[0].find('pose')
-    assert pose.get('relative_to') == 'ping'
+    assert sensor_links[0].find('pose').get('relative_to') == 'ping_beam'
+    sensor = next(root.iter('sensor'))
+    assert sensor.find('frame_id').text == 'ping_beam'
 
 
 def test_installed_model_sdf_carries_the_specs_comment():
@@ -149,8 +170,6 @@ def test_plugin_references_survive_lumping():
         f'plugin joints lumped away: {joint_refs - surviving_joints}')
     assert link_refs <= surviving_links, (
         f'plugin links lumped away: {link_refs - surviving_links}')
-    # Sensor links are posed relative_to a part frame; the conversion must
-    # keep a frame of that name for every lumped part.
     sensor_frames = {li.find('pose').get('relative_to')
                      for li in sdf_root.iter('link') if li.find('pose') is not None
                      and li.find('pose').get('relative_to')}
@@ -176,15 +195,14 @@ def test_sensor_and_bridge_topics_agree():
         'ros_topic_name': '/diagnostics', 'gz_topic_name': '/diagnostics',
         'ros_type_name': 'std_msgs/msg/Empty', 'gz_type_name': 'gz.msgs.Empty',
         'direction': 'GZ_TO_ROS'}
-    configs = [
-        FULL_CONFIG,
-        DEFAULT_CONFIG,
-        full_config_text('topic_namespace: boat_a\n'),
-    ]
-    for config in configs:
+    renamed = yaml.safe_dump(yaml.safe_load(DEFAULT_CONFIG) | {'parts': [
+        {'slot': 'ping', 'on': 'ping_mount', 'type': 'ping_singlebeam',
+         'name': 'sonar', 'topic': 'echo'}]}, sort_keys=False)
+    for config in (FULL_CONFIG, DEFAULT_CONFIG, NO_SENSOR_CONFIG, renamed,
+                   full_config_text('topic_namespace: boat_a\n')):
         cfg = yaml.safe_load(config)
         cfg.setdefault('extra_bridge_topics', []).append(extra)
-        entries = bridge_gen.bridge_entries(cfg)
+        entries = bridge_gen.bridge_entries(cfg, urdf_instances(config))
         assert extra in entries, 'extra_bridge_topics dropped'
         ns = cfg.get('topic_namespace', 'blueboat')
         fixed = {'/clock', f'/{ns}/joint_states', extra['gz_topic_name']}
@@ -196,12 +214,11 @@ def test_sensor_and_bridge_topics_agree():
 
 
 def test_full_config_covers_catalog():
-    """FULL_CONFIG exercises every part type bluerobotics_parts offers."""
-    cfg = yaml.safe_load(FULL_CONFIG)
-    config_types = {p['type'] for p in cfg['parts']} | {cfg['base']['type']}
-    assert config_types == set(catalog()), (
-        f'FULL_CONFIG drift: missing {set(catalog()) - config_types}, '
-        f'unknown {config_types - set(catalog())}')
+    """FULL_CONFIG (with the defaults) fits every part type the library offers."""
+    types = {t for t, _ in urdf_instances(FULL_CONFIG)}
+    assert types == set(catalog()), (
+        f'FULL_CONFIG drift: missing {set(catalog()) - types}, '
+        f'unknown {types - set(catalog())}')
 
 
 def test_sensor_frame_ids_resolve_in_tf():
@@ -229,10 +246,13 @@ def test_sensor_frame_ids_resolve_in_tf():
 def test_installed_artifacts_match_shipped_config():
     """The generated files that ship agree with the config they came from."""
     cfg = yaml.safe_load(DEFAULT_CONFIG)
+    installed_urdf = DESC_SHARE / 'urdf' / 'blueboat.urdf'
     bridge_yaml = GZ_SHARE / 'config' / 'ros_gz_bridge.yaml'
     assert yaml.safe_load(bridge_yaml.read_text()) == \
-        bridge_gen.bridge_entries(cfg)
-    urdf = ET.fromstring((DESC_SHARE / 'urdf' / 'blueboat.urdf').read_text())
+        bridge_gen.bridge_entries(cfg, bridge_gen.instances_from_urdf(installed_urdf))
+    urdf = ET.parse(installed_urdf).getroot()
     links = {li.get('name') for li in urdf.findall('link')}
-    for part in cfg['parts']:
-        assert part['name'] in links, f'{part["name"]} missing from shipped URDF'
+    for part in urdf.findall('assembly_part'):
+        assert part.get('name') in links, f'{part.get("name")} missing from shipped URDF'
+    assert any(p.get('type') == 'ping_singlebeam' for p in urdf.findall('assembly_part')), \
+        'the shipped default must carry the Ping'

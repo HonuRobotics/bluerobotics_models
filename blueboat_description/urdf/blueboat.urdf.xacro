@@ -20,8 +20,10 @@
              default="$(find blueboat_description)/config/blueboat.yaml"/>
   <xacro:property name="cfg" value="${xacro.load_yaml('$(arg config_file)')}"/>
 
-  <!-- Chassis as the root, every other part mounted on it. -->
-  <xacro:assemble base="${cfg['base']}" parts="${cfg.get('parts') or []}"/>
+  <!-- Chassis as the root; its slots (and theirs) fill with their defaults,
+       the config overrides and adds. -->
+  <xacro:assemble base="${cfg['base']}" parts="${cfg.get('parts') or []}"
+                  slots="${cfg.get('slots') or []}"/>
 
   <!-- ===== hull displacement (assembly declared) =====
        Box pontoons on a link fixed to the base: graded buoyancy accepts only

@@ -3,7 +3,7 @@
      static model, for reviewing inertia, collisions and visuals against the
      mesh. Right click a model > View > Collisions / Inertia / Center of Mass.
      Regenerate after an import. -->
-<sdf version="1.9">
+<sdf version="1.12">
   <world name="parts_check">
     <physics name="1ms" type="ode">
       <max_step_size>0.001</max_step_size>
@@ -188,16 +188,16 @@
             </geometry>
           </visual>
         </link>
-        <frame name='blueboat_chassis_flag_socket_joint' attached_to='blueboat_chassis'>
+        <frame name='blueboat_chassis_flag_joint' attached_to='blueboat_chassis'>
           <pose>-0.29799999999999999 0.20000000000000001 0.14699999999999999 0 0 0</pose>
         </frame>
-        <frame name='blueboat_chassis_flag_socket' attached_to='blueboat_chassis_flag_socket_joint'>
+        <frame name='blueboat_chassis_flag' attached_to='blueboat_chassis_flag_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
-        <frame name='blueboat_chassis_mast_socket_joint' attached_to='blueboat_chassis'>
+        <frame name='blueboat_chassis_mast_joint' attached_to='blueboat_chassis'>
           <pose>-0.29799999999999999 0 0.14699999999999999 0 0 0</pose>
         </frame>
-        <frame name='blueboat_chassis_mast_socket' attached_to='blueboat_chassis_mast_socket_joint'>
+        <frame name='blueboat_chassis_mast' attached_to='blueboat_chassis_mast_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='blueboat_chassis_motor_port_joint' attached_to='blueboat_chassis'>
@@ -331,10 +331,10 @@
             </geometry>
           </visual>
         </link>
-        <frame name='blueboat_ping_singlebeam_mount_sensor_joint' attached_to='blueboat_ping_singlebeam_mount'>
+        <frame name='blueboat_ping_singlebeam_mount_ping_joint' attached_to='blueboat_ping_singlebeam_mount'>
           <pose>0 0 -0.01 0 0 0</pose>
         </frame>
-        <frame name='blueboat_ping_singlebeam_mount_sensor' attached_to='blueboat_ping_singlebeam_mount_sensor_joint'>
+        <frame name='blueboat_ping_singlebeam_mount_ping' attached_to='blueboat_ping_singlebeam_mount_ping_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
       </model>
@@ -521,6 +521,12 @@
             </geometry>
           </visual>
         </link>
+        <frame name='ping_singlebeam_beam_joint' attached_to='ping_singlebeam'>
+          <pose>0 0 -0.043999999999999997 0 0 0</pose>
+        </frame>
+        <frame name='ping_singlebeam_beam' attached_to='ping_singlebeam_beam_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
       </model>
     <model name='surveyor_multibeam'>
           <static>true</static>
