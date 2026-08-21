@@ -1,13 +1,15 @@
 # Reference
 
-Exhaustive tables: topics, frames, configuration keys, worlds and packages.
+Exhaustive tables: configuration keys, the parts catalog and slots, topics,
+frames, worlds and packages.
 
 ```{toctree}
 :maxdepth: 1
 
+config-schema
+parts-catalog
 topics
 frames
-config-schema
 worlds
 packages
 ```

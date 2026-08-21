@@ -4,7 +4,7 @@
 
   Everything about the vehicle comes from the config (which parts, where) and
   from the part macros (geometry, inertia); the only vehicle level declaration
-  is the hull displacement, per AUR_BUOYANCY_DESIGN.md. No Gazebo tags or
+  is the hull displacement (docs: design/buoyancy). No Gazebo tags or
   plugins here (those belong in blueboat_gazebo).
 
       xacro blueboat.urdf.xacro > blueboat.urdf                     # default loadout

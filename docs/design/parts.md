@@ -1,121 +1,91 @@
-# Parts library
+# Parts
 
-A **part** is a single physical component: one mesh, no joints, geometry only.
-Visual, collision and inertia — never sensors, never plugins. A `ping2_sonar`
-part is the shape and mass of a Ping2; it becomes a sensor in `*_gazebo`, where
-`<sensor>` elements and the plugins that drive them are configured.
-
-Every part lives in `bluerobotics_parts/models/`, in one flat namespace,
-regardless of which vehicle uses it. There is no "does a second vehicle use it
-yet?" test and no migration when the answer changes. Category subdirectories
-were considered and rejected: they buy no namespacing, and recategorising a
-part later moves its path.
+A **part** is a single physical component: one mesh, no joints, geometry
+only (visual, collision, inertia). Parts are vehicle agnostic and live in
+`bluerobotics_parts` whether one vehicle uses them or several; assemblies
+(parts plus the joints between them) live in the per vehicle description
+packages.
 
 ## The part contract
 
-Three artifacts per part, with distinct authority:
+A part is one file, `bluerobotics_parts/urdf/<part>.urdf.xacro`, holding two
+macros (`bluerobotics_parts/urdf/parts.xacro` documents them and includes
+every part):
 
-| File | Origin | Authoritative for |
-|---|---|---|
-| `<part>.glb` | modeller | Visuals and materials — referenced directly, never converted |
-| `model.sdf` | modeller | Collision geometry **as delivered** |
-| `<part>.urdf.xacro` | generated, then maintained | Collision geometry **as used**, plus link, joint and inertia |
-
-A developer tightening a collision primitive in the xacro puts it out of step
-with `model.sdf`. That is expected, not a defect: `model.sdf` records what the
-modeller shipped, the xacro records what we build with. Do not "fix" the
-divergence by editing `model.sdf`.
-
-`model.sdf` is kept rather than deleted after import. It is the only record of
-what the modeller intended, and it is what makes re-import possible.
-
-**Materials come with the mesh.** Gazebo loads PBR directly from `.glb` —
-glTF materials, the combined metallic-roughness texture split into separate
-maps, normal, emissive and light maps. Nothing is declared in the URDF beyond
-the mesh reference. The obligation this puts on the modeller is that the `.glb`
-carries proper PBR materials.
-
-## The import script
-
-Parts get revised, so this runs **whenever a part is delivered or updated** —
-it is not a one-time migration. It reads `model.sdf`, rewrites each
-`<collision>` into URDF form (`<pose>` → `<origin xyz rpy>`, `<box><size>` →
-`<box size=…>`), and writes the result into the part's xacro between markers:
-
-```xml
-<!-- BEGIN GENERATED COLLISIONS — from model.sdf, do not edit by hand -->
-…
-<!-- END GENERATED COLLISIONS -->
-```
-
-It is idempotent, and it touches only the generated region — a re-import must
-not stamp on inertia, joints or visuals a developer has since edited. It fails
-loudly rather than emitting something wrong.
-
-## Rules for parts
-
-URDF expresses four collision shapes: **box, cylinder, sphere and mesh**. It has
-no cone, capsule, ellipsoid or plane. The export tool offers cone and plane, so
-this is reachable in practice and the import script rejects them rather than
-approximating.
-
-> **The rule for the modeller: box, cylinder, sphere or mesh — never cone or plane.**
-
-Three collision cases:
-
-| Case | Visual | Collision | For |
-|---|---|---|---|
-| **1. Visual only** | `.glb` | *none* | Passive accessories that need no contact |
-| **2. Visual + primitives** | `.glb` | box, cylinder, sphere | **The default** |
-| **3. Visual + collision mesh** | `.glb` | mesh file | Odd shapes where a primitive will not do |
-
-Case 2 is what a part *is*, not a decision made per part: the modeller ships
-every part with primitives that coarsely approximate the mesh, so approximate
-collision geometry always exists and nobody has to go back and ask for it.
-Developers refine those primitives when a part needs better, and drop to Case 1
-by removing them when a part needs no contact at all — both are edits to
-something that already exists rather than work commissioned from the modeller.
-
-Case 3 carries two costs: graded buoyancy rejects mesh collisions outright, and
-mesh contact is materially more expensive than a primitive.
-
-The import script enforces:
-
-| Check | Why |
+| Macro | Role |
 |---|---|
-| Geometry is box / cylinder / sphere / mesh | URDF cannot express cone or plane at all |
-| Collision primitives present | Case 2 is the default |
-| Names free of spaces and `.00N` suffixes | they become link, frame and topic names |
-| Dimensions sane against the part's real size | catches export scale errors |
-| `<inertial>` present with plausible mass | parts contribute mass to the assembly |
+| `<part>_info` | exports the metadata as the property `part_info`: `attach` (where the part bolts onto its parent, "x y z" in its own frame), `axis` (spin axis), `slots` (name → `xyz`, `rpy`, `accepts`, `default`, `joint`) and `frames` (name → `xyz`, `rpy`) |
+| `<part>` | instantiates it: one link (inertia, visual, optional collision), the mounting joint, and the slots and frames as massless links `<name>_<slot>` / `<name>_<frame>` |
 
-## Reviewing new parts
+Every part macro takes the same parameters: `name`, `parent` (`""` for the
+assembly root), `xyz`/`rpy`, `collision` (`false` to fit without contact
+geometry), `joint` (`fixed`, or `continuous` for parts that spin) and `axis`.
+The helper `part_joint` folds the attach offset in, so a mast whose origin is
+at its centroid still stands on the deck when fitted at a deck slot.
 
-When adding new parts to the repo, a few manual tests verify the components
-(meshes and SDF files) are consistent with the standard workflow and
-conventions.
+Mass, inertia and center of gravity are stated in the part and nowhere else;
+assemblies compose them ([Buoyancy](buoyancy.md)).
 
-### Parts gallery
+## What the modeler delivers
 
-To quickly review all the parts in the `bluerobotics_parts/models` directory,
-a simple world file is included that arranges all the parts in a grid with
-lighting conducive to reviewing the shapes and textures.
+Into `bluerobotics_parts/models/<part>/`, using exactly the names in
+`models/parts.csv`:
 
-After following the [installation instructions](../getting-started/installation.md),
-run Gazebo with the model gallery world:
-
-```bash
-gz sim ~/ws/src/bluerobotics_models/bluerobotics_parts/models/parts_gallery.sdf
+```
+models/blueboat_chassis/
+  blueboat_chassis.visual.glb        # required: visual mesh, PBR materials embedded
+  model.sdf                          # collision primitives, as delivered
+  blueboat_chassis.collision.stl     # optional: only if a primitive will not do
 ```
 
-### Parts standalone
+Rules:
 
-It is also possible to load the individual parts, by loading the individual
-`model.sdf` files, e.g.:
+1. **The directory name is the part name.** If the right directory is not in
+   `parts.csv`, ask before inventing one.
+2. **Origin at the mesh centroid, x forward, y left, z up**
+   ([REP 103](https://www.ros.org/reps/rep-0103.html)). The centroid is not
+   the center of gravity; that is stated separately in the part.
+3. **Collision shapes: box, cylinder, sphere or mesh. Never cone or plane.**
+   URDF cannot express them and the bootstrap rejects them. Prefer
+   primitives; a coarse envelope is what is wanted. Every part ships with
+   primitives; developers refine or drop them (collision is optional at the
+   point of use).
+4. **No spaces or `.001` style suffixes in any name**; they become frame and
+   topic names.
+5. **Attachment points as SDF frames when known** (`attach`, and one per
+   mount point): they save a measurement downstream. Not required.
 
-```bash
-gz sim ~/ws/src/bluerobotics_models/bluerobotics_parts/models/blueboat_chassis/model.sdf
-```
+Materials ride inside the `.glb`; Gazebo loads glTF PBR directly. The
+`.glb` stays in the repository (the part's visual points at it). `model.sdf`
+is the modeler's work product and the bootstrap input; nothing in ROS or
+Gazebo reads it, and the plan is to keep the SDF deliveries on a side branch
+so the released packages carry only what they use.
 
-Because there is no world file, the lighting is default and not representative
-of the maritime environments, but it is a convenient standalone test.
+Part names: lowercase snake_case, named for the product as Blue Robotics
+sells it; a vehicle prefix only when the part fits that vehicle alone
+(`blueboat_payload_bracket`); a vendor prefix only when the product name is
+ambiguous (`waterlinked_a50_dvl`); a function suffix where the name does not
+say what it is (`_sidescan`, `_multibeam`); articulated assemblies split into
+their moving pieces (`newton_gripper_cylinder`, `_shaft`, `_jaw`).
+
+## Bootstrapping from a delivery
+
+`sdf_to_part.py` writes the first version of the part from `model.sdf`:
+the visual (pointing at the `.glb`), the collision primitives translated to
+URDF, and an **inertia estimate**: the primitives run through SDF auto
+inertia (`gz sdf --expand-auto-inertials`) at a uniform density, giving
+mass, center of mass and the full tensor; a collision mesh is integrated
+directly; `--mass` scales the tensor to a known mass, keeping its shape.
+Slots, frames, attach and axis come from flags. The tool refuses to
+overwrite an existing part: from the first write on, the file is source.
+
+Inertia estimates are placeholders until measured or vendor values replace
+them; the file header says which it is.
+
+## Reviewing parts
+
+`worlds/parts_check.sdf` lays out every part from its **macro** (expanded and
+converted to SDF exactly as the vehicle is) as its own static model; the
+Gazebo entity menu toggles collisions, inertia and center of mass against
+the mesh. `worlds/parts_gallery.sdf` does the same for the raw deliveries.
+The step by step acceptance list is in [Add a part](../how-to/add-part.md).

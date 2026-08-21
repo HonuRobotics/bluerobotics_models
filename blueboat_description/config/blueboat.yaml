@@ -8,7 +8,7 @@
 # itself with its default (the chassis fits its two outboards, the flag and
 # the Ping2 integration kit; the kit's bracket fits the Ping). The entries
 # below are how to change that. See bluerobotics_parts/urdf/assembly.xacro
-# for the full rules and blueboat_description/ACCESSORIES.md for the slots
+# for the full rules and the site (vehicles/blueboat/configuration) for the slots
 # and the catalog.
 #
 # Topic namespace: sensor topics default to /<topic_namespace>/<name>/...
@@ -16,7 +16,7 @@ topic_namespace: blueboat
 
 # base: the part whose link is the assembly root, base_link. Its own
 # collision geometry is off because displacement and contact for a surface
-# vessel are declared under hull_displacement (AUR_BUOYANCY_DESIGN.md).
+# vessel are declared under hull_displacement (docs: design/buoyancy).
 base: {type: blueboat_chassis, name: base_link, collision: false}
 
 # parts: overrides and additions. A slot entry picks what goes in a slot

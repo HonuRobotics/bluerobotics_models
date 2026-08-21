@@ -48,7 +48,7 @@
   The URDF xacro is the part. It may be bootstrapped from a modeler's SDF
   with scripts/sdf_to_part.py or written by hand; nothing downstream knows
   or cares which. Mass, inertia and center of gravity are stated in the part
-  and nowhere else; assemblies compose them (AUR_BUOYANCY_DESIGN.md).
+  and nowhere else; assemblies compose them (docs: design/buoyancy).
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
