@@ -40,13 +40,11 @@ install(FILES ${bridge_yaml} DESTINATION share/${PROJECT_NAME}/config)
 
 # Composed simulation model. model.sdf is GENERATED from model.sdf.xacro at build
 # time (reads blueboat_description/config/blueboat.yaml, adds the Gazebo plugins).
-# It is installed as models/blueboat/model.sdf next to the static model.config,
-# i.e. as model://blueboat. The config dependency is EXPLICIT: the
+# Only the STAMPED copy below is installed (as models/blueboat/model.sdf next to
+# the static model.config, i.e. model://blueboat); xacro_add_files generates. The config dependency is EXPLICIT: the
 # configure time xacro --deps snapshot cannot resolve $(find) and fails with
 # only a warning, leaving the rule without deps.
-xacro_add_files(model.sdf.xacro
-  INSTALL DESTINATION models/blueboat
-  DEPENDS ${vehicle_config} TARGET model_raw)
+xacro_add_files(model.sdf.xacro DEPENDS ${vehicle_config} TARGET model_raw)
 
 # Stamp model.sdf with the same model specs comment the installed URDF
 # carries (the numbers come from that URDF, the loadout from the config).
