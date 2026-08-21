@@ -50,7 +50,7 @@ def test_default_config_reproduces_the_installed_artifacts(tmp_path):
     assert yaml.safe_load((out / 'ros_gz_bridge.yaml').read_text()) == \
         yaml.safe_load((GZ_SHARE / 'config' / 'ros_gz_bridge.yaml').read_text())
     generated = ET.parse(out / 'model.sdf').getroot()
-    installed = ET.parse(GZ_SHARE / 'model.sdf').getroot()
+    installed = ET.parse(GZ_SHARE / 'models' / 'blueboat' / 'model.sdf').getroot()
     assert [s.get('name') for s in generated.iter('sensor')] == \
         [s.get('name') for s in installed.iter('sensor')]
     assert len(list(generated.iter('plugin'))) == len(list(installed.iter('plugin')))

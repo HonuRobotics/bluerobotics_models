@@ -26,8 +26,9 @@ ros2 run blueboat_gazebo configure_vehicle.py --config my_loadout.yaml --out-dir
 ```
 
 writes `blueboat.urdf`, `model.sdf`, `model.config` and `ros_gz_bridge.yaml`.
-The directory is a Gazebo model: with `~/my_models` on `GZ_SIM_RESOURCE_PATH`
-it is `model://blueboat`, so a world can `<include>` it, or spawn it with
+The directory is a Gazebo model: with `~/my_models` prepended to
+`GZ_SIM_RESOURCE_PATH` it is `model://blueboat`, shadowing the installed
+default, so a world can `<include>` it, or spawn it with
 `ros2 run ros_gz_sim create -world <world> -file ~/my_models/blueboat/model.sdf -name blueboat -z 0.05`.
 Start the bridge on the generated config
 (`ros2 run ros_gz_bridge parameter_bridge --ros-args -p config_file:=$HOME/my_models/blueboat/ros_gz_bridge.yaml`)
@@ -39,5 +40,5 @@ one resolution of the config, so they agree with each other.
 The third option, for anything long lived: an overlay workspace that builds
 only `blueboat_description` with your edited `config/blueboat.yaml` on top
 of the installed packages. The build regenerates the URDF, the composed model
-and the bridge config consistently, and `model://blueboat_gazebo` resolves to
+and the bridge config consistently, and `model://blueboat` resolves to
 your overlay.

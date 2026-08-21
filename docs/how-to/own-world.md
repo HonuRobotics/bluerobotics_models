@@ -10,12 +10,12 @@ the ogre2 render engine. Copy both plugin blocks from
 
 ## Include the default model
 
-Sourcing the workspace puts `blueboat_gazebo` on `GZ_SIM_RESOURCE_PATH`, so
-`model://blueboat_gazebo` resolves:
+Sourcing the workspace puts the package's models directory on
+`GZ_SIM_RESOURCE_PATH`, so `model://blueboat` resolves:
 
 ```xml
 <include>
-  <uri>model://blueboat_gazebo</uri>
+  <uri>model://blueboat</uri>
   <name>blueboat</name>
   <pose>0 0 0.05 0 0 0</pose>
 </include>
@@ -25,7 +25,7 @@ Sourcing the workspace puts `blueboat_gazebo` on `GZ_SIM_RESOURCE_PATH`, so
 
 ```bash
 ros2 run ros_gz_sim create -world <your_world> -name blueboat -z 0.05 \
-  -file $(ros2 pkg prefix --share blueboat_gazebo)/model.sdf
+  -file $(ros2 pkg prefix --share blueboat_gazebo)/models/blueboat/model.sdf
 ```
 
 ## Use the stock launch with your world

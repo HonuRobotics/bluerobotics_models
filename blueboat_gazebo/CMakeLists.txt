@@ -7,8 +7,11 @@ find_package(blueboat_description REQUIRED)
 find_package(bluerobotics_parts REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
-# Put this package's share dir on GZ_SIM_RESOURCE_PATH so model://blueboat_gazebo
-# (the composed model below) resolves in Gazebo.
+# Put this package's models dir on GZ_SIM_RESOURCE_PATH so model://blueboat
+# (the composed model, installed under share/blueboat_gazebo/models/blueboat)
+# resolves in Gazebo. The model is deliberately NOT named after the package:
+# Gazebo tries model:// names relative to the current directory first, and a
+# source checkout has a directory called blueboat_gazebo.
 ament_environment_hooks("hooks/resource_paths.dsv.in")
 ament_environment_hooks("hooks/resource_paths.sh.in")
 
@@ -37,11 +40,13 @@ install(FILES ${bridge_yaml} DESTINATION share/${PROJECT_NAME}/config)
 
 # Composed simulation model. model.sdf is GENERATED from model.sdf.xacro at build
 # time (reads blueboat_description/config/blueboat.yaml, adds the Gazebo plugins).
-# xacro_add_files (no DESTINATION) installs it to share/${PROJECT_NAME}/model.sdf,
-# next to the static model.config. The config dependency is EXPLICIT: the
+# It is installed as models/blueboat/model.sdf next to the static model.config,
+# i.e. as model://blueboat. The config dependency is EXPLICIT: the
 # configure time xacro --deps snapshot cannot resolve $(find) and fails with
 # only a warning, leaving the rule without deps.
-xacro_add_files(model.sdf.xacro DEPENDS ${vehicle_config} TARGET model_raw)
+xacro_add_files(model.sdf.xacro
+  INSTALL DESTINATION models/blueboat
+  DEPENDS ${vehicle_config} TARGET model_raw)
 
 # Stamp model.sdf with the same model specs comment the installed URDF
 # carries (the numbers come from that URDF, the loadout from the config).
@@ -60,11 +65,9 @@ add_custom_command(
   DEPENDS ${raw_sdf} ${desc_urdf} ${vehicle_config} ${stamper}
   COMMENT "Stamping model.sdf with model specs")
 add_custom_target(${PROJECT_NAME}_model_specs ALL DEPENDS ${stamped_sdf})
-install(FILES ${stamped_sdf} DESTINATION share/${PROJECT_NAME})
-install(FILES
-  model.config
-  model.sdf.xacro
-  DESTINATION share/${PROJECT_NAME})
+install(FILES ${stamped_sdf} model.config
+  DESTINATION share/${PROJECT_NAME}/models/blueboat)
+install(FILES model.sdf.xacro DESTINATION share/${PROJECT_NAME})
 install(PROGRAMS
   scripts/generate_bridge_config.py
   scripts/configure_vehicle.py

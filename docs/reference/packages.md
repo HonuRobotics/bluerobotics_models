@@ -13,7 +13,7 @@
 | Artifact | Generated | From |
 |---|---|---|
 | `blueboat_description/urdf/blueboat.urdf` | at build | the config and the parts (carries the `<assembly_part>` manifest) |
-| `blueboat_gazebo/model.sdf` (`model://blueboat_gazebo`) | at build | the same config, merging the URDF and adding plugins and sensors |
+| `blueboat_gazebo/models/blueboat/model.sdf` (`model://blueboat`) | at build | the same config, merging the URDF and adding plugins and sensors |
 | `blueboat_gazebo/config/ros_gz_bridge.yaml` | at build | the config and the URDF manifest |
 | the same three | at launch, into a temp dir | `sim.launch.xml config_file:=` via `configure_vehicle.py` |
 | `bluerobotics_parts/worlds/parts_check.sdf` | by a person, committed | the part macros (`parts_check_world.py`) |

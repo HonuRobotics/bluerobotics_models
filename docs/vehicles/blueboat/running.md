@@ -42,5 +42,5 @@ to spin the propellers.
 
 ## In your own world
 
-Include `model://blueboat_gazebo` or spawn the generated model; see
+Include `model://blueboat` or spawn the generated model; see
 [Run in your own world](../../how-to/own-world.md).

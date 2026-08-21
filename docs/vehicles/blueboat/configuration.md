@@ -18,7 +18,7 @@ configures nothing). Two ways to use your own:
   ```
   The launch regenerates every artifact from the file at start.
 - **As the new default** of your workspace: edit `config/blueboat.yaml` and
-  `colcon build`; the installed URDF, `model://blueboat_gazebo` and the
+  `colcon build`; the installed URDF, `model://blueboat` and the
   bridge config regenerate.
 
 ## The slots

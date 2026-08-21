@@ -6,7 +6,7 @@
   per outboard motor, and one <sensor> per sensor part. Buoyancy is a world plugin (graded, in the playground
   world), not here.
 
-  In a world:  <include><uri>model://blueboat_gazebo</uri></include>
+  In a world:  <include><uri>model://blueboat</uri></include>
 -->
 <sdf version="1.12" xmlns:xacro="http://ros.org/wiki/xacro"
      xmlns:gz="http://gazebosim.org/schema">

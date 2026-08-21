@@ -40,7 +40,7 @@ resolution; a test asserts they are equal for several configs.
 ## Build time and launch time
 
 At build, the installed defaults are generated from the shipped config: the
-URDF, `model.sdf` (`model://blueboat_gazebo`, with a specs comment
+URDF, `model.sdf` (`model://blueboat`, with a specs comment
 stamped in) and `config/ros_gz_bridge.yaml`. At launch, `sim.launch.xml`
 runs `configure_vehicle.py --config <file> --temp`, which regenerates the
 three into a temporary directory, spawns that model into the vehicle free

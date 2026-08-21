@@ -191,7 +191,7 @@ def test_pontoons_tile_and_float_the_boat():
 
 def test_installed_model_sdf_carries_the_specs_comment():
     """The stamped model.sdf repeats the URDF specs; the masses agree."""
-    text = (GZ_SHARE / 'model.sdf').read_text()
+    text = (GZ_SHARE / 'models' / 'blueboat' / 'model.sdf').read_text()
     assert 'model specs' in text, 'installed model.sdf is not stamped'
     match = re.search(r'^  total mass: +([\d.]+) kg', text, re.M)
     assert match, 'specs comment misses the total mass row'
