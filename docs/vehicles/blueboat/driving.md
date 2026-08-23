@@ -1,20 +1,22 @@
 # Driving the BlueBoat
 
-The boat is driven by thrust commands, in newtons, to its two outboard
-motors. Equal thrust drives ahead; differential thrust yaws (more starboard
-thrust turns to port and vice versa).
+The boat is driven by thrust commands, in newtons, to its two propellers.
+Equal thrust drives ahead; differential thrust yaws (more starboard thrust
+turns to port and vice versa). Each propeller part in the loadout gets a
+thrust topic named after it, `/<namespace>/<name>/thrust`; the default
+loadout fits `motor_port` and `motor_stbd`.
 
 ## ROS topics
 
 | Topic | Type | Notes |
 |---|---|---|
-| `/blueboat/thrusters/port/thrust` | `std_msgs/msg/Float64` | newtons, clamped to the T200 limits (about +51 / -40 N) |
-| `/blueboat/thrusters/stbd/thrust` | `std_msgs/msg/Float64` | same |
+| `/blueboat/motor_port/thrust` | `std_msgs/msg/Float64` | newtons, clamped to the propeller's limits (about +51 / -40 N) |
+| `/blueboat/motor_stbd/thrust` | `std_msgs/msg/Float64` | same |
 | `/joint_states` | `sensor_msgs/msg/JointState` | `motor_port_joint`, `motor_stbd_joint` speeds, for RViz |
 
 ```bash
-ros2 topic pub /blueboat/thrusters/port/thrust std_msgs/msg/Float64 "data: 20.0" -1 &
-ros2 topic pub /blueboat/thrusters/stbd/thrust std_msgs/msg/Float64 "data: 20.0" -1 &
+ros2 topic pub /blueboat/motor_port/thrust std_msgs/msg/Float64 "data: 20.0" -1 &
+ros2 topic pub /blueboat/motor_stbd/thrust std_msgs/msg/Float64 "data: 20.0" -1 &
 wait
 ```
 
@@ -29,14 +31,16 @@ heading. Controllers that publish continuously are unaffected. Stop with
 
 | gz topic | Type | Direction |
 |---|---|---|
-| `/model/blueboat/joint/motor_<side>_joint/cmd_thrust` | `gz.msgs.Double` | command (what the bridge maps the ROS topics to) |
-| `/model/blueboat/joint/motor_<side>_joint/ang_vel` | `gz.msgs.Double` | propeller speed feedback, rad/s |
+| `/blueboat/motor_<side>/thrust` | `gz.msgs.Double` | command (the same name the bridge exposes on ROS) |
+| `/blueboat/motor_<side>/thrust/ang_vel` | `gz.msgs.Double` | propeller speed feedback, rad/s |
 
 ```bash
-gz topic -t /model/blueboat/joint/motor_port_joint/cmd_thrust -m gz.msgs.Double -p 'data: 10.0' &
-gz topic -t /model/blueboat/joint/motor_stbd_joint/cmd_thrust -m gz.msgs.Double -p 'data: 10.0' &
+gz topic -t /blueboat/motor_port/thrust -m gz.msgs.Double -p 'data: 10.0' &
+gz topic -t /blueboat/motor_stbd/thrust -m gz.msgs.Double -p 'data: 10.0' &
 wait
 ```
 
-The topic namespace (`blueboat`) and the per sensor topic names are set in
-the loadout config; see [Topics](../../reference/topics.md).
+The topic namespace (`blueboat`) and the per part topic names are set in
+the loadout config; see [Topics](../../reference/topics.md). Fit a
+different propeller, rename it or leave a motor slot empty and the thrust
+topics follow the loadout.

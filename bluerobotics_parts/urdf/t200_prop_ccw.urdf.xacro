@@ -7,8 +7,11 @@
 
   Inertia: estimated from the delivered collision geometry at 1000 kg/m^3 (SDF auto inertia); replace with measured values.
 
+  Drive: T200 16 V endpoints and prop diameter as placeholders for every
+  propeller option; replace with measured values for this prop.
+
   Contract (see parts.xacro): <part>_info exports the metadata (attach,
-  axis, slots, frames); <part> instantiates the link, its mounting joint
+  slots, frames, drive); <part> instantiates the link, its mounting joint
   and its slot / frame links.
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
@@ -16,11 +19,11 @@
   <xacro:macro name="t200_prop_ccw_info">
     <xacro:property name="part_info" scope="parent" value="${dict(
         attach='0 0 0',
-        axis='1 0 0',
         slots=dict(
         ),
         frames=dict(
-        ))}"/>
+        ),
+        drive=dict(diameter=0.076, max_thrust=51.5, min_thrust=-40.2, rotation='ccw'))}"/>
   </xacro:macro>
 
   <xacro:macro name="t200_prop_ccw"

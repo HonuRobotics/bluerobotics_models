@@ -15,15 +15,18 @@
 """
 Generate the ros_gz bridge config from the vehicle parts config.
 
-Run at build time (see CMakeLists.txt): emits /clock, the two thruster command
-topics (part of the drivetrain, always present) and one entry per topic of each
-sensor part in the assembly. The parts come from the generated URDF's
-<assembly_part> manifest (the resolved loadout, defaults included); topic
-bases follow /<topic_namespace>/<part name>, overridable per part in the
-vehicle config with `topic` (both sides), `gz_topic` (Gazebo side) and
-`ros_topic` (ROS side). This is the single point that must agree with the
-sensor <topic>s emitted by model.sdf.xacro; both derive from the same
-resolution, so they cannot drift.
+Run at build time (see CMakeLists.txt) and at launch (configure_vehicle.py):
+emits /clock, /joint_states and one entry per topic of each part in the
+assembly that has topics (a propeller's thrust command, a sensor's output).
+The parts come from the generated URDF's <assembly_part> manifest (the
+resolved loadout, defaults included); topic bases follow
+/<topic_namespace>/<part name>, overridable per part in the vehicle config
+with `topic` (both sides), `gz_topic` (Gazebo side) and `ros_topic` (ROS
+side). This is the single point that must agree with the <topic>s
+model.sdf.xacro gives the plugins; both derive from the same resolution, so
+they cannot drift. The config is also checked against the manifest here
+(bluerobotics_parts.assembly.check), so a loadout that names a slot or an
+instance that does not exist fails the build or the launch with the reason.
 
 Usage: generate_bridge_config.py <vehicle_config.yaml> <vehicle.urdf> <output_bridge.yaml>
 """
@@ -31,11 +34,19 @@ Usage: generate_bridge_config.py <vehicle_config.yaml> <vehicle.urdf> <output_br
 import sys
 import xml.etree.ElementTree as ET
 
+from bluerobotics_parts import assembly
 import yaml
 
 # type -> [(topic suffix, ROS type, gz type, direction)]
-# Sensor parts (bluerobotics_parts types) and the topics each produces.
+# Parts (bluerobotics_parts types) and the topics each has in simulation.
+THRUST = ('thrust', 'std_msgs/msg/Float64', 'gz.msgs.Double', 'ROS_TO_GZ')
 PART_TOPICS = {
+    # Propellers: thrust command in newtons to the Thruster on their joint.
+    'm200_weedless_prop_ccw': [THRUST],
+    'm200_weedless_prop_cw': [THRUST],
+    't200_prop_ccw': [THRUST],
+    't200_prop_cw': [THRUST],
+    # Sensors.
     'ping_singlebeam': [
         ('range', 'sensor_msgs/msg/LaserScan', 'gz.msgs.LaserScan',
          'GZ_TO_ROS'),
@@ -46,18 +57,6 @@ PART_TOPICS = {
 def absolute(topic):
     """Return the topic with a leading slash."""
     return topic if topic.startswith('/') else '/' + topic
-
-
-# The gz side topics bake the model instance name: worlds must spawn the
-# model under this name (the playground does). Per instance parameterization
-# is the multi vehicle PR.
-MODEL_NAME = 'blueboat'
-
-
-def instances_from_urdf(path):
-    """(type, name) of every part instance recorded in the URDF manifest."""
-    root = ET.parse(path).getroot()
-    return [(e.get('type'), e.get('name')) for e in root.findall('assembly_part')]
 
 
 def overrides_for(cfg, name):
@@ -87,7 +86,7 @@ def bridge_entries(cfg, instances):
         'gz_type_name': 'gz.msgs.Clock',
         'direction': 'GZ_TO_ROS',
     }]
-    # Motor joint states from the JointStatePublisher plugin, for
+    # Propeller joint states from the JointStatePublisher plugin, for
     # robot_state_publisher / RViz prop animation.
     entries.append({
         'ros_topic_name': '/joint_states',
@@ -96,16 +95,6 @@ def bridge_entries(cfg, instances):
         'gz_type_name': 'gz.msgs.Model',
         'direction': 'GZ_TO_ROS',
     })
-    # Twin outboard thrusters: drivetrain, always present. Thrust in newtons.
-    for side in ('port', 'stbd'):
-        entries.append({
-            'ros_topic_name': absolute(f'{ns}/thrusters/{side}/thrust'),
-            'gz_topic_name':
-                f'/model/{MODEL_NAME}/joint/motor_{side}_joint/cmd_thrust',
-            'ros_type_name': 'std_msgs/msg/Float64',
-            'gz_type_name': 'gz.msgs.Double',
-            'direction': 'ROS_TO_GZ',
-        })
     for ptype, name in instances:
         part = overrides_for(cfg, name)
         default_base = f'{ns}/{name}'
@@ -137,7 +126,12 @@ def main():
         sys.exit(__doc__)
     with open(sys.argv[1]) as f:
         cfg = yaml.safe_load(f) or {}
-    instances = instances_from_urdf(sys.argv[2])
+    root = ET.parse(sys.argv[2]).getroot()
+    try:
+        assembly.check(cfg, root)
+    except assembly.AssemblyError as e:
+        sys.exit(str(e))
+    instances = [(ptype, name) for ptype, name, _ in assembly.instances(root)]
     with open(sys.argv[3], 'w') as f:
         f.write('# GENERATED from the vehicle config '
                 '(blueboat_description/config/blueboat.yaml) and the assembled\n'

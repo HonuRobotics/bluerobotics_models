@@ -14,14 +14,15 @@ every part):
 
 | Macro | Role |
 |---|---|
-| `<part>_info` | exports the metadata as the property `part_info`: `attach` (where the part bolts onto its parent, "x y z" in its own frame), `axis` (spin axis), `slots` (name → `xyz`, `rpy`, `accepts`, `default`, `joint`) and `frames` (name → `xyz`, `rpy`) |
+| `<part>_info` | exports the metadata as the property `part_info`: `attach` (where the part bolts onto its parent, "x y z" in its own frame), `slots` (name → `xyz`, `rpy`, `accepts`, `default`, `joint`), `frames` (name → `xyz`, `rpy`) and, for propellers, `drive` (`diameter`, `max_thrust`, `min_thrust`, `rotation`), what a simulator needs to drive the part on its joint |
 | `<part>` | instantiates it: one link (inertia, visual, optional collision), the mounting joint, and the slots and frames as massless links `<name>_<slot>` / `<name>_<frame>` |
 
 Every part macro takes the same parameters: `name`, `parent` (`""` for the
 assembly root), `xyz`/`rpy`, `collision` (`false` to fit without contact
-geometry), `joint` (`fixed`, or `continuous` for parts that spin) and `axis`.
-The helper `part_joint` folds the attach offset in, so a mast whose origin is
-at its centroid still stands on the deck when fitted at a deck slot.
+geometry), `joint` (`fixed`, or `continuous` for parts that spin) and
+`axis`, whose default is the part's own spin axis. The helper `part_joint`
+folds the attach offset in, so a mast whose origin is at its centroid still
+stands on the deck when fitted at a deck slot.
 
 Mass, inertia and center of gravity are stated in the part and nowhere else;
 assemblies compose them ([Buoyancy](buoyancy.md)).
@@ -80,8 +81,9 @@ URDF, and an **inertia estimate**: the primitives run through SDF auto
 inertia (`gz sdf --expand-auto-inertials`) at a uniform density, giving
 mass, center of mass and the full tensor; a collision mesh is integrated
 directly; `--mass` scales the tensor to a known mass, keeping its shape.
-Slots, frames, attach and axis come from flags. The tool refuses to
-overwrite an existing part: from the first write on, the file is source.
+Slots, frames, attach and the spin axis come from flags; a propeller's
+`drive` table is added by hand. The tool refuses to overwrite an existing
+part: from the first write on, the file is source.
 
 Inertia estimates are placeholders until measured or vendor values replace
 them; the file header says which it is.

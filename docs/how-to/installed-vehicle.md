@@ -12,7 +12,7 @@ ros2 launch blueboat_gazebo sim.launch.xml config_file:=/path/my_loadout.yaml
 ros2 launch blueboat_description display.launch.xml config_file:=/path/my_loadout.yaml
 ```
 
-`sim.launch.xml` runs `configure_vehicle.py` into a temporary directory at
+`sim.launch.xml` runs `configure_vehicle.py` into a per loadout directory under `$ROS_HOME` at
 start, spawns that model and starts the bridge on that config. The default
 (no argument) is the baked default vehicle.
 

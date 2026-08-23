@@ -13,6 +13,7 @@
 # limitations under the License.
 """configure_vehicle.py: every loadout artifact from one config, at any time."""
 
+import os
 from pathlib import Path
 import subprocess
 import tempfile
@@ -83,16 +84,68 @@ def test_custom_loadout_flows_to_every_artifact(tmp_path):
     bridge = yaml.safe_load((out / 'ros_gz_bridge.yaml').read_text())
     topics = {e['ros_topic_name'] for e in bridge}
     assert '/blueboat/ping/range' not in topics
-    assert '/blueboat/thrusters/port/thrust' in topics
+    assert '/blueboat/motor_port/thrust' in topics
 
 
-def test_temp_mode_prints_only_the_directory():
-    """--temp creates a fresh directory and prints its path, nothing else."""
-    out = subprocess.run([str(TOOL), '--config', str(DEFAULT_CONFIG), '--temp'],
+def test_drivetrain_follows_the_config(tmp_path):
+    """A renamed or removed propeller moves or drops its Thruster and bridge topic."""
+    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
+    cfg['parts'] = [{'slot': 'motor_port', 'type': 'none'},
+                    {'slot': 'motor_stbd', 'type': 't200_prop_cw', 'name': 'right'}]
+    config = tmp_path / 'custom.yaml'
+    config.write_text(yaml.safe_dump(cfg, sort_keys=False))
+    out = configure(config, tmp_path / 'v')
+    model = ET.parse(out / 'model.sdf').getroot()
+    thrusters = [p for p in model.iter('plugin') if p.get('name').endswith('Thruster')]
+    assert [t.find('joint_name').text for t in thrusters] == ['right_joint']
+    assert thrusters[0].find('topic').text == 'blueboat/right/thrust'
+    topics = {e['ros_topic_name'] for e in
+              yaml.safe_load((out / 'ros_gz_bridge.yaml').read_text())}
+    assert '/blueboat/right/thrust' in topics
+    assert not any(t.endswith('motor_port/thrust') for t in topics)
+
+
+def test_base_name_flows_to_the_model(tmp_path):
+    """The config's base.name is the root link on the Gazebo side too."""
+    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
+    cfg['base'] = {'type': 'blueboat_chassis', 'name': 'hull'}
+    config = tmp_path / 'custom.yaml'
+    config.write_text(yaml.safe_dump(cfg, sort_keys=False))
+    out = configure(config, tmp_path / 'v')
+    assert 'hull' in links(out / 'blueboat.urdf')
+    model = ET.parse(out / 'model.sdf').getroot()
+    assert model.find('.//link[@name="hull_displacement"]/pose').get('relative_to') == 'hull'
+    assert {j.find('parent').text for j in model.findall('.//joint')} == {'hull'}
+    hydro = next(p for p in model.iter('plugin') if p.get('name').endswith('Hydrodynamics'))
+    assert hydro.find('link_name').text == 'hull'
+    out = subprocess.run(['gz', 'sdf', '-k', str(out / 'model.sdf')],
+                         capture_output=True, text=True, timeout=60)
+    assert out.returncode == 0 and 'Valid' in out.stdout, out.stderr
+
+
+def test_mismatched_config_fails_with_the_reason(tmp_path):
+    """A slot entry that matches nothing fails the tool (and so the launch)."""
+    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
+    cfg['parts'] = [{'slot': 'pingg', 'of': 'ping_mount', 'type': 'none'}]
+    config = tmp_path / 'custom.yaml'
+    config.write_text(yaml.safe_dump(cfg, sort_keys=False))
+    out = subprocess.run([str(TOOL), '--config', str(config), '--out-dir', str(tmp_path / 'v')],
                          capture_output=True, text=True, timeout=180)
-    assert out.returncode == 0, out.stderr
-    path = Path(out.stdout)
-    assert path.is_dir() and (path / 'model.sdf').is_file()
-    assert out.stdout == str(path), 'stdout must be the bare path (launch uses it)'
-    subprocess.run(['rm', '-rf', str(path)], check=False)
-    assert tempfile.gettempdir() in str(path)
+    assert out.returncode != 0 and "'pingg' of 'ping_mount'" in out.stderr, out.stderr
+
+
+def test_cache_mode_prints_only_the_directory():
+    """--cache writes under $ROS_HOME, keyed by the config, and prints the path only."""
+    with tempfile.TemporaryDirectory() as ros_home:
+        env = dict(os.environ, ROS_HOME=ros_home)
+        out = subprocess.run([str(TOOL), '--config', str(DEFAULT_CONFIG), '--cache'],
+                             capture_output=True, text=True, timeout=180, env=env)
+        assert out.returncode == 0, out.stderr
+        path = Path(out.stdout)
+        assert path.is_dir() and (path / 'model.sdf').is_file()
+        assert out.stdout == str(path), 'stdout must be the bare path (launch uses it)'
+        assert path.parent == Path(ros_home) / 'blueboat_gazebo'
+        # Same config, same directory: nothing piles up launch after launch.
+        again = subprocess.run([str(TOOL), '--config', str(DEFAULT_CONFIG), '--cache'],
+                               capture_output=True, text=True, timeout=180, env=env)
+        assert again.stdout == out.stdout

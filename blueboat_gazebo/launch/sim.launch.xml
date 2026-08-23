@@ -4,8 +4,10 @@
 
   Everything about the vehicle is derived from config_file at launch time by
   configure_vehicle.py (URDF, composed model, ros_gz bridge config, into a
-  temporary directory), so a custom loadout needs no rebuild and works the
-  same from a source build or a binary install. The world is vehicle free
+  per loadout directory under $ROS_HOME), so a custom loadout needs no
+  rebuild and works the same from a source build or a binary install. A
+  config that does not match the parts (a slot that does not exist, a type
+  that does not fit) fails the launch with the reason. The world is vehicle free
   (blueboat_water.sdf by default) and the generated model is spawned into it
   as "blueboat". With use_composition (default), gz_server, the bridge and
   robot_state_publisher run as composable nodes in ONE container process;
@@ -31,7 +33,7 @@
 
   <!-- Every artifact of this loadout, generated now from config_file. -->
   <let name="vehicle_dir"
-       value="$(command '$(find-pkg-prefix blueboat_gazebo)/lib/blueboat_gazebo/configure_vehicle.py --config $(var config_file) --temp')"/>
+       value="$(command '$(find-pkg-prefix blueboat_gazebo)/lib/blueboat_gazebo/configure_vehicle.py --config $(var config_file) --cache')"/>
   <let name="robot_description" value="$(command 'cat $(var vehicle_dir)/blueboat.urdf')"/>
 
   <!-- Gazebo server (composable) — creates the shared container. -->

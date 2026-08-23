@@ -8,8 +8,8 @@ config that realizes the ROS side is generated from the loadout
 
 | Topic | Type | Direction | Available with |
 |---|---|---|---|
-| `/blueboat/thrusters/port/thrust` | `std_msgs/msg/Float64` | subscribes | always (drivetrain) |
-| `/blueboat/thrusters/stbd/thrust` | `std_msgs/msg/Float64` | subscribes | always |
+| `/blueboat/motor_port/thrust` | `std_msgs/msg/Float64` | subscribes | the port propeller (default) |
+| `/blueboat/motor_stbd/thrust` | `std_msgs/msg/Float64` | subscribes | the starboard propeller (default) |
 | `/blueboat/ping/range` | `sensor_msgs/msg/LaserScan` | publishes (lazy) | the Ping2 (default) |
 | `/joint_states` | `sensor_msgs/msg/JointState` | publishes | always |
 | `/clock` | `rosgraph_msgs/msg/Clock` | publishes | always |
@@ -19,10 +19,12 @@ config that realizes the ROS side is generated from the loadout
 
 | Topic | Type | Direction |
 |---|---|---|
-| `/model/blueboat/joint/motor_<side>_joint/cmd_thrust` | `gz.msgs.Double` | command |
-| `/model/blueboat/joint/motor_<side>_joint/ang_vel` | `gz.msgs.Double` | feedback |
+| `/blueboat/motor_<side>/thrust` | `gz.msgs.Double` | command |
+| `/blueboat/motor_<side>/thrust/ang_vel` | `gz.msgs.Double` | feedback |
 | `/blueboat/ping/range` | `gz.msgs.LaserScan` | publishes |
 | `/blueboat/joint_states` | `gz.msgs.Model` | publishes |
 
-Per sensor part, `topic` / `gz_topic` / `ros_topic` in the config rename the
-base; a second sensor instance gets `/<ns>/<its name>/...`.
+Every topic a part has follows `/<namespace>/<instance name>/<suffix>` on
+both sides (`/thrust` for a propeller, `/range` for the Ping). Per part,
+`topic` / `gz_topic` / `ros_topic` in the config rename the base; a second
+instance gets `/<ns>/<its name>/...`.

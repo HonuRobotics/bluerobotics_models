@@ -39,6 +39,11 @@ import xml.etree.ElementTree as ET
 
 import yaml
 
+try:
+    from bluerobotics_parts import assembly
+except ImportError:  # bluerov2: no parts library, no manifest
+    assembly = None
+
 DEFAULT_FLUID_DENSITY = 1025.0  # seawater; overridable via buoyancy: fluid_density
 
 STAMP_RE = re.compile(r'<!-- =+ model specs =+.*?=+ -->\n?', re.S)
@@ -151,9 +156,9 @@ def parts_summary(urdf_root, cfg):
     The assembled URDF carries an <assembly_part> manifest (defaults
     included); configs of the older accessories form list them directly.
     """
-    manifest = urdf_root.findall('assembly_part')
+    manifest = assembly.instances(urdf_root) if assembly else []
     if manifest:
-        return [f'{e.get("type")} ({e.get("name")})' for e in manifest]
+        return [f'{ptype} ({name})' for ptype, name, _ in manifest]
     return [f'{a["type"]} ({a["name"]})'
             for a in (cfg.get('parts') or cfg.get('accessories') or [])]
 
@@ -258,6 +263,13 @@ def main():
     with open(args.config) as f:
         cfg = yaml.safe_load(f) or {}
     urdf_root = ET.parse(args.urdf).getroot()
+    if assembly and urdf_root.find('assembly_part') is not None:
+        # The config check the xacro expansion cannot do itself: fails the
+        # build on an entry that matched nothing, duplicate names, typos.
+        try:
+            assembly.check(cfg, urdf_root)
+        except assembly.AssemblyError as e:
+            sys.exit(str(e))
     comment = specs_comment(args.vehicle, urdf_root, cfg)
     if '--' in comment.replace('<!--', '', 1)[:-len('-->\n')]:
         sys.exit('model specs comment would contain "--", illegal in XML')

@@ -55,7 +55,6 @@ one slot on top:
   <xacro:macro name="my_box_info">
     <xacro:property name="part_info" scope="parent" value="${dict(
         attach='0 0 -0.05',
-        axis='0 0 1',
         slots=dict(
             top=dict(xyz='0 0 0.05', rpy='0 0 0', accepts=['ping_singlebeam'], default='none'),
         ),
@@ -90,7 +89,12 @@ one slot on top:
 ```
 
 `attach` is where the part bolts on, in its own frame (here the bottom face,
-so the box stands on whatever it is mounted to). Then steps 3 to 5 above.
+so the box stands on whatever it is mounted to); the macro's `axis` default
+is the part's own spin axis, used when it is fitted on a turning joint. A
+propeller additionally declares `drive=dict(diameter=..., max_thrust=...,
+min_thrust=..., rotation='ccw'|'cw')`, which makes the assembly mount it on a
+continuous joint and the Gazebo side give it a Thruster and a thrust topic.
+Then steps 3 to 5 above.
 
 ## Where a part goes
 

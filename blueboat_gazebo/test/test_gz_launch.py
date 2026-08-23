@@ -92,8 +92,7 @@ def command_motors(env, mapping, repeats=6):
     """
     for _ in range(repeats):
         procs = [(side, subprocess.Popen(
-            ['gz', 'topic', '-t',
-             f'/model/blueboat/joint/motor_{side}_joint/cmd_thrust',
+            ['gz', 'topic', '-t', f'/blueboat/motor_{side}/thrust',
              '-m', 'gz.msgs.Double', '-p', f'data: {value}'],
             env=env, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
             text=True)) for side, value in mapping.items()]
@@ -122,10 +121,10 @@ def test_model_loaded(sim):
 
 def test_interfaces_advertised(sim):
     """Motor commands, speed feedback and the world clock are advertised."""
-    needed = ('/model/blueboat/joint/motor_port_joint/cmd_thrust',
-              '/model/blueboat/joint/motor_stbd_joint/cmd_thrust',
-              '/model/blueboat/joint/motor_port_joint/ang_vel',
-              '/model/blueboat/joint/motor_stbd_joint/ang_vel',
+    needed = ('/blueboat/motor_port/thrust',
+              '/blueboat/motor_stbd/thrust',
+              '/blueboat/motor_port/thrust/ang_vel',
+              '/blueboat/motor_stbd/thrust/ang_vel',
               f'/world/{WORLD_NAME}/clock')
     poll_until(
         lambda: all(t in gz(sim, 'topic', '-l')[1] for t in needed), 30,

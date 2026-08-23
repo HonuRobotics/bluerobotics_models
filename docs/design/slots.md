@@ -43,19 +43,25 @@ Rules, in words:
 - The **base** part is the root; its link is the named root link (no joint).
 - Every slot fills itself with its **default**, recursively, unless the
   config has an entry for it. An entry names the slot (`slot:`), the
-  instance carrying it (`on:`, default the base), and `type:` an accepted
+  instance carrying it (`of:`, default the base), and `type:` an accepted
   part or `none`. The occupant's instance name defaults to the slot name.
 - **Free placements** (no `slot:`) give `type`, `name`, `xyz`/`rpy` relative
   to `parent`.
 - **Ad hoc slots** declared under `slots:` on any instance behave like the
   parts' own, `accepts` and `default` included.
-- Mistakes fail the expansion naming the problem: a type the slot does not
-  accept, an unknown slot on the base, a slot configured twice, a mistyped
-  part type.
+- Mistakes fail, naming the problem. The expansion itself catches a type
+  the slot does not accept, an unknown slot on the base, a slot configured
+  twice, a bare `on:` key (YAML reads it as `true`; the key is `of:`), a
+  mistyped part type. What xacro cannot see across its recursion, an entry
+  or ad hoc slot whose `of:`/`slot:` matches nothing deeper down, two
+  instances with the same name, an unknown key, is caught right after by
+  `bluerobotics_parts.assembly.check` from the manifest; the build, the
+  launch and `check_assembly.py <config> <urdf>` run it.
 - Every fitted instance is recorded in the URDF as
-  `<assembly_part type name parent/>`, an extension element urdfdom and
-  Gazebo ignore, so the Gazebo composition and the bridge generator know
-  the resolved loadout without re-resolving it.
+  `<assembly_part type name parent/>` and every slot visited as
+  `<assembly_slot of name/>`, extension elements urdfdom and Gazebo ignore,
+  so the Gazebo composition, the bridge generator and the config check know
+  the resolved assembly without re-resolving it.
 
 ## What a slot is in the URDF
 

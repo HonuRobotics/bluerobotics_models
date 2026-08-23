@@ -33,16 +33,17 @@ flowchart LR
 - **Assembly** ([Slots and assembly](slots.md)): `assembly.xacro` instantiates
   the base part and fills every slot, recursively, with its default unless
   the config says otherwise. The default vehicle is therefore defined by the
-  parts, and a config only states differences. The resolved parts list is
-  recorded in the URDF as `<assembly_part>` elements.
+  parts, and a config only states differences. The resolved assembly is
+  recorded in the URDF as `<assembly_part>` and `<assembly_slot>` elements,
+  and the config is checked against it.
 - **Buoyancy** ([Buoyancy](buoyancy.md)): mass properties are composed from
   the parts; displacement is declared at the assembly (box pontoons for a
   USV, a trim target for a UUV).
 - **Gazebo composition** ([Gazebo composition](gazebo-composition.md)):
-  `blueboat_gazebo` merge includes the URDF and adds plugins; sensors are
-  emitted by running the same assembly resolution with Gazebo emitters and
-  posed at the parts' frames; the bridge config is generated from the
-  manifest. Build time for the installed defaults, launch time for
+  `blueboat_gazebo` merge includes the URDF and adds plugins; sensors and
+  thrusters are emitted by running the same assembly resolution with Gazebo
+  emitters, posed at the parts' frames and driving the propellers' joints;
+  the bridge config is generated from the manifest. Build time for the installed defaults, launch time for
   `config_file:=`.
 
 ## Why it works this way

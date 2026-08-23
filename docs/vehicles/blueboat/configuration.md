@@ -48,9 +48,10 @@ hull_displacement: {length: 1.05, width: 0.18, height: 0.18, x: 0.027, y: 0.361,
 ```
 
 - A **slot entry** names the slot and the `type` to fit, which must be one
-  the slot accepts, or `none`. `on:` names the instance carrying the slot
-  when it is not the base (for example `{slot: ping, on: ping_mount, ...}`).
-  The occupant is named after the slot unless you give it a `name`.
+  the slot accepts, or `none`. `of:` names the instance carrying the slot
+  when it is not the base (for example `{slot: ping, of: ping_mount, ...}`).
+  The occupant is named after the slot unless you give it a `name`; fitting
+  the same part twice needs a `name` on one of them.
 - A **free placement** gives `type`, `name`, `xyz`/`rpy` relative to
   `parent` (default `base_link`). The part's own slots still fill with their
   defaults.
@@ -58,14 +59,17 @@ hull_displacement: {length: 1.05, width: 0.18, height: 0.18, x: 0.027, y: 0.361,
   used like the parts' own:
   ```yaml
   slots:
-    - {on: base_link, name: camera, xyz: "0.45 0 0.2", rpy: "0 0 0"}
+    - {of: base_link, name: camera, xyz: "0.45 0 0.2", rpy: "0 0 0"}
   ```
-- Per sensor part, `topic`, `gz_topic`, `ros_topic` and `bridge:` override
-  the topic names and the bridge entry (see [Config schema](../../reference/config-schema.md)).
+- Per sensor or propeller part, `topic`, `gz_topic`, `ros_topic` and
+  `bridge:` override the topic names and the bridge entry (see
+  [Config schema](../../reference/config-schema.md)).
 
 Mistakes fail the build or the launch with a message naming the problem:
-a type the slot does not accept, an unknown slot, a slot configured twice,
-a mistyped part type.
+a type the slot does not accept, an unknown slot or instance, a slot
+configured twice, the same instance name used twice, a key nobody reads, a
+mistyped part type. (The instance key is `of:`, not `on:`: YAML reads a bare
+`on` as the boolean `true`, and the expansion says so if you write it.)
 
 ## Checking the result
 

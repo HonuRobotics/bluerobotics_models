@@ -8,7 +8,7 @@
   Inertia: tensor shape estimated from the collision geometry, scaled from 68.139 kg at 1000 kg/m^3 to the stated 12 kg.
 
   Contract (see parts.xacro): <part>_info exports the metadata (attach,
-  axis, slots, frames); <part> instantiates the link, its mounting joint
+  slots, frames, drive); <part> instantiates the link, its mounting joint
   and its slot / frame links.
   Slots other parts fit into, as frames <name>_<slot>:
     motor_port: m200_weedless_prop_ccw, t200_prop_ccw; default m200_weedless_prop_ccw
@@ -23,7 +23,6 @@
   <xacro:macro name="blueboat_chassis_info">
     <xacro:property name="part_info" scope="parent" value="${dict(
         attach='0 0 0',
-        axis='1 0 0',
         slots=dict(
             motor_port=dict(xyz='-0.52 0.301 -0.117', rpy='0 0 0', accepts=['m200_weedless_prop_ccw', 't200_prop_ccw'], default='m200_weedless_prop_ccw', joint='continuous'),
             motor_stbd=dict(xyz='-0.52 -0.301 -0.117', rpy='0 0 0', accepts=['m200_weedless_prop_cw', 't200_prop_cw'], default='m200_weedless_prop_cw', joint='continuous'),

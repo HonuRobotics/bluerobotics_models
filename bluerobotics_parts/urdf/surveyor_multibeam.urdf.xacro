@@ -8,7 +8,7 @@
   Inertia: estimated from the delivered collision geometry at 1000 kg/m^3 (SDF auto inertia); replace with measured values.
 
   Contract (see parts.xacro): <part>_info exports the metadata (attach,
-  axis, slots, frames); <part> instantiates the link, its mounting joint
+  slots, frames, drive); <part> instantiates the link, its mounting joint
   and its slot / frame links.
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
@@ -16,7 +16,6 @@
   <xacro:macro name="surveyor_multibeam_info">
     <xacro:property name="part_info" scope="parent" value="${dict(
         attach='0 0 0',
-        axis='1 0 0',
         slots=dict(
         ),
         frames=dict(

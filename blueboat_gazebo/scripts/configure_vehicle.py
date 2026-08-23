@@ -25,15 +25,18 @@ vehicle be reconfigured without rebuilding, also from a binary install:
     ros2 run blueboat_gazebo configure_vehicle.py --config my_loadout.yaml --out-dir ~/my_blueboat
     ros2 launch blueboat_gazebo sim.launch.xml config_file:=my_loadout.yaml   # does this for you
 
-With --temp the directory is a fresh temporary one and its path is printed
-(nothing else), which is how the launch file calls it.
+With --cache the directory is one under $ROS_HOME (default ~/.ros) named
+after the config's content, so the same loadout always lands in the same
+place and nothing piles up; its path is printed (nothing else), which is
+how the launch file calls it.
 """
 
 import argparse
+import hashlib
+import os
 import pathlib
 import subprocess
 import sys
-import tempfile
 
 from ament_index_python.packages import (get_package_prefix,
                                          get_package_share_directory)
@@ -86,18 +89,25 @@ def configure(config, out_dir):
     return out_dir
 
 
+def cache_dir(config):
+    """Per loadout directory under $ROS_HOME, keyed by the config's content."""
+    ros_home = pathlib.Path(os.environ.get('ROS_HOME', pathlib.Path.home() / '.ros'))
+    digest = hashlib.sha256(pathlib.Path(config).read_bytes()).hexdigest()[:12]
+    return ros_home / 'blueboat_gazebo' / digest
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     ap.add_argument('--config', required=True, help='vehicle config yaml')
     group = ap.add_mutually_exclusive_group(required=True)
     group.add_argument('--out-dir', help='directory to write the artifacts into')
-    group.add_argument('--temp', action='store_true',
-                       help='write into a fresh temporary directory and print its path')
+    group.add_argument('--cache', action='store_true',
+                       help='write into $ROS_HOME/blueboat_gazebo/<config hash>, print its path')
     args = ap.parse_args(argv)
 
-    out_dir = tempfile.mkdtemp(prefix='blueboat_') if args.temp else args.out_dir
+    out_dir = cache_dir(args.config) if args.cache else args.out_dir
     configure(args.config, out_dir)
-    if args.temp:
+    if args.cache:
         sys.stdout.write(str(out_dir))
     else:
         print(f'wrote blueboat.urdf, blueboat.gazebo.urdf, model.sdf, model.config, '

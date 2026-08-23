@@ -9,7 +9,7 @@
   Mounts the named part four ways, so one command exercises the things that
   actually break: instantiating at all, two instances without a name collision,
   collision:=false, and a part parented to another part rather than to the
-  chassis. See "Accepting a new part" in the package README.
+  chassis. See the site: how-to/add-part.
 -->
 <robot name="part_probe" xmlns:xacro="http://ros.org/wiki/xacro">
 

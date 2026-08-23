@@ -20,7 +20,6 @@
 
          attach   where the part bolts onto its parent, "x y z" in the part
                   frame (the mounting joint folds it in)
-         axis     spin axis in the part frame, for parts that turn
          slots    named mount points other parts fit into, each with
                     xyz / rpy   pose in the part frame
                     accepts     part types that fit (omit: anything fits)
@@ -29,6 +28,17 @@
                     joint       joint type for the occupant (default fixed)
          frames   named reference frames (a sensor's beam origin, a lens),
                   each with xyz / rpy
+         drive    propellers only: what a simulator needs to drive the part
+                  as a thruster on its mounting joint
+                    diameter    propeller diameter, m
+                    max_thrust  forward thrust limit, N
+                    min_thrust  reverse thrust limit, N (negative)
+                    rotation    'ccw' or 'cw', seen from behind looking
+                                forward along the spin axis
+
+     Simulators read `frames` and `drive` (blueboat_gazebo places a
+     <sensor> at a sensor part's frame and a Thruster on a propeller's
+     joint); the URDF itself only turns `frames` into links.
 
   2. <part>: the macro that instantiates it, taking exactly
 
@@ -37,13 +47,14 @@
          xyz / rpy  mount pose relative to parent (meters / radians)
          collision  false to instantiate the part without contact geometry
          joint      fixed (default), or continuous / revolute for parts that spin
-         axis       joint axis in the part frame, used when joint is not fixed
+         axis       joint axis in the part frame, used when joint is not
+                    fixed; the macro's default is the part's own spin axis
 
      and emitting one link (inertia, visual via part_visual, optional
-     collision), the mounting joint (part_joint), and its slots and frames as massless links
-     named <name>_<slot> / <name>_<frame> (part_slots, part_frames). They
-     show up in TF and are lumped away in Gazebo, where they survive as
-     frames of the same name.
+     collision), the mounting joint (part_joint), and its slots and frames as
+     massless links named <name>_<slot> / <name>_<frame> (part_slots,
+     part_frames). They show up in TF and are lumped away in Gazebo, where
+     they survive as frames of the same name.
 
   The URDF xacro is the part. It may be bootstrapped from a modeler's SDF
   with scripts/sdf_to_part.py or written by hand; nothing downstream knows
@@ -114,12 +125,9 @@
       <origin xyz="${xyz}" rpy="${rpy}"/>
     </joint>
   </xacro:macro>
-  <xacro:macro name="part_frame" params="name parent xyz rpy:='0 0 0'">
-    <xacro:part_slot name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"/>
-  </xacro:macro>
 
-  <!-- All of a part's slots / frames from its part_info tables (xacro has
-       no loop; recurse over list(table.items())). -->
+  <!-- All of a part's slots (or frames: same thing to the URDF) from its
+       part_info table (xacro has no loop; recurse over list(table.items())). -->
   <xacro:macro name="part_slots" params="name items">
     <xacro:if value="${len(items) > 0}">
       <xacro:part_slot name="${name}_${items[0][0]}" parent="${name}"
@@ -128,11 +136,7 @@
     </xacro:if>
   </xacro:macro>
   <xacro:macro name="part_frames" params="name items">
-    <xacro:if value="${len(items) > 0}">
-      <xacro:part_frame name="${name}_${items[0][0]}" parent="${name}"
-                        xyz="${items[0][1]['xyz']}" rpy="${items[0][1].get('rpy', '0 0 0')}"/>
-      <xacro:part_frames name="${name}" items="${items[1:]}"/>
-    </xacro:if>
+    <xacro:part_slots name="${name}" items="${items}"/>
   </xacro:macro>
 
   <!-- ===== catalog =====

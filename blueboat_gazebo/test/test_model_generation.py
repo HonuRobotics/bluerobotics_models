@@ -22,6 +22,7 @@ import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import (get_package_prefix,
                                          get_package_share_directory)
+from bluerobotics_parts import assembly
 import pytest
 import yaml
 
@@ -102,8 +103,14 @@ def test_model_generation_follows_config():
     """Plugin and sensor counts track the config; no xacro residue."""
     root, text = xacro(MODEL_XACRO, FULL_CONFIG)
     assert 'xacro:' not in text and 'xmlns:xacro' not in text
-    assert 'assembly_part' not in text, 'manifest elements belong to the URDF only'
-    assert len(plugins(root, 'gz-sim-thruster-system')) == 2
+    assert 'assembly_part' not in text and 'assembly_slot' not in text, \
+        'manifest elements belong to the URDF only'
+    # One Thruster per propeller instance: the two defaults plus the free
+    # placed T200 props of the full config.
+    props = [n for t, n in urdf_instances(FULL_CONFIG) if t.endswith(('_prop_ccw', '_prop_cw'))]
+    assert len(props) == 4
+    assert {t.find('joint_name').text for t in plugins(root, 'gz-sim-thruster-system')} == \
+        {f'{n}_joint' for n in props}
     assert len(plugins(root, 'gz-sim-hydrodynamics-system')) == 1
     sensors = list(root.iter('sensor'))
     assert {s.get('type') for s in sensors} == {'gpu_lidar'}
@@ -111,6 +118,29 @@ def test_model_generation_follows_config():
     empty_root, _ = xacro(MODEL_XACRO, NO_SENSOR_CONFIG)
     assert not list(empty_root.iter('sensor')), 'emptying the Ping slot removes the sensor'
     assert len(plugins(empty_root, 'gz-sim-thruster-system')) == 2
+
+
+def test_thrusters_follow_the_propeller_parts():
+    """One Thruster per propeller instance, on its joint, with the part's drive data."""
+    root, _ = xacro(MODEL_XACRO, DEFAULT_CONFIG)
+    thrusters = {t.find('joint_name').text: t
+                 for t in plugins(root, 'gz-sim-thruster-system')}
+    assert set(thrusters) == {'motor_port_joint', 'motor_stbd_joint'}
+    port, stbd = thrusters['motor_port_joint'], thrusters['motor_stbd_joint']
+    # Counter rotating pair: opposite coefficient signs; same limits.
+    assert float(port.find('thrust_coefficient').text) == \
+        -float(stbd.find('thrust_coefficient').text)
+    assert float(port.find('max_thrust_cmd').text) > 0 > float(port.find('min_thrust_cmd').text)
+    assert port.find('topic').text == 'blueboat/motor_port/thrust'
+    # Empty a motor slot and rename the other: the plugins follow.
+    cfg = yaml.safe_dump(yaml.safe_load(DEFAULT_CONFIG) | {'parts': [
+        {'slot': 'motor_port', 'type': 'none'},
+        {'slot': 'motor_stbd', 'type': 't200_prop_cw', 'name': 'right', 'topic': 'r'}]},
+        sort_keys=False)
+    root, _ = xacro(MODEL_XACRO, cfg)
+    thrusters = plugins(root, 'gz-sim-thruster-system')
+    assert [t.find('joint_name').text for t in thrusters] == ['right_joint']
+    assert thrusters[0].find('topic').text == 'r/thrust'
 
 
 def test_default_config_has_the_ping_sensor():
@@ -259,8 +289,9 @@ def test_plugin_references_survive_lumping():
 
 
 def sdf_gz_topics(root):
-    """Collect the gz-side topics the model's sensors declare."""
+    """Collect the gz-side topics the model's sensors and Thruster plugins declare."""
     topics = {sensor.find('topic').text for sensor in root.iter('sensor')}
+    topics |= {t.find('topic').text for t in plugins(root, 'gz-sim-thruster-system')}
     return {t if t.startswith('/') else '/' + t for t in topics}
 
 
@@ -268,15 +299,16 @@ def test_sensor_and_bridge_topics_agree():
     """
     Model gz topics equal generated bridge gz topics, by construction.
 
-    Fixed entries (clock, joint states, thrusters) and extra_bridge_topics
-    pass through untouched; everything else must match a model sensor topic.
+    Fixed entries (clock, joint states) and extra_bridge_topics pass through
+    untouched; everything else must match a topic the model gives a sensor
+    or a Thruster plugin.
     """
     extra = {
         'ros_topic_name': '/diagnostics', 'gz_topic_name': '/diagnostics',
         'ros_type_name': 'std_msgs/msg/Empty', 'gz_type_name': 'gz.msgs.Empty',
         'direction': 'GZ_TO_ROS'}
     renamed = yaml.safe_dump(yaml.safe_load(DEFAULT_CONFIG) | {'parts': [
-        {'slot': 'ping', 'on': 'ping_mount', 'type': 'ping_singlebeam',
+        {'slot': 'ping', 'of': 'ping_mount', 'type': 'ping_singlebeam',
          'name': 'sonar', 'topic': 'echo'}]}, sort_keys=False)
     for config in (FULL_CONFIG, DEFAULT_CONFIG, NO_SENSOR_CONFIG, renamed,
                    full_config_text('topic_namespace: boat_a\n')):
@@ -287,8 +319,7 @@ def test_sensor_and_bridge_topics_agree():
         ns = cfg.get('topic_namespace', 'blueboat')
         fixed = {'/clock', f'/{ns}/joint_states', extra['gz_topic_name']}
         bridge_topics = {e['gz_topic_name'] for e in entries
-                         if e['gz_topic_name'] not in fixed
-                         and not e['gz_topic_name'].endswith('/cmd_thrust')}
+                         if e['gz_topic_name'] not in fixed}
         root, _ = xacro(MODEL_XACRO, config)
         assert sdf_gz_topics(root) == bridge_topics
 
@@ -329,7 +360,8 @@ def test_installed_artifacts_match_shipped_config():
     installed_urdf = DESC_SHARE / 'urdf' / 'blueboat.urdf'
     bridge_yaml = GZ_SHARE / 'config' / 'ros_gz_bridge.yaml'
     assert yaml.safe_load(bridge_yaml.read_text()) == \
-        bridge_gen.bridge_entries(cfg, bridge_gen.instances_from_urdf(installed_urdf))
+        bridge_gen.bridge_entries(cfg, [(t, n) for t, n, _ in assembly.instances(
+            ET.parse(installed_urdf).getroot())])
     urdf = ET.parse(installed_urdf).getroot()
     links = {li.get('name') for li in urdf.findall('link')}
     for part in urdf.findall('assembly_part'):

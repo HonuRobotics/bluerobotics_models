@@ -16,10 +16,10 @@
         - {slot: motor_port, type: t200_prop_ccw}          # another option for a slot
         - {slot: ping_mount, type: none}                   # leave a slot empty
         - {slot: mast, type: blueboat_antenna_mast}        # fill a slot that has no default
-        - {slot: ping, on: ping_mount, type: ping_singlebeam, topic: sonar}   # a slot on another part
+        - {slot: ping, of: ping_mount, type: ping_singlebeam, topic: sonar}   # a slot of another part
         - {type: explorehd_camera, name: cam, xyz: "0.3 0 0.2", rpy: "0 0 0"}  # free placement
       slots:
-        - {on: base_link, name: gopro, xyz: "0.45 0 0.2", accepts: [explorehd_camera]}
+        - {of: base_link, name: gopro, xyz: "0.45 0 0.2", accepts: [explorehd_camera]}
 
   How it resolves:
 
@@ -28,26 +28,38 @@
     default, recursively (a bracket brings its sensor), unless the config
     has an entry for that slot: `type:` picks another option (it must be in
     the slot's accepts list), `type: none` leaves it empty. An entry names
-    the slot, and `on:` the instance carrying it (default: the base). The
-    occupant's instance name defaults to the slot name.
+    the slot, and `of:` the instance carrying it (default: the base). The
+    occupant's instance name defaults to the slot name. (The key is `of`,
+    not `on`: a bare `on` is a YAML boolean and would read as `true`.)
   * Entries without slot: are free placements: type, name, xyz/rpy relative
     to parent (default: the base). Their slots fill too.
+  * The occupant's joint is the entry's `joint:`, else the slot's, else the
+    part's nature: a propeller (a part with a `drive` table) turns on a
+    continuous joint, anything else is fixed.
   * `slots:` declares ad hoc slots on any instance, usable like the part's
     own (accepts and default work the same).
-  * Mistakes fail the expansion loudly: an unknown slot on the base, a type
-    a slot does not accept, or a slot configured twice. An unknown part type
-    fails as "unknown macro name".
+  * Mistakes the expansion can see fail it loudly: an unknown slot on the
+    base, a type a slot does not accept, a slot configured twice, a bare
+    `on:` key. An unknown part type fails as "unknown macro name". What
+    xacro cannot see across the recursion (an entry or ad hoc slot whose
+    `of:` or `slot:` matches nothing deeper down, two instances with the
+    same name, an unknown key) is caught by bluerobotics_parts.assembly.check
+    from the manifest below; the vehicle builds and launches run it.
 
-  Every instance is also recorded as <assembly_part type name parent/>, a
-  URDF extension element urdfdom and Gazebo ignore, so tooling downstream
-  (the Gazebo composition, the bridge generator) knows the resolved parts
-  list without re-resolving anything.
+  The manifest: every instance is recorded as <assembly_part type name
+  parent/> and every slot visited as <assembly_slot of name/>, URDF
+  extension elements urdfdom and Gazebo ignore, so tooling downstream (the
+  Gazebo composition, the bridge generator, the config check) knows the
+  resolved assembly without re-resolving anything. `manifest:=false` turns
+  the records off for outputs that are not URDF.
 
   The emitter is pluggable: `emit` names the macro called per instance
-  (default emit_part: the part macro plus the manifest element), `emit_slot`
-  the one called per ad hoc slot (default part_slot). blueboat_gazebo runs
-  the same resolution with emitters that produce sensors, so the composed
-  model can never disagree with the URDF about which parts are fitted.
+  (default emit_part: the part macro), `emit_slot` the one called per ad hoc
+  slot (default part_slot). Emitters receive the part's `info` table, so a
+  simulator can place a sensor at a declared frame or drive a propeller.
+  blueboat_gazebo runs the same resolution with such emitters, so the
+  composed model can never disagree with the URDF about which parts are
+  fitted.
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
@@ -66,9 +78,8 @@
     <xacro:property name="part_info" scope="parent" value="${part_info}"/>
   </xacro:macro>
 
-  <!-- Default emitter: manifest element plus the part macro itself. -->
-  <xacro:macro name="emit_part" params="ptype name parent xyz rpy collision joint axis">
-    <assembly_part type="${ptype}" name="${name}" parent="${parent}"/>
+  <!-- Default emitter: the part macro itself. -->
+  <xacro:macro name="emit_part" params="ptype name parent xyz rpy collision joint axis info">
     <xacro:if value="${axis == ''}">
       <xacro:call macro="${ptype}" name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
                   collision="${collision}" joint="${joint}"/>
@@ -90,8 +101,11 @@
 
   <!-- One slot of one instance: config entry, else the slot default. -->
   <xacro:macro name="fill_slot" params="inst slot spec entries adhoc emit emit_slot">
+    <xacro:if value="${manifest}">
+      <assembly_slot of="${inst}" name="${slot}"/>
+    </xacro:if>
     <xacro:property name="matches"
-                    value="${[e for e in entries if e.get('slot') == slot and e.get('on', base_name) == inst]}"/>
+                    value="${[e for e in entries if e.get('slot') == slot and e.get('of', base_name) == inst]}"/>
     <xacro:if value="${len(matches) > 1}">
       <xacro:assembly_fail message="slot '${slot}' of '${inst}' is configured ${len(matches)} times"/>
     </xacro:if>
@@ -104,7 +118,7 @@
       <xacro:place_part ptype="${chosen}" name="${entry.get('name', slot)}" parent="${inst}_${slot}"
                         xyz="${entry.get('xyz', '0 0 0')}" rpy="${entry.get('rpy', '0 0 0')}"
                         collision="${entry.get('collision', True)}"
-                        joint="${entry.get('joint', spec.get('joint', 'fixed'))}"
+                        joint="${entry.get('joint', spec.get('joint', ''))}"
                         axis="${entry.get('axis', '')}"
                         entries="${entries}" adhoc="${adhoc}" emit="${emit}" emit_slot="${emit_slot}"/>
     </xacro:if>
@@ -120,13 +134,20 @@
   </xacro:macro>
 
   <!-- Instantiate a part, then its slots: the part's own and the ad hoc
-       ones the config put on this instance. -->
+       ones the config put on this instance. joint "" means unspecified by
+       the entry and the slot: a part that drives (a propeller) then turns
+       on a continuous joint, anything else is fixed. -->
   <xacro:macro name="place_part"
                params="ptype name parent xyz rpy collision joint axis entries adhoc emit emit_slot">
     <xacro:part_info_of ptype="${ptype}"/>
+    <xacro:property name="joint_type"
+                    value="${joint if joint != '' else ('continuous' if 'drive' in part_info else 'fixed')}"/>
+    <xacro:if value="${manifest}">
+      <assembly_part type="${ptype}" name="${name}" parent="${parent}"/>
+    </xacro:if>
     <xacro:call macro="${emit}" ptype="${ptype}" name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
-                collision="${collision}" joint="${joint}" axis="${axis}"/>
-    <xacro:property name="mine" value="${[s for s in adhoc if s.get('on', base_name) == name]}"/>
+                collision="${collision}" joint="${joint_type}" axis="${axis}" info="${part_info}"/>
+    <xacro:property name="mine" value="${[s for s in adhoc if s.get('of', base_name) == name]}"/>
     <xacro:adhoc_slots inst="${name}" items="${mine}" emit_slot="${emit_slot}"/>
     <xacro:fill_slots inst="${name}"
                       items="${list(part_info['slots'].items()) + [(s['name'], s) for s in mine]}"
@@ -143,7 +164,7 @@
       <xacro:if value="${it.get('type', 'none') != 'none'}">
         <xacro:place_part ptype="${it['type']}" name="${it['name']}" parent="${it.get('parent', base_name)}"
                           xyz="${it['xyz']}" rpy="${it.get('rpy', '0 0 0')}"
-                          collision="${it.get('collision', True)}" joint="${it.get('joint', 'fixed')}"
+                          collision="${it.get('collision', True)}" joint="${it.get('joint', '')}"
                           axis="${it.get('axis', '')}"
                           entries="${entries}" adhoc="${adhoc}" emit="${emit}" emit_slot="${emit_slot}"/>
       </xacro:if>
@@ -156,21 +177,26 @@
        declares; entries on deeper instances are checked when reached. -->
   <xacro:macro name="check_base_slots" params="items known">
     <xacro:if value="${len(items) > 0}">
-      <xacro:if value="${items[0].get('on', base_name) == base_name and items[0]['slot'] not in known}">
+      <xacro:if value="${items[0].get('of', base_name) == base_name and items[0]['slot'] not in known}">
         <xacro:assembly_fail message="unknown slot '${items[0]['slot']}' on '${base_name}' (known: ${known})"/>
       </xacro:if>
       <xacro:check_base_slots items="${items[1:]}" known="${known}"/>
     </xacro:if>
   </xacro:macro>
 
-  <xacro:macro name="assemble" params="base parts slots:='' emit:=emit_part emit_slot:=part_slot">
+  <xacro:macro name="assemble"
+               params="base parts slots:='' emit:=emit_part emit_slot:=part_slot manifest:=true">
     <xacro:property name="base_name" value="${base.get('name', 'base_link')}"/>
     <xacro:property name="adhoc" value="${slots if slots else []}"/>
+    <!-- A bare `on:` key parses as the YAML boolean true; the key is `of:`. -->
+    <xacro:if value="${len([e for e in list(parts) + list(adhoc) if True in e]) > 0}">
+      <xacro:assembly_fail message="an entry has a bare 'on:' key, which YAML reads as true; the key is 'of:'"/>
+    </xacro:if>
     <xacro:property name="slot_entries" value="${[p for p in parts if 'slot' in p]}"/>
     <xacro:property name="free_entries" value="${[p for p in parts if 'slot' not in p]}"/>
     <xacro:part_info_of ptype="${base['type']}"/>
     <xacro:check_base_slots items="${slot_entries}"
-                            known="${list(part_info['slots'].keys()) + [s['name'] for s in adhoc if s.get('on', base_name) == base_name]}"/>
+                            known="${list(part_info['slots'].keys()) + [s['name'] for s in adhoc if s.get('of', base_name) == base_name]}"/>
     <xacro:place_part ptype="${base['type']}" name="${base_name}" parent="" xyz="0 0 0" rpy="0 0 0"
                       collision="${base.get('collision', True)}" joint="fixed" axis=""
                       entries="${slot_entries}" adhoc="${adhoc}" emit="${emit}" emit_slot="${emit_slot}"/>

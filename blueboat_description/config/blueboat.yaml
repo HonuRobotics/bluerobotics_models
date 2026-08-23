@@ -21,11 +21,11 @@ topic_namespace: blueboat
 base: {type: blueboat_chassis, name: base_link}
 
 # parts: overrides and additions. A slot entry picks what goes in a slot
-# (slot: the slot name, on: the instance carrying it, default base_link;
+# (slot: the slot name, of: the instance carrying it, default base_link;
 # type: an accepted part type, or none to leave it empty). An entry without
 # slot: is a free placement: type, name, xyz/rpy relative to parent (default
-# base_link). Optional per part topic overrides for sensor parts (bases; the
-# per sensor suffix such as /range is appended):
+# base_link). Optional per part topic overrides for sensor and propeller
+# parts (bases; the per part suffix such as /range or /thrust is appended):
 #   topic:     base for BOTH the Gazebo and ROS sides
 #   gz_topic:  Gazebo side base   (overrides `topic`)
 #   ros_topic: ROS side base      (overrides `topic`)
@@ -37,14 +37,15 @@ parts: []
   # - {slot: motor_stbd, type: t200_prop_cw}
   # - {slot: mast, type: blueboat_antenna_mast}               # slots with no default
   # - {slot: payload, type: blueboat_payload_bracket}
-  # - {slot: ping, on: ping_mount, type: ping_singlebeam, topic: sonar}   # rename the Ping topics
+  # - {slot: ping, of: ping_mount, type: ping_singlebeam, topic: sonar}   # rename the Ping topics
   # - {type: basestation_antenna,   name: radio,     xyz: "-0.35 0 0.5",    rpy: "0 0 0"}
   # - {type: omniscan_450_sidescan, name: sidescan,  xyz: "0.2 0.22 -0.03", rpy: "0 0 0"}
   # - {type: surveyor_multibeam,    name: multibeam, xyz: "0.35 0 -0.08",   rpy: "0 0 0"}
 
-# slots: ad hoc slots on any instance, usable like the parts' own.
+# slots: ad hoc slots on any instance, usable like the parts' own. (The
+# instance key is of:, not on:, which YAML would read as the boolean true.)
 # slots:
-#   - {on: base_link, name: camera, xyz: "0.45 0 0.2", rpy: "0 0 0"}
+#   - {of: base_link, name: camera, xyz: "0.45 0 0.2", rpy: "0 0 0"}
 
 # Hull displacement (USV case), read by the Gazebo composition: box pontoons
 # on a dedicated hull_displacement link that is the only thing the world's

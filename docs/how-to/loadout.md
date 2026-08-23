@@ -42,7 +42,7 @@ parts:
 
 ```yaml
 parts:
-  - {slot: ping, on: ping_mount, type: ping_singlebeam, topic: sonar}
+  - {slot: ping, of: ping_mount, type: ping_singlebeam, topic: sonar}
 ```
 
 gives `/blueboat/sonar/range` on both sides; `gz_topic` / `ros_topic` set one
@@ -63,7 +63,7 @@ gets its own sensor, frame `bow_ping_beam` and topic `/blueboat/bow_ping/range`.
 
 ```yaml
 slots:
-  - {on: base_link, name: camera, xyz: "0.45 0 0.2", rpy: "0 0 0", accepts: [surveyor_multibeam]}
+  - {of: base_link, name: camera, xyz: "0.45 0 0.2", rpy: "0 0 0", accepts: [surveyor_multibeam]}
 parts:
   - {slot: camera, type: surveyor_multibeam, name: bow_sonar}
 ```

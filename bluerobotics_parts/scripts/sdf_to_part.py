@@ -298,12 +298,11 @@ def py_str(value):
     return repr(str(value))
 
 
-def emit_info(part, axis, attach, slots, frames):
+def emit_info(part, attach, slots, frames):
     """Emit the <part>_info macro: metadata exported as the property part_info."""
     lines = [f'  <xacro:macro name="{part}_info">',
              '    <xacro:property name="part_info" scope="parent" value="${dict(',
              f'        attach={py_str(attach)},',
-             f'        axis={py_str(axis)},',
              '        slots=dict(']
     for name, slot in slots.items():
         fields = [f'xyz={py_str(slot["xyz"])}', f'rpy={py_str(slot["rpy"])}']
@@ -338,7 +337,7 @@ def emit_macro(part, visuals, collisions, inertia, source, axis, attach, slots, 
     w(f'  Inertia: {source}.')
     w('')
     w('  Contract (see parts.xacro): <part>_info exports the metadata (attach,')
-    w('  axis, slots, frames); <part> instantiates the link, its mounting joint')
+    w('  slots, frames, drive); <part> instantiates the link, its mounting joint')
     w('  and its slot / frame links.')
     if slots:
         w('  Slots other parts fit into, as frames <name>_<slot>:')
@@ -350,7 +349,7 @@ def emit_macro(part, visuals, collisions, inertia, source, axis, attach, slots, 
     w('-->')
     w('<robot xmlns:xacro="http://ros.org/wiki/xacro">')
     w('')
-    lines.extend(emit_info(part, axis, attach, slots, frames))
+    lines.extend(emit_info(part, attach, slots, frames))
     w('')
     w(f'  <xacro:macro name="{part}"')
     w(f'               params="name parent xyz:=\'0 0 0\' rpy:=\'0 0 0\' collision:=true '
@@ -369,8 +368,10 @@ def emit_macro(part, visuals, collisions, inertia, source, axis, attach, slots, 
         if any(abs(v) > 1e-9 for v in vis['pose'][3:]):
             raise ConversionError(f'{part}: visual pose with a rotation is not supported; '
                                   'deliver the mesh in the part frame')
+        xyz = (f' xyz="{fmt_xyz(vis["pose"][:3])}"'
+               if any(abs(v) > 1e-9 for v in vis['pose'][:3]) else '')
         w(f'      <xacro:part_visual mesh="package://{PACKAGE}/models/{part}/{vis["uri"]}"'
-          f' xyz="{fmt_xyz(vis["pose"][:3])}"/>')
+          f'{xyz}/>')
     if collisions:
         w('      <xacro:if value="${collision}">')
         for col in collisions:
@@ -464,7 +465,8 @@ def main(argv=None):
     ap.add_argument('--mass', type=float, help='known mass in kg; the estimate is scaled to it')
     ap.add_argument('--density', type=float, default=DEFAULT_DENSITY,
                     help='density for the estimate, kg/m^3 (default %(default)s)')
-    ap.add_argument('--axis', default='1 0 0', help='spin axis default for the macro')
+    ap.add_argument('--axis', default='1 0 0',
+                    help='spin axis in the part frame, the axis default of the macro')
     ap.add_argument('--attach', default='0 0 0',
                     help='attach point in the part frame, "x y z"')
     ap.add_argument('--slot', action='append',

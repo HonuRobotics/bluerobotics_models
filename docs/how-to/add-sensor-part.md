@@ -8,12 +8,14 @@ sense. The split keeps the description Gazebo free:
    declares `beam` at its transducer face). It becomes the URDF link
    `<name>_beam`, carried in TF, and survives Gazebo's lumping as a frame.
 2. **`blueboat_gazebo` knows the part type.** In `model.sdf.xacro`, the
-   `gz_part` emitter has one branch per sensor type. Add one for yours: a
-   `<sensor>` block on a massless link posed `relative_to="${name}_<frame>"`,
-   with `<frame_id>` set to that frame and the topic from `topic_base`
-   (the Ping branch is the template). The emitter runs inside the same
-   assembly resolution that built the URDF, so it fires for every instance
-   of the type, defaults and free placements alike.
+   `gz_part` emitter has one branch per sensor type (and one for any part
+   with a `drive` table, the propellers). Add one for yours: a `<sensor>`
+   block on a massless link posed `relative_to="${name}_<frame>"`, with
+   `<frame_id>` set to that frame and the topic from `topic_base` (the Ping
+   branch is the template; `info` is the part's `part_info` if you need its
+   frames or other metadata). The emitter runs inside the same assembly
+   resolution that built the URDF, so it fires for every instance of the
+   type, defaults and free placements alike.
 3. **The bridge knows the topics.** In `scripts/generate_bridge_config.py`,
    add the type to `PART_TOPICS`: one `(suffix, ros type, gz type, direction)`
    per topic the sensor produces. The generator reads the fitted instances

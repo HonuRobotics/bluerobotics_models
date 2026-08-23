@@ -20,6 +20,7 @@ import tempfile
 import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import get_package_share_directory
+from bluerobotics_parts import assembly
 import pytest
 import yaml
 
@@ -191,12 +192,59 @@ def test_slot_without_default_fills_on_request():
     assert manifest(root)['payload'] == 'blueboat_payload_bracket'
 
 
-def test_slot_entry_on_another_part():
-    """An entry can address a slot of a non base instance with on:."""
+def test_slot_entry_of_another_part():
+    """An entry can address a slot of a non base instance with of:."""
     root = generate_urdf(make_config(
-        [{'slot': 'ping', 'on': 'ping_mount', 'type': 'ping_singlebeam', 'name': 'sonar'}]))
+        [{'slot': 'ping', 'of': 'ping_mount', 'type': 'ping_singlebeam', 'name': 'sonar'}]))
     assert manifest(root)['sonar'] == 'ping_singlebeam'
     assert 'ping' not in manifest(root)
+
+
+def test_bare_on_key_is_rejected():
+    """A bare on: key is the YAML boolean true; the expansion says so."""
+    # Flow style as a user types it: PyYAML reads the key as True.
+    text = make_config() + '\nparts:\n  - {slot: ping, on: ping_mount, type: none}\n'
+    text = text.replace('parts: []\n', '', 1)
+    expect_failure(text, "bare 'on:' key")
+
+
+def test_manifest_records_every_slot_visited():
+    """<assembly_slot of name/> covers the parts' own slots and the ad hoc ones."""
+    root = generate_urdf(make_config(
+        slots=[{'of': 'ping_mount', 'name': 'side', 'xyz': '0 0.05 0'}]))
+    visited = assembly.slots(root)
+    assert {('base_link', 'motor_port'), ('base_link', 'ping_mount'),
+            ('ping_mount', 'ping'), ('ping_mount', 'side')} <= visited
+
+
+def test_check_catches_what_the_expansion_cannot():
+    """Entries matching nothing deeper down, and duplicate names, fail the check."""
+    # A typo in a slot of a non base instance, and a non existent instance:
+    # the expansion cannot see them (it only validates the base's slots).
+    cfg = yaml.safe_load(make_config(
+        [{'slot': 'pingg', 'of': 'ping_mount', 'type': 'none'},
+         {'slot': 'ping', 'of': 'ping_mountt', 'type': 'none'}],
+        slots=[{'of': 'nowhere', 'name': 'x', 'xyz': '0 0 0'}]))
+    root = generate_urdf(yaml.safe_dump(cfg))
+    found = assembly.problems(cfg, root)
+    assert any("'pingg' of 'ping_mount'" in f and "['ping']" in f for f in found), found
+    assert any("'ping' of 'ping_mountt'" in f and 'no instance' in f for f in found), found
+    assert any("ad hoc slot 'x' of 'nowhere'" in f for f in found), found
+    # The same part fitted twice without a name: the bracket's slot fills
+    # with `ping` on both, which the URDF cannot hold.
+    cfg = yaml.safe_load(make_config(
+        [{'type': 'blueboat_ping_singlebeam_mount', 'name': 'mount2', 'xyz': '0 0.26 0.01'}]))
+    found = assembly.problems(cfg, generate_urdf(yaml.safe_dump(cfg)))
+    assert any("['ping']" in f and 'more than once' in f for f in found), found
+    # Unknown keys are typos.
+    cfg = yaml.safe_load(make_config([{'slot': 'flag', 'type': 'none', 'bogus': 1}]))
+    found = assembly.problems(cfg, generate_urdf(yaml.safe_dump(cfg)))
+    assert any("['bogus']" in f for f in found), found
+    # And a clean config has nothing to report.
+    cfg = yaml.safe_load(make_config(
+        [{'slot': 'ping', 'of': 'ping_mount', 'type': 'ping_singlebeam', 'name': 'sonar',
+          'topic': 'sonar'}]))
+    assert assembly.problems(cfg, generate_urdf(yaml.safe_dump(cfg))) == []
 
 
 def test_slot_rejects_parts_that_do_not_fit():
@@ -228,7 +276,7 @@ def test_ad_hoc_slot_from_config():
     """The config can declare a slot on an instance and fill it."""
     root = generate_urdf(make_config(
         parts=[{'slot': 'camera', 'type': 'surveyor_multibeam', 'name': 'mb'}],
-        slots=[{'on': 'base_link', 'name': 'camera', 'xyz': '0.45 0 0.2',
+        slots=[{'of': 'base_link', 'name': 'camera', 'xyz': '0.45 0 0.2',
                 'accepts': ['surveyor_multibeam']}]))
     assert 'base_link_camera' in link_names(root)
     assert joints_by_child(root)['mb'][0] == 'base_link_camera'
