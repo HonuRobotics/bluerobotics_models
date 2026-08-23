@@ -245,7 +245,7 @@ def combine(bodies):
     """Combine (mass, com, tensor about own com) bodies into one."""
     mass = sum(b[0] for b in bodies)
     com = [sum(b[0] * b[1][i] for b in bodies) / mass for i in range(3)]
-    tot = {k: 0.0 for k in ('ixx', 'ixy', 'ixz', 'iyy', 'iyz', 'izz')}
+    tot = dict.fromkeys(('ixx', 'ixy', 'ixz', 'iyy', 'iyz', 'izz'), 0.0)
     for m, c, t in bodies:
         dx, dy, dz = (c[i] - com[i] for i in range(3))
         tot['ixx'] += t['ixx'] + m * (dy * dy + dz * dz)
