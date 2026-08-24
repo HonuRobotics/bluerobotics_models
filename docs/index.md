@@ -16,6 +16,7 @@ reconfigured from one YAML file when you want the exact loadout.
 ## Quick start
 
 ```bash
+mkdir -p ~/ws/src
 cd ~/ws/src && git clone https://github.com/HonuRobotics/bluerobotics_models.git
 cd ~/ws && rosdep update && rosdep install --from-paths src --ignore-packages-from-source --default-yes
 colcon build --merge-install

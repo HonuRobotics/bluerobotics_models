@@ -5,6 +5,7 @@
 Into a colcon workspace:
 
 ```bash
+mkdir -p ~/ws/src
 cd ~/ws/src
 git clone https://github.com/HonuRobotics/bluerobotics_models.git
 cd ~/ws

@@ -11,6 +11,18 @@ check that runs after the expansion) lists entries or ad hoc slots that
 matched nothing, duplicate instance names and unknown keys. Fix the config;
 see [Configuring the BlueBoat](../vehicles/blueboat/configuration.md).
 
+## The boat appears rolled 90 degrees in RViz, parts detached
+
+The part meshes are Y up glTF, as the specification requires. RViz converts
+glTF to Z up on load since Lyrical (`rviz_rendering` gained the conversion
+after Kilted); older RViz draws the mesh data as is, which shows the hulls
+stacked vertically and the flag away from the boat, while TF and collisions
+stay correct. Use RViz from ROS Lyrical or newer, or pass
+`gltf_up:=z` to `display.launch.xml` (or to `xacro`) to pre rotate the
+visuals for an older RViz. The same picture on Lyrical means a stale
+install: rebuild `bluerobotics_parts` after pulling (`rm -rf build install`
+if in doubt) so the converted meshes replace the old copies.
+
 ## The boat moves sideways instead of forward
 
 Thrust commands latch, and sequential one shot publications stagger thruster
