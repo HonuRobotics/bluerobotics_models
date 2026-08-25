@@ -1,23 +1,61 @@
 # Troubleshooting / FAQ
 
-## The vehicle moves sideways instead of forward
+## xacro fails with "ASSEMBLY ERROR: ..."
 
-Thrust commands latch, and sequential one-shot publications stagger thruster
+The loadout config asked for something the parts cannot do: a type the slot
+does not accept (the message lists what it accepts), an unknown slot on the
+base, a slot configured twice, a bare `on:` key (YAML reads it as `true`;
+the instance key is `of:`). "unknown macro name: xacro:<type>" means a
+mistyped part type. The same banner from the build or the launch (the config
+check that runs after the expansion) lists entries or ad hoc slots that
+matched nothing, duplicate instance names and unknown keys. Fix the config;
+see [Configuring the BlueBoat](../vehicles/blueboat/configuration.md).
+
+## The boat appears rolled 90 degrees in RViz, parts detached
+
+The part meshes are Y up glTF, as the specification requires. RViz converts
+glTF to Z up on load since Lyrical (`rviz_rendering` gained the conversion
+after Kilted); older RViz draws the mesh data as is, which shows the hulls
+stacked vertically and the flag away from the boat, while TF and collisions
+stay correct. Use RViz from ROS Lyrical or newer, or pass
+`gltf_up:=z` to `display.launch.xml` (or to `xacro`) to pre rotate the
+visuals for an older RViz. The same picture on Lyrical means a stale
+install: rebuild `bluerobotics_parts` after pulling (`rm -rf build install`
+if in doubt) so the converted meshes replace the old copies.
+
+## The boat moves sideways instead of forward
+
+Thrust commands latch, and sequential one shot publications stagger thruster
 onset, applying a momentary unbalanced wrench that yaws the vehicle before it
-translates. Command all thrusters **in parallel** — see
-[Driving](../vehicles/bluerov2/driving.md).
+translates. Command both thrusters **in parallel**; see
+[Driving](../vehicles/blueboat/driving.md).
 
-## "Cannot locate rosdep definition"
-
-Run `rosdep update` first — fresh containers ship without the database.
-
-## No camera images
+## No ranges on /blueboat/ping/range
 
 Rendered sensors need a usable render path. On desktops, run inside an X
 session; headless machines need working EGL (CI installs
-`libegl1 libgl1 libgl1-mesa-dri libglvnd0`).
+`libegl1 libgl1 libgl1-mesa-dri libglvnd0`). The bridge is lazy: ranges flow
+once something subscribes on the ROS side.
+
+## A part looks rolled 90 degrees in RViz but fine in Gazebo
+
+Its `.glb` was exported Z-up. glTF is Y-up by specification; RViz converts
+on load and Gazebo does not. Convert the file once with
+`ros2 run bluerobotics_parts gltf_to_yup.py <part>.visual.glb` (see
+[Parts](../design/parts.md)).
+
+## "Cannot locate rosdep definition"
+
+Run `rosdep update` first; fresh containers ship without the database.
 
 ## Two simulations interfere with each other
 
 Isolate them: set a unique `GZ_PARTITION` per Gazebo instance and a unique
 `ROS_DOMAIN_ID` per ROS graph.
+
+## robot_state_publisher warns about the root link inertia
+
+Expected and harmless: KDL only publishes TF and ignores inertia; Gazebo
+reads it through sdformat. Do not add a dummy root link: Gazebo's URDF
+conversion would lump `base_link` into it and break every plugin that
+references `base_link`.

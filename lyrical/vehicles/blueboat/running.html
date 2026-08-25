@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Running the BlueBoat simulation &mdash; BlueRobotics Models lyrical documentation</title>
+  <title>Running the BlueBoat &mdash; BlueRobotics Models lyrical documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/honu.css?v=44af46ee" />
@@ -48,11 +48,46 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started/index.html">Getting started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../getting-started/requirements.html">Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../getting-started/installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../getting-started/installation.html">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../getting-started/installation.html#from-source">From source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../getting-started/installation.html#from-ros-packages-debs">From ROS packages (debs)</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../getting-started/first-simulation.html">First simulation</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Vehicles</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">BlueBoat</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html#the-default-vehicle">The default vehicle</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Running the BlueBoat</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#full-ros-bring-up">Full ROS bring up</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#gazebo-only-no-ros">Gazebo only, no ROS</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#rviz-only-no-gazebo">RViz only, no Gazebo</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#in-your-own-world">In your own world</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="driving.html">Driving the BlueBoat</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="driving.html#ros-topics">ROS topics</a></li>
+<li class="toctree-l5"><a class="reference internal" href="driving.html#gazebo-transport-no-ros">Gazebo transport (no ROS)</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="sensors.html">BlueBoat sensors</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="sensors.html#ping2-echosounder-fitted-by-default">Ping2 echosounder (fitted by default)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="sensors.html#side-scan-and-multibeam-sonars">Side scan and multibeam sonars</a></li>
+<li class="toctree-l5"><a class="reference internal" href="sensors.html#adding-a-sensor-part">Adding a sensor part</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="configuration.html">Configuring the BlueBoat</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="configuration.html#where-the-config-lives-and-how-it-is-applied">Where the config lives and how it is applied</a></li>
+<li class="toctree-l5"><a class="reference internal" href="configuration.html#the-slots">The slots</a></li>
+<li class="toctree-l5"><a class="reference internal" href="configuration.html#changing-the-loadout">Changing the loadout</a></li>
+<li class="toctree-l5"><a class="reference internal" href="configuration.html#checking-the-result">Checking the result</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../bluerov2/index.html">BlueROV2</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../bluerov2/running.html">Running the BlueROV2 simulation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../bluerov2/driving.html">Driving the BlueROV2</a><ul>
@@ -64,60 +99,128 @@
 <li class="toctree-l3"><a class="reference internal" href="../bluerov2/configuration.html">BlueROV2 configuration</a></li>
 </ul>
 </li>
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">BlueBoat</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Running the BlueBoat simulation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="driving.html">Driving the BlueBoat</a></li>
-<li class="toctree-l3"><a class="reference internal" href="sensors.html">BlueBoat sensors</a></li>
-<li class="toctree-l3"><a class="reference internal" href="configuration.html">BlueBoat configuration</a></li>
-</ul>
-</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../how-to/index.html">How-to guides</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../how-to/own-world.html">Use a vehicle in your own world</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../how-to/accessories.html">Change the accessory loadout</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../how-to/namespaces.html">Rename topics and namespaces</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../how-to/rviz.html">Visualize in RViz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../how-to/loadout.html">Change the loadout</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/loadout.html#fit-the-other-propellers">Fit the other propellers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/loadout.html#leave-the-ping2-kit-off">Leave the Ping2 kit off</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/loadout.html#add-the-antenna-mast-or-the-payload-bracket">Add the antenna mast or the payload bracket</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/loadout.html#rename-the-ping-topics">Rename the Ping topics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/loadout.html#add-a-part-somewhere-specific">Add a part somewhere specific</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/loadout.html#declare-your-own-mount-point">Declare your own mount point</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/loadout.html#see-what-you-got">See what you got</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../how-to/installed-vehicle.html">Configure an installed vehicle</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/installed-vehicle.html#the-launch-does-it-for-you">The launch does it for you</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/installed-vehicle.html#generate-the-artifacts-yourself">Generate the artifacts yourself</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/installed-vehicle.html#overlay-workspace">Overlay workspace</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../how-to/add-part.html">Add a part</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/add-part.html#from-a-modeler-s-sdf-delivery">From a modeler’s SDF delivery</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/add-part.html#by-hand">By hand</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/add-part.html#where-a-part-goes">Where a part goes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../how-to/add-sensor-part.html">Add a sensor part</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../how-to/own-world.html">Run in your own world</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/own-world.html#include-the-default-model">Include the default model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/own-world.html#spawn-at-runtime">Spawn at runtime</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/own-world.html#use-the-stock-launch-with-your-world">Use the stock launch with your world</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/own-world.html#with-a-custom-loadout">With a custom loadout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../how-to/rviz.html">View in RViz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../how-to/namespaces.html">Topic namespaces and several simulations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../how-to/faq.html">Troubleshooting / FAQ</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../how-to/faq.html#the-vehicle-moves-sideways-instead-of-forward">The vehicle moves sideways instead of forward</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/faq.html#xacro-fails-with-assembly-error">xacro fails with “ASSEMBLY ERROR: …”</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/faq.html#the-boat-appears-rolled-90-degrees-in-rviz-parts-detached">The boat appears rolled 90 degrees in RViz, parts detached</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/faq.html#the-boat-moves-sideways-instead-of-forward">The boat moves sideways instead of forward</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/faq.html#no-ranges-on-blueboat-ping-range">No ranges on /blueboat/ping/range</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/faq.html#a-part-looks-rolled-90-degrees-in-rviz-but-fine-in-gazebo">A part looks rolled 90 degrees in RViz but fine in Gazebo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/faq.html#cannot-locate-rosdep-definition">“Cannot locate rosdep definition”</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../how-to/faq.html#no-camera-images">No camera images</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/faq.html#two-simulations-interfere-with-each-other">Two simulations interfere with each other</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/faq.html#robot-state-publisher-warns-about-the-root-link-inertia">robot_state_publisher warns about the root link inertia</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/index.html">Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../reference/topics.html">Topics and interfaces</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../reference/frames.html">Frames and conventions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../reference/config-schema.html">Configuration schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/config-schema.html">Config schema</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/config-schema.html#parts-entries"><code class="docutils literal notranslate"><span class="pre">parts</span></code> entries</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/parts-catalog.html">Parts catalog and slots</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/parts-catalog.html#catalog">Catalog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/parts-catalog.html#slots">Slots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/parts-catalog.html#frames">Frames</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/topics.html">Topics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/topics.html#ros">ROS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/topics.html#gazebo-transport">Gazebo transport</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/frames.html">Frames</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../reference/worlds.html">Worlds</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../reference/packages.html">Package layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/packages.html">Package layout</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/packages.html#generated-artifacts">Generated artifacts</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../design/index.html">Design</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../design/architecture.html">Architecture</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../design/architecture.html#assemblies">Assemblies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../design/architecture.html#the-pieces">The pieces</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../design/architecture.html#why-it-works-this-way">Why it works this way</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../design/parts.html">Parts library</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../design/parts.html">Parts</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../design/parts.html#the-part-contract">The part contract</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../design/parts.html#the-import-script">The import script</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../design/parts.html#rules-for-parts">Rules for parts</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../design/parts.html#reviewing-new-parts">Reviewing new parts</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../design/parts.html#parts-gallery">Parts gallery</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../design/parts.html#parts-standalone">Parts standalone</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../design/parts.html#what-the-modeler-delivers">What the modeler delivers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../design/parts.html#bootstrapping-from-a-delivery">Bootstrapping from a delivery</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../design/parts.html#reviewing-parts">Reviewing parts</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../design/slots.html">Slots and assembly</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../design/slots.html#resolution">Resolution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../design/slots.html#what-a-slot-is-in-the-urdf">What a slot is in the URDF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../design/slots.html#why-defaults-live-in-the-parts">Why defaults live in the parts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../design/slots.html#where-to-add-a-slot">Where to add a slot</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../design/buoyancy.html">Buoyancy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../design/buoyancy.html">Buoyancy: all up round mass and displacement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../design/buoyancy.html#usv-hull-displacement">USV: hull displacement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../design/buoyancy.html#uuv-declared-trim-bluerov2">UUV: declared trim (BlueROV2)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../design/buoyancy.html#constraints">Constraints</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../design/gazebo-composition.html">Gazebo composition</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../design/gazebo-composition.html#merge-include-and-lumping">Merge include and lumping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../design/gazebo-composition.html#sensors-and-thrusters-follow-their-part">Sensors and thrusters follow their part</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../design/gazebo-composition.html#the-bridge-agrees-by-construction">The bridge agrees by construction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../design/gazebo-composition.html#build-time-and-launch-time">Build time and launch time</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../design/gazebo-composition.html#what-is-in-the-composed-model">What is in the composed model</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../project/index.html">Project</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../project/contributing.html">Contributing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../project/releases.html">Releases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../project/contributing.html">Contributing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../project/contributing.html#build-and-test">Build and test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../project/contributing.html#pre-commit-hooks">Pre-commit hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../project/contributing.html#conventions">Conventions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../project/contributing.html#documentation">Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../project/releases.html">Releasing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../project/releases.html#one-time-prerequisites">One time prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../project/releases.html#per-release">Per release</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../project/releases.html#notes">Notes</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -138,7 +241,7 @@
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Vehicles</a></li>
           <li class="breadcrumb-item"><a href="index.html">BlueBoat</a></li>
-      <li class="breadcrumb-item active">Running the BlueBoat simulation</li>
+      <li class="breadcrumb-item active">Running the BlueBoat</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/vehicles/blueboat/running.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -148,12 +251,74 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="running-the-blueboat-simulation">
-<h1>Running the BlueBoat simulation<a class="headerlink" href="#running-the-blueboat-simulation" title="Link to this heading"></a></h1>
-<div class="note admonition">
-<p class="admonition-title">Draft</p>
-<p>This page is being migrated from the package READMEs.</p>
+  <section id="running-the-blueboat">
+<h1>Running the BlueBoat<a class="headerlink" href="#running-the-blueboat" title="Link to this heading"></a></h1>
+<section id="full-ros-bring-up">
+<h2>Full ROS bring up<a class="headerlink" href="#full-ros-bring-up" title="Link to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>blueboat_gazebo<span class="w"> </span>sim.launch.xml
+</pre></div>
 </div>
+<p>Starts the Gazebo server (composed in one container with the ros_gz bridge
+and <code class="docutils literal notranslate"><span class="pre">robot_state_publisher</span></code>), the Gazebo GUI, and spawns the boat into the
+vehicle free water world. The simulation starts running.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Argument</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">config_file</span></code></p></td>
+<td><p>the package default</p></td>
+<td><p>loadout YAML; every artifact is regenerated from it at launch</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">world</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">blueboat_water.sdf</span></code></p></td>
+<td><p>a vehicle free world SDF to spawn into</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gui</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">true</span></code></p></td>
+<td><p>start the Gazebo GUI</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">use_composition</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">true</span></code></p></td>
+<td><p>server, bridge and state publisher in one process</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">blueboat</span></code></p></td>
+<td><p>model name to spawn as (the world’s buoyancy and the bridge expect it)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">z</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.05</span></code></p></td>
+<td><p>spawn height; the default sits at the waterline</p></td>
+</tr>
+</tbody>
+</table>
+<p>A <code class="docutils literal notranslate"><span class="pre">[kdl_parser]</span> <span class="pre">root</span> <span class="pre">link</span> <span class="pre">...</span> <span class="pre">inertia</span></code> warning from <code class="docutils literal notranslate"><span class="pre">robot_state_publisher</span></code>
+is expected and harmless.</p>
+</section>
+<section id="gazebo-only-no-ros">
+<h2>Gazebo only, no ROS<a class="headerlink" href="#gazebo-only-no-ros" title="Link to this heading"></a></h2>
+<p>The playground world includes the default composed model (started this way
+the world comes up paused; press play):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gz<span class="w"> </span>sim<span class="w"> </span><span class="k">$(</span>ros2<span class="w"> </span>pkg<span class="w"> </span>prefix<span class="w"> </span>--share<span class="w"> </span>blueboat_gazebo<span class="k">)</span>/worlds/blueboat_playground.sdf
+</pre></div>
+</div>
+</section>
+<section id="rviz-only-no-gazebo">
+<h2>RViz only, no Gazebo<a class="headerlink" href="#rviz-only-no-gazebo" title="Link to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>blueboat_description<span class="w"> </span>display.launch.xml<span class="w">          </span><span class="c1"># config_file:= works here too</span>
+</pre></div>
+</div>
+<p>Shows the model and its frames (parts, slots, the Ping <code class="docutils literal notranslate"><span class="pre">beam</span></code>), with sliders
+to spin the propellers.</p>
+</section>
+<section id="in-your-own-world">
+<h2>In your own world<a class="headerlink" href="#in-your-own-world" title="Link to this heading"></a></h2>
+<p>Include <code class="docutils literal notranslate"><span class="pre">model://blueboat</span></code> or spawn the generated model; see
+<a class="reference internal" href="../../how-to/own-world.html"><span class="std std-doc">Run in your own world</span></a>.</p>
+</section>
 </section>
 
 

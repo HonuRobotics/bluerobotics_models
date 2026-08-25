@@ -7,5 +7,7 @@ How the models are built and why.
 
 architecture
 parts
+slots
 buoyancy
+gazebo-composition
 ```

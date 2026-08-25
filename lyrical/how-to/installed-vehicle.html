@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>How-to guides &mdash; BlueRobotics Models lyrical documentation</title>
+  <title>Configure an installed vehicle &mdash; BlueRobotics Models lyrical documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/honu.css?v=44af46ee" />
@@ -21,8 +21,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Change the loadout" href="loadout.html" />
-    <link rel="prev" title="BlueROV2 configuration" href="../vehicles/bluerov2/configuration.html" /> 
+    <link rel="next" title="Add a part" href="add-part.html" />
+    <link rel="prev" title="Change the loadout" href="loadout.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -101,7 +101,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">How-to guides</a><ul>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">How-to guides</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="loadout.html">Change the loadout</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="loadout.html#fit-the-other-propellers">Fit the other propellers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="loadout.html#leave-the-ping2-kit-off">Leave the Ping2 kit off</a></li>
@@ -112,10 +112,10 @@
 <li class="toctree-l3"><a class="reference internal" href="loadout.html#see-what-you-got">See what you got</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="installed-vehicle.html">Configure an installed vehicle</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="installed-vehicle.html#the-launch-does-it-for-you">The launch does it for you</a></li>
-<li class="toctree-l3"><a class="reference internal" href="installed-vehicle.html#generate-the-artifacts-yourself">Generate the artifacts yourself</a></li>
-<li class="toctree-l3"><a class="reference internal" href="installed-vehicle.html#overlay-workspace">Overlay workspace</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Configure an installed vehicle</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-launch-does-it-for-you">The launch does it for you</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generate-the-artifacts-yourself">Generate the artifacts yourself</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#overlay-workspace">Overlay workspace</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="add-part.html">Add a part</a><ul>
@@ -239,9 +239,10 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">How-to guides</li>
+          <li class="breadcrumb-item"><a href="index.html">How-to guides</a></li>
+      <li class="breadcrumb-item active">Configure an installed vehicle</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/how-to/index.md" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/how-to/installed-vehicle.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -249,29 +250,57 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="how-to-guides">
-<h1>How-to guides<a class="headerlink" href="#how-to-guides" title="Link to this heading"></a></h1>
-<p>Task oriented guides for configuring, extending and integrating the vehicles.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="loadout.html">Change the loadout</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installed-vehicle.html">Configure an installed vehicle</a></li>
-<li class="toctree-l1"><a class="reference internal" href="add-part.html">Add a part</a></li>
-<li class="toctree-l1"><a class="reference internal" href="add-sensor-part.html">Add a sensor part</a></li>
-<li class="toctree-l1"><a class="reference internal" href="own-world.html">Run in your own world</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rviz.html">View in RViz</a></li>
-<li class="toctree-l1"><a class="reference internal" href="namespaces.html">Topic namespaces and several simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="faq.html">Troubleshooting / FAQ</a></li>
-</ul>
+  <section id="configure-an-installed-vehicle">
+<h1>Configure an installed vehicle<a class="headerlink" href="#configure-an-installed-vehicle" title="Link to this heading"></a></h1>
+<p>From a binary (deb) install nothing under <code class="docutils literal notranslate"><span class="pre">/opt/ros</span></code> should be edited, and
+there is no workspace to rebuild. The vehicle is still fully configurable:
+every artifact (URDF, composed Gazebo model, ros_gz bridge config) is
+generated from a config file on demand, by the same tools the build uses.</p>
+<section id="the-launch-does-it-for-you">
+<h2>The launch does it for you<a class="headerlink" href="#the-launch-does-it-for-you" title="Link to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>blueboat_gazebo<span class="w"> </span>sim.launch.xml<span class="w"> </span>config_file:<span class="o">=</span>/path/my_loadout.yaml
+ros2<span class="w"> </span>launch<span class="w"> </span>blueboat_description<span class="w"> </span>display.launch.xml<span class="w"> </span>config_file:<span class="o">=</span>/path/my_loadout.yaml
+</pre></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">sim.launch.xml</span></code> runs <code class="docutils literal notranslate"><span class="pre">configure_vehicle.py</span></code> into a per loadout directory under <code class="docutils literal notranslate"><span class="pre">$ROS_HOME</span></code> at
+start, spawns that model and starts the bridge on that config. The default
+(no argument) is the baked default vehicle.</p>
+</section>
+<section id="generate-the-artifacts-yourself">
+<h2>Generate the artifacts yourself<a class="headerlink" href="#generate-the-artifacts-yourself" title="Link to this heading"></a></h2>
+<p>For anything beyond the stock launch (your own world and launch files, a
+model to hand to somebody else):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>run<span class="w"> </span>blueboat_gazebo<span class="w"> </span>configure_vehicle.py<span class="w"> </span>--config<span class="w"> </span>my_loadout.yaml<span class="w"> </span>--out-dir<span class="w"> </span>~/my_models/blueboat
+</pre></div>
+</div>
+<p>writes <code class="docutils literal notranslate"><span class="pre">blueboat.urdf</span></code>, <code class="docutils literal notranslate"><span class="pre">blueboat.gazebo.urdf</span></code> (the copy the model merges,
+glTF visuals pre-rotated for Gazebo), <code class="docutils literal notranslate"><span class="pre">model.sdf</span></code>, <code class="docutils literal notranslate"><span class="pre">model.config</span></code> and
+<code class="docutils literal notranslate"><span class="pre">ros_gz_bridge.yaml</span></code>.
+The directory is a Gazebo model: with <code class="docutils literal notranslate"><span class="pre">~/my_models</span></code> prepended to
+<code class="docutils literal notranslate"><span class="pre">GZ_SIM_RESOURCE_PATH</span></code> it is <code class="docutils literal notranslate"><span class="pre">model://blueboat</span></code>, shadowing the installed
+default, so a world can <code class="docutils literal notranslate"><span class="pre">&lt;include&gt;</span></code> it, or spawn it with
+<code class="docutils literal notranslate"><span class="pre">ros2</span> <span class="pre">run</span> <span class="pre">ros_gz_sim</span> <span class="pre">create</span> <span class="pre">-world</span> <span class="pre">&lt;world&gt;</span> <span class="pre">-file</span> <span class="pre">~/my_models/blueboat/model.sdf</span> <span class="pre">-name</span> <span class="pre">blueboat</span> <span class="pre">-z</span> <span class="pre">0.05</span></code>.
+Start the bridge on the generated config
+(<code class="docutils literal notranslate"><span class="pre">ros2</span> <span class="pre">run</span> <span class="pre">ros_gz_bridge</span> <span class="pre">parameter_bridge</span> <span class="pre">--ros-args</span> <span class="pre">-p</span> <span class="pre">config_file:=$HOME/my_models/blueboat/ros_gz_bridge.yaml</span></code>)
+and <code class="docutils literal notranslate"><span class="pre">robot_state_publisher</span></code> on the generated URDF. The three files come from
+one resolution of the config, so they agree with each other.</p>
+</section>
+<section id="overlay-workspace">
+<h2>Overlay workspace<a class="headerlink" href="#overlay-workspace" title="Link to this heading"></a></h2>
+<p>The third option, for anything long lived: an overlay workspace that builds
+only <code class="docutils literal notranslate"><span class="pre">blueboat_description</span></code> with your edited <code class="docutils literal notranslate"><span class="pre">config/blueboat.yaml</span></code> on top
+of the installed packages. The build regenerates the URDF, the composed model
+and the bridge config consistently, and <code class="docutils literal notranslate"><span class="pre">model://blueboat</span></code> resolves to
+your overlay.</p>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../vehicles/bluerov2/configuration.html" class="btn btn-neutral float-left" title="BlueROV2 configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="loadout.html" class="btn btn-neutral float-right" title="Change the loadout" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="loadout.html" class="btn btn-neutral float-left" title="Change the loadout" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="add-part.html" class="btn btn-neutral float-right" title="Add a part" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>How-to guides &mdash; BlueRobotics Models lyrical documentation</title>
+  <title>Add a sensor part &mdash; BlueRobotics Models lyrical documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/honu.css?v=44af46ee" />
@@ -21,8 +21,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Change the loadout" href="loadout.html" />
-    <link rel="prev" title="BlueROV2 configuration" href="../vehicles/bluerov2/configuration.html" /> 
+    <link rel="next" title="Run in your own world" href="own-world.html" />
+    <link rel="prev" title="Add a part" href="add-part.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -101,7 +101,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">How-to guides</a><ul>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">How-to guides</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="loadout.html">Change the loadout</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="loadout.html#fit-the-other-propellers">Fit the other propellers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="loadout.html#leave-the-ping2-kit-off">Leave the Ping2 kit off</a></li>
@@ -124,7 +124,7 @@
 <li class="toctree-l3"><a class="reference internal" href="add-part.html#where-a-part-goes">Where a part goes</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="add-sensor-part.html">Add a sensor part</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Add a sensor part</a></li>
 <li class="toctree-l2"><a class="reference internal" href="own-world.html">Run in your own world</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="own-world.html#include-the-default-model">Include the default model</a></li>
 <li class="toctree-l3"><a class="reference internal" href="own-world.html#spawn-at-runtime">Spawn at runtime</a></li>
@@ -239,9 +239,10 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">How-to guides</li>
+          <li class="breadcrumb-item"><a href="index.html">How-to guides</a></li>
+      <li class="breadcrumb-item active">Add a sensor part</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/how-to/index.md" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/how-to/add-sensor-part.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -249,29 +250,43 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="how-to-guides">
-<h1>How-to guides<a class="headerlink" href="#how-to-guides" title="Link to this heading"></a></h1>
-<p>Task oriented guides for configuring, extending and integrating the vehicles.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="loadout.html">Change the loadout</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installed-vehicle.html">Configure an installed vehicle</a></li>
-<li class="toctree-l1"><a class="reference internal" href="add-part.html">Add a part</a></li>
-<li class="toctree-l1"><a class="reference internal" href="add-sensor-part.html">Add a sensor part</a></li>
-<li class="toctree-l1"><a class="reference internal" href="own-world.html">Run in your own world</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rviz.html">View in RViz</a></li>
-<li class="toctree-l1"><a class="reference internal" href="namespaces.html">Topic namespaces and several simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="faq.html">Troubleshooting / FAQ</a></li>
-</ul>
-</div>
+  <section id="add-a-sensor-part">
+<h1>Add a sensor part<a class="headerlink" href="#add-a-sensor-part" title="Link to this heading"></a></h1>
+<p>A sensor is a part like any other, plus what the simulator needs to make it
+sense. The split keeps the description Gazebo free:</p>
+<ol class="arabic simple">
+<li><p><strong>The part declares its sensing frame.</strong> In <code class="docutils literal notranslate"><span class="pre">&lt;part&gt;_info</span></code>, a <code class="docutils literal notranslate"><span class="pre">frames</span></code>
+entry at the sensing origin, oriented as the sensor looks (the Ping
+declares <code class="docutils literal notranslate"><span class="pre">beam</span></code> at its transducer face). It becomes the URDF link
+<code class="docutils literal notranslate"><span class="pre">&lt;name&gt;_beam</span></code>, carried in TF, and survives Gazebo’s lumping as a frame.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">blueboat_gazebo</span></code> knows the part type.</strong> In <code class="docutils literal notranslate"><span class="pre">model.sdf.xacro</span></code>, the
+<code class="docutils literal notranslate"><span class="pre">gz_part</span></code> emitter has one branch per sensor type (and one for any part
+with a <code class="docutils literal notranslate"><span class="pre">drive</span></code> table, the propellers). Add one for yours: a <code class="docutils literal notranslate"><span class="pre">&lt;sensor&gt;</span></code>
+block on a massless link posed <code class="docutils literal notranslate"><span class="pre">relative_to=&quot;${name}_&lt;frame&gt;&quot;</span></code>, with
+<code class="docutils literal notranslate"><span class="pre">&lt;frame_id&gt;</span></code> set to that frame and the topic from <code class="docutils literal notranslate"><span class="pre">topic_base</span></code> (the Ping
+branch is the template; <code class="docutils literal notranslate"><span class="pre">info</span></code> is the part’s <code class="docutils literal notranslate"><span class="pre">part_info</span></code> if you need its
+frames or other metadata). The emitter runs inside the same assembly
+resolution that built the URDF, so it fires for every instance of the
+type, defaults and free placements alike.</p></li>
+<li><p><strong>The bridge knows the topics.</strong> In <code class="docutils literal notranslate"><span class="pre">scripts/generate_bridge_config.py</span></code>,
+add the type to <code class="docutils literal notranslate"><span class="pre">PART_TOPICS</span></code>: one <code class="docutils literal notranslate"><span class="pre">(suffix,</span> <span class="pre">ros</span> <span class="pre">type,</span> <span class="pre">gz</span> <span class="pre">type,</span> <span class="pre">direction)</span></code>
+per topic the sensor produces. The generator reads the fitted instances
+from the URDF manifest, so again no per vehicle edit.</p></li>
+<li><p><strong>Fit it</strong>: in a slot (add the type to the slot’s <code class="docutils literal notranslate"><span class="pre">accepts</span></code>, make it the
+<code class="docutils literal notranslate"><span class="pre">default</span></code> if it should come standard) or free placed.</p></li>
+</ol>
+<p>The tests guard the contract: every sensor’s <code class="docutils literal notranslate"><span class="pre">frame_id</span></code> must be a TF frame,
+every sensor’s frame must survive URDF to SDF conversion, and the Gazebo
+topics must equal the bridge’s, for the default, a full catalog and a
+renamed instance config. Run <code class="docutils literal notranslate"><span class="pre">colcon</span> <span class="pre">test</span> <span class="pre">--packages-select</span> <span class="pre">blueboat_gazebo</span></code>.</p>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../vehicles/bluerov2/configuration.html" class="btn btn-neutral float-left" title="BlueROV2 configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="loadout.html" class="btn btn-neutral float-right" title="Change the loadout" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="add-part.html" class="btn btn-neutral float-left" title="Add a part" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="own-world.html" class="btn btn-neutral float-right" title="Run in your own world" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

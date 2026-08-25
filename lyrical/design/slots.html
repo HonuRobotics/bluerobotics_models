@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Architecture &mdash; BlueRobotics Models lyrical documentation</title>
+  <title>Slots and assembly &mdash; BlueRobotics Models lyrical documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/honu.css?v=44af46ee" />
@@ -377,8 +377,8 @@ window.runMermaid = runMermaid;</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Parts" href="parts.html" />
-    <link rel="prev" title="Design" href="index.html" /> 
+    <link rel="next" title="Buoyancy: all up round mass and displacement" href="buoyancy.html" />
+    <link rel="prev" title="Parts" href="parts.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -528,9 +528,9 @@ window.runMermaid = runMermaid;</script>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Design</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Architecture</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#the-pieces">The pieces</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#why-it-works-this-way">Why it works this way</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="architecture.html#the-pieces">The pieces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="architecture.html#why-it-works-this-way">Why it works this way</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="parts.html">Parts</a><ul>
@@ -540,11 +540,11 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l3"><a class="reference internal" href="parts.html#reviewing-parts">Reviewing parts</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="slots.html">Slots and assembly</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="slots.html#resolution">Resolution</a></li>
-<li class="toctree-l3"><a class="reference internal" href="slots.html#what-a-slot-is-in-the-urdf">What a slot is in the URDF</a></li>
-<li class="toctree-l3"><a class="reference internal" href="slots.html#why-defaults-live-in-the-parts">Why defaults live in the parts</a></li>
-<li class="toctree-l3"><a class="reference internal" href="slots.html#where-to-add-a-slot">Where to add a slot</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Slots and assembly</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#resolution">Resolution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-a-slot-is-in-the-urdf">What a slot is in the URDF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#why-defaults-live-in-the-parts">Why defaults live in the parts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#where-to-add-a-slot">Where to add a slot</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="buoyancy.html">Buoyancy: all up round mass and displacement</a><ul>
@@ -596,9 +596,9 @@ window.runMermaid = runMermaid;</script>
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Design</a></li>
-      <li class="breadcrumb-item active">Architecture</li>
+      <li class="breadcrumb-item active">Slots and assembly</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/design/architecture.md" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/design/slots.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -606,83 +606,94 @@ window.runMermaid = runMermaid;</script>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="architecture">
-<h1>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h1>
-<p>URDF is the source of truth. A <strong>part</strong> is a URDF xacro macro; a <strong>vehicle</strong>
-is an assembly of parts resolved from a config and the parts’ own slot
-tables; everything Gazebo needs is generated from that assembly. Nothing
-converts formats at runtime, and ROS and Gazebo see the same geometry.</p>
+  <section id="slots-and-assembly">
+<h1>Slots and assembly<a class="headerlink" href="#slots-and-assembly" title="Link to this heading"></a></h1>
+<p>Parts fit together without anyone knowing coordinates because parts declare
+<strong>slots</strong>: named mount points with the part types that fit and a default
+occupant. The BlueBoat chassis declares where its propellers, flag, mast,
+payload bracket and Ping2 kit go; the kit’s bracket declares where the Ping
+goes; the Ping declares the frame its beam leaves from.</p>
 <pre  class="mermaid">
-        flowchart LR
-  subgraph delivery [&quot;modeler delivery (bluerobotics_parts/models)&quot;]
-    GLB[&quot;part.visual.glb&quot;]
-    SDF[&quot;model.sdf (collision primitives)&quot;]
-  end
-  SDF -- &quot;sdf_to_part.py, once&quot; --&gt; PART[&quot;urdf/part.urdf.xacro&lt;br/&gt;the part: link, inertia, visual, collision,&lt;br/&gt;attach, slots, frames&quot;]
-  GLB -. &quot;referenced by the visual&quot; .-&gt; PART
-  CFG[&quot;config/blueboat.yaml&lt;br/&gt;base, overrides, hull displacement&quot;] --&gt; ASM[&quot;assembly.xacro&lt;br/&gt;slots fill with defaults,&lt;br/&gt;config overrides and adds&quot;]
-  PART --&gt; ASM
-  ASM --&gt; URDF[&quot;blueboat.urdf&lt;br/&gt;+ assembly_part manifest&quot;]
-  URDF --&gt; ROS[&quot;ROS: robot_state_publisher, RViz, TF&quot;]
-  URDF -- &quot;merge include&quot; --&gt; MODEL[&quot;model.sdf&lt;br/&gt;+ thrusters, hydrodynamics, sensors&quot;]
-  URDF -- &quot;manifest&quot; --&gt; BRIDGE[&quot;ros_gz_bridge.yaml&quot;]
-  MODEL --&gt; GZ[&quot;Gazebo&quot;]
-  BRIDGE --&gt; GZ
-    </pre><section id="the-pieces">
-<h2>The pieces<a class="headerlink" href="#the-pieces" title="Link to this heading"></a></h2>
+        flowchart TB
+  C[&quot;blueboat_chassis&quot;]
+  C --&gt;|&quot;slot motor_port&lt;br/&gt;accepts M200 ccw, T200 ccw&lt;br/&gt;default M200 ccw, continuous&quot;| MP[&quot;m200_weedless_prop_ccw&quot;]
+  C --&gt;|&quot;slot motor_stbd&lt;br/&gt;default M200 cw, continuous&quot;| MS[&quot;m200_weedless_prop_cw&quot;]
+  C --&gt;|&quot;slot flag&lt;br/&gt;default blueboat_flag&quot;| F[&quot;blueboat_flag&quot;]
+  C --&gt;|&quot;slot mast&lt;br/&gt;accepts antenna mast&lt;br/&gt;default none&quot;| M((&quot;empty&quot;))
+  C --&gt;|&quot;slot payload&lt;br/&gt;accepts payload bracket&lt;br/&gt;default none&quot;| P((&quot;empty&quot;))
+  C --&gt;|&quot;slot ping_mount&lt;br/&gt;accepts the Ping2 bracket&lt;br/&gt;default the bracket&quot;| B[&quot;blueboat_ping_singlebeam_mount&quot;]
+  B --&gt;|&quot;slot ping&lt;br/&gt;accepts ping_singlebeam&lt;br/&gt;default ping_singlebeam&quot;| PG[&quot;ping_singlebeam&quot;]
+  PG -. &quot;frame beam&quot; .-&gt; BEAM[/&quot;transducer face:&lt;br/&gt;the Gazebo sensor goes here&quot;/]
+    </pre><section id="resolution">
+<h2>Resolution<a class="headerlink" href="#resolution" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">bluerobotics_parts/urdf/assembly.xacro</span></code> turns a config into a vehicle:</p>
+<pre  class="mermaid">
+        flowchart TD
+  A[&quot;instantiate the base part&quot;] --&gt; B[&quot;for each slot of the instance&lt;br/&gt;(its own, plus ad hoc slots from the config)&quot;]
+  B --&gt; C{&quot;config entry&lt;br/&gt;for this slot?&quot;}
+  C -- &quot;none&quot; --&gt; D[&quot;fit the slot's default&lt;br/&gt;(nothing if default is none)&quot;]
+  C -- &quot;type: none&quot; --&gt; E[&quot;leave it empty;&lt;br/&gt;the slot frame stays&quot;]
+  C -- &quot;type: X&quot; --&gt; F{&quot;X in accepts?&quot;}
+  F -- &quot;no&quot; --&gt; G[&quot;ASSEMBLY ERROR&quot;]
+  F -- &quot;yes&quot; --&gt; H[&quot;fit X (name defaults to the slot)&quot;]
+  D --&gt; I[&quot;recurse: the occupant's slots&quot;]
+  H --&gt; I
+  I --&gt; B
+  A --&gt; J[&quot;then the free placements:&lt;br/&gt;type, name, xyz/rpy on a parent&lt;br/&gt;(their slots fill too)&quot;]
+    </pre><p>Rules, in words:</p>
 <ul class="simple">
-<li><p><strong>Parts</strong> (<a class="reference internal" href="parts.html"><span class="std std-doc">Parts</span></a>): one file per part in <code class="docutils literal notranslate"><span class="pre">bluerobotics_parts/urdf/</span></code>,
-hand maintained. It can be bootstrapped from a modeler’s SDF delivery or
-written from scratch; downstream cannot tell. Each part states its own
-mass, inertia and center of gravity, and declares where other parts fit
-(slots) and where it senses (frames).</p></li>
-<li><p><strong>Assembly</strong> (<a class="reference internal" href="slots.html"><span class="std std-doc">Slots and assembly</span></a>): <code class="docutils literal notranslate"><span class="pre">assembly.xacro</span></code> instantiates
-the base part and fills every slot, recursively, with its default unless
-the config says otherwise. The default vehicle is therefore defined by the
-parts, and a config only states differences. The resolved assembly is
-recorded in the URDF as <code class="docutils literal notranslate"><span class="pre">&lt;assembly_part&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;assembly_slot&gt;</span></code> elements,
-and the config is checked against it.</p></li>
-<li><p><strong>Buoyancy</strong> (<a class="reference internal" href="buoyancy.html"><span class="std std-doc">Buoyancy</span></a>): mass properties are composed from
-the parts; displacement is declared at the assembly (box pontoons for a
-USV, a trim target for a UUV).</p></li>
-<li><p><strong>Gazebo composition</strong> (<a class="reference internal" href="gazebo-composition.html"><span class="std std-doc">Gazebo composition</span></a>):
-<code class="docutils literal notranslate"><span class="pre">blueboat_gazebo</span></code> merge includes the URDF and adds plugins; sensors and
-thrusters are emitted by running the same assembly resolution with Gazebo
-emitters, posed at the parts’ frames and driving the propellers’ joints;
-the bridge config is generated from the manifest. Build time for the installed defaults, launch time for
-<code class="docutils literal notranslate"><span class="pre">config_file:=</span></code>.</p></li>
+<li><p>The <strong>base</strong> part is the root; its link is the named root link (no joint).</p></li>
+<li><p>Every slot fills itself with its <strong>default</strong>, recursively, unless the
+config has an entry for it. An entry names the slot (<code class="docutils literal notranslate"><span class="pre">slot:</span></code>), the
+instance carrying it (<code class="docutils literal notranslate"><span class="pre">of:</span></code>, default the base), and <code class="docutils literal notranslate"><span class="pre">type:</span></code> an accepted
+part or <code class="docutils literal notranslate"><span class="pre">none</span></code>. The occupant’s instance name defaults to the slot name.</p></li>
+<li><p><strong>Free placements</strong> (no <code class="docutils literal notranslate"><span class="pre">slot:</span></code>) give <code class="docutils literal notranslate"><span class="pre">type</span></code>, <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">xyz</span></code>/<code class="docutils literal notranslate"><span class="pre">rpy</span></code> relative
+to <code class="docutils literal notranslate"><span class="pre">parent</span></code>.</p></li>
+<li><p><strong>Ad hoc slots</strong> declared under <code class="docutils literal notranslate"><span class="pre">slots:</span></code> on any instance behave like the
+parts’ own, <code class="docutils literal notranslate"><span class="pre">accepts</span></code> and <code class="docutils literal notranslate"><span class="pre">default</span></code> included.</p></li>
+<li><p>Mistakes fail, naming the problem. The expansion itself catches a type
+the slot does not accept, an unknown slot on the base, a slot configured
+twice, a bare <code class="docutils literal notranslate"><span class="pre">on:</span></code> key (YAML reads it as <code class="docutils literal notranslate"><span class="pre">true</span></code>; the key is <code class="docutils literal notranslate"><span class="pre">of:</span></code>), a
+mistyped part type. What xacro cannot see across its recursion, an entry
+or ad hoc slot whose <code class="docutils literal notranslate"><span class="pre">of:</span></code>/<code class="docutils literal notranslate"><span class="pre">slot:</span></code> matches nothing deeper down, two
+instances with the same name, an unknown key, is caught right after by
+<code class="docutils literal notranslate"><span class="pre">bluerobotics_parts.assembly.check</span></code> from the manifest; the build, the
+launch and <code class="docutils literal notranslate"><span class="pre">check_assembly.py</span> <span class="pre">&lt;config&gt;</span> <span class="pre">&lt;urdf&gt;</span></code> run it.</p></li>
+<li><p>Every fitted instance is recorded in the URDF as
+<code class="docutils literal notranslate"><span class="pre">&lt;assembly_part</span> <span class="pre">type</span> <span class="pre">name</span> <span class="pre">parent/&gt;</span></code> and every slot visited as
+<code class="docutils literal notranslate"><span class="pre">&lt;assembly_slot</span> <span class="pre">of</span> <span class="pre">name/&gt;</span></code>, extension elements urdfdom and Gazebo ignore,
+so the Gazebo composition, the bridge generator and the config check know
+the resolved assembly without re-resolving it.</p></li>
 </ul>
 </section>
-<section id="why-it-works-this-way">
-<h2>Why it works this way<a class="headerlink" href="#why-it-works-this-way" title="Link to this heading"></a></h2>
-<p><strong>The problem is transcription, not format.</strong> The modeler’s tooling exports
-SDF; the description packages consume URDF. When a person bridges that gap
-by retyping geometry, that hand step is the only place defects can enter. A
-contributed part once arrived with cylinders of radius 0.41 m on a 1.2 m
-hull, collision names containing spaces, geometry yawed 180 degrees, and SDF
-syntax pasted into a URDF file where it could not parse. None of it was
-detectable until the whole vehicle assembled, because there was no smaller
-unit to test. So the conversion is a tool, a part is the unit, and a review
-world shows every part alone.</p>
-<p><strong>SDF first was prototyped and rejected.</strong> Parts as standalone SDF models,
-composed with <code class="docutils literal notranslate"><span class="pre">&lt;include</span> <span class="pre">merge=&quot;true&quot;&gt;</span></code> and converted for ROS by
-<code class="docutils literal notranslate"><span class="pre">sdformat_urdf</span></code>, is what <a class="reference external" href="https://gazebosim.org/docs/latest/ros2_interop/">Gazebo’s interoperability docs</a>
-recommend, and it works. It was rejected on ecosystem grounds: robots that
-ship to both ROS and Gazebo (<code class="docutils literal notranslate"><span class="pre">clearpath_common</span></code>, <code class="docutils literal notranslate"><span class="pre">turtlebot4</span></code>,
-<code class="docutils literal notranslate"><span class="pre">Universal_Robots_ROS2_Description</span></code>) are URDF first without exception, and a
-young converter on the critical path of every description would make its
-bugs ours. The URDF stays canonical; SDF deliveries are an optional on ramp
-and move to a side branch once converted.</p>
-<p><strong>Defaults live in the parts.</strong> The previous design kept a hand written
-“standalone” vehicle and a separate programmatic path and declared them
-deliberately out of sync. Slots with defaults remove the split: the zero
-configuration vehicle and the configurable one are the same resolution,
-with an empty config.</p>
-<p><strong>The structure is Clearpath’s.</strong> <a class="reference external" href="https://github.com/clearpathrobotics/clearpath_common"><code class="docutils literal notranslate"><span class="pre">clearpath_common</span></code></a>
-is the closest analogue, a family of configurable robots for ROS and Gazebo
-built from a shared parts library plus a YAML driven generator. The
-additions here are the slot tables and the bootstrap tool, which they do not
-need because their geometry does not arrive from an artist exporting SDF.</p>
+<section id="what-a-slot-is-in-the-urdf">
+<h2>What a slot is in the URDF<a class="headerlink" href="#what-a-slot-is-in-the-urdf" title="Link to this heading"></a></h2>
+<p>A slot is a massless link <code class="docutils literal notranslate"><span class="pre">&lt;instance&gt;_&lt;slot&gt;</span></code> on a fixed joint at the slot
+pose; the occupant hangs off it with its own joint (<code class="docutils literal notranslate"><span class="pre">fixed</span></code>, or the slot’s
+<code class="docutils literal notranslate"><span class="pre">continuous</span></code> for propellers), its attach offset folded in. So <code class="docutils literal notranslate"><span class="pre">flag</span></code> is
+<code class="docutils literal notranslate"><span class="pre">base_link</span> <span class="pre">→</span> <span class="pre">base_link_flag</span> <span class="pre">→</span> <span class="pre">flag</span></code>. In TF you get a frame at every mount
+point, filled or not; in Gazebo the fixed joints are lumped into <code class="docutils literal notranslate"><span class="pre">base_link</span></code>
+and the names survive as SDF frames. Physically it is one rigid body either
+way.</p>
+</section>
+<section id="why-defaults-live-in-the-parts">
+<h2>Why defaults live in the parts<a class="headerlink" href="#why-defaults-live-in-the-parts" title="Link to this heading"></a></h2>
+<p>The knowledge of where a Ping2 kit bolts on is a property of the BlueBoat
+hull (it has the holes) and of the bracket (it has the ring), not of any
+particular user’s config. Putting the slot, its accepted types and its
+default where the knowledge is means every vehicle that uses the part gets it
+right, the shipped config configures nothing, and a user who wants the Ping
+writes nothing, while one who wants it elsewhere writes one line. Batteries
+will follow the same path: the chassis declares the bays with a default
+capacity, a battery is a part like any other, and the composed mass and
+trim follow.</p>
+</section>
+<section id="where-to-add-a-slot">
+<h2>Where to add a slot<a class="headerlink" href="#where-to-add-a-slot" title="Link to this heading"></a></h2>
+<p>In the part (one line in its <code class="docutils literal notranslate"><span class="pre">_info</span></code>, plus <code class="docutils literal notranslate"><span class="pre">accepts</span></code>), as a pull request,
+when it corresponds to a real mounting point everyone has; in the config
+(<code class="docutils literal notranslate"><span class="pre">slots:</span></code>) when it is specific to one loadout; in your own part when you
+author a bracket of your own.</p>
 </section>
 </section>
 
@@ -690,8 +701,8 @@ need because their geometry does not arrive from an artist exporting SDF.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="Design" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="parts.html" class="btn btn-neutral float-right" title="Parts" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="parts.html" class="btn btn-neutral float-left" title="Parts" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="buoyancy.html" class="btn btn-neutral float-right" title="Buoyancy: all up round mass and displacement" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

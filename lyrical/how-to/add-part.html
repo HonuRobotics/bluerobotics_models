@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>How-to guides &mdash; BlueRobotics Models lyrical documentation</title>
+  <title>Add a part &mdash; BlueRobotics Models lyrical documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/honu.css?v=44af46ee" />
@@ -21,8 +21,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Change the loadout" href="loadout.html" />
-    <link rel="prev" title="BlueROV2 configuration" href="../vehicles/bluerov2/configuration.html" /> 
+    <link rel="next" title="Add a sensor part" href="add-sensor-part.html" />
+    <link rel="prev" title="Configure an installed vehicle" href="installed-vehicle.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -101,7 +101,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">How-to guides</a><ul>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">How-to guides</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="loadout.html">Change the loadout</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="loadout.html#fit-the-other-propellers">Fit the other propellers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="loadout.html#leave-the-ping2-kit-off">Leave the Ping2 kit off</a></li>
@@ -118,10 +118,10 @@
 <li class="toctree-l3"><a class="reference internal" href="installed-vehicle.html#overlay-workspace">Overlay workspace</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="add-part.html">Add a part</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="add-part.html#from-a-modeler-s-sdf-delivery">From a modeler’s SDF delivery</a></li>
-<li class="toctree-l3"><a class="reference internal" href="add-part.html#by-hand">By hand</a></li>
-<li class="toctree-l3"><a class="reference internal" href="add-part.html#where-a-part-goes">Where a part goes</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Add a part</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#from-a-modeler-s-sdf-delivery">From a modeler’s SDF delivery</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#by-hand">By hand</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#where-a-part-goes">Where a part goes</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="add-sensor-part.html">Add a sensor part</a></li>
@@ -239,9 +239,10 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">How-to guides</li>
+          <li class="breadcrumb-item"><a href="index.html">How-to guides</a></li>
+      <li class="breadcrumb-item active">Add a part</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/how-to/index.md" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/how-to/add-part.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -249,29 +250,122 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="how-to-guides">
-<h1>How-to guides<a class="headerlink" href="#how-to-guides" title="Link to this heading"></a></h1>
-<p>Task oriented guides for configuring, extending and integrating the vehicles.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="loadout.html">Change the loadout</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installed-vehicle.html">Configure an installed vehicle</a></li>
-<li class="toctree-l1"><a class="reference internal" href="add-part.html">Add a part</a></li>
-<li class="toctree-l1"><a class="reference internal" href="add-sensor-part.html">Add a sensor part</a></li>
-<li class="toctree-l1"><a class="reference internal" href="own-world.html">Run in your own world</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rviz.html">View in RViz</a></li>
-<li class="toctree-l1"><a class="reference internal" href="namespaces.html">Topic namespaces and several simulations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="faq.html">Troubleshooting / FAQ</a></li>
-</ul>
+  <section id="add-a-part">
+<h1>Add a part<a class="headerlink" href="#add-a-part" title="Link to this heading"></a></h1>
+<p>A part is one file, <code class="docutils literal notranslate"><span class="pre">bluerobotics_parts/urdf/&lt;part&gt;.urdf.xacro</span></code>, holding a
+metadata macro (<code class="docutils literal notranslate"><span class="pre">&lt;part&gt;_info</span></code>) and the macro that instantiates it; the full
+contract is in <a class="reference internal" href="../design/parts.html"><span class="std std-doc">Parts</span></a>. There are two ways to write it.</p>
+<section id="from-a-modeler-s-sdf-delivery">
+<h2>From a modeler’s SDF delivery<a class="headerlink" href="#from-a-modeler-s-sdf-delivery" title="Link to this heading"></a></h2>
+<p>The modeler delivers <code class="docutils literal notranslate"><span class="pre">models/&lt;part&gt;/&lt;part&gt;.visual.glb</span></code> (PBR materials
+embedded, Y-up as the glTF specification requires) and
+<code class="docutils literal notranslate"><span class="pre">models/&lt;part&gt;/model.sdf</span></code> (the collision primitives), following the rules in
+<a class="reference internal" href="../design/parts.html"><span class="std std-doc">Parts</span></a>. If the mesh shows rolled 90 degrees in RViz but
+fine in Gazebo, it was exported Z-up: run
+<code class="docutils literal notranslate"><span class="pre">ros2</span> <span class="pre">run</span> <span class="pre">bluerobotics_parts</span> <span class="pre">gltf_to_yup.py</span> <span class="pre">models/&lt;part&gt;/&lt;part&gt;.visual.glb</span></code>
+once. Then:</p>
+<ol class="arabic">
+<li><p>Look at the delivery in Gazebo: scale, origin at the mesh centroid, x
+forward / y left / z up, materials, collision envelope.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gz<span class="w"> </span>sim<span class="w"> </span>models/&lt;part&gt;/model.sdf
+</pre></div>
 </div>
+</li>
+<li><p>Bootstrap the macro. Inertia is estimated from the collision primitives
+(SDF auto inertia at a uniform density, scaled to <code class="docutils literal notranslate"><span class="pre">--mass</span></code> if known);
+slots, frames, the attach offset and a spin axis are seeded from flags:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>run<span class="w"> </span>bluerobotics_parts<span class="w"> </span>sdf_to_part.py<span class="w"> </span>models/&lt;part&gt;<span class="w"> </span>--mass<span class="w"> </span><span class="m">0</span>.344<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--attach<span class="w"> </span><span class="s2">"0 0 -0.05"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--slot<span class="w"> </span><span class="s2">"sensor=0,0,-0.01;accepts=ping_singlebeam;default=ping_singlebeam"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--frame<span class="w"> </span><span class="nv">beam</span><span class="o">=</span><span class="m">0</span>,0,-0.044
+</pre></div>
+</div>
+<p>The tool writes <code class="docutils literal notranslate"><span class="pre">urdf/&lt;part&gt;.urdf.xacro</span></code> once and refuses to overwrite it
+without <code class="docutils literal notranslate"><span class="pre">--force</span></code>: from here on the file is source, edit it by hand.</p>
+</li>
+<li><p>Add the include line to <code class="docutils literal notranslate"><span class="pre">urdf/parts.xacro</span></code> (alphabetical) and, if the
+part belongs in a slot, add its type to that slot’s <code class="docutils literal notranslate"><span class="pre">accepts</span></code> (and
+<code class="docutils literal notranslate"><span class="pre">default</span></code> if it is the usual occupant) in the carrying part’s <code class="docutils literal notranslate"><span class="pre">_info</span></code>.</p></li>
+<li><p>Verify: <code class="docutils literal notranslate"><span class="pre">colcon</span> <span class="pre">build</span> <span class="pre">--packages-select</span> <span class="pre">bluerobotics_parts</span></code>, then the
+probe and the review world:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PARTS</span><span class="o">=</span><span class="k">$(</span>ros2<span class="w"> </span>pkg<span class="w"> </span>prefix<span class="w"> </span>--share<span class="w"> </span>bluerobotics_parts<span class="k">)</span>
+xacro<span class="w"> </span><span class="nv">$PARTS</span>/urdf/part_probe.urdf.xacro<span class="w"> </span>part:<span class="o">=</span>&lt;part&gt;<span class="w"> </span>&gt;<span class="w"> </span>/tmp/probe.urdf<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>check_urdf<span class="w"> </span>/tmp/probe.urdf
+ros2<span class="w"> </span>run<span class="w"> </span>bluerobotics_parts<span class="w"> </span>parts_check_world.py<span class="w"> </span>--out<span class="w"> </span><span class="nv">$PARTS</span>/worlds/parts_check.sdf
+gz<span class="w"> </span>sim<span class="w"> </span><span class="nv">$PARTS</span>/worlds/parts_check.sdf<span class="w">      </span><span class="c1"># right click a part: View &gt; Collisions / Inertia / Center of Mass</span>
+</pre></div>
+</div>
+</li>
+<li><p>Commit the macro (and the regenerated <code class="docutils literal notranslate"><span class="pre">worlds/parts_check.sdf</span></code>).</p></li>
+</ol>
+</section>
+<section id="by-hand">
+<h2>By hand<a class="headerlink" href="#by-hand" title="Link to this heading"></a></h2>
+<p>No SDF needed: write the file. A minimal part, a 10 cm box of 0.5 kg with
+one slot on top:</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;?xml version="1.0"?&gt;</span>
+<span class="nt">&lt;robot</span><span class="w"> </span><span class="na">xmlns:xacro=</span><span class="s">"http://ros.org/wiki/xacro"</span><span class="nt">&gt;</span>
+
+<span class="w">  </span><span class="nt">&lt;xacro:macro</span><span class="w"> </span><span class="na">name=</span><span class="s">"my_box_info"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;xacro:property</span><span class="w"> </span><span class="na">name=</span><span class="s">"part_info"</span><span class="w"> </span><span class="na">scope=</span><span class="s">"parent"</span><span class="w"> </span><span class="na">value=</span><span class="s">"${dict(</span>
+<span class="s">        attach='0 0 -0.05',</span>
+<span class="s">        slots=dict(</span>
+<span class="s">            top=dict(xyz='0 0 0.05', rpy='0 0 0', accepts=['ping_singlebeam'], default='none'),</span>
+<span class="s">        ),</span>
+<span class="s">        frames=dict())}"</span><span class="nt">/&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/xacro:macro&gt;</span>
+
+<span class="w">  </span><span class="nt">&lt;xacro:macro</span><span class="w"> </span><span class="na">name=</span><span class="s">"my_box"</span>
+<span class="w">               </span><span class="na">params=</span><span class="s">"name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='0 0 1'"</span><span class="nt">&gt;</span>
+<span class="w">    </span><span class="nt">&lt;xacro:my_box_info/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;link</span><span class="w"> </span><span class="na">name=</span><span class="s">"${name}"</span><span class="nt">&gt;</span>
+<span class="w">      </span><span class="nt">&lt;inertial&gt;</span>
+<span class="w">        </span><span class="nt">&lt;origin</span><span class="w"> </span><span class="na">xyz=</span><span class="s">"0 0 0"</span><span class="w"> </span><span class="na">rpy=</span><span class="s">"0 0 0"</span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;mass</span><span class="w"> </span><span class="na">value=</span><span class="s">"0.5"</span><span class="nt">/&gt;</span>
+<span class="w">        </span><span class="nt">&lt;inertia</span><span class="w"> </span><span class="na">ixx=</span><span class="s">"0.000833"</span><span class="w"> </span><span class="na">ixy=</span><span class="s">"0"</span><span class="w"> </span><span class="na">ixz=</span><span class="s">"0"</span><span class="w"> </span><span class="na">iyy=</span><span class="s">"0.000833"</span><span class="w"> </span><span class="na">iyz=</span><span class="s">"0"</span><span class="w"> </span><span class="na">izz=</span><span class="s">"0.000833"</span><span class="nt">/&gt;</span>
+<span class="w">      </span><span class="nt">&lt;/inertial&gt;</span>
+<span class="w">      </span><span class="nt">&lt;visual&gt;</span><span class="w">   </span><span class="cm">&lt;!-- a glTF mesh would go through &lt;xacro:part_visual mesh="package://..."/&gt; --&gt;</span>
+<span class="w">        </span><span class="nt">&lt;geometry&gt;&lt;box</span><span class="w"> </span><span class="na">size=</span><span class="s">"0.1 0.1 0.1"</span><span class="nt">/&gt;&lt;/geometry&gt;</span>
+<span class="w">      </span><span class="nt">&lt;/visual&gt;</span>
+<span class="w">      </span><span class="nt">&lt;xacro:if</span><span class="w"> </span><span class="na">value=</span><span class="s">"${collision}"</span><span class="nt">&gt;</span>
+<span class="w">        </span><span class="nt">&lt;collision&gt;</span>
+<span class="w">          </span><span class="nt">&lt;geometry&gt;&lt;box</span><span class="w"> </span><span class="na">size=</span><span class="s">"0.1 0.1 0.1"</span><span class="nt">/&gt;&lt;/geometry&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/collision&gt;</span>
+<span class="w">      </span><span class="nt">&lt;/xacro:if&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/link&gt;</span>
+<span class="w">    </span><span class="nt">&lt;xacro:part_joint</span><span class="w"> </span><span class="na">name=</span><span class="s">"${name}"</span><span class="w"> </span><span class="na">parent=</span><span class="s">"${parent}"</span><span class="w"> </span><span class="na">xyz=</span><span class="s">"${xyz}"</span><span class="w"> </span><span class="na">rpy=</span><span class="s">"${rpy}"</span>
+<span class="w">                      </span><span class="na">joint=</span><span class="s">"${joint}"</span><span class="w"> </span><span class="na">axis=</span><span class="s">"${axis}"</span><span class="w"> </span><span class="na">attach=</span><span class="s">"${part_info['attach']}"</span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;xacro:part_slots</span><span class="w"> </span><span class="na">name=</span><span class="s">"${name}"</span><span class="w"> </span><span class="na">items=</span><span class="s">"${list(part_info['slots'].items())}"</span><span class="nt">/&gt;</span>
+<span class="w">    </span><span class="nt">&lt;xacro:part_frames</span><span class="w"> </span><span class="na">name=</span><span class="s">"${name}"</span><span class="w"> </span><span class="na">items=</span><span class="s">"${list(part_info['frames'].items())}"</span><span class="nt">/&gt;</span>
+<span class="w">  </span><span class="nt">&lt;/xacro:macro&gt;</span>
+
+<span class="nt">&lt;/robot&gt;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">attach</span></code> is where the part bolts on, in its own frame (here the bottom face,
+so the box stands on whatever it is mounted to); the macro’s <code class="docutils literal notranslate"><span class="pre">axis</span></code> default
+is the part’s own spin axis, used when it is fitted on a turning joint. A
+propeller additionally declares <code class="docutils literal notranslate"><span class="pre">drive=dict(diameter=...,</span> <span class="pre">max_thrust=...,</span> <span class="pre">min_thrust=...,</span> <span class="pre">rotation='ccw'|'cw')</span></code>, which makes the assembly mount it on a
+continuous joint and the Gazebo side give it a Thruster and a thrust topic.
+Then steps 3 to 5 above.</p>
+</section>
+<section id="where-a-part-goes">
+<h2>Where a part goes<a class="headerlink" href="#where-a-part-goes" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>In a slot</strong>: list its type in the slot’s <code class="docutils literal notranslate"><span class="pre">accepts</span></code>; users fit it with
+<code class="docutils literal notranslate"><span class="pre">{slot:</span> <span class="pre">&lt;slot&gt;,</span> <span class="pre">type:</span> <span class="pre">&lt;part&gt;}</span></code>, or automatically if it is the <code class="docutils literal notranslate"><span class="pre">default</span></code>.</p></li>
+<li><p><strong>Free placed</strong>: nothing to declare; users give <code class="docutils literal notranslate"><span class="pre">xyz</span></code>/<code class="docutils literal notranslate"><span class="pre">rpy</span></code>.</p></li>
+<li><p><strong>As a slot provider</strong>: declare slots in its <code class="docutils literal notranslate"><span class="pre">_info</span></code> (the Ping bracket
+declares <code class="docutils literal notranslate"><span class="pre">ping</span></code>; a battery bay would declare <code class="docutils literal notranslate"><span class="pre">battery</span></code>).</p></li>
+</ul>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../vehicles/bluerov2/configuration.html" class="btn btn-neutral float-left" title="BlueROV2 configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="loadout.html" class="btn btn-neutral float-right" title="Change the loadout" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="installed-vehicle.html" class="btn btn-neutral float-left" title="Configure an installed vehicle" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="add-sensor-part.html" class="btn btn-neutral float-right" title="Add a sensor part" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
