@@ -4,7 +4,7 @@
   z -3, graded buoyancy (seawater below z 0, air above), a visual water
   surface at the waterline, the core systems and the vehicle pulled in via
   <include>. Started directly it comes up paused; press play and the boat
-  settles to its static draft (about 70 mm) and floats level. Hydrodynamic
+  settles to its static draft and floats level (base_link at the waterline). Hydrodynamic
   damping lives in the included model; tuning the coefficients against the
   real vehicle is the deferred part.
 
@@ -31,10 +31,10 @@
       <render_engine>ogre2</render_engine>
     </plugin>
 
-    <!-- Graded buoyancy: seawater (1025) below z=0, air above -> the BlueBoat
-         floats at the z=0 waterline. Displacement comes from the pontoon-box
-         collisions (graded mode rejects the mesh hull); the boat self-settles to
-         its draft. -->
+    <!-- Graded buoyancy: seawater (1025) below z=0, air above, acting on the
+         boat's dedicated hull_displacement link only (the box pontoons the
+         composed model declares); the parts' own collisions are contact
+         geometry and never displace. -->
     <plugin filename="gz-sim-buoyancy-system"
             name="gz::sim::systems::Buoyancy">
       <graded_buoyancy>
@@ -44,7 +44,7 @@
           <density>1</density>
         </density_change>
       </graded_buoyancy>
-      <enable>blueboat</enable>
+      <enable>blueboat::hull_displacement</enable>
     </plugin>
 
     <light type="directional" name="sun">
@@ -98,9 +98,9 @@
 
     <!-- The vehicle, pulled in from blueboat_gazebo (the composed model). -->
     <include>
-      <uri>model://blueboat_gazebo</uri>
+      <uri>model://blueboat</uri>
       <name>blueboat</name>
-      <pose>0 0 0.25 0 0 0</pose>
+      <pose>0 0 0.05 0 0 0</pose>
     </include>
 
   </world>

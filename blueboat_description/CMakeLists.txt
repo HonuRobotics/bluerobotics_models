@@ -3,6 +3,9 @@ project(blueboat_description)
 
 find_package(ament_cmake REQUIRED)
 find_package(xacro REQUIRED)
+# The parts library the xacro assembles from; a real build order dependency
+# because $(find bluerobotics_parts) is resolved while expanding at build time.
+find_package(bluerobotics_parts REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 # Put this package's share dir on GZ_SIM_RESOURCE_PATH so package:// URIs into it

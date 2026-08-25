@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<!--
+  blueboat_antenna_mast part macro.
+
+  Bootstrapped from models/blueboat_antenna_mast/model.sdf by scripts/sdf_to_part.py on
+  2026-08-21. This file is the part: maintain it by hand from here on.
+
+  Inertia: estimated from the delivered collision geometry at 1000 kg/m^3 (SDF auto inertia); replace with measured values.
+
+  Contract (see parts.xacro): <part>_info exports the metadata (attach,
+  slots, frames, drive); <part> instantiates the link, its mounting joint
+  and its slot / frame links.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="blueboat_antenna_mast_info">
+    <xacro:property name="part_info" scope="parent" value="${dict(
+        attach='0 0 -0.331',
+        slots=dict(
+        ),
+        frames=dict(
+        ))}"/>
+  </xacro:macro>
+
+  <xacro:macro name="blueboat_antenna_mast"
+               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='1 0 0'">
+    <xacro:blueboat_antenna_mast_info/>
+
+    <link name="${name}">
+      <inertial>
+        <origin xyz="-0.004079 -4.3e-05 0.100422" rpy="0 0 0"/>
+        <mass value="0.303561"/>
+        <inertia ixx="0.0159029" ixy="0" ixz="0"
+                 iyy="0.0159029" iyz="0"
+                 izz="1.85026e-05"/>
+      </inertial>
+      <xacro:part_visual mesh="package://bluerobotics_parts/models/blueboat_antenna_mast/blueboat_antenna_mast.visual.glb"/>
+      <xacro:if value="${collision}">
+        <collision>
+          <origin xyz="-0.004079 -4.3e-05 0.100422" rpy="0 -0 0"/>
+          <geometry>
+            <cylinder radius="0.011041" length="0.792647"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+    </link>
+
+    <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
+                      joint="${joint}" axis="${axis}" attach="${part_info['attach']}"/>
+    <xacro:part_slots name="${name}" items="${list(part_info['slots'].items())}"/>
+    <xacro:part_frames name="${name}" items="${list(part_info['frames'].items())}"/>
+
+  </xacro:macro>
+
+</robot>

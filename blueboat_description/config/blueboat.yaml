@@ -1,35 +1,60 @@
-# BlueBoat build-time configuration.
-# Edit this file and rebuild (colcon build) to regenerate the URDF, the composed
-# Gazebo model AND the ros_gz bridge config.
+# BlueBoat build time configuration.
+#
+# Edit this file and rebuild (colcon build) to regenerate the URDF, the
+# composed Gazebo model AND the ros_gz bridge config. To try a loadout without
+# rebuilding, pass config_file:=<your.yaml> to the launches.
+#
+# The default BlueBoat needs nothing here: every slot of every part fills
+# itself with its default (the chassis fits its two outboards, the flag and
+# the Ping2 integration kit; the kit's bracket fits the Ping). The entries
+# below are how to change that. See bluerobotics_parts/urdf/assembly.xacro
+# for the full rules and the site (vehicles/blueboat/configuration) for the slots
+# and the catalog.
 #
 # Topic namespace: sensor topics default to /<topic_namespace>/<name>/...
 topic_namespace: blueboat
 
-# Accessories to mount. `type` must match a macro in urdf/accessories.xacro;
-# xyz/rpy are the mount pose relative to base_link (metres / radians).
-# Optional per-accessory topic overrides (bases; per-sensor suffixes like
-# /range are appended):
+# base: the part whose link is the assembly root, base_link. Its collision
+# geometry (hulls, crossbeams, hatches as the modeler delivered them) gives
+# contact; displacement comes from the box pontoons under hull_displacement,
+# since graded buoyancy reads only boxes and spheres (docs: design/buoyancy).
+base: {type: blueboat_chassis, name: base_link}
+
+# parts: overrides and additions. A slot entry picks what goes in a slot
+# (slot: the slot name, of: the instance carrying it, default base_link;
+# type: an accepted part type, or none to leave it empty). An entry without
+# slot: is a free placement: type, name, xyz/rpy relative to parent (default
+# base_link). Optional per part topic overrides for sensor and propeller
+# parts (bases; the per part suffix such as /range or /thrust is appended):
 #   topic:     base for BOTH the Gazebo and ROS sides
-#   gz_topic:  Gazebo-side base   (overrides `topic`)
-#   ros_topic: ROS-side base      (overrides `topic`)
-#   bridge:    dict of NATIVE ros_gz_bridge keys (lazy, subscriber_queue,
-#              publisher_queue, ...) merged into that accessory's generated
-#              bridge entries
-#
-# extra_bridge_topics: optional top-level list, appended VERBATIM to the
-# generated bridge config in native ros_gz_bridge syntax. Never hand-edit the
+#   gz_topic:  Gazebo side base   (overrides `topic`)
+#   ros_topic: ROS side base      (overrides `topic`)
+#   bridge:    dict of NATIVE ros_gz_bridge keys merged into that part's
+#              generated bridge entries
+parts: []
+  # - {slot: ping_mount, type: none}                          # no Ping2 kit
+  # - {slot: motor_port, type: t200_prop_ccw}                 # the other propeller option
+  # - {slot: motor_stbd, type: t200_prop_cw}
+  # - {slot: mast, type: blueboat_antenna_mast}               # slots with no default
+  # - {slot: payload, type: blueboat_payload_bracket}
+  # - {slot: ping, of: ping_mount, type: ping_singlebeam, topic: sonar}   # rename the Ping topics
+  # - {type: basestation_antenna,   name: radio,     xyz: "-0.35 0 0.5",    rpy: "0 0 0"}
+  # - {type: omniscan_450_sidescan, name: sidescan,  xyz: "0.2 0.22 -0.03", rpy: "0 0 0"}
+  # - {type: surveyor_multibeam,    name: multibeam, xyz: "0.35 0 -0.08",   rpy: "0 0 0"}
+
+# slots: ad hoc slots on any instance, usable like the parts' own. (The
+# instance key is of:, not on:, which YAML would read as the boolean true.)
+# slots:
+#   - {of: base_link, name: camera, xyz: "0.45 0 0.2", rpy: "0 0 0"}
+
+# Hull displacement (USV case), read by the Gazebo composition: box pontoons
+# on a dedicated hull_displacement link that is the only thing the world's
+# graded buoyancy is enabled on, sized from the chassis hulls and split into
+# segments so a pitched waterplane is modeled per segment. The boat self
+# settles to a draft of roughly mass / (water_density * 2 * length * width).
+# (docs: design/buoyancy)
+hull_displacement: {length: 1.05, width: 0.18, height: 0.18, x: 0.027, y: 0.361, z: 0.059, segments: 6}
+
+# extra_bridge_topics: optional top level list, appended VERBATIM to the
+# generated bridge config in native ros_gz_bridge syntax. Never hand edit the
 # generated ros_gz_bridge.yaml; it is overwritten on rebuild.
-#
-# Default: the Ping2 echosounder only. Uncomment entries below to add the rest
-# of the catalog; the bridge config regenerates to match on rebuild.
-accessories:
-  # The transducer must sit below the static waterline (~z -0.24); the
-  # integration kit mounts it under the hull.
-  - {type: ping_sonar,          name: ping,        xyz: "0 0 -0.32",     rpy: "0 0 0"}
-  # - {type: flag,                name: flag,        xyz: "-0.3 0 -0.08",  rpy: "0 0 0"}
-  # - {type: antenna_mast,        name: mast,        xyz: "-0.35 0 0.45",  rpy: "0 0 0"}
-  # - {type: basestation_antenna, name: basestation, xyz: "-0.35 0 0.78",  rpy: "0 0 0"}
-  # - {type: ping_mount,          name: ping_mount,  xyz: "0 -0.12 -0.02", rpy: "0 0 0"}
-  # - {type: payload_bracket,     name: payload,     xyz: "0.1 0 0.15",    rpy: "0 0 0"}
-  # - {type: omniscan_450,        name: sidescan,    xyz: "0.2 0.22 -0.03", rpy: "0 0 0"}
-  # - {type: surveyor_multibeam,  name: multibeam,   xyz: "0.35 0 -0.08",  rpy: "0 0 0"}

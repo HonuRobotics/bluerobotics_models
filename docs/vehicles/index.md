@@ -1,10 +1,10 @@
 # Vehicles
 
-One manual per vehicle: bring-up, driving, sensors and configuration.
+One manual per vehicle: running, driving, sensors and configuration.
 
 ```{toctree}
 :maxdepth: 1
 
-BlueROV2 <bluerov2/index>
 BlueBoat <blueboat/index>
+BlueROV2 <bluerov2/index>
 ```

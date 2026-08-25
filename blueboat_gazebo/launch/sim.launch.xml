@@ -1,28 +1,40 @@
 <?xml version="1.0"?>
 <!--
-  Bring up Gazebo with the BlueBoat already in the world (the playground world
-  <include>s the composed model). With use_composition (default), gz_server, the
-  ros_gz bridge and robot_state_publisher run as composable nodes in ONE
-  container process; the Gazebo GUI runs as a separate process. The world starts
-  paused; press play and the boat floats at its static draft.
+  Bring up Gazebo with the BlueBoat.
+
+  Everything about the vehicle is derived from config_file at launch time by
+  configure_vehicle.py (URDF, composed model, ros_gz bridge config, into a
+  per loadout directory under $ROS_HOME), so a custom loadout needs no
+  rebuild and works the same from a source build or a binary install. A
+  config that does not match the parts (a slot that does not exist, a type
+  that does not fit) fails the launch with the reason. The world is vehicle free
+  (blueboat_water.sdf by default) and the generated model is spawned into it
+  as "blueboat". With use_composition (default), gz_server, the bridge and
+  robot_state_publisher run as composable nodes in ONE container process;
+  the Gazebo GUI runs as a separate process. The simulation starts running
+  and the boat floats at its static draft.
+
+      ros2 launch blueboat_gazebo sim.launch.xml
+      ros2 launch blueboat_gazebo sim.launch.xml config_file:=/path/my_loadout.yaml
 -->
 <launch>
   <arg name="world"
-       default="$(find-pkg-share blueboat_gazebo)/worlds/blueboat_playground.sdf"
-       description="World SDF (defaults to the self-contained playground)."/>
+       default="$(find-pkg-share blueboat_gazebo)/worlds/blueboat_water.sdf"
+       description="Vehicle free world SDF to spawn the boat into."/>
   <arg name="use_composition" default="true"
        description="Run gz_server, bridge and robot_state_publisher in one process."/>
   <arg name="gui" default="true" description="Launch the Gazebo GUI."/>
   <arg name="config_file"
        default="$(find-pkg-share blueboat_description)/config/blueboat.yaml"
-       description="Vehicle config (accessories) expanded at launch."/>
-  <arg name="bridge_config_file"
-       default="$(find-pkg-share blueboat_gazebo)/config/ros_gz_bridge.yaml"
-       description="ros_gz bridge config (generated; regenerate for custom loadouts)."/>
+       description="Vehicle loadout config, expanded at launch."/>
+  <arg name="name" default="blueboat"
+       description="Model name to spawn as; the world's buoyancy and the bridge expect blueboat."/>
+  <arg name="z" default="0.05" description="Spawn height (m); the default sits at the waterline."/>
 
-  <!-- Base URDF, shared by both robot_state_publisher variants below. -->
-  <let name="robot_description"
-       value="$(command 'xacro $(find-pkg-share blueboat_description)/urdf/blueboat.urdf.xacro config_file:=$(var config_file)')"/>
+  <!-- Every artifact of this loadout, generated now from config_file. -->
+  <let name="vehicle_dir"
+       value="$(command '$(find-pkg-prefix blueboat_gazebo)/lib/blueboat_gazebo/configure_vehicle.py --config $(var config_file) --cache')"/>
+  <let name="robot_description" value="$(command 'cat $(var vehicle_dir)/blueboat.urdf')"/>
 
   <!-- Gazebo server (composable) — creates the shared container. -->
   <gz_server world_sdf_file="$(var world)"
@@ -33,9 +45,13 @@
   <!-- Gazebo GUI (separate Qt process). -->
   <executable cmd="gz sim -g" output="screen" if="$(var gui)"/>
 
+  <!-- The vehicle, spawned from the generated model into the (only) world. -->
+  <node pkg="ros_gz_sim" exec="create" name="spawn_blueboat" output="screen"
+        args="-name $(var name) -z $(var z) -file $(var vehicle_dir)/model.sdf"/>
+
   <!-- ros_gz bridge (composable) — joins the container; bridges the clock. -->
   <ros_gz_bridge bridge_name="ros_gz_bridge"
-                 config_file="$(var bridge_config_file)"
+                 config_file="$(var vehicle_dir)/ros_gz_bridge.yaml"
                  container_name="ros_gz_container"
                  create_own_container="false"
                  use_composition="$(var use_composition)"/>

@@ -42,10 +42,8 @@ def test_specs_comment_matches_the_model():
                 for m in root.findall('.//inertial/mass'))
     stamped_mass = float(spec(text, 'total mass').split()[0])
     assert stamped_mass == pytest.approx(total, abs=5e-4)
-    volume = 0.0
-    for box in root.findall('.//collision/geometry/box'):
-        lx, ly, lz = (float(v) for v in box.get('size').split())
-        volume += lx * ly * lz
+    hull = yaml.safe_load((SHARE / 'config' / 'blueboat.yaml').read_text())['hull_displacement']
+    volume = 2 * hull['length'] * hull['width'] * hull['height']
     stamped_volume = float(spec(text, 'displaced volume').split()[0])
     assert stamped_volume == pytest.approx(volume, abs=5e-7)
     offset = spec(text, 'cob offset')
@@ -61,9 +59,10 @@ def test_specs_comment_matches_the_model():
 
 
 def test_specs_comment_reports_the_loadout():
-    """The accessories row reflects the shipped default config."""
+    """The parts row lists every part the assembly resolved to."""
     text = URDF.read_text()
-    cfg = yaml.safe_load((SHARE / 'config' / 'blueboat.yaml').read_text())
-    accessories = spec(text, 'accessories')
-    for accessory in cfg.get('accessories') or []:
-        assert accessory['type'] in accessories
+    parts = spec(text, 'parts')
+    manifest = ET.fromstring(text).findall('assembly_part')
+    assert manifest, 'the shipped URDF carries no assembly manifest'
+    for part in manifest:
+        assert f'{part.get("type")} ({part.get("name")})' in parts

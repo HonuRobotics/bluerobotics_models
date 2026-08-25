@@ -12,12 +12,16 @@
   <arg name="config_file"
        default="$(find-pkg-share blueboat_description)/config/blueboat.yaml"
        description="Vehicle config (accessories) expanded at launch."/>
+  <!-- RViz converts glTF meshes to Z up since Lyrical; older RViz draws
+       the Y up data as is. Pass z to pre rotate the visuals for older RViz. -->
+  <arg name="gltf_up" default="y"
+       description="Keep y for RViz from Lyrical on; pass z for older RViz."/>
 
   <node pkg="robot_state_publisher" exec="robot_state_publisher"
         name="robot_state_publisher">
     <!-- type="str": keep launch from running yaml type-inference over the URDF. -->
     <param name="robot_description"
-           value="$(command 'xacro $(find-pkg-share blueboat_description)/urdf/blueboat.urdf.xacro config_file:=$(var config_file)')"
+           value="$(command 'xacro $(find-pkg-share blueboat_description)/urdf/blueboat.urdf.xacro config_file:=$(var config_file) gltf_up:=$(var gltf_up)')"
            type="str"/>
   </node>
 

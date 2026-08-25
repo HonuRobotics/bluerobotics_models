@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<!--
+  blueboat_chassis part macro.
+
+  Bootstrapped from models/blueboat_chassis/model.sdf by scripts/sdf_to_part.py on
+  2026-08-21. This file is the part: maintain it by hand from here on.
+
+  Inertia: tensor shape estimated from the collision geometry, scaled from 68.139 kg at 1000 kg/m^3 to the stated 12 kg.
+
+  Contract (see parts.xacro): <part>_info exports the metadata (attach,
+  slots, frames, drive); <part> instantiates the link, its mounting joint
+  and its slot / frame links.
+  Slots other parts fit into, as frames <name>_<slot>:
+    motor_port: m200_weedless_prop_ccw, t200_prop_ccw; default m200_weedless_prop_ccw
+    motor_stbd: m200_weedless_prop_cw, t200_prop_cw; default m200_weedless_prop_cw
+    mast: blueboat_antenna_mast; default none
+    flag: blueboat_flag; default blueboat_flag
+    payload: blueboat_payload_bracket; default none
+    ping_mount: blueboat_ping_singlebeam_mount; default blueboat_ping_singlebeam_mount
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="blueboat_chassis_info">
+    <xacro:property name="part_info" scope="parent" value="${dict(
+        attach='0 0 0',
+        slots=dict(
+            motor_port=dict(xyz='-0.52 0.301 -0.117', rpy='0 0 0', accepts=['m200_weedless_prop_ccw', 't200_prop_ccw'], default='m200_weedless_prop_ccw', joint='continuous'),
+            motor_stbd=dict(xyz='-0.52 -0.301 -0.117', rpy='0 0 0', accepts=['m200_weedless_prop_cw', 't200_prop_cw'], default='m200_weedless_prop_cw', joint='continuous'),
+            mast=dict(xyz='-0.298 0 0.147', rpy='0 0 0', accepts=['blueboat_antenna_mast'], default='none'),
+            flag=dict(xyz='-0.298 0.2 0.147', rpy='0 0 0', accepts=['blueboat_flag'], default='blueboat_flag'),
+            payload=dict(xyz='0.299 0 0.147', rpy='0 0 0', accepts=['blueboat_payload_bracket'], default='none'),
+            ping_mount=dict(xyz='0 -0.259 0.01', rpy='0 0 0', accepts=['blueboat_ping_singlebeam_mount'], default='blueboat_ping_singlebeam_mount'),
+        ),
+        frames=dict(
+        ))}"/>
+  </xacro:macro>
+
+  <xacro:macro name="blueboat_chassis"
+               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='1 0 0'">
+    <xacro:blueboat_chassis_info/>
+
+    <link name="${name}">
+      <inertial>
+        <origin xyz="0.0212659 0 0.0724998" rpy="0 0 0"/>
+        <mass value="12"/>
+        <inertia ixx="1.6043" ixy="-1.22202e-18" ixz="0.00372803"
+                 iyy="0.988314" iyz="4.88808e-18"
+                 izz="2.53089"/>
+      </inertial>
+      <xacro:part_visual mesh="package://bluerobotics_parts/models/blueboat_chassis/blueboat_chassis.visual.glb"/>
+      <xacro:if value="${collision}">
+        <collision>
+          <origin xyz="-0.002666 -0.368156 0.131239" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.439118 0.157103 0.079944"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="-0.002666 0.368156 0.131239" rpy="0 -0 0"/>
+          <geometry>
+            <box size="0.439118 0.157103 0.079944"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0.299228 0 0.126654" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.033317 0.572185 0.041201"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="-0.297919 0 0.126654" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.033317 0.572185 0.041201"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0.026602 -0.36148 0.059302" rpy="-0 1.5708 0"/>
+          <geometry>
+            <cylinder radius="0.091714" length="1.05084"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0.026602 0.36148 0.059302" rpy="-0 1.5708 0"/>
+          <geometry>
+            <cylinder radius="0.091714" length="1.05084"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+    </link>
+
+    <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
+                      joint="${joint}" axis="${axis}" attach="${part_info['attach']}"/>
+    <xacro:part_slots name="${name}" items="${list(part_info['slots'].items())}"/>
+    <xacro:part_frames name="${name}" items="${list(part_info['frames'].items())}"/>
+
+  </xacro:macro>
+
+</robot>

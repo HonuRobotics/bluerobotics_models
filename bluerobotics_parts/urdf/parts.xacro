@@ -1,45 +1,160 @@
 <?xml version="1.0"?>
 <!--
-  bluerobotics_parts — the parts-level macro library.
+  bluerobotics_parts: the parts level macro library.
 
-  PROTOTYPE. One part is wired up (blueboat_antenna_mast); the rest of the
-  catalog follows the same one line once each part has a macro.
-
-  Include this once and every part is available as a macro. An assembly should
-  not include individual part files directly — that is what this file is for.
+  Include this once and every part is available as a macro:
 
       <xacro:include filename="$(find bluerobotics_parts)/urdf/parts.xacro"/>
-      <xacro:blueboat_antenna_mast name="mast" parent="base_link" xyz="0 0 0.2"/>
+      <xacro:t200_thruster name="thruster_port" parent="base_link" xyz="-0.5 0.3 -0.1"/>
 
-  ===== the part macro contract =====
+  Vehicles normally do not call part macros one by one: assembly.xacro
+  builds a vehicle from a config, filling each part's slots with their
+  defaults and applying the config's overrides.
 
-  Every macro included below takes exactly these parameters, in this order:
+  ===== the part contract =====
 
-      name       link name for this instance; the fixed joint is <name>_joint
-      parent     link to attach to
-      xyz / rpy  mount pose relative to parent (meters / radians)
-      collision  false to instantiate the part with no contact geometry
+  A part is one file, urdf/<part>.urdf.xacro, holding two macros:
 
-  This is a contract, not a convention. A dispatcher that mounts parts from a
-  config list forwards exactly this set to whichever macro a `type` names, so a
-  macro that drops or renames one fails with `Invalid parameter "collision"`
-  instead of doing something surprising. The vessel macros will have to honor
-  it too.
+  1. <part>_info: the part's metadata, exported into the caller's scope as
+     the property `part_info` (scope="parent"):
 
-  That dispatcher (`mount_parts`, generalized from accessories.xacro) is not
-  here yet. It belongs with the assembly work, where it can be exercised
-  against a real vehicle rather than against itself.
+         attach   where the part bolts onto its parent, "x y z" in the part
+                  frame (the mounting joint folds it in)
+         slots    named mount points other parts fit into, each with
+                    xyz / rpy   pose in the part frame
+                    accepts     part types that fit (omit: anything fits)
+                    default     the type fitted when the config is silent,
+                                or 'none'
+                    joint       joint type for the occupant (default fixed)
+         frames   named reference frames (a sensor's beam origin, a lens),
+                  each with xyz / rpy
+         drive    propellers only: what a simulator needs to drive the part
+                  as a thruster on its mounting joint
+                    diameter    propeller diameter, m
+                    max_thrust  forward thrust limit, N
+                    min_thrust  reverse thrust limit, N (negative)
+                    rotation    'ccw' or 'cw', seen from behind looking
+                                forward along the spin axis
 
-  Mass, inertia tensor and center-of-gravity pose are carried by each part in
-  its own file, hand-authored from measurement or the vendor. There is no
-  central mass table here and so nothing to keep in sync. See
-  AUR_BUOYANCY_DESIGN.md.
+     Simulators read `frames` and `drive` (blueboat_gazebo places a
+     <sensor> at a sensor part's frame and a Thruster on a propeller's
+     joint); the URDF itself only turns `frames` into links.
+
+  2. <part>: the macro that instantiates it, taking exactly
+
+         name       link name for this instance; the joint is <name>_joint
+         parent     link to attach to; "" emits the link alone (assembly root)
+         xyz / rpy  mount pose relative to parent (meters / radians)
+         collision  false to instantiate the part without contact geometry
+         joint      fixed (default), or continuous / revolute for parts that spin
+         axis       joint axis in the part frame, used when joint is not
+                    fixed; the macro's default is the part's own spin axis
+
+     and emitting one link (inertia, visual via part_visual, optional
+     collision), the mounting joint (part_joint), and its slots and frames as
+     massless links named <name>_<slot> / <name>_<frame> (part_slots,
+     part_frames). They show up in TF and are lumped away in Gazebo, where
+     they survive as frames of the same name.
+
+  The URDF xacro is the part. It may be bootstrapped from a modeler's SDF
+  with scripts/sdf_to_part.py or written by hand; nothing downstream knows
+  or cares which. Mass, inertia and center of gravity are stated in the part
+  and nowhere else; assemblies compose them (docs: design/buoyancy).
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
+  <!-- ===== helpers used by every part macro ===== -->
+
+  <!-- glTF meshes are Y-up by specification and the delivered .glb files
+       conform. RViz and other ROS tools rotate them to Z-up on load; Gazebo
+       does not (it shows the data as is), so the URDF Gazebo merges is
+       expanded with gltf_up:=z, which pre-rotates every glTF visual by +90
+       degrees about x. The installed ROS URDF keeps gltf_up=y (no rotation). -->
+  <xacro:arg name="gltf_up" default="y"/>
+  <xacro:property name="gltf_visual_rpy" value="${'1.5708 0 0' if '$(arg gltf_up)' == 'z' else '0 0 0'}"/>
+
+  <!-- A part's visual mesh, with the glTF up axis handling above. -->
+  <xacro:macro name="part_visual" params="mesh xyz:='0 0 0'">
+    <visual>
+      <origin xyz="${xyz}" rpy="${gltf_visual_rpy}"/>
+      <geometry>
+        <mesh filename="${mesh}"/>
+      </geometry>
+    </visual>
+  </xacro:macro>
+
+  <!-- The mounting joint. attach is the bolt on point in the part frame:
+       the child frame is placed at xyz/rpy minus the rotated attach offset,
+       so that point lands exactly on the requested pose. parent="" means
+       root: no joint is emitted. -->
+  <xacro:macro name="part_joint"
+               params="name parent xyz rpy joint:=fixed axis:='1 0 0' attach:='0 0 0'">
+    <xacro:if value="${parent != ''}">
+      <xacro:property name="_t" value="${[float(v) for v in xyz.split()]}"/>
+      <xacro:property name="_r" value="${[float(v) for v in rpy.split()]}"/>
+      <xacro:property name="_a" value="${[-float(v) for v in attach.split()]}"/>
+      <xacro:property name="_cr" value="${cos(_r[0])}"/>
+      <xacro:property name="_sr" value="${sin(_r[0])}"/>
+      <xacro:property name="_cp" value="${cos(_r[1])}"/>
+      <xacro:property name="_sp" value="${sin(_r[1])}"/>
+      <xacro:property name="_cy" value="${cos(_r[2])}"/>
+      <xacro:property name="_sy" value="${sin(_r[2])}"/>
+      <xacro:property name="_ox"
+        value="${_t[0] + _cy*_cp*_a[0] + (_cy*_sp*_sr - _sy*_cr)*_a[1] + (_cy*_sp*_cr + _sy*_sr)*_a[2]}"/>
+      <xacro:property name="_oy"
+        value="${_t[1] + _sy*_cp*_a[0] + (_sy*_sp*_sr + _cy*_cr)*_a[1] + (_sy*_sp*_cr - _cy*_sr)*_a[2]}"/>
+      <xacro:property name="_oz"
+        value="${_t[2] - _sp*_a[0] + _cp*_sr*_a[1] + _cp*_cr*_a[2]}"/>
+      <joint name="${name}_joint" type="${joint}">
+        <parent link="${parent}"/>
+        <child link="${name}"/>
+        <origin xyz="${_ox} ${_oy} ${_oz}" rpy="${rpy}"/>
+        <xacro:if value="${joint != 'fixed'}">
+          <axis xyz="${axis}"/>
+        </xacro:if>
+      </joint>
+    </xacro:if>
+  </xacro:macro>
+
+  <!-- A slot or a reference frame: massless link fixed to the part. -->
+  <xacro:macro name="part_slot" params="name parent xyz rpy:='0 0 0'">
+    <link name="${name}"/>
+    <joint name="${name}_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${name}"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- All of a part's slots (or frames: same thing to the URDF) from its
+       part_info table (xacro has no loop; recurse over list(table.items())). -->
+  <xacro:macro name="part_slots" params="name items">
+    <xacro:if value="${len(items) > 0}">
+      <xacro:part_slot name="${name}_${items[0][0]}" parent="${name}"
+                       xyz="${items[0][1]['xyz']}" rpy="${items[0][1].get('rpy', '0 0 0')}"/>
+      <xacro:part_slots name="${name}" items="${items[1:]}"/>
+    </xacro:if>
+  </xacro:macro>
+  <xacro:macro name="part_frames" params="name items">
+    <xacro:part_slots name="${name}" items="${items}"/>
+  </xacro:macro>
+
   <!-- ===== catalog =====
-       One include per part. Keep alphabetical; the directory name, the file
-       name and the macro name are all the part name from models/parts.csv. -->
-  <xacro:include filename="$(find bluerobotics_parts)/models/blueboat_antenna_mast/blueboat_antenna_mast.urdf.xacro"/>
+       One include per part, alphabetical. The file name and the macro name
+       are the part name. -->
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/basestation_antenna.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/blueboat_antenna_mast.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/blueboat_chassis.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/blueboat_flag.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/blueboat_payload_bracket.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/blueboat_ping_singlebeam_mount.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/m200_weedless_prop_ccw.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/m200_weedless_prop_cw.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/omniscan_450_sidescan.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/ping_singlebeam.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/surveyor_multibeam.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/t200_prop_ccw.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/t200_prop_cw.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/t200_thruster.urdf.xacro"/>
 
 </robot>

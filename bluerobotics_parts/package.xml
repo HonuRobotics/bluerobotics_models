@@ -16,7 +16,9 @@
   <url type="bugtracker">https://github.com/HonuRobotics/bluerobotics_models/issues</url>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
 
+  <exec_depend>python3-yaml</exec_depend>
   <exec_depend>xacro</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>

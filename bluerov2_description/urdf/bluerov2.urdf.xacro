@@ -45,7 +45,7 @@
 
   <!-- ==================== Buoyancy declaration ====================
        Optional keys under `buoyancy:` in the config declare the vehicle's
-       buoyant behavior for the assembled loadout (see AUR_BUOYANCY_DESIGN.md).
+       buoyant behavior for the assembled loadout (docs: design/buoyancy).
        An absent block or key takes its default below:
 
          net_buoyancy    net buoyancy as displaced mass, in kg. Positive floats

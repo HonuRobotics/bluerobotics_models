@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!--
+  blueboat_ping_singlebeam_mount part macro.
+
+  Bootstrapped from models/blueboat_ping_singlebeam_mount/model.sdf by scripts/sdf_to_part.py on
+  2026-08-21. This file is the part: maintain it by hand from here on.
+
+  Inertia: estimated from the delivered collision geometry at 1000 kg/m^3 (SDF auto inertia); replace with measured values.
+
+  Contract (see parts.xacro): <part>_info exports the metadata (attach,
+  slots, frames, drive); <part> instantiates the link, its mounting joint
+  and its slot / frame links.
+  Slots other parts fit into, as frames <name>_<slot>:
+    ping: ping_singlebeam; default ping_singlebeam
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="blueboat_ping_singlebeam_mount_info">
+    <xacro:property name="part_info" scope="parent" value="${dict(
+        attach='0 0 0',
+        slots=dict(
+            ping=dict(xyz='0 0 -0.01', rpy='0 0 0', accepts=['ping_singlebeam'], default='ping_singlebeam'),
+        ),
+        frames=dict(
+        ))}"/>
+  </xacro:macro>
+
+  <xacro:macro name="blueboat_ping_singlebeam_mount"
+               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='1 0 0'">
+    <xacro:blueboat_ping_singlebeam_mount_info/>
+
+    <link name="${name}">
+      <inertial>
+        <origin xyz="0.00102118 -0.00184678 0.00452042" rpy="0 0 0"/>
+        <mass value="0.0586769"/>
+        <inertia ixx="2.90082e-05" ixy="-3.72562e-20" ixz="-3.49252e-13"
+                 iyy="0.000291832" iyz="-1.0888e-12"
+                 izz="0.000301922"/>
+      </inertial>
+      <xacro:part_visual mesh="package://bluerobotics_parts/models/blueboat_ping_singlebeam_mount/blueboat_ping_singlebeam_mount.visual.glb"/>
+      <xacro:if value="${collision}">
+        <collision>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry>
+            <mesh filename="package://bluerobotics_parts/models/blueboat_ping_singlebeam_mount/blueboat_ping_singlebeam_mount.collision.stl" scale="1 1 1"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+    </link>
+
+    <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
+                      joint="${joint}" axis="${axis}" attach="${part_info['attach']}"/>
+    <xacro:part_slots name="${name}" items="${list(part_info['slots'].items())}"/>
+    <xacro:part_frames name="${name}" items="${list(part_info['frames'].items())}"/>
+
+  </xacro:macro>
+
+</robot>

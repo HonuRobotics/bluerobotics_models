@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<!--
+  surveyor_multibeam part macro.
+
+  Bootstrapped from models/surveyor_multibeam/model.sdf by scripts/sdf_to_part.py on
+  2026-08-21. This file is the part: maintain it by hand from here on.
+
+  Inertia: estimated from the delivered collision geometry at 1000 kg/m^3 (SDF auto inertia); replace with measured values.
+
+  Contract (see parts.xacro): <part>_info exports the metadata (attach,
+  slots, frames, drive); <part> instantiates the link, its mounting joint
+  and its slot / frame links.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="surveyor_multibeam_info">
+    <xacro:property name="part_info" scope="parent" value="${dict(
+        attach='0 0 0',
+        slots=dict(
+        ),
+        frames=dict(
+        ))}"/>
+  </xacro:macro>
+
+  <xacro:macro name="surveyor_multibeam"
+               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='1 0 0'">
+    <xacro:surveyor_multibeam_info/>
+
+    <link name="${name}">
+      <inertial>
+        <origin xyz="-0.00255219 -0.000106891 -0.00198043" rpy="0 0 0"/>
+        <mass value="0.698641"/>
+        <inertia ixx="0.000511009" ixy="2.87141e-06" ixz="-1.38952e-06"
+                 iyy="0.00161571" iyz="2.95116e-07"
+                 izz="0.00170839"/>
+      </inertial>
+      <xacro:part_visual mesh="package://bluerobotics_parts/models/surveyor_multibeam/surveyor_multibeam.visual.glb"/>
+      <xacro:if value="${collision}">
+        <collision>
+          <origin xyz="-0.003761 -8.9e-05 0.002653" rpy="0 -0 0"/>
+          <geometry>
+            <box size="0.146896 0.067019 0.056353"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="-0.004562 3.4e-05 -0.021276" rpy="0 -0 0"/>
+          <geometry>
+            <box size="0.171913 0.090927 0.008497"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0.084398 -0.015071 -0.002678" rpy="-0 1.5708 0"/>
+          <geometry>
+            <cylinder radius="0.008067" length="0.031815"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0.07957 0.015057 -0.002678" rpy="-0 1.5708 0"/>
+          <geometry>
+            <cylinder radius="0.008067" length="0.022158"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+    </link>
+
+    <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
+                      joint="${joint}" axis="${axis}" attach="${part_info['attach']}"/>
+    <xacro:part_slots name="${name}" items="${list(part_info['slots'].items())}"/>
+    <xacro:part_frames name="${name}" items="${list(part_info['frames'].items())}"/>
+
+  </xacro:macro>
+
+</robot>

@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<!--
+  omniscan_450_sidescan part macro.
+
+  Bootstrapped from models/omniscan_450_sidescan/model.sdf by scripts/sdf_to_part.py on
+  2026-08-21. This file is the part: maintain it by hand from here on.
+
+  Inertia: estimated from the delivered collision geometry at 1000 kg/m^3 (SDF auto inertia); replace with measured values.
+
+  Contract (see parts.xacro): <part>_info exports the metadata (attach,
+  slots, frames, drive); <part> instantiates the link, its mounting joint
+  and its slot / frame links.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="omniscan_450_sidescan_info">
+    <xacro:property name="part_info" scope="parent" value="${dict(
+        attach='0 0 0',
+        slots=dict(
+        ),
+        frames=dict(
+        ))}"/>
+  </xacro:macro>
+
+  <xacro:macro name="omniscan_450_sidescan"
+               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='1 0 0'">
+    <xacro:omniscan_450_sidescan_info/>
+
+    <link name="${name}">
+      <inertial>
+        <origin xyz="0 -0.001397 0.0193453" rpy="0 0 0"/>
+        <mass value="0.432857"/>
+        <inertia ixx="0.000106339" ixy="0" ixz="0"
+                 iyy="0.00371936" iyz="9.19397e-06"
+                 izz="0.00378588"/>
+      </inertial>
+      <xacro:part_visual mesh="package://bluerobotics_parts/models/omniscan_450_sidescan/omniscan_450_sidescan.visual.glb"/>
+      <xacro:if value="${collision}">
+        <collision>
+          <origin xyz="0 0.000924 0.026878" rpy="0 -0 0"/>
+          <geometry>
+            <box size="0.288405 0.0283 0.015639"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 -0.009413 0.021011" rpy="0 -0 0"/>
+          <geometry>
+            <box size="0.332663 0.059971 0.005112"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="-0 -0.003749 0.012993" rpy="-0.288675 -0 0"/>
+          <geometry>
+            <box size="0.332663 0.054792 0.005613"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0.002529 0.016576" rpy="0 -0 0"/>
+          <geometry>
+            <box size="0.332663 0.037167 0.004801"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="-0 0.011328 0.011715" rpy="0 -0 0"/>
+          <geometry>
+            <box size="0.332663 0.020919 0.005972"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+    </link>
+
+    <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
+                      joint="${joint}" axis="${axis}" attach="${part_info['attach']}"/>
+    <xacro:part_slots name="${name}" items="${list(part_info['slots'].items())}"/>
+    <xacro:part_frames name="${name}" items="${list(part_info['frames'].items())}"/>
+
+  </xacro:macro>
+
+</robot>
