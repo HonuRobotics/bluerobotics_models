@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-  Gallery of the BlueBoat parts delivered in PR #5, laid out for visual review.
+  Gallery of the delivered Blue Robotics parts, laid out for visual review.
 
   Each part is pulled in with <include> pointing straight at its model.sdf, so
   this file holds layout only - the visual mesh and the collision geometry come
@@ -17,12 +17,12 @@
   at src/bluerobotics_models instead.
 
   Covers every part under models/ that ships both a mesh and a model.sdf -
-  14 of 28 directories.
+  15 of 28 directories.
 
   Run:  gz sim <this file>
 
   Laid out in groups, +y between groups, +x within a group:
-    vessel       blueboat_chassis
+    vessel       blueboat_chassis bluerov2_chassis
     masts        basestation_antenna blueboat_antenna_mast blueboat_flag
     mounts       blueboat_payload_bracket blueboat_ping_singlebeam_mount
     propulsion   m200_weedless_prop_ccw m200_weedless_prop_cw t200_prop_ccw t200_prop_cw t200_thruster
@@ -37,7 +37,6 @@
   Turn on View -> Collisions to check contact geometry against the mesh.
 
   Not yet delivered (directory exists, no mesh or model.sdf):
-    bluerov2_chassis
     bluerov2_heavy_chassis
     bluerov2_payload_skid
     bluerov2_roof_rack
@@ -101,6 +100,12 @@
       <uri>bluerobotics_parts/models/blueboat_chassis/model.sdf</uri>
       <name>blueboat_chassis</name>
       <pose>0.596 0.0 1.0 0 0 0</pose>
+      <static>true</static>
+    </include>
+    <include>
+      <uri>bluerobotics_parts/models/bluerov2_chassis/model.sdf</uri>
+      <name>bluerov2_chassis</name>
+      <pose>1.77 0.0 1.0 0 0 0</pose>
       <static>true</static>
     </include>
     <!-- masts -->
