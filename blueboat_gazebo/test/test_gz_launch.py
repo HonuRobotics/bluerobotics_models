@@ -57,7 +57,9 @@ def sim_seconds(env):
                         f'/world/{WORLD_NAME}/stats', '-n', '1', timeout=15)
     block = re.search(r'sim_time\s*{([^}]*)}', out)
     assert code == 0 and block, f'cannot read world stats:\n{out}\n{err}'
-    sec = re.search(r'sec:\s*(\d+)', block.group(1))
+    # (?<![a-z]) so 'sec:' never matches inside 'nsec:' (protobuf text
+    # omits a zero sec field, leaving only nsec in the block).
+    sec = re.search(r'(?<![a-z])sec:\s*(\d+)', block.group(1))
     nsec = re.search(r'nsec:\s*(\d+)', block.group(1))
     return (int(sec.group(1)) if sec else 0) + \
         (int(nsec.group(1)) if nsec else 0) / 1e9
