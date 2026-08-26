@@ -21,7 +21,8 @@
     thruster_1 .. thruster_4: vectored horizontals (1 FR ccw, 2 FL ccw,
       3 RR cw, 4 RL cw); default the matching t200 prop
     thruster_5, thruster_6: verticals (5 starboard ccw, 6 port cw), at
-      z 0.05 so the props nest just below the artist foam top (z 0.067)
+      x 0.015 / z 0.05, centered in the well between the artist foam
+      blocks (x -0.032 .. +0.061) with the props just below its top
     camera: explorehd_camera (default) or marinesitu_c3
     sonar: ping360; default none
     dvl: dvl_a50; default none
@@ -42,8 +43,8 @@
             thruster_2=dict(xyz='0.14 0.092 0.0', rpy='0 0 2.3562', accepts=['t200_prop_ccw'], default='t200_prop_ccw', collision=False),
             thruster_3=dict(xyz='-0.15 -0.092 0.0', rpy='0 0 -0.7854', accepts=['t200_prop_cw'], default='t200_prop_cw', collision=False),
             thruster_4=dict(xyz='-0.15 0.092 0.0', rpy='0 0 0.7854', accepts=['t200_prop_cw'], default='t200_prop_cw', collision=False),
-            thruster_5=dict(xyz='0.0 -0.109 0.05', rpy='0 1.5708 0', accepts=['t200_prop_ccw'], default='t200_prop_ccw', collision=False),
-            thruster_6=dict(xyz='0.0 0.109 0.05', rpy='0 1.5708 0', accepts=['t200_prop_cw'], default='t200_prop_cw', collision=False),
+            thruster_5=dict(xyz='0.015 -0.109 0.05', rpy='0 1.5708 0', accepts=['t200_prop_ccw'], default='t200_prop_ccw', collision=False),
+            thruster_6=dict(xyz='0.015 0.109 0.05', rpy='0 1.5708 0', accepts=['t200_prop_cw'], default='t200_prop_cw', collision=False),
             camera=dict(xyz='0.22 0 0.05', rpy='0 0 0', accepts=['explorehd_camera', 'marinesitu_c3'], default='explorehd_camera'),
             sonar=dict(xyz='0.16 0 0.13', rpy='0 0 0', accepts=['ping360'], default='none'),
             dvl=dict(xyz='-0.12 0 -0.14', rpy='0 0 0', accepts=['dvl_a50'], default='none'),
@@ -54,8 +55,8 @@
             thruster_body_2=dict(xyz='0.14 0.092 0.0', rpy='0 0 2.3562', accepts=['t200_thruster'], default='t200_thruster', collision=False),
             thruster_body_3=dict(xyz='-0.15 -0.092 0.0', rpy='0 0 -0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
             thruster_body_4=dict(xyz='-0.15 0.092 0.0', rpy='0 0 0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
-            thruster_body_5=dict(xyz='0.0 -0.109 0.05', rpy='0 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
-            thruster_body_6=dict(xyz='0.0 0.109 0.05', rpy='0 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_5=dict(xyz='0.015 -0.109 0.05', rpy='0 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_6=dict(xyz='0.015 0.109 0.05', rpy='0 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
         ),
         frames=dict(
         ))}"/>
