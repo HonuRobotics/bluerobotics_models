@@ -71,12 +71,11 @@ add_custom_command(
           ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_model.py
   COMMENT "Generating model.sdf from bluerov2.yaml and the assembled URDF")
 set(stamper
-  ${bluerov2_description_DIR}/../../../lib/bluerov2_description/stamp_model_specs.py)
+  ${bluerobotics_parts_DIR}/../../../lib/bluerobotics_parts/stamp_model_specs.py)
 set(stamped_sdf ${CMAKE_CURRENT_BINARY_DIR}/stamped/model.sdf)
 add_custom_command(
   OUTPUT ${stamped_sdf}
   COMMAND Python3::Interpreter ${stamper}
-          --vehicle bluerov2
           --urdf ${desc_urdf}
           --config ${vehicle_config}
           --stamp ${raw_sdf}

@@ -26,6 +26,8 @@ xacro_add_files(
     TARGET urdf_raw
 )
 
+set(stamper
+  ${bluerobotics_parts_DIR}/../../../lib/bluerobotics_parts/stamp_model_specs.py)
 # Stamp the generated URDF with a model specs comment (total mass, centers of
 # mass and buoyancy, net buoyancy, accessories) and install the stamped copy
 # under the same urdf/ name every consumer resolves.
@@ -33,16 +35,13 @@ set(raw_urdf ${CMAKE_CURRENT_BINARY_DIR}/urdf/bluerov2.urdf)
 set(stamped_urdf ${CMAKE_CURRENT_BINARY_DIR}/stamped/bluerov2.urdf)
 add_custom_command(
   OUTPUT ${stamped_urdf}
-  COMMAND Python3::Interpreter
-          ${CMAKE_CURRENT_SOURCE_DIR}/scripts/stamp_model_specs.py
-          --vehicle bluerov2
+  COMMAND Python3::Interpreter ${stamper}
           --urdf ${raw_urdf}
           --config ${CMAKE_CURRENT_SOURCE_DIR}/config/bluerov2.yaml
           --stamp ${raw_urdf}
           --out ${stamped_urdf}
-  DEPENDS ${raw_urdf}
+  DEPENDS ${raw_urdf} ${stamper}
           ${CMAKE_CURRENT_SOURCE_DIR}/config/bluerov2.yaml
-          ${CMAKE_CURRENT_SOURCE_DIR}/scripts/stamp_model_specs.py
   COMMENT "Stamping bluerov2.urdf with model specs")
 add_custom_target(${PROJECT_NAME}_model_specs ALL DEPENDS ${stamped_urdf})
 install(FILES ${stamped_urdf} DESTINATION share/${PROJECT_NAME}/urdf)
@@ -53,9 +52,6 @@ install(DIRECTORY
   launch
   config
   DESTINATION share/${PROJECT_NAME})
-install(PROGRAMS
-  scripts/stamp_model_specs.py
-  DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

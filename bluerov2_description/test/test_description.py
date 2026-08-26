@@ -14,7 +14,6 @@
 """Generation pipeline tests: config yaml + part slots -> URDF."""
 
 from pathlib import Path
-import re
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
@@ -26,7 +25,6 @@ import yaml
 SHARE = Path(get_package_share_directory('bluerov2_description'))
 PARTS_SHARE = Path(get_package_share_directory('bluerobotics_parts'))
 TOP_XACRO = SHARE / 'urdf' / 'bluerov2.urdf.xacro'
-PARTS_XACRO = PARTS_SHARE / 'urdf' / 'parts.xacro'
 
 DEFAULT_CONFIG = (SHARE / 'config' / 'bluerov2.yaml').read_text()
 
@@ -38,20 +36,21 @@ DEFAULT_LOADOUT = {'base_link': 'bluerov2_chassis',
                    'camera': 'explorehd_camera'}
 DEFAULT_LOADOUT |= {f'thruster_body_{n}': 't200_thruster' for n in range(1, 7)}
 
-# The library is shared across vehicles; these tests sweep the BlueROV2's
-# sub catalog only (the BlueBoat parts have their own suite). The t200
-# props are shared and included here.
-BOAT_PARTS = {'blueboat_chassis', 'blueboat_flag', 'blueboat_antenna_mast',
-              'blueboat_payload_bracket', 'blueboat_ping_singlebeam_mount',
-              'ping_singlebeam', 'basestation_antenna', 'surveyor_multibeam',
-              'omniscan_450_sidescan',
-              'm200_weedless_prop_ccw', 'm200_weedless_prop_cw'}
+# The parts library is shared across vehicles; each vehicle's suite sweeps
+# only the parts of its own world (the catalog wide guarantee lives in
+# bluerobotics_parts/test/test_parts.py). The t200 parts are shared with
+# the BlueBoat and included here.
+BLUEROV2_PARTS = sorted({
+    'bluerov2_chassis', 'bluerov2_heavy_chassis', 'dvl_a50',
+    'explorehd_camera', 'marinesitu_c3', 'newton_gripper',
+    'omniscan_450_fs', 'payload_skid', 'ping360', 'roof_rack',
+    'sediment_sampler', 'sonoptix_echo', 't200_prop_ccw', 't200_prop_cw',
+    't200_thruster'})
 
 
 def catalog():
-    """Part types the BlueROV2 sweep covers: the include list minus the boat's."""
-    names = re.findall(r'/urdf/([a-z0-9_]+)\.urdf\.xacro', PARTS_XACRO.read_text())
-    return sorted(set(names) - {'part_probe'} - BOAT_PARTS)
+    """Part types the BlueROV2 sweep covers."""
+    return BLUEROV2_PARTS
 
 
 def make_config(parts=(), slots=(), base='bluerov2_chassis'):
