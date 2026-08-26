@@ -3,3 +3,5 @@ install/
 log/
 __pycache__/
 *.pyc
+.devcontainer/
+.devcontainer/*
