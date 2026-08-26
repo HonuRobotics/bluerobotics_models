@@ -7,8 +7,8 @@
   it by hand from here on.
 
   The chassis is the standard (6 thruster) BlueROV2 hull as one rigid body,
-  T200 thruster bodies included; only the propellers are separate parts, on
-  the thruster slots. Mass is the hull plus six T200 bodies (9.4 + 6 x
+  with T200 bodies and propellers as parts on the thruster_body_N and
+  thruster_N slots (all fitted by default). Mass is the hull plus six T200 bodies (9.4 + 6 x
   0.3049 kg, the T200 in air mass minus its prop part), so the default
   loadout totals the reference ~11.5 kg in air. Inertia: tensor shape
   estimated from the collision geometry, scaled to that mass.
@@ -46,6 +46,12 @@
             gripper=dict(xyz='0.28 0 -0.08', rpy='0 0 0', accepts=['newton_gripper', 'sediment_sampler'], default='none'),
             payload=dict(xyz='0 0 -0.17', rpy='0 0 0', accepts=['payload_skid'], default='none'),
             rack=dict(xyz='0 0 0.17', rpy='0 0 0', accepts=['roof_rack'], default='none'),
+            thruster_body_1=dict(xyz='0.14 -0.092 0.0', rpy='0 0 -2.3562', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_2=dict(xyz='0.14 0.092 0.0', rpy='0 0 2.3562', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_3=dict(xyz='-0.15 -0.092 0.0', rpy='0 0 -0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_4=dict(xyz='-0.15 0.092 0.0', rpy='0 0 0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_5=dict(xyz='0.0 -0.109 0.077', rpy='0 1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_6=dict(xyz='0.0 0.109 0.077', rpy='0 1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
         ),
         frames=dict(
         ))}"/>
@@ -62,10 +68,12 @@
              gently nose down); the bootstrap estimate from the collision
              volumes put it 3 cm low, which made surge climb. -->
         <origin xyz="0.00979373 -0.000225576 0.011" rpy="0 0 0"/>
-        <mass value="11.2297"/>
-        <inertia ixx="0.167167" ixy="-6.77391e-06" ixz="-0.000601754"
-                 iyy="0.208312" iyz="2.46933e-05"
-                 izz="0.263922"/>
+        <mass value="9.4"/>
+        <!-- Bare hull: the T200 bodies and props are parts on the
+             thruster_body / thruster slots. Tensor scaled to this mass. -->
+        <inertia ixx="1.399298e-01" ixy="-5.670210e-06" ixz="-5.037078e-04"
+                 iyy="1.743709e-01" iyz="2.066992e-05"
+                 izz="2.209201e-01"/>
       </inertial>
       <xacro:part_visual mesh="package://bluerobotics_parts/models/bluerov2_chassis/bluerov2_chassis.visual.glb"/>
       <xacro:if value="${collision}">

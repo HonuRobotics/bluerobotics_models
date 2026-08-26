@@ -3,8 +3,8 @@
   bluerov2_heavy_chassis part macro.
 
   Hand derived from the bluerov2_chassis part: the Heavy kit hull (wider
-  frame, 8 thrusters) as one rigid body, T200 bodies included; only the
-  propellers are separate parts. The visual is the DAVE heavy mesh, a
+  frame, 8 thrusters) as one rigid body, with T200 bodies and propellers
+  as parts on their slots. The visual is the DAVE heavy mesh, a
   PLACEHOLDER until the artist delivers the heavy shell; collisions are the
   standard chassis set (approximate for the wider hull). Mass is the heavy
   hull plus eight T200 bodies (12.75 + 8 x 0.3049 kg), totalling the
@@ -46,6 +46,14 @@
             gripper=dict(xyz='0.28 0 -0.08', rpy='0 0 0', accepts=['newton_gripper', 'sediment_sampler'], default='none'),
             payload=dict(xyz='0 0 -0.17', rpy='0 0 0', accepts=['payload_skid'], default='none'),
             rack=dict(xyz='0 0 0.17', rpy='0 0 0', accepts=['roof_rack'], default='none'),
+            thruster_body_1=dict(xyz='0.14 -0.092 0.0', rpy='0 0 -2.3562', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_2=dict(xyz='0.14 0.092 0.0', rpy='0 0 2.3562', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_3=dict(xyz='-0.15 -0.092 0.0', rpy='0 0 -0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_4=dict(xyz='-0.15 0.092 0.0', rpy='0 0 0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_5=dict(xyz='0.118 -0.215 0.064', rpy='0 1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_6=dict(xyz='0.118 0.215 0.064', rpy='0 1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_7=dict(xyz='-0.118 -0.215 0.064', rpy='0 1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_8=dict(xyz='-0.118 0.215 0.064', rpy='0 1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
         ),
         frames=dict(
         ))}"/>
@@ -62,12 +70,12 @@
              gently nose down); the bootstrap estimate from the collision
              volumes put it 3 cm low, which made surge climb. -->
         <origin xyz="0.00979373 -0.000225576 0.011" rpy="0 0 0"/>
-        <mass value="15.1896"/>
-        <!-- Standard chassis tensor scaled to the heavy mass; refine when
-             the heavy shell arrives. -->
-        <inertia ixx="0.226119" ixy="-9.16233e-06" ixz="-0.000813946"
-                 iyy="0.281774" iyz="3.34021e-05"
-                 izz="0.357013"/>
+        <mass value="12.75"/>
+        <!-- Bare hull: the T200 bodies and props are parts on the
+             thruster_body / thruster slots. Tensor scaled to this mass. -->
+        <inertia ixx="1.898021e-01" ixy="-7.690769e-06" ixz="-6.832182e-04"
+                 iyy="2.365183e-01" iyz="2.803739e-05"
+                 izz="2.996732e-01"/>
       </inertial>
       <!-- DAVE heavy hull, authored in 25 mm units (0.025 scales to metres). -->
       <visual>

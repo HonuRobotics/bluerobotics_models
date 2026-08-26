@@ -36,6 +36,7 @@ DEFAULT_LOADOUT = {'base_link': 'bluerov2_chassis',
                    'thruster_3': 't200_prop_cw', 'thruster_4': 't200_prop_cw',
                    'thruster_5': 't200_prop_ccw', 'thruster_6': 't200_prop_cw',
                    'camera': 'explorehd_camera'}
+DEFAULT_LOADOUT |= {f'thruster_body_{n}': 't200_thruster' for n in range(1, 7)}
 
 # The library is shared across vehicles; these tests sweep the BlueROV2's
 # sub catalog only (the BlueBoat parts have their own suite). The t200
@@ -44,7 +45,7 @@ BOAT_PARTS = {'blueboat_chassis', 'blueboat_flag', 'blueboat_antenna_mast',
               'blueboat_payload_bracket', 'blueboat_ping_singlebeam_mount',
               'ping_singlebeam', 'basestation_antenna', 'surveyor_multibeam',
               'omniscan_450_sidescan',
-              'm200_weedless_prop_ccw', 'm200_weedless_prop_cw', 't200_thruster'}
+              'm200_weedless_prop_ccw', 'm200_weedless_prop_cw'}
 
 
 def catalog():
@@ -127,7 +128,8 @@ def test_heavy_chassis_has_eight_thrusters():
     """The heavy base fits four corner verticals with balanced chirality."""
     root = generate_urdf(make_config(base='bluerov2_heavy_chassis'))
     parts = manifest(root)
-    props = {n: t for n, t in parts.items() if n.startswith('thruster_')}
+    props = {n: t for n, t in parts.items()
+             if n.startswith('thruster_') and not n.startswith('thruster_body')}
     assert len(props) == 8
     assert sum(t.endswith('_ccw') for t in props.values()) == 4
 

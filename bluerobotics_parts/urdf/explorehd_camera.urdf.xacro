@@ -36,6 +36,9 @@
                  izz="${_m/2.0 * _r**2}"/>
       </inertial>
       <visual>
+        <!-- The cylinder primitive's axis is z; the camera points along +x
+             (the sensing direction), so lay the visual on its side. -->
+        <origin xyz="0 0 0" rpy="0 1.5708 0"/>
         <geometry><cylinder radius="${_r}" length="${_l}"/></geometry>
         <material name="${name}_mat"><color rgba="0.5 0.5 0.55 1"/></material>
       </visual>

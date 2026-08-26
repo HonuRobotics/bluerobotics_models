@@ -52,8 +52,9 @@ macro (`bluerobotics_parts/urdf/<part>.urdf.xacro`); this page mirrors them.
 
 | Type | What | Notes |
 |---|---|---|
-| `bluerov2_chassis` | standard hull as one body, T200 bodies included | the assembly root; declares every slot |
+| `bluerov2_chassis` | standard hull (frame, tanks, foam) | the assembly root; declares every slot incl. thruster bodies and props |
 | `bluerov2_heavy_chassis` | Heavy kit hull (8 thrusters) | placeholder mesh until the heavy shell is delivered |
+| `t200_thruster` | T200 body | fitted on the thruster_body slots by default |
 | `t200_prop_ccw`, `t200_prop_cw` | T200 propellers | shared with the BlueBoat; drive table, continuous joints |
 | `explorehd_camera` | exploreHD underwater camera | sensor part (camera) |
 | `marinesitu_c3` | MarineSitu C3 stereo camera | sensor part (rgbd) |
