@@ -39,6 +39,11 @@ import xml.etree.ElementTree as ET
 
 import yaml
 
+try:
+    from bluerobotics_parts import assembly
+except ImportError:  # bluerov2: no parts library, no manifest
+    assembly = None
+
 DEFAULT_FLUID_DENSITY = 1025.0  # seawater; overridable via buoyancy: fluid_density
 
 STAMP_RE = re.compile(r'<!-- =+ model specs =+.*?=+ -->\n?', re.S)
@@ -144,16 +149,48 @@ def buoyancy_properties(root):
     return volume, tuple(m / volume for m in moment)
 
 
-def accessory_summary(cfg):
-    """One `type (name)` item per configured accessory."""
+def parts_summary(urdf_root, cfg):
+    """
+    Return one `type (name)` item per part in the assembly.
+
+    The assembled URDF carries an <assembly_part> manifest (defaults
+    included); configs of the older accessories form list them directly.
+    """
+    manifest = assembly.instances(urdf_root) if assembly else []
+    if manifest:
+        return [f'{ptype} ({name})' for ptype, name, _ in manifest]
     return [f'{a["type"]} ({a["name"]})'
-            for a in cfg.get('accessories') or []]
+            for a in (cfg.get('parts') or cfg.get('accessories') or [])]
+
+
+def declared_displacement(cfg, total_mass, com):
+    """
+    Return (volume, center of buoyancy) from the config's declaration.
+
+    The Gazebo composition realizes displacement on a dedicated link, so
+    the URDF carries no displacement geometry and the numbers come from
+    the declaration: a `buoyancy:` block (UUV) solves
+    fluid_density * volume = total_mass + net_buoyancy with the CoB at
+    cob_offset from the chosen frame. Returns None when the config
+    declares nothing (legacy: read the URDF collisions).
+    """
+    buoyancy = cfg.get('buoyancy')
+    if buoyancy:
+        density = float(buoyancy.get('fluid_density', DEFAULT_FLUID_DENSITY))
+        net = float(buoyancy.get('net_buoyancy', 0.002))
+        offset = [float(v) for v in
+                  str(buoyancy.get('cob_offset', '0 0 0.046')).split()]
+        base = com if buoyancy.get('cob_frame', 'com') == 'com' else (0.0,) * 3
+        return ((total_mass + net) / density,
+                tuple(base[i] + offset[i] for i in range(3)))
+    return None
 
 
 def specs_comment(vehicle, urdf_root, cfg):
     """Build the model specs comment block for the stamped file."""
     total, com = mass_properties(urdf_root)
-    volume, cob = buoyancy_properties(urdf_root)
+    volume, cob = (declared_displacement(cfg, total, com)
+                   or buoyancy_properties(urdf_root))
     density = float((cfg.get('buoyancy') or {}).get(
         'fluid_density', DEFAULT_FLUID_DENSITY))
     displaced = density * volume
@@ -187,8 +224,8 @@ def specs_comment(vehicle, urdf_root, cfg):
     else:
         rows.append(('reserve buoyancy',
                      f'{displaced - total:+.3f} kg at full submersion'))
-    accessories = accessory_summary(cfg) or ['none']
-    rows.append(('accessories', '; '.join(accessories)))
+    parts = parts_summary(urdf_root, cfg) or ['none']
+    rows.append(('parts', '; '.join(parts)))
     width = max(len(label) for label, _ in rows) + 2
     body = '\n'.join(f'  {label + ":":<{width}}{value}'
                      for label, value in rows)
@@ -234,6 +271,13 @@ def main():
     with open(args.config) as f:
         cfg = yaml.safe_load(f) or {}
     urdf_root = ET.parse(args.urdf).getroot()
+    if assembly and urdf_root.find('assembly_part') is not None:
+        # The config check the xacro expansion cannot do itself: fails the
+        # build on an entry that matched nothing, duplicate names, typos.
+        try:
+            assembly.check(cfg, urdf_root)
+        except assembly.AssemblyError as e:
+            sys.exit(str(e))
     comment = specs_comment(args.vehicle, urdf_root, cfg)
     if '--' in comment.replace('<!--', '', 1)[:-len('-->\n')]:
         sys.exit('model specs comment would contain "--", illegal in XML')

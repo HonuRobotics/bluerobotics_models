@@ -57,7 +57,9 @@ def sim_seconds(env):
                         f'/world/{WORLD_NAME}/stats', '-n', '1', timeout=15)
     block = re.search(r'sim_time\s*{([^}]*)}', out)
     assert code == 0 and block, f'cannot read world stats:\n{out}\n{err}'
-    sec = re.search(r'sec:\s*(\d+)', block.group(1))
+    # (?<![a-z]) so 'sec:' never matches inside 'nsec:' (protobuf text
+    # omits a zero sec field, leaving only nsec in the block).
+    sec = re.search(r'(?<![a-z])sec:\s*(\d+)', block.group(1))
     nsec = re.search(r'nsec:\s*(\d+)', block.group(1))
     return (int(sec.group(1)) if sec else 0) + \
         (int(nsec.group(1)) if nsec else 0) / 1e9
@@ -93,7 +95,7 @@ def command_thrusters(env, mapping, repeats=6):
     for _ in range(repeats):
         procs = [(n, subprocess.Popen(
             ['gz', 'topic', '-t',
-             f'/model/bluerov2/joint/thruster{n}_joint/cmd_thrust',
+             f'/bluerov2/thruster_{n}/thrust',
              '-m', 'gz.msgs.Double', '-p', f'data: {value}'],
             env=env, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
             text=True)) for n, value in mapping.items()]
@@ -122,8 +124,8 @@ def test_model_loaded(sim):
 
 def test_interfaces_advertised(sim):
     """Thruster commands and sensor topics are advertised."""
-    needed = ('/model/bluerov2/joint/thruster1_joint/cmd_thrust',
-              '/model/bluerov2/joint/thruster6_joint/cmd_thrust',
+    needed = ('/bluerov2/thruster_1/thrust',
+              '/bluerov2/thruster_6/thrust',
               f'/world/{WORLD_NAME}/clock')
     poll_until(
         lambda: all(t in gz(sim, 'topic', '-l')[1] for t in needed), 30,
@@ -197,10 +199,12 @@ def test_forward_thrust_mix_surges(sim):
     command_thrusters(sim, {1: -10.0, 2: -10.0, 3: 10.0, 4: 10.0})
     wait_sim_seconds(sim, 8)          # onset transient: spin damps, speed builds
     t1 = sim_seconds(sim)
-    x1, y1, _, _, _, yaw1 = model_pose(sim)
+    x1, y1, z1, r1, p1, yaw1 = model_pose(sim)
+    print(f'DEBUG t1={t1:.2f} p=({x1:.3f},{y1:.3f},{z1:.3f}) rpy=({r1:.2f},{p1:.2f},{yaw1:.2f})')
     wait_sim_seconds(sim, 8)
     t2 = sim_seconds(sim)
-    x2, y2, _, _, _, yaw2 = model_pose(sim)
+    x2, y2, z2, r2, p2, yaw2 = model_pose(sim)
+    print(f'DEBUG t2={t2:.2f} p=({x2:.3f},{y2:.3f},{z2:.3f}) rpy=({r2:.2f},{p2:.2f},{yaw2:.2f})')
     dx, dy = x2 - x1, y2 - y1
     speed = math.hypot(dx, dy) / (t2 - t1)
     assert speed > 0.05, (

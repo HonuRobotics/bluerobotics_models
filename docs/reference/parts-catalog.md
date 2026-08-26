@@ -47,3 +47,18 @@ after the slot by default.
 
 Slot poses, accepted types and defaults live in each part's `<part>_info`
 macro (`bluerobotics_parts/urdf/<part>.urdf.xacro`); this page mirrors them.
+
+## BlueROV2 parts
+
+| Type | What | Notes |
+|---|---|---|
+| `bluerov2_chassis` | standard hull as one body, T200 bodies included | the assembly root; declares every slot |
+| `bluerov2_heavy_chassis` | Heavy kit hull (8 thrusters) | placeholder mesh until the heavy shell is delivered |
+| `t200_prop_ccw`, `t200_prop_cw` | T200 propellers | shared with the BlueBoat; drive table, continuous joints |
+| `explorehd_camera` | exploreHD underwater camera | sensor part (camera) |
+| `marinesitu_c3` | MarineSitu C3 stereo camera | sensor part (rgbd) |
+| `ping360` | Ping360 scanning sonar | sensor part (planar gpu_lidar) |
+| `dvl_a50` | Water Linked DVL A50 | sensor part (native DVL); backend loads only when fitted |
+| `newton_gripper`, `sediment_sampler` | 1 DOF claws | multi body parts; cmd_pos controllers |
+| `payload_skid`, `roof_rack` | payload skid, top rack | geometry only |
+| `sonoptix_echo`, `omniscan_450_fs` | imaging sonars | geometry only (no acoustic model ships) |

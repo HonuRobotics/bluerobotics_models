@@ -1,51 +1,68 @@
-# BlueROV2 build-time configuration.
-# Edit this file and rebuild (colcon build) to regenerate the URDF, the composed
-# Gazebo model AND the ros_gz bridge config; the buoyancy collision resizes
-# automatically for the configured loadout.
+# BlueROV2 build time configuration.
 #
-# variant: standard | heavy   (heavy = Heavy kit: 8-thruster vectored layout +
-#                              heavy frame mesh; standard = 6 thrusters)
-variant: standard
-
-# Buoyancy declaration (optional). Every key has a default; leaving the block
-# out builds the same near neutral vehicle as before. The full contract is
-# documented where it is implemented: urdf/bluerov2.urdf.xacro, section
-# "Buoyancy declaration".
-# buoyancy:
-#   net_buoyancy: 0.002      # kg, positive floats up
-#   cob_offset: "0 0 0.046"  # m, relative to cob_frame
-#   cob_frame: com           # com or base_link
-#   fluid_density: 1025.0    # kg/m^3, must match the world's Buoyancy plugin
-
-# Topic namespace: sensor/claw topics default to /<topic_namespace>/<name>/...
+# Edit this file and rebuild (colcon build) to regenerate the URDF, the
+# composed Gazebo model AND the ros_gz bridge config. To try a loadout
+# without rebuilding, pass config_file:=<your.yaml> to the launches.
+#
+# The default BlueROV2 needs nothing here: every slot of every part fills
+# itself with its default (the chassis fits its six propellers and the
+# exploreHD camera). The entries below are how to change that. See
+# bluerobotics_parts/urdf/assembly.xacro for the full rules and the site
+# (vehicles/bluerov2/configuration) for the slots and the catalog.
+#
+# Topic namespace: part topics default to /<topic_namespace>/<name>/...
 topic_namespace: bluerov2
 
-# Accessories to mount. `type` must match a macro in urdf/accessories.xacro;
-# xyz/rpy are the mount pose relative to base_link (metres / radians).
-# Optional per-accessory topic overrides (bases; per-sensor suffixes like
-# /image, /scan, /cmd_pos are appended):
+# base: the part whose link is the assembly root, base_link. The type picks
+# the variant: bluerov2_chassis (standard, 6 thrusters) or
+# bluerov2_heavy_chassis (Heavy kit, 8).
+base: {type: bluerov2_chassis, name: base_link}
+
+# parts: overrides and additions. A slot entry picks what goes in a slot
+# (slot: the slot name, of: the instance carrying it, default base_link;
+# type: an accepted part type, or none to leave it empty). An entry without
+# slot: is a free placement: type, name, xyz/rpy relative to parent
+# (default base_link). Optional per part topic overrides for parts with
+# topics (bases; the per part suffix such as /image is appended):
 #   topic:     base for BOTH the Gazebo and ROS sides
-#   gz_topic:  Gazebo-side base   (overrides `topic`)
-#   ros_topic: ROS-side base      (overrides `topic`)
-#   bridge:    dict of NATIVE ros_gz_bridge keys (lazy, subscriber_queue,
-#              publisher_queue, ...) merged into that accessory's generated
-#              bridge entries, e.g.  bridge: {lazy: false, publisher_queue: 5}
+#   gz_topic:  Gazebo side base   (overrides `topic`)
+#   ros_topic: ROS side base      (overrides `topic`)
+#   bridge:    dict of NATIVE ros_gz_bridge keys merged into that part's
+#              generated bridge entries
+parts: []
+  # - {slot: camera, type: marinesitu_c3}                    # the stereo option
+  # - {slot: camera, type: none}                             # bare hull
+  # - {slot: sonar, type: ping360}                           # slots with no default
+  # - {slot: dvl, type: dvl_a50}
+  # - {slot: gripper, type: newton_gripper}
+  # - {slot: gripper, type: sediment_sampler}
+  # - {slot: payload, type: payload_skid}
+  # - {slot: rack, type: roof_rack}
+  # - {type: sonoptix_echo,   name: sonar_l, xyz: "0.14 0.16 -0.05",  rpy: "0 0 0"}
+  # - {type: omniscan_450_fs, name: sonar_r, xyz: "0.14 -0.16 -0.05", rpy: "0 0 0"}
+
+# slots: ad hoc slots on any instance, usable like the parts' own. (The
+# instance key is of:, not on:, which YAML would read as the boolean true.)
+# slots:
+#   - {of: base_link, name: light, xyz: "0.2 0.1 0.1", rpy: "0 0 0"}
+
+# Buoyancy declaration, realized by the Gazebo composition as a dedicated
+# buoyancy_displacement link (an analytic box the world's buoyancy plugin is
+# enabled on; the parts' own collisions are contact geometry and never
+# displace). The box is solved at generation time from the assembled mass:
+#   fluid_density * volume = total_mass + net_buoyancy
 #
-# extra_bridge_topics: optional top-level list, appended VERBATIM to the
-# generated bridge config in native ros_gz_bridge syntax, for topics outside
-# the accessory system (thruster commands, odometry, ...). Never hand-edit the
-# generated ros_gz_bridge.yaml; it is overwritten on rebuild.
-#
-# Default: forward-looking camera only. Uncomment entries below to add the rest
-# of the catalog; the bridge config regenerates to match on rebuild.
-accessories:
-  - {type: explorehd_camera, name: camera,    xyz: "0.22 0 0.05",     rpy: "0 0 0"}
-  # - {type: ping360,          name: ping360,   xyz: "0.16 0 0.13",     rpy: "0 0 0"}
-  # - {type: dvl_a50,          name: dvl,       xyz: "-0.12 0 -0.14",   rpy: "0 0 0"}
-  # - {type: roof_rack,        name: roof_rack, xyz: "0 0 0.17",        rpy: "0 0 0"}
-  # - {type: payload_skid,     name: skid,      xyz: "0 0 -0.17",       rpy: "0 0 0"}
-  # - {type: sonoptix_echo,    name: sonoptix,  xyz: "0.14 0.16 -0.05", rpy: "0 0 0"}
-  # - {type: omniscan_450_fs,  name: omniscan,  xyz: "0.14 -0.16 -0.05", rpy: "0 0 0"}
-  # - {type: marinesitu_c3,    name: stereo,    xyz: "-0.16 0 0.16",    rpy: "0 0 0"}
-  # - {type: newton_gripper,   name: gripper,   xyz: "0.28 0 -0.08",    rpy: "0 0 0"}
-  # - {type: sediment_sampler, name: sampler,   xyz: "-0.26 0 -0.06",   rpy: "0 0 3.14159"}
+#   net_buoyancy   net buoyancy as displaced mass, kg. Positive floats up.
+#   cob_offset     "x y z" (m): center of buoyancy, relative to cob_frame.
+#   cob_frame      com (default; preserves righting stiffness across
+#                  loadouts) or base_link (pins the CoB like the hull).
+#   fluid_density  kg/m^3; MUST match the world's buoyancy plugin (a test
+#                  enforces it for the shipped world).
+#   footprint      "x y" (m): the box footprint; height is solved. The
+#                  default matches the standard hull; use "0.457 0.575"
+#                  for the heavy chassis.
+buoyancy: {net_buoyancy: 0.002, cob_offset: "0 0 0.046", cob_frame: com, fluid_density: 1025.0, footprint: "0.457 0.338"}
+
+# extra_bridge_topics: optional top level list, appended VERBATIM to the
+# generated bridge config in native ros_gz_bridge syntax. Never hand edit
+# the generated ros_gz_bridge.yaml; it is overwritten on rebuild.

@@ -11,9 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Generation-pipeline tests: config yaml -> URDF (validity, variants, buoyancy)."""
+"""Generation pipeline tests: config yaml + part slots -> URDF."""
 
-import math
 from pathlib import Path
 import re
 import subprocess
@@ -21,60 +20,61 @@ import tempfile
 import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import get_package_share_directory
-import pytest
+from bluerobotics_parts import assembly
+import yaml
 
 SHARE = Path(get_package_share_directory('bluerov2_description'))
+PARTS_SHARE = Path(get_package_share_directory('bluerobotics_parts'))
 TOP_XACRO = SHARE / 'urdf' / 'bluerov2.urdf.xacro'
-ACCESSORIES_XACRO = SHARE / 'urdf' / 'accessories.xacro'
+PARTS_XACRO = PARTS_SHARE / 'urdf' / 'parts.xacro'
 
-WATER_DENSITY = 1025.0
-NET_BUOYANCY_DEFAULT = 0.002   # kg, per the default buoyancy declaration
-COB_OFFSET_DEFAULT = (0.0, 0.0, 0.046)  # m, CoB relative to CoM
+DEFAULT_CONFIG = (SHARE / 'config' / 'bluerov2.yaml').read_text()
 
-# Full accessory catalog: type -> (demo pose, links the macro must generate).
-CATALOG = {
-    'ping360': ('0.16 0 0.13', ['{n}']),
-    'roof_rack': ('0 0 0.17', ['{n}']),
-    'payload_skid': ('0 0 -0.17', ['{n}']),
-    'dvl_a50': ('-0.12 0 -0.14', ['{n}']),
-    'explorehd_camera': ('0.22 0 0.05', ['{n}']),
-    'sonoptix_echo': ('0.14 0.16 -0.05', ['{n}']),
-    'omniscan_450_fs': ('0.14 -0.16 -0.05', ['{n}']),
-    'marinesitu_c3': ('-0.16 0 0.16', ['{n}']),
-    'newton_gripper': ('0.28 0 -0.08',
-                       ['{n}_body', '{n}_jaw_left', '{n}_jaw_right']),
-    'sediment_sampler': ('-0.26 0 -0.06',
-                         ['{n}_body', '{n}_cup_left', '{n}_cup_right']),
-}
+# What the chassis slots fill with when the config is silent.
+DEFAULT_LOADOUT = {'base_link': 'bluerov2_chassis',
+                   'thruster_1': 't200_prop_ccw', 'thruster_2': 't200_prop_ccw',
+                   'thruster_3': 't200_prop_cw', 'thruster_4': 't200_prop_cw',
+                   'thruster_5': 't200_prop_ccw', 'thruster_6': 't200_prop_cw',
+                   'camera': 'explorehd_camera'}
+
+# The library is shared across vehicles; these tests sweep the BlueROV2's
+# sub catalog only (the BlueBoat parts have their own suite). The t200
+# props are shared and included here.
+BOAT_PARTS = {'blueboat_chassis', 'blueboat_flag', 'blueboat_antenna_mast',
+              'blueboat_payload_bracket', 'blueboat_ping_singlebeam_mount',
+              'ping_singlebeam', 'basestation_antenna', 'surveyor_multibeam',
+              'omniscan_450_sidescan',
+              'm200_weedless_prop_ccw', 'm200_weedless_prop_cw', 't200_thruster'}
 
 
-def make_config(variant='standard', accessories=(), buoyancy=None):
-    """Return vehicle-config yaml text for the given loadout."""
-    lines = [f'variant: {variant}']
-    if buoyancy:
-        lines.append('buoyancy:')
-        lines.extend(f'  {k}: {v}' for k, v in buoyancy.items())
-    lines.append('accessories:' if accessories else 'accessories: []')
-    for type_name, name, xyz in accessories:
-        lines.append(
-            f'  - {{type: {type_name}, name: {name}, '
-            f'xyz: "{xyz}", rpy: "0 0 0"}}')
-    return '\n'.join(lines) + '\n'
+def catalog():
+    """Part types the BlueROV2 sweep covers: the include list minus the boat's."""
+    names = re.findall(r'/urdf/([a-z0-9_]+)\.urdf\.xacro', PARTS_XACRO.read_text())
+    return sorted(set(names) - {'part_probe'} - BOAT_PARTS)
 
 
-def full_catalog_accessories():
-    """Return one accessory entry per catalog type."""
-    return [(t, f'acc_{t}', pose) for t, (pose, _) in CATALOG.items()]
+def make_config(parts=(), slots=(), base='bluerov2_chassis'):
+    """Vehicle config yaml: chassis base, overrides/additions."""
+    cfg = {'base': {'type': base, 'name': 'base_link'},
+           'parts': [dict(p) for p in parts]}
+    if slots:
+        cfg['slots'] = [dict(s) for s in slots]
+    return yaml.safe_dump(cfg, sort_keys=False)
 
 
-def xacro_output(config_text):
-    """Run xacro on the top-level file with the given config; return the URDF."""
+def xacro_run(config_text):
+    """Run xacro on the top-level file with the given config."""
     with tempfile.NamedTemporaryFile('w', suffix='.yaml', delete=False) as f:
         f.write(config_text)
         config_path = f.name
-    out = subprocess.run(
+    return subprocess.run(
         ['xacro', str(TOP_XACRO), f'config_file:={config_path}'],
-        capture_output=True, text=True, timeout=60)
+        capture_output=True, text=True, timeout=120)
+
+
+def xacro_output(config_text):
+    """Expand; fail the test with xacro's stderr on error."""
+    out = xacro_run(config_text)
     assert out.returncode == 0, (
         f'xacro failed ({out.returncode})\n--- stderr ---\n{out.stderr}')
     return out.stdout
@@ -85,260 +85,149 @@ def generate_urdf(config_text):
     return ET.fromstring(xacro_output(config_text))
 
 
+def expect_failure(config_text, fragment):
+    """Assert the expansion fails and names the problem."""
+    out = xacro_run(config_text)
+    assert out.returncode != 0, 'xacro accepted a config it should reject'
+    assert fragment in out.stderr, (
+        f'expected {fragment!r} in the error, got:\n{out.stderr[-800:]}')
+
+
 def link_names(root):
     """Return the set of link names in a URDF tree."""
     return {link.get('name') for link in root.findall('link')}
 
 
-def joint_names(root):
-    """Return the set of joint names in a URDF tree."""
-    return {joint.get('name') for joint in root.findall('joint')}
+def manifest(root):
+    """Map instance name -> part type from the <assembly_part> elements."""
+    return {e.get('name'): e.get('type') for e in root.findall('assembly_part')}
 
 
-def total_mass(root):
-    """Sum every link mass in a URDF tree."""
-    return sum(float(m.get('value'))
-               for m in root.findall('.//inertial/mass'))
+def test_default_config_is_the_default_loadout():
+    """The shipped default builds 6 props + the camera from slot defaults."""
+    root = generate_urdf(DEFAULT_CONFIG)
+    assert manifest(root) == DEFAULT_LOADOUT
+    assert set(DEFAULT_LOADOUT) <= link_names(root)
 
 
-def collision_volume(root):
-    """Sum every collision volume in the URDF, as the gz Buoyancy system does."""
-    total = 0.0
-    for geo in root.findall('.//collision/geometry'):
-        box = geo.find('box')
-        cyl = geo.find('cylinder')
-        sph = geo.find('sphere')
-        if box is not None:
-            x, y, z = (float(v) for v in box.get('size').split())
-            total += x * y * z
-        elif cyl is not None:
-            total += (math.pi * float(cyl.get('radius')) ** 2
-                      * float(cyl.get('length')))
-        elif sph is not None:
-            total += 4 / 3 * math.pi * float(sph.get('radius')) ** 3
-        else:
-            raise AssertionError(
-                f'unhandled collision geometry: {[c.tag for c in geo]}')
-    return total
+def test_vectored_spin_convention():
+    """Check ArduSub chirality: ccw props on 1/2/5, cw on 3/4/6, continuous."""
+    root = generate_urdf(DEFAULT_CONFIG)
+    parts = manifest(root)
+    for n, expected in ((1, 'ccw'), (2, 'ccw'), (3, 'cw'), (4, 'cw'),
+                        (5, 'ccw'), (6, 'cw')):
+        assert parts[f'thruster_{n}'] == f't200_prop_{expected}'
+    joints = {j.get('name'): j.get('type') for j in root.findall('joint')}
+    for n in range(1, 7):
+        # Propellers declare a drive table, so they land on continuous joints.
+        assert joints[f'thruster_{n}_joint'] == 'continuous'
 
 
-def link_origins(root):
-    """
-    Map each link to its translation in the base frame.
-
-    Mount rpy are zero in every config these tests generate, so translations
-    compose without rotation.
-    """
-    origins = {'base_link': (0.0, 0.0, 0.0)}
-    pending = root.findall('joint')
-    while pending:
-        rest = []
-        for joint in pending:
-            parent = joint.find('parent').get('link')
-            if parent not in origins:
-                rest.append(joint)
-                continue
-            origin = joint.find('origin')
-            xyz = [float(v) for v in origin.get('xyz').split()] \
-                if origin is not None else [0.0, 0.0, 0.0]
-            base = origins[parent]
-            origins[joint.find('child').get('link')] = tuple(
-                base[k] + xyz[k] for k in range(3))
-        assert len(rest) < len(pending), 'joint graph has an orphan'
-        pending = rest
-    return origins
+def test_heavy_chassis_has_eight_thrusters():
+    """The heavy base fits four corner verticals with balanced chirality."""
+    root = generate_urdf(make_config(base='bluerov2_heavy_chassis'))
+    parts = manifest(root)
+    props = {n: t for n, t in parts.items() if n.startswith('thruster_')}
+    assert len(props) == 8
+    assert sum(t.endswith('_ccw') for t in props.values()) == 4
 
 
-def element_offset(parent):
-    """Return the xyz of an element's <origin>, or zero."""
-    origin = parent.find('origin')
-    if origin is None:
-        return [0.0, 0.0, 0.0]
-    return [float(v) for v in origin.get('xyz').split()]
+def test_slot_override_and_none():
+    """A slot entry can empty a slot, swap it or fill one with no default."""
+    root = generate_urdf(make_config([{'slot': 'camera', 'type': 'marinesitu_c3'},
+                                      {'slot': 'dvl', 'type': 'dvl_a50'},
+                                      {'slot': 'gripper', 'type': 'newton_gripper'}]))
+    parts = manifest(root)
+    assert parts['camera'] == 'marinesitu_c3'
+    assert parts['dvl'] == 'dvl_a50'
+    assert parts['gripper'] == 'newton_gripper'
+    root = generate_urdf(make_config([{'slot': 'camera', 'type': 'none'}]))
+    assert 'camera' not in manifest(root)
 
 
-def center_of_mass(root):
-    """Mass-weighted centroid of every inertial, in the base frame."""
-    origins = link_origins(root)
-    mass, moment = 0.0, [0.0, 0.0, 0.0]
-    for link in root.findall('link'):
-        inertial = link.find('inertial')
-        if inertial is None:
-            continue
-        m = float(inertial.find('mass').get('value'))
-        off = element_offset(inertial)
-        base = origins[link.get('name')]
-        mass += m
-        for k in range(3):
-            moment[k] += m * (base[k] + off[k])
-    return tuple(mo / mass for mo in moment)
-
-
-def center_of_buoyancy(root):
-    """Volume-weighted centroid of every collision, in the base frame."""
-    origins = link_origins(root)
-    volume, moment = 0.0, [0.0, 0.0, 0.0]
-    for link in root.findall('link'):
-        base = origins[link.get('name')]
-        for col in link.findall('collision'):
-            box = col.find('geometry/box')
-            d = [float(v) for v in box.get('size').split()]
-            vol = d[0] * d[1] * d[2]
-            off = element_offset(col)
-            volume += vol
-            for k in range(3):
-                moment[k] += vol * (base[k] + off[k])
-    return tuple(mo / volume for mo in moment)
-
-
-def net_buoyancy(root):
-    """Return water_density * total collision volume - total mass, in kg."""
-    return WATER_DENSITY * collision_volume(root) - total_mass(root)
-
-
-def test_default_config_camera_only():
-    """The shipped default config builds a standard model with camera only."""
-    default = (SHARE / 'config' / 'bluerov2.yaml').read_text()
-    root = generate_urdf(default)
+def test_gripper_part_carries_its_jaws():
+    """The claw parts are multi body: housing plus two revolute jaws."""
+    root = generate_urdf(make_config([{'slot': 'gripper', 'type': 'newton_gripper'}]))
     links = link_names(root)
-    thrusters = {li for li in links if re.fullmatch(r'thruster\d', li)}
-    assert len(thrusters) == 6
-    assert 'camera' in links
-    accessory_links = links - thrusters - {'base_link'}
-    assert accessory_links == {'camera'}
+    assert {'gripper', 'gripper_jaw_left', 'gripper_jaw_right'} <= links
+    joints = {j.get('name'): j.get('type') for j in root.findall('joint')}
+    assert joints['gripper_jaw_left_joint'] == 'revolute'
 
 
-def test_buoyancy_invariant_across_loadouts():
-    """
-    Both declared quantities hold for any loadout.
-
-    rho*V - m stays at the declared net buoyancy, and the CoB sits at the
-    declared offset from the CoM. Tolerance on the offset covers the
-    mount-pose approximation for claw collision volumes.
-    """
-    configs = [
-        make_config(),
-        (SHARE / 'config' / 'bluerov2.yaml').read_text(),
-        make_config('heavy', full_catalog_accessories()),
-        make_config('standard', full_catalog_accessories()),
-    ]
-    for config in configs:
-        root = generate_urdf(config)
-        assert abs(net_buoyancy(root) - NET_BUOYANCY_DEFAULT) < 1e-6
-        com, cob = center_of_mass(root), center_of_buoyancy(root)
-        for k in range(3):
-            assert abs(cob[k] - com[k] - COB_OFFSET_DEFAULT[k]) < 2e-3
+def test_slot_rejects_parts_that_do_not_fit():
+    """A type outside the slot's accepts list fails the expansion."""
+    expect_failure(make_config([{'slot': 'thruster_1', 'type': 't200_prop_cw'}]),
+                   'does not fit')
 
 
-def test_buoyancy_declaration_honored():
-    """An explicit buoyancy block drives both declared quantities."""
+def test_unknown_slot_on_base_fails():
+    """A typo in the slot name fails the expansion naming it."""
+    expect_failure(make_config([{'slot': 'nope', 'type': 'ping360'}]),
+                   "unknown slot 'nope'")
+
+
+def test_bare_on_key_is_rejected():
+    """A bare on: key is the YAML boolean true; the expansion says so."""
+    text = make_config() + 'slots:\n  - {on: base_link, name: x, xyz: "0 0 0"}\n'
+    expect_failure(text, "bare 'on:' key")
+
+
+def test_free_placement_and_adhoc_slot():
+    """Free placements and ad hoc slots work as in the config schema."""
     root = generate_urdf(make_config(
-        'heavy', full_catalog_accessories(),
-        buoyancy={'net_buoyancy': 0.05, 'cob_offset': '"0.01 0.005 0.03"'}))
-    assert abs(net_buoyancy(root) - 0.05) < 1e-6
-    com, cob = center_of_mass(root), center_of_buoyancy(root)
-    for k, want in enumerate((0.01, 0.005, 0.03)):
-        assert abs(cob[k] - com[k] - want) < 2e-3
+        parts=[{'type': 'sonoptix_echo', 'name': 'sonar_l',
+                'xyz': '0.14 0.16 -0.05', 'rpy': '0 0 0'},
+               {'slot': 'light', 'type': 'roof_rack', 'name': 'bar'}],
+        slots=[{'of': 'base_link', 'name': 'light', 'xyz': '0.2 0.1 0.1'}]))
+    assert {'sonar_l', 'bar', 'base_link_light'} <= link_names(root)
 
 
-def test_cob_frame_and_fluid_density_honored():
-    """base_link frame pins the CoB absolutely; density rescales the volume."""
-    root = generate_urdf(make_config(buoyancy={
-        'net_buoyancy': 0.05, 'cob_offset': '"0.02 0 0.1"',
-        'cob_frame': 'base_link', 'fluid_density': 1000.0}))
-    assert abs(1000.0 * collision_volume(root) - total_mass(root) - 0.05) < 1e-6
-    cob = center_of_buoyancy(root)
-    for k, want in enumerate((0.02, 0.0, 0.1)):
-        assert abs(cob[k] - want) < 1e-6  # in base_link, not relative to CoM
+def test_check_catches_what_the_expansion_cannot():
+    """Entries matching nothing deeper down, unknown keys, clean configs."""
+    cfg = yaml.safe_load(make_config([{'slot': 'dvl', 'of': 'nowhere', 'type': 'none'}]))
+    found = assembly.problems(cfg, generate_urdf(yaml.safe_dump(cfg)))
+    assert any("no instance named 'nowhere'" in f for f in found), found
+    cfg = yaml.safe_load(make_config([{'slot': 'dvl', 'type': 'dvl_a50', 'bogus': 1}]))
+    found = assembly.problems(cfg, generate_urdf(yaml.safe_dump(cfg)))
+    assert any("['bogus']" in f for f in found), found
+    cfg = yaml.safe_load(DEFAULT_CONFIG)
+    assert assembly.problems(cfg, generate_urdf(DEFAULT_CONFIG)) == []
 
 
-def test_invalid_cob_frame_fails_loudly():
-    """A cob_frame that is neither com nor base_link refuses to build."""
-    config = make_config(buoyancy={'cob_frame': 'flange'})
-    with tempfile.NamedTemporaryFile('w', suffix='.yaml', delete=False) as f:
-        f.write(config)
-        config_path = f.name
-    out = subprocess.run(
-        ['xacro', str(TOP_XACRO), f'config_file:={config_path}'],
-        capture_output=True, text=True, timeout=60)
-    assert out.returncode != 0
-    assert 'cob_frame' in out.stderr
+def test_catalog_covered_by_defaults_plus_overrides():
+    """Every ROV catalog type is reachable via slots or free placement."""
+    root = generate_urdf(make_config(
+        parts=[{'slot': 'sonar', 'type': 'ping360'},
+               {'slot': 'dvl', 'type': 'dvl_a50'},
+               {'slot': 'gripper', 'type': 'newton_gripper'},
+               {'slot': 'payload', 'type': 'payload_skid'},
+               {'slot': 'rack', 'type': 'roof_rack'},
+               {'type': 'sonoptix_echo', 'name': 'sonar_l', 'xyz': '0.14 0.16 -0.05'},
+               {'type': 'omniscan_450_fs', 'name': 'sonar_r', 'xyz': '0.14 -0.16 -0.05'},
+               {'type': 'marinesitu_c3', 'name': 'stereo', 'xyz': '-0.16 0 0.16'},
+               {'type': 'sediment_sampler', 'name': 'sampler', 'xyz': '-0.26 0 -0.06'},
+               {'type': 'bluerov2_heavy_chassis', 'name': 'trailer', 'xyz': '0 0 0.6'}]))
+    assert set(manifest(root).values()) == set(catalog())
 
 
-def test_unbuildable_declaration_fails_loudly():
-    """A net buoyancy the hull box cannot realize fails the build by name."""
-    config = make_config(buoyancy={'net_buoyancy': -100.0})
-    with tempfile.NamedTemporaryFile('w', suffix='.yaml', delete=False) as f:
-        f.write(config)
-        config_path = f.name
-    out = subprocess.run(
-        ['xacro', str(TOP_XACRO), f'config_file:={config_path}'],
-        capture_output=True, text=True, timeout=60)
-    assert out.returncode != 0
-    assert 'net_buoyancy' in out.stderr
-
-
-def test_variant_selects_thrusters_and_mesh():
-    """The heavy variant gets 8 thrusters + heavy mesh; standard 6 + standard."""
-    std = generate_urdf(make_config('standard'))
-    heavy = generate_urdf(make_config('heavy'))
-    count = {r: len([li for li in link_names(r)
-                     if re.fullmatch(r'thruster\d', li)])
-             for r in (std, heavy)}
-    assert count[std] == 6 and count[heavy] == 8
-    std_meshes = ET.tostring(std, encoding='unicode')
-    heavy_meshes = ET.tostring(heavy, encoding='unicode')
-    assert 'bluerov2_heavy.dae' not in std_meshes
-    assert 'bluerov2_heavy.dae' in heavy_meshes
-
-
-def test_catalog_completeness_and_toggle():
-    """Every accessory type generates its links, and only when configured."""
-    empty_links = link_names(generate_urdf(make_config()))
-    for type_name, (pose, links_tpl) in CATALOG.items():
-        name = f'acc_{type_name}'
-        root = generate_urdf(make_config('standard', [(type_name, name, pose)]))
-        expected = {tpl.format(n=name) for tpl in links_tpl}
-        assert expected <= link_names(root), f'{type_name} missing links'
-        assert not expected & empty_links, f'{type_name} present when absent'
-
-
-@pytest.mark.parametrize('variant', ('standard', 'heavy'))
-def test_mesh_references_resolve(variant):
+def test_mesh_references_resolve():
     """Every package:// mesh URI in the generated URDF exists on disk."""
-    root = generate_urdf(make_config(variant, full_catalog_accessories()))
+    root = generate_urdf(make_config([{'slot': 'sonar', 'type': 'ping360'}],
+                                     base='bluerov2_heavy_chassis'))
     uris = {m.get('filename') for m in root.findall('.//mesh')}
     assert uris
     for uri in uris:
-        package, _, rel = uri.removeprefix('package://').partition('/')
-        path = Path(get_package_share_directory(package)) / rel
-        assert path.is_file(), f'missing mesh {uri}'
+        assert uri.startswith('package://bluerobotics_parts/'), uri
+        rel = uri.replace('package://bluerobotics_parts/', '')
+        assert (PARTS_SHARE / rel).is_file(), f'missing mesh {uri}'
 
 
-@pytest.mark.parametrize('variant', ('standard', 'heavy'))
-def test_check_urdf_accepts_generated(variant):
-    """The urdfdom validator accepts the generated URDF."""
-    text = xacro_output(make_config(variant, full_catalog_accessories()))
+def test_check_urdf_accepts_generated():
+    """The generated URDF parses with urdfdom's check_urdf."""
+    text = xacro_output(DEFAULT_CONFIG)
     with tempfile.NamedTemporaryFile('w', suffix='.urdf', delete=False) as f:
         f.write(text)
-        urdf_path = f.name
-    out = subprocess.run(['check_urdf', urdf_path], capture_output=True,
-                         text=True, timeout=30)
-    assert out.returncode == 0, (
-        f'check_urdf rejected the URDF ({out.returncode})\n'
-        f'--- stdout ---\n{out.stdout}\n--- stderr ---\n{out.stderr}')
-
-
-def test_mass_table_matches_macros():
-    """
-    Accessory mass keys match the catalog, and each names a macro.
-
-    The dispatcher invokes the config type directly as a macro, so a key
-    without a same-named macro would fail only at build time.
-    """
-    text = ACCESSORIES_XACRO.read_text()
-    dict_src = re.search(r'\$\{dict\(([^)]*)\)\}', text).group(1)
-    mass_keys = set(re.findall(r'(\w+)=', dict_src))
-    macros = set(re.findall(r'<xacro:macro name="(\w+)"', text))
-    assert mass_keys <= macros, f'mass keys without a macro: {mass_keys - macros}'
-    assert mass_keys == set(CATALOG)
+        path = f.name
+    out = subprocess.run(['check_urdf', path], capture_output=True, text=True,
+                         timeout=60)
+    assert out.returncode == 0, f'check_urdf rejected the URDF:\n{out.stderr}'

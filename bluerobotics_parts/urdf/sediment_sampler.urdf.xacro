@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<!--
+  sediment_sampler part macro: a Newton sediment sampler: the 1 DOF claw with rubber cup end links.
+
+  A MULTI BODY part, extending the usual one link contract: the housing is
+  the part's link, and two cup arms ride revolute joints
+  (${name}_cup_left_joint / _right_joint, 0 closed .. 0.6 rad open,
+  mirrored axes so one command opens both). bluerov2_gazebo drives them
+  with JointPositionControllers on <topic base>/cmd_pos. Primitive
+  placeholder geometry; the cup arms carry collisions so they can touch
+  things.
+
+  Contract (see parts.xacro): <part>_info exports the metadata (attach,
+  slots, frames, drive); <part> instantiates the link, its mounting joint
+  and its slot / frame links.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="sediment_sampler_info">
+    <xacro:property name="part_info" scope="parent" value="${dict(
+        attach='0 0 0',
+        slots=dict(
+        ),
+        frames=dict(
+        ))}"/>
+  </xacro:macro>
+
+  <xacro:macro name="_sediment_sampler_cup" params="name side y axis collision">
+    <link name="${name}_cup_${side}">
+      <inertial>
+        <origin xyz="0.028 0 0" rpy="0 0 0"/>
+        <mass value="0.1"/>
+        <inertia ixx="${0.1/12.0 * (0.01**2 + 0.012**2)}" ixy="0" ixz="0"
+                 iyy="${0.1/12.0 * (0.055**2 + 0.012**2)}" iyz="0"
+                 izz="${0.1/12.0 * (0.055**2 + 0.01**2)}"/>
+      </inertial>
+      <visual>
+        <origin xyz="0.028 0 0" rpy="0 0 0"/>
+        <geometry><box size="0.055 0.01 0.012"/></geometry>
+        <material name="${name}_arm_mat"><color rgba="0.5 0.5 0.55 1"/></material>
+      </visual>
+      <visual>
+        <origin xyz="0.062 0 0" rpy="0 1.5708 0"/>
+        <geometry><cylinder radius="0.018" length="0.026"/></geometry>
+        <material name="${name}_cup_mat"><color rgba="0.1 0.3 0.8 1"/></material>
+      </visual>
+      <xacro:if value="${collision}">
+        <collision>
+          <origin xyz="0.045 0 0" rpy="0 0 0"/>
+          <geometry><box size="0.09 0.02 0.026"/></geometry>
+        </collision>
+      </xacro:if>
+    </link>
+    <joint name="${name}_cup_${side}_joint" type="revolute">
+      <parent link="${name}"/><child link="${name}_cup_${side}"/>
+      <origin xyz="0.025 ${y} 0" rpy="0 0 0"/>
+      <axis xyz="${axis}"/>
+      <limit lower="0" upper="0.6" effort="10" velocity="2"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="sediment_sampler"
+               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='1 0 0'">
+    <xacro:sediment_sampler_info/>
+
+    <link name="${name}">
+      <inertial>
+        <mass value="0.3"/>
+        <!-- Box 0.05 x 0.06 x 0.06 (the housing). -->
+        <inertia ixx="${0.3/12.0 * (0.06**2 + 0.06**2)}" ixy="0" ixz="0"
+                 iyy="${0.3/12.0 * (0.05**2 + 0.06**2)}" iyz="0"
+                 izz="${0.3/12.0 * (0.05**2 + 0.06**2)}"/>
+      </inertial>
+      <visual>
+        <geometry><box size="0.05 0.06 0.06"/></geometry>
+        <material name="${name}_mat"><color rgba="0.5 0.5 0.55 1"/></material>
+      </visual>
+      <xacro:if value="${collision}">
+        <collision><geometry><box size="0.05 0.06 0.06"/></geometry></collision>
+      </xacro:if>
+    </link>
+
+    <xacro:_sediment_sampler_cup name="${name}" side="left" y="0.02" axis="0 0 1" collision="${collision}"/>
+    <xacro:_sediment_sampler_cup name="${name}" side="right" y="-0.02" axis="0 0 -1" collision="${collision}"/>
+
+    <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
+                      joint="${joint}" axis="${axis}" attach="${part_info['attach']}"/>
+    <xacro:part_slots name="${name}" items="${list(part_info['slots'].items())}"/>
+    <xacro:part_frames name="${name}" items="${list(part_info['frames'].items())}"/>
+
+  </xacro:macro>
+
+</robot>

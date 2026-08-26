@@ -9,9 +9,7 @@ reconfigured from one YAML file when you want the exact loadout.
 - **BlueBoat**: twin hull differential drive USV with the Ping2 echosounder
   fitted by default: [BlueBoat manual](vehicles/blueboat/index.md)
 - **BlueROV2**: vectored six or eight thruster ROV with camera, sonar, DVL and
-  manipulator accessories: [BlueROV2 manual](vehicles/bluerov2/index.md)
-  (being moved onto the parts pipeline; its pages still describe the
-  previous accessory system)
+  manipulator parts: [BlueROV2 manual](vehicles/bluerov2/index.md)
 
 ## Quick start
 

@@ -1,16 +1,15 @@
 <?xml version="1.0"?>
 <!--
-  Self-contained underwater world for the BlueROV2: sun, a seabed plane, the
-  core + sensor systems, graded buoyancy (seawater below z 0, air above) and
-  the vehicle pulled in via <include>. Started directly with `gz sim` it comes
-  up paused; press play and the near-neutral vehicle drifts up very slowly,
-  damped by its hydrodynamics, until it floats essentially awash at the
-  surface (the default 0.002 kg net_buoyancy leaves almost no freeboard).
+  Vehicle free underwater world for the BlueROV2: seabed, graded buoyancy
+  (seawater below z=0, air above) acting only on a spawned model's dedicated
+  buoyancy_displacement link, the sensor render backend and the core
+  systems. sim.launch.xml spawns the model generated from the loadout
+  config into it.
 
   Run it directly, no ROS:  gz sim <this file>
 -->
 <sdf version="1.12">
-  <world name="bluerov2_playground">
+  <world name="bluerov2_water">
 
     <physics name="1ms" type="ignored">
       <max_step_size>0.001</max_step_size>
@@ -86,13 +85,6 @@
         </visual>
       </link>
     </model>
-
-    <!-- The vehicle, the composed model of the default loadout. -->
-    <include>
-      <uri>model://bluerov2</uri>
-      <name>bluerov2</name>
-      <pose>0 0 0.5 0 0 0</pose>
-    </include>
 
   </world>
 </sdf>

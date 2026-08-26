@@ -15,6 +15,8 @@
 
 import importlib.util
 from pathlib import Path
+import subprocess
+import sys
 
 from ament_index_python.packages import get_package_prefix  # noqa: I100
 
@@ -24,102 +26,88 @@ _spec = importlib.util.spec_from_file_location('bridge_gen', _SCRIPT)
 bridge_gen = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(bridge_gen)
 
+ALWAYS = {'/clock', '/joint_states'}
+PROPS = [('t200_prop_ccw', 'thruster_1'), ('t200_prop_cw', 'thruster_3')]
 
-def entries_for(cfg):
+
+def entries_for(cfg, instances):
     """Run the generator and index the entries by ros topic."""
-    entries = bridge_gen.bridge_entries(cfg)
+    entries = bridge_gen.bridge_entries(cfg, instances)
     return {e['ros_topic_name']: e for e in entries}
 
 
-def accessory(type_name, name, **extra):
-    """Build a minimal accessory config entry."""
-    return {'type': type_name, 'name': name,
-            'xyz': '0 0 0', 'rpy': '0 0 0', **extra}
+def test_only_clock_and_joint_states_without_parts():
+    """Nothing is hardcoded: with no parts only /clock and /joint_states remain."""
+    assert set(entries_for({}, [])) == ALWAYS
 
 
-def test_default_camera_only():
-    """Camera-only config yields exactly clock + image + camera_info."""
-    cfg = {'accessories': [accessory('explorehd_camera', 'camera')]}
-    entries = entries_for(cfg)
-    thrusters = {f'/bluerov2/thrusters/thruster{n}/thrust'
-                 for n in range(1, 7)}
-    assert set(entries) == {'/clock', '/bluerov2/camera/image',
-                            '/bluerov2/camera/camera_info'} | thrusters
-    assert entries['/bluerov2/thrusters/thruster1/thrust']['direction'] == \
-        'ROS_TO_GZ'
-    heavy = entries_for({'variant': 'heavy', 'accessories': []})
-    assert '/bluerov2/thrusters/thruster8/thrust' in heavy
+def test_propellers_bridge_their_thrust_command():
+    """Each propeller instance gets a ROS_TO_GZ thrust topic named after it."""
+    entries = entries_for({}, PROPS)
+    assert set(entries) == ALWAYS | {'/bluerov2/thruster_1/thrust', '/bluerov2/thruster_3/thrust'}
+    one = entries['/bluerov2/thruster_1/thrust']
+    assert one['direction'] == 'ROS_TO_GZ'
+    assert one['ros_type_name'] == 'std_msgs/msg/Float64'
+    # Same name on the gz side: model.sdf.xacro gives the Thruster this <topic>.
+    assert one['gz_topic_name'] == '/bluerov2/thruster_1/thrust'
 
 
-def test_per_type_topic_sets():
-    """Each accessory type produces its documented topics and types."""
-    cfg = {'accessories': [
-        accessory('marinesitu_c3', 'stereo'),
-        accessory('dvl_a50', 'dvl'),
-        accessory('ping360', 'ping360'),
-        accessory('newton_gripper', 'gripper'),
-    ]}
-    entries = entries_for(cfg)
-    for suffix in ('image', 'depth_image', 'points', 'camera_info'):
-        assert f'/bluerov2/stereo/{suffix}' in entries
+def test_sensor_and_claw_parts_bridge_their_topics():
+    """Camera, DVL and claw instances produce their entries, named after them."""
+    instances = [('explorehd_camera', 'camera'), ('dvl_a50', 'dvl'),
+                 ('newton_gripper', 'gripper'), ('marinesitu_c3', 'stereo'),
+                 ('ping360', 'sonar')]
+    entries = entries_for({}, instances)
+    assert entries['/bluerov2/camera/image']['lazy'] is True
+    assert '/bluerov2/camera/camera_info' in entries
     dvl = entries['/bluerov2/dvl/velocity']
     assert dvl['ros_type_name'] == 'marine_acoustic_msgs/msg/Dvl'
-    assert dvl['gz_type_name'] == 'gz.msgs.DVLVelocityTracking'
-    assert entries['/bluerov2/ping360/scan']['ros_type_name'] == \
-        'sensor_msgs/msg/LaserScan'
-    claw = entries['/bluerov2/gripper/cmd_pos']
-    assert claw['direction'] == 'ROS_TO_GZ'
+    grip = entries['/bluerov2/gripper/cmd_pos']
+    assert grip['direction'] == 'ROS_TO_GZ' and 'lazy' not in grip
+    assert '/bluerov2/stereo/points' in entries
+    assert '/bluerov2/sonar/scan' in entries
 
 
-def test_non_sensor_accessories_produce_nothing():
-    """Geometry-only accessories add no bridge entries."""
-    cfg = {'accessories': [accessory('roof_rack', 'rack'),
-                           accessory('payload_skid', 'skid'),
-                           accessory('sonoptix_echo', 'sonoptix'),
-                           accessory('omniscan_450_fs', 'omniscan')]}
-    thrusters = {f'/bluerov2/thrusters/thruster{n}/thrust'
-                 for n in range(1, 7)}
-    assert set(entries_for(cfg)) == {'/clock'} | thrusters
+def test_geometry_only_parts_produce_nothing():
+    """Parts without a sensor model add no bridge entries."""
+    instances = [('bluerov2_flag', 'flag'), ('bluerov2_antenna_mast', 'mast'),
+                 ('omniscan_450_sidescan', 'sidescan'), ('surveyor_multibeam', 'multibeam')]
+    assert set(entries_for({}, instances)) == ALWAYS
 
 
 def test_topic_override_precedence():
-    """Topic precedence: gz_topic/ros_topic > topic > /<namespace>/<name>."""
-    cfg = {'topic_namespace': 'rov_a', 'accessories': [
-        accessory('explorehd_camera', 'camera'),
-        accessory('ping360', 'ping360', topic='/sonar/front'),
-        accessory('dvl_a50', 'dvl',
-                  gz_topic='rov_a/dvl_raw', ros_topic='/sensors/dvl'),
-    ]}
-    entries = entries_for(cfg)
-    assert '/rov_a/camera/image' in entries
-    front = entries['/sonar/front/scan']
-    assert front['gz_topic_name'] == '/sonar/front/scan'
-    dvl = entries['/sensors/dvl/velocity']
-    assert dvl['gz_topic_name'] == '/rov_a/dvl_raw/velocity'
-
-
-def test_lazy_default_and_bridge_override():
-    """GZ_TO_ROS entries default lazy, clock is eager, bridge: overrides."""
-    cfg = {'accessories': [
-        accessory('explorehd_camera', 'camera'),
-        accessory('ping360', 'ping360',
-                  bridge={'lazy': False, 'publisher_queue': 5}),
-        accessory('newton_gripper', 'gripper'),
-    ]}
-    entries = entries_for(cfg)
-    assert 'lazy' not in entries['/clock']
-    assert entries['/bluerov2/camera/image']['lazy'] is True
-    ping = entries['/bluerov2/ping360/scan']
-    assert ping['lazy'] is False and ping['publisher_queue'] == 5
-    assert 'lazy' not in entries['/bluerov2/gripper/cmd_pos']
+    """Gz_topic/ros_topic > topic > /<namespace>/<name>, matched by instance."""
+    cfg = {'topic_namespace': 'rov_a', 'parts': [
+        {'slot': 'camera', 'type': 'explorehd_camera',
+         'gz_topic': 'rov_a/cam_raw', 'ros_topic': '/sensors/cam'}]}
+    entries = entries_for(cfg, [('explorehd_camera', 'camera')] + PROPS)
+    cam = entries['/sensors/cam/image']
+    assert cam['gz_topic_name'] == '/rov_a/cam_raw/image'
+    assert '/rov_a/thruster_1/thrust' in entries
+    # A renamed occupant is matched by its name, not the slot.
+    cfg = {'parts': [{'slot': 'camera', 'type': 'explorehd_camera',
+                      'name': 'cam', 'topic': 'eye'}]}
+    assert '/eye/image' in entries_for(cfg, [('explorehd_camera', 'cam')])
 
 
 def test_extra_bridge_topics_verbatim():
-    """extra_bridge_topics entries are appended untouched."""
-    extra = {'ros_topic_name': '/thrust1',
-             'gz_topic_name': '/model/bluerov2/joint/thruster1_joint/cmd_thrust',
-             'ros_type_name': 'std_msgs/msg/Float64',
-             'gz_type_name': 'gz.msgs.Double',
-             'direction': 'ROS_TO_GZ'}
-    cfg = {'accessories': [], 'extra_bridge_topics': [dict(extra)]}
-    assert entries_for(cfg)['/thrust1'] == extra
+    """Extra_bridge_topics entries are appended untouched."""
+    extra = {'ros_topic_name': '/odom',
+             'gz_topic_name': '/model/bluerov2/odom',
+             'ros_type_name': 'nav_msgs/msg/Odometry',
+             'gz_type_name': 'gz.msgs.Odometry', 'direction': 'GZ_TO_ROS'}
+    cfg = {'parts': [], 'extra_bridge_topics': [dict(extra)]}
+    assert entries_for(cfg, [])['/odom'] == extra
+
+
+def test_cli_rejects_a_config_that_matches_nothing(tmp_path):
+    """The generator runs the assembly check: a stray entry fails with the reason."""
+    urdf = ('<robot name="x"><assembly_part type="bluerov2_chassis" name="base_link" parent=""/>'
+            '<assembly_slot of="base_link" name="dvl"/><link name="base_link"/></robot>')
+    (tmp_path / 'v.urdf').write_text(urdf)
+    (tmp_path / 'bad.yaml').write_text('parts:\n  - {slot: dvll, type: none}\n')
+    out = subprocess.run([sys.executable, str(_SCRIPT), str(tmp_path / 'bad.yaml'),
+                          str(tmp_path / 'v.urdf'), str(tmp_path / 'out.yaml')],
+                         capture_output=True, text=True)
+    assert out.returncode != 0 and "'dvll' of 'base_link'" in out.stderr, out.stderr
+    assert not (tmp_path / 'out.yaml').exists()

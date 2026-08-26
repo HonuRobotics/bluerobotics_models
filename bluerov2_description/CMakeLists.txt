@@ -4,10 +4,13 @@ project(bluerov2_description)
 find_package(ament_cmake REQUIRED)
 find_package(xacro REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
+# The parts library the xacro assembles from; a real build order dependency
+# because $(find bluerobotics_parts) is resolved while expanding at build time.
+find_package(bluerobotics_parts REQUIRED)
 
-# Put this package's share dir on GZ_SIM_RESOURCE_PATH so package:// URIs into it
-# (the meshes, and the generated URDF that bluerov2_gazebo merge-includes) resolve
-# in Gazebo. RViz resolves package:// on its own through the ament index.
+# Put this package's share dir on GZ_SIM_RESOURCE_PATH so package:// URIs into
+# it (the generated URDF that bluerov2_gazebo merge-includes) resolve in
+# Gazebo. RViz resolves package:// on its own through the ament index.
 ament_environment_hooks("hooks/resource_paths.dsv.in")
 ament_environment_hooks("hooks/resource_paths.sh.in")
 
@@ -20,8 +23,6 @@ xacro_add_files(
   urdf/bluerov2.urdf.xacro
     REMAP config_file:=${CMAKE_CURRENT_SOURCE_DIR}/config/bluerov2.yaml
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/config/bluerov2.yaml
-            ${CMAKE_CURRENT_SOURCE_DIR}/urdf/thruster.xacro
-            ${CMAKE_CURRENT_SOURCE_DIR}/urdf/accessories.xacro
     TARGET urdf_raw
 )
 
@@ -47,7 +48,6 @@ add_custom_target(${PROJECT_NAME}_model_specs ALL DEPENDS ${stamped_urdf})
 install(FILES ${stamped_urdf} DESTINATION share/${PROJECT_NAME}/urdf)
 
 install(DIRECTORY
-  meshes
   urdf
   rviz
   launch

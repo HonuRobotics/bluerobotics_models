@@ -6,14 +6,13 @@ Licensed under the Apache License, Version 2.0 (see LICENSE).
 This repository redistributes third-party mesh assets, reused as temporary
 placeholders until original art replaces them:
 
-- bluerov2_description/meshes/bluerov2.dae, bluerov2_heavy.dae,
-  t200/ccw_prop.dae, t200/cw_prop.dae
+- bluerobotics_parts/models/bluerov2_heavy_chassis/bluerov2_heavy.dae
   From Project DAVE (https://github.com/IOES-Lab/dave, ros2 branch).
   License: Apache-2.0.
 
-- bluerov2_description/meshes/accessories/ping360.dae
+- bluerobotics_parts/models/ping360/ping360.dae
   From CentraleNantesROV/bluerov2
   (https://github.com/CentraleNantesROV/bluerov2). License: Apache-2.0.
 
-See bluerov2_description/ASSETS.md for per-file provenance. The blueboat_*
-packages ship no third-party assets (primitive shapes only).
+The remaining bluerobotics_parts meshes are original Honu Robotics art
+(artist deliveries); the primitive placeholder parts ship no assets.

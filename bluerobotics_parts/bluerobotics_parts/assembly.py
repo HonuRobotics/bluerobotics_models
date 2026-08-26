@@ -26,6 +26,7 @@ nobody reads. Vehicle builds and launches call `check`; the CLI is
     check_assembly.py <vehicle_config.yaml> <assembled.urdf>
 """
 
+import math
 import sys
 import xml.etree.ElementTree as ET
 
@@ -34,13 +35,89 @@ import yaml
 # Keys each kind of config entry may carry. A key outside its set is a typo
 # until proven otherwise; the sets grow with the features.
 TOP_KEYS = {'topic_namespace', 'base', 'parts', 'slots', 'hull_displacement',
-            'extra_bridge_topics'}
+            'buoyancy', 'extra_bridge_topics'}
 BASE_KEYS = {'type', 'name', 'collision'}
 PART_COMMON_KEYS = {'type', 'name', 'xyz', 'rpy', 'collision', 'joint', 'axis',
                     'topic', 'gz_topic', 'ros_topic', 'bridge'}
 SLOT_ENTRY_KEYS = PART_COMMON_KEYS | {'slot', 'of'}
 FREE_ENTRY_KEYS = PART_COMMON_KEYS | {'parent'}
-ADHOC_SLOT_KEYS = {'of', 'name', 'xyz', 'rpy', 'accepts', 'default', 'joint'}
+ADHOC_SLOT_KEYS = {'of', 'name', 'xyz', 'rpy', 'accepts', 'default', 'joint',
+                   'collision'}
+
+
+def rpy_matrix(r, p, y):
+    """Rotation matrix (row tuples) for URDF fixed axis rpy angles."""
+    cr, sr, cp, sp, cy, sy = (math.cos(r), math.sin(r), math.cos(p),
+                              math.sin(p), math.cos(y), math.sin(y))
+    return ((cy * cp, cy * sp * sr - sy * cr, cy * sp * cr + sy * sr),
+            (sy * cp, sy * sp * sr + cy * cr, sy * sp * cr - cy * sr),
+            (-sp, cp * sr, cp * cr))
+
+
+def compose(a, b):
+    """Compose two (rotation, translation) transforms: a then b."""
+    ra, ta = a
+    rb, tb = b
+    rot = tuple(tuple(sum(ra[i][k] * rb[k][j] for k in range(3))
+                      for j in range(3)) for i in range(3))
+    trans = tuple(ta[i] + sum(ra[i][k] * tb[k] for k in range(3))
+                  for i in range(3))
+    return rot, trans
+
+
+def apply(tf, v):
+    """Apply a (rotation, translation) transform to a point."""
+    rot, trans = tf
+    return tuple(trans[i] + sum(rot[i][k] * v[k] for k in range(3))
+                 for i in range(3))
+
+
+def origin_tf(element):
+    """Transform of an <origin> child (identity when absent)."""
+    origin = element.find('origin') if element is not None else None
+    if origin is None:
+        return rpy_matrix(0, 0, 0), (0.0, 0.0, 0.0)
+    xyz = [float(v) for v in origin.get('xyz', '0 0 0').split()]
+    rpy = [float(v) for v in origin.get('rpy', '0 0 0').split()]
+    return rpy_matrix(*rpy), tuple(xyz)
+
+
+def link_poses(root):
+    """Pose of every link in the root link frame, via the joint tree."""
+    parent_joint = {j.find('child').get('link'): j
+                    for j in root.findall('joint')}
+    poses = {}
+
+    def pose(name):
+        if name not in poses:
+            joint = parent_joint.get(name)
+            if joint is None:
+                poses[name] = rpy_matrix(0, 0, 0), (0.0, 0.0, 0.0)
+            else:
+                poses[name] = compose(pose(joint.find('parent').get('link')),
+                                      origin_tf(joint))
+        return poses[name]
+
+    for link in root.findall('link'):
+        pose(link.get('name'))
+    return poses
+
+
+def mass_properties(root):
+    """Total mass and center of mass of the URDF, in the root link frame."""
+    poses = link_poses(root)
+    total, moment = 0.0, [0.0, 0.0, 0.0]
+    for link in root.findall('link'):
+        inertial = link.find('inertial')
+        if inertial is None:
+            continue
+        mass = float(inertial.find('mass').get('value'))
+        com = apply(compose(poses[link.get('name')], origin_tf(inertial)),
+                    (0.0, 0.0, 0.0))
+        total += mass
+        for i in range(3):
+            moment[i] += mass * com[i]
+    return total, tuple(m / total for m in moment)
 
 
 class AssemblyError(Exception):

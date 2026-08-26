@@ -40,11 +40,18 @@ bridge_gen = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(bridge_gen)
 
 
+# The library is shared across vehicles; sweep the BlueBoat's sub catalog
+# only (the BlueROV2 parts have their own suite).
+ROV_PARTS = {'bluerov2_chassis', 'bluerov2_heavy_chassis', 'ping360', 'payload_skid',
+             'roof_rack', 'sonoptix_echo', 'omniscan_450_fs', 'marinesitu_c3',
+             'explorehd_camera', 'dvl_a50', 'newton_gripper', 'sediment_sampler'}
+
+
 def catalog():
     """Part types the library offers: the include list of parts.xacro."""
     text = (PARTS_SHARE / 'urdf' / 'parts.xacro').read_text()
     return sorted(set(re.findall(r'/urdf/([a-z0-9_]+)\.urdf\.xacro', text))
-                  - {'part_probe'})
+                  - {'part_probe'} - ROV_PARTS)
 
 
 # Types the chassis slots fit by default; everything else in the catalog is

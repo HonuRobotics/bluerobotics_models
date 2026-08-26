@@ -43,10 +43,17 @@ DEFAULT_LOADOUT = {'base_link': 'blueboat_chassis',
 PING_FACE_BELOW_ORIGIN = 0.044
 
 
+# The library is shared across vehicles; these tests sweep the BlueBoat's
+# sub catalog only (the BlueROV2 parts have their own suite).
+ROV_PARTS = {'bluerov2_chassis', 'bluerov2_heavy_chassis', 'ping360', 'payload_skid',
+             'roof_rack', 'sonoptix_echo', 'omniscan_450_fs', 'marinesitu_c3',
+             'explorehd_camera', 'dvl_a50', 'newton_gripper', 'sediment_sampler'}
+
+
 def catalog():
-    """Part types the library offers: the include list of parts.xacro."""
+    """Part types the BlueBoat sweep covers: the include list minus the ROV's."""
     names = re.findall(r'/urdf/([a-z0-9_]+)\.urdf\.xacro', PARTS_XACRO.read_text())
-    return sorted(set(names) - {'part_probe'})
+    return sorted(set(names) - {'part_probe'} - ROV_PARTS)
 
 
 def make_config(parts=(), slots=(), hull=True):
