@@ -88,6 +88,25 @@ def test_model_generation_follows_config():
     assert not list(std_root.iter('sensor'))
 
 
+def test_dvl_backend_loads_only_with_a_dvl():
+    """
+    Load gz-sim-dvl-system with the model iff a DVL is configured.
+
+    Loaded unconditionally (e.g. from the world), the idle
+    DopplerVelocityLogSystem joins every render iteration once any rendering
+    sensor exists and costs half or more of the real time factor.
+    """
+    default = (DESC_SHARE / 'config' / 'bluerov2.yaml').read_text()
+    root, _ = xacro(MODEL_XACRO, default)
+    assert not plugins(root, 'gz-sim-dvl-system'), \
+        'no DVL configured, yet the DVL backend is loaded'
+    root, _ = xacro(MODEL_XACRO, FULL_CONFIG)
+    assert len(plugins(root, 'gz-sim-dvl-system')) == 1
+    world = (GZ_SHARE / 'worlds' / 'bluerov2_playground.sdf').read_text()
+    assert '<plugin filename="gz-sim-dvl-system"' not in world, \
+        'the world must not load the DVL backend unconditionally'
+
+
 def test_plugin_references_survive_lumping():
     """
     #8: plugin joint/link refs exist in the POST-lumping converted model.
