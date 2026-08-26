@@ -43,15 +43,20 @@ with a heavier loadout), `cob_offset` and `cob_frame` (`com`: the offset is
 the BG vector and sets righting stiffness directly; `base_link`: the center
 of buoyancy is pinned in the hull like the real vehicle), and
 `fluid_density` (must match the world's buoyancy plugin; both default to
-1025). The generation composes the total mass and center of mass and solves
-the base collision box so both declarations hold for the configured
-loadout; a declaration that cannot be met fails the build.
+1025) and `footprint` (the box footprint; height is solved). The model
+generation computes the assembled total mass and center of mass from the
+URDF and solves an analytic box on a dedicated `buoyancy_displacement`
+link, the only link the worlds enable buoyancy on, so both declarations
+hold for the configured loadout and the parts' own collisions stay pure
+contact geometry. The same pattern as the BlueBoat's pontoons, with the
+box solved instead of declared.
 
 ## Constraints
 
 - URDF cannot express `<fluid_added_mass>`; added mass stays out of the
   description (the Gazebo hydrodynamics plugin is where it would go).
-- Graded buoyancy accepts only box and sphere collisions; the buoyancy
-  geometry doubles as contact geometry.
+- Graded buoyancy accepts only box and sphere collisions; both vehicles
+  therefore realize displacement as boxes on a dedicated enabled link,
+  separate from the parts' contact geometry.
 - Sensors need their own links for TF frames, which the parts' frames
   provide.
