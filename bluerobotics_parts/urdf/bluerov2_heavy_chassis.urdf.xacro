@@ -28,6 +28,9 @@
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
+  <!-- Body slots: +x faces the propeller, so the motor bulk trails away
+       from the prop plane (downward pointing verticals: motor below,
+       inside the chassis; only the duct ring shows at the foam). -->
   <xacro:macro name="bluerov2_heavy_chassis_info">
     <xacro:property name="part_info" scope="parent" value="${dict(
         attach='0 0 0',
@@ -50,10 +53,10 @@
             thruster_body_2=dict(xyz='0.14 0.092 0.0', rpy='0 0 2.3562', accepts=['t200_thruster'], default='t200_thruster', collision=False),
             thruster_body_3=dict(xyz='-0.15 -0.092 0.0', rpy='0 0 -0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
             thruster_body_4=dict(xyz='-0.15 0.092 0.0', rpy='0 0 0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
-            thruster_body_5=dict(xyz='0.118 -0.215 0.064', rpy='0 1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
-            thruster_body_6=dict(xyz='0.118 0.215 0.064', rpy='0 1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
-            thruster_body_7=dict(xyz='-0.118 -0.215 0.064', rpy='0 1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
-            thruster_body_8=dict(xyz='-0.118 0.215 0.064', rpy='0 1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_5=dict(xyz='0.118 -0.215 0.064', rpy='0 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_6=dict(xyz='0.118 0.215 0.064', rpy='0 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_7=dict(xyz='-0.118 -0.215 0.064', rpy='0 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_8=dict(xyz='-0.118 0.215 0.064', rpy='0 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
         ),
         frames=dict(
         ))}"/>
