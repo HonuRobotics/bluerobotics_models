@@ -21,11 +21,14 @@ The behavior tests measure in SIM time (world stats), so a slow runner with a
 low real time factor changes only how long they wait, never what they assert.
 """
 
+import contextlib
 import math
 import os
 from pathlib import Path
 import re
+import signal
 import subprocess
+import time
 import uuid
 
 from ament_index_python.packages import get_package_share_directory
@@ -57,9 +60,8 @@ def sim_seconds(env):
                         f'/world/{WORLD_NAME}/stats', '-n', '1', timeout=15)
     block = re.search(r'sim_time\s*{([^}]*)}', out)
     assert code == 0 and block, f'cannot read world stats:\n{out}\n{err}'
-    # (?<![a-z]) so 'sec:' never matches inside 'nsec:' (protobuf text
-    # omits a zero sec field, leaving only nsec in the block).
-    sec = re.search(r'(?<![a-z])sec:\s*(\d+)', block.group(1))
+    # \b so 'sec:' cannot match inside 'nsec:' when sec is omitted (== 0).
+    sec = re.search(r'\bsec:\s*(\d+)', block.group(1))
     nsec = re.search(r'nsec:\s*(\d+)', block.group(1))
     return (int(sec.group(1)) if sec else 0) + \
         (int(nsec.group(1)) if nsec else 0) / 1e9
@@ -68,7 +70,15 @@ def sim_seconds(env):
 def wait_sim_seconds(env, seconds, timeout=120):
     """Block until the sim clock advances `seconds`, whatever the RTF."""
     start = sim_seconds(env)
-    poll_until(lambda: sim_seconds(env) - start >= seconds, timeout,
+
+    def advanced():
+        now = sim_seconds(env)
+        assert now > start - 1.0, (
+            f'sim clock went backward ({start:.3f} -> {now:.3f} s): '
+            'server restart or corrupt stats read')
+        return now - start >= seconds
+
+    poll_until(advanced, timeout,
                f'sim advanced less than {seconds}s in {timeout}s of wall time',
                interval=0.5)
 
@@ -84,25 +94,42 @@ def teleport(env, x, y, z):
     assert code == 0 and 'true' in out, f'set_pose failed:\n{out}\n{err}'
 
 
-def command_thrusters(env, mapping, repeats=6):
+def latch_thrusters(env, mapping, period=0.3):
     """
-    Latch thrust commands (N), publishing every topic in parallel each round.
+    Hold thrust commands (N) by republishing them until released.
 
-    Parallel publication matters: commands latch, so staggered one-at-a-time
-    onset applies an unbalanced wrench and yaws the vehicle off its heading.
-    Rounds repeat because one-shot publications can lose the discovery race.
+    `gz topic -p` publishes once per invocation, and a single shot can lose
+    the transport discovery race under load: a total loss parks the vehicle
+    and a partial latch applies an unbalanced wrench that drives it
+    diagonally. Republishing in a loop for the whole command window makes
+    delivery a matter of time instead of luck. Stop with release_thrusters,
+    which latches zero behind the commands.
     """
-    for _ in range(repeats):
-        procs = [(n, subprocess.Popen(
-            ['gz', 'topic', '-t',
-             f'/bluerov2/thruster_{n}/thrust',
-             '-m', 'gz.msgs.Double', '-p', f'data: {value}'],
-            env=env, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
-            text=True)) for n, value in mapping.items()]
-        for n, proc in procs:
-            _, err = proc.communicate(timeout=20)
-            assert proc.returncode == 0, (
-                f'thruster {n} command failed ({proc.returncode}): {err}')
+    procs = []
+    for n, value in mapping.items():
+        topic = f'/bluerov2/thruster_{n}/thrust'
+        loop = (f'while true; do gz topic -t {topic} -m gz.msgs.Double '
+                f'-p "data: {value}"; sleep {period}; done')
+        procs.append(subprocess.Popen(
+            ['bash', '-c', loop], env=env, start_new_session=True,
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
+    return procs
+
+
+def _stop_publishers(procs):
+    for proc in procs:
+        with contextlib.suppress(ProcessLookupError):
+            os.killpg(proc.pid, signal.SIGTERM)
+    for proc in procs:
+        proc.wait(timeout=10)
+
+
+def release_thrusters(env, procs, numbers):
+    """Stop the publishers and latch zero so the next test starts clean."""
+    _stop_publishers(procs)
+    zeros = latch_thrusters(env, dict.fromkeys(numbers, 0.0))
+    time.sleep(4.0)  # several republish rounds so the zeros land
+    _stop_publishers(zeros)
 
 
 @pytest.fixture(scope='module')
@@ -175,10 +202,12 @@ def test_vertical_thrusters_heave(sim):
     teleport(sim, 0, 0, -3.0)
     wait_sim_seconds(sim, 3)
     t0, z0 = sim_seconds(sim), model_pose(sim)[2]
-    command_thrusters(sim, {5: -20.0, 6: -20.0})
-    wait_sim_seconds(sim, 6)
-    t1, z1 = sim_seconds(sim), model_pose(sim)[2]
-    command_thrusters(sim, {5: 0.0, 6: 0.0}, repeats=3)
+    procs = latch_thrusters(sim, {5: -20.0, 6: -20.0})
+    try:
+        wait_sim_seconds(sim, 6)
+        t1, z1 = sim_seconds(sim), model_pose(sim)[2]
+    finally:
+        release_thrusters(sim, procs, (5, 6))
     rate = (z1 - z0) / (t1 - t0)
     assert rate > 0.10, (
         f'no heave authority: climbed {rate:.3f} m/s '
@@ -189,22 +218,26 @@ def test_forward_thrust_mix_surges(sim):
     """
     The vectored surge mix drives the vehicle along its nose, without crab.
 
-    Command onset can rotate the heading (see command_thrusters), so the
+    Command onset can rotate the heading (see latch_thrusters), so the
     assertion is on the steady state, which is what the model owns: velocity
     aligned with the body x axis and no residual yaw, wherever the nose ended
     up pointing.
     """
     teleport(sim, 0, 0, -3.0)
     wait_sim_seconds(sim, 3)
-    command_thrusters(sim, {1: -10.0, 2: -10.0, 3: 10.0, 4: 10.0})
-    wait_sim_seconds(sim, 8)          # onset transient: spin damps, speed builds
-    t1 = sim_seconds(sim)
-    x1, y1, z1, r1, p1, yaw1 = model_pose(sim)
-    print(f'DEBUG t1={t1:.2f} p=({x1:.3f},{y1:.3f},{z1:.3f}) rpy=({r1:.2f},{p1:.2f},{yaw1:.2f})')
-    wait_sim_seconds(sim, 8)
-    t2 = sim_seconds(sim)
-    x2, y2, z2, r2, p2, yaw2 = model_pose(sim)
-    print(f'DEBUG t2={t2:.2f} p=({x2:.3f},{y2:.3f},{z2:.3f}) rpy=({r2:.2f},{p2:.2f},{yaw2:.2f})')
+    # 5 N per thruster: the run must FIT IN THE POOL (walls at +/-12.55 m).
+    # At 10 N the steady ~1 m/s over both windows reaches the wall and
+    # the vehicle slides along it, reading as crab.
+    procs = latch_thrusters(sim, {1: -5.0, 2: -5.0, 3: 5.0, 4: 5.0})
+    try:
+        wait_sim_seconds(sim, 6)      # onset transient: spin damps, speed builds
+        t1 = sim_seconds(sim)
+        x1, y1, _, _, _, yaw1 = model_pose(sim)
+        wait_sim_seconds(sim, 6)
+        t2 = sim_seconds(sim)
+        x2, y2, _, _, _, yaw2 = model_pose(sim)
+    finally:
+        release_thrusters(sim, procs, (1, 2, 3, 4))
     dx, dy = x2 - x1, y2 - y1
     speed = math.hypot(dx, dy) / (t2 - t1)
     assert speed > 0.05, (

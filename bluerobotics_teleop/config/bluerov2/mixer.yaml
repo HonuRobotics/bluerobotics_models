@@ -1,0 +1,20 @@
+# BlueROV2 (standard, 6 thrusters) mixer: model truth, not user preference.
+# Gains follow REP 103 body axes (x forward, y left, z up). The surge and
+# heave columns reproduce the sign sets verified by the bluerov2_gazebo
+# integration tests; sway and yaw follow from the vectored 45 degree layout.
+twist_to_thrust:
+  ros__parameters:
+    thruster_topics:
+      - /bluerov2/thrusters/thruster1/thrust
+      - /bluerov2/thrusters/thruster2/thrust
+      - /bluerov2/thrusters/thruster3/thrust
+      - /bluerov2/thrusters/thruster4/thrust
+      - /bluerov2/thrusters/thruster5/thrust
+      - /bluerov2/thrusters/thruster6/thrust
+    gains_linear_x:  [-1.0, -1.0,  1.0,  1.0,  0.0,  0.0]
+    gains_linear_y:  [-1.0,  1.0, -1.0,  1.0,  0.0,  0.0]
+    gains_linear_z:  [ 0.0,  0.0,  0.0,  0.0, -1.0, -1.0]
+    gains_angular_z: [-1.0,  1.0,  1.0, -1.0,  0.0,  0.0]
+    # T200 envelope at 16 V, Newtons.
+    max_thrust_forward: 50.0
+    max_thrust_reverse: -40.0

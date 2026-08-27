@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <!--
-  Self-contained underwater world for the BlueROV2: sun, a seabed plane, the
-  core + sensor systems, graded buoyancy (seawater below z 0, air above) and
-  the vehicle pulled in via <include>. Started directly with `gz sim` it comes
-  up paused; press play and the near-neutral vehicle drifts up very slowly,
+  Self-contained underwater world for the BlueROV2: sun, a pool environment,
+  the core + sensor systems, graded buoyancy (seawater below z 0, air above)
+  and the vehicle pulled in via <include>. Started directly with `gz sim` it comes
+  up paused; press play and the near-neutral vehicle rises very slowly,
   damped by its hydrodynamics, until it floats essentially awash at the
   surface (the default 0.002 kg net_buoyancy leaves almost no freeboard).
 
@@ -12,10 +12,181 @@
 <sdf version="1.12">
   <world name="bluerov2_playground">
 
+    <!-- Keep 1 ms: the vectored thruster mix is step sensitive. At 4 ms the
+         surge mix crabs ~45 deg off the nose, and 2 ms is flaky under load
+         (test_forward_thrust_mix_surges). Revisit with hydrodynamics tuning
+         before raising this. -->
     <physics name="1ms" type="ignored">
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1.0</real_time_factor>
     </physics>
+
+    <!-- GUI layout: the stock gz sim panels (a world <gui> block replaces the
+         client's default config, so the full set is spelled out) with the
+         startup camera framed on the vehicle spawn point. -->
+    <gui fullscreen="0">
+      <plugin filename="MinimalScene" name="3D View">
+        <gz-gui>
+          <title>3D View</title>
+          <property type="bool" key="showTitleBar">false</property>
+          <property type="string" key="state">docked</property>
+        </gz-gui>
+        <engine>ogre2</engine>
+        <scene>scene</scene>
+        <camera_pose>-0.85 0.6 -0.65 0 0.32 -0.61</camera_pose>
+      </plugin>
+      <plugin filename="EntityContextMenuPlugin" name="Entity context menu">
+        <gz-gui>
+          <property key="state" type="string">floating</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="GzSceneManager" name="Scene Manager">
+        <gz-gui>
+          <property key="resizable" type="bool">false</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="state" type="string">floating</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="InteractiveViewControl" name="Interactive view control">
+        <gz-gui>
+          <property key="resizable" type="bool">false</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="state" type="string">floating</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="CameraTracking" name="Camera tracking">
+        <gz-gui>
+          <property key="resizable" type="bool">false</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="state" type="string">floating</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="MarkerManager" name="Marker manager">
+        <gz-gui>
+          <property key="resizable" type="bool">false</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="state" type="string">floating</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="SelectEntities" name="Select entities">
+        <gz-gui>
+          <property key="resizable" type="bool">false</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="state" type="string">floating</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="Spawn" name="Spawn entities">
+        <gz-gui>
+          <property key="resizable" type="bool">false</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="state" type="string">floating</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="VisualizationCapabilities" name="Visualization capabilities">
+        <gz-gui>
+          <property key="resizable" type="bool">false</property>
+          <property key="width" type="double">5</property>
+          <property key="height" type="double">5</property>
+          <property key="state" type="string">floating</property>
+          <property key="showTitleBar" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="WorldControl" name="World control">
+        <gz-gui>
+          <title>World control</title>
+          <property type="bool" key="showTitleBar">false</property>
+          <property type="bool" key="resizable">false</property>
+          <property type="double" key="height">72</property>
+          <property type="double" key="z">1</property>
+          <property type="string" key="state">floating</property>
+          <anchors target="3D View">
+            <line own="left" target="left"/>
+            <line own="bottom" target="bottom"/>
+          </anchors>
+        </gz-gui>
+        <play_pause>true</play_pause>
+        <step>true</step>
+        <start_paused>true</start_paused>
+        <use_event>true</use_event>
+      </plugin>
+      <plugin filename="WorldStats" name="World stats">
+        <gz-gui>
+          <title>World stats</title>
+          <property type="bool" key="showTitleBar">false</property>
+          <property type="bool" key="resizable">false</property>
+          <property type="double" key="height">110</property>
+          <property type="double" key="width">290</property>
+          <property type="double" key="z">1</property>
+          <property type="string" key="state">floating</property>
+          <anchors target="3D View">
+            <line own="right" target="right"/>
+            <line own="bottom" target="bottom"/>
+          </anchors>
+        </gz-gui>
+        <sim_time>true</sim_time>
+        <real_time>true</real_time>
+        <real_time_factor>true</real_time_factor>
+        <iterations>true</iterations>
+      </plugin>
+      <plugin filename="TransformControl" name="Transform control">
+        <gz-gui>
+          <property key="resizable" type="bool">false</property>
+          <property key="x" type="double">0</property>
+          <property key="y" type="double">50</property>
+          <property key="width" type="double">250</property>
+          <property key="height" type="double">50</property>
+          <property key="state" type="string">floating</property>
+          <property key="showTitleBar" type="bool">false</property>
+          <property key="cardBackground" type="string">#777777</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="Screenshot" name="Screenshot">
+        <gz-gui>
+          <property key="resizable" type="bool">false</property>
+          <property key="x" type="double">250</property>
+          <property key="y" type="double">50</property>
+          <property key="width" type="double">50</property>
+          <property key="height" type="double">50</property>
+          <property key="state" type="string">floating</property>
+          <property key="showTitleBar" type="bool">false</property>
+          <property key="cardBackground" type="string">#777777</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="ComponentInspector" name="Component inspector">
+        <gz-gui>
+          <property type="bool" key="showTitleBar">false</property>
+          <property type="string" key="state">docked</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="EntityTree" name="Entity tree">
+        <gz-gui>
+          <property type="bool" key="showTitleBar">false</property>
+          <property type="string" key="state">docked</property>
+        </gz-gui>
+      </plugin>
+    </gui>
+
+    <!-- Underwater ambient, matching the pool environment. -->
+    <scene>
+      <ambient>0.3 0.6 0.7</ambient>
+      <background>0.6 0.85 0.95</background>
+      <grid>false</grid>
+    </scene>
 
     <plugin filename="gz-sim-physics-system"
             name="gz::sim::systems::Physics"/>
@@ -60,8 +231,19 @@
       <direction>-0.5 0.1 -0.9</direction>
     </light>
 
+    <!-- Pool environment: a 25 x 25 m basin, floor at z -5, wall tops at the
+         z=0 water surface, with the surrounding deck. -->
+    <include>
+      <uri>model://pool</uri>
+    </include>
+    <include>
+      <uri>model://deck</uri>
+    </include>
+
     <model name="ground_plane">
       <static>true</static>
+      <!-- Seabed, well below the z=0 water surface. -->
+      <pose>0 0 -5 0 0 0</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
@@ -91,17 +273,18 @@
     <include>
       <uri>model://bluerov2</uri>
       <name>bluerov2</name>
-      <pose>0 0 0.5 0 0 0</pose>
+      <pose>0 0 -1 0 0 0</pose>
     </include>
 
-    <!-- Visual only water surface at the z=0 graded buoyancy waterline. -->
+    <!-- Visual only water surface at the z=0 graded buoyancy waterline,
+         sized to the pool basin so it does not flood the deck. -->
     <model name="water_surface">
       <static>true</static>
       <link name="link">
         <visual name="visual">
           <transparency>0.4</transparency>
           <geometry>
-            <plane><normal>0 0 1</normal><size>200 200</size></plane>
+            <plane><normal>0 0 1</normal><size>24.8 24.8</size></plane>
           </geometry>
           <material>
             <ambient>0.10 0.30 0.50 1</ambient>

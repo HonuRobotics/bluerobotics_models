@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>bluerobotics_teleop</name>
+  <version>0.1.0</version>
+  <description>
+    Gamepad teleoperation for the BlueROV2 and BlueBoat: a config driven
+    Twist to thrust mixer with deadman, timeout and EPA safety behavior,
+    plus an interactive joystick calibration tool.
+  </description>
+  <maintainer email="caguero@honurobotics.com">Carlos Aguero</maintainer>
+  <license>Apache-2.0</license>
+
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>joy</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>teleop_twist_joy</exec_depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>ament_xmllint</test_depend>
+  <test_depend>blueboat_gazebo</test_depend>
+  <test_depend>bluerov2_gazebo</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
