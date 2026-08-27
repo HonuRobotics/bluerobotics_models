@@ -1,0 +1,195 @@
+<?xml version="1.0"?>
+<sdf version="1.12">
+  <model name="pool">
+    <static>true</static>
+
+    <!-- Pool floor -->
+    <model name="floor">
+      <pose>0 0 -5 0 0 0</pose>
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>25 25 0.2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>25 25 0.2</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.6 0.7 0.75 1</ambient>
+            <diffuse>0.7 0.8 0.85 1</diffuse>
+            <specular>0.3 0.3 0.3 1</specular>
+            <pbr>
+              <metal>
+                <albedo_map>model://pool/materials/textures/pool_floor.png</albedo_map>
+                <normal_map>model://pool/materials/textures/pool_floor_normal.png</normal_map>
+                <roughness_map>model://pool/materials/textures/pool_floor_roughness.png</roughness_map>
+                <metalness>0.0</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Pool walls -->
+    <model name="walls">
+      <static>true</static>
+      <link name="link">
+
+        <!-- Wall: +X side (at x=12.55) -->
+        <collision name="wall_px_collision">
+          <pose>12.55 0 -2.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.1 25 5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="wall_px_visual">
+          <pose>12.55 0 -2.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.1 25 5</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.85 0.9 1</ambient>
+            <diffuse>0.9 0.93 0.96 1</diffuse>
+            <specular>0.3 0.3 0.3 1</specular>
+            <pbr>
+              <metal>
+                <albedo_map>model://pool/materials/textures/pool_tile.png</albedo_map>
+                <normal_map>model://pool/materials/textures/pool_tile_normal.png</normal_map>
+                <roughness_map>model://pool/materials/textures/pool_tile_roughness.png</roughness_map>
+                <metalness>0.0</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+
+        <!-- Wall: -X side -->
+        <collision name="wall_nx_collision">
+          <pose>-12.55 0 -2.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.1 25 5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="wall_nx_visual">
+          <pose>-12.55 0 -2.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.1 25 5</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.85 0.9 1</ambient>
+            <diffuse>0.9 0.93 0.96 1</diffuse>
+            <specular>0.3 0.3 0.3 1</specular>
+            <pbr>
+              <metal>
+                <albedo_map>model://pool/materials/textures/pool_tile.png</albedo_map>
+                <normal_map>model://pool/materials/textures/pool_tile_normal.png</normal_map>
+                <roughness_map>model://pool/materials/textures/pool_tile_roughness.png</roughness_map>
+                <metalness>0.0</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+
+        <!-- Wall: +Y side (at y=12.55) -->
+        <collision name="wall_py_collision">
+          <pose>0 12.55 -2.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>25.2 0.1 5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="wall_py_visual">
+          <pose>0 12.55 -2.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>25.2 0.1 5</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.85 0.9 1</ambient>
+            <diffuse>0.9 0.93 0.96 1</diffuse>
+            <specular>0.3 0.3 0.3 1</specular>
+            <pbr>
+              <metal>
+                <albedo_map>model://pool/materials/textures/pool_tile.png</albedo_map>
+                <normal_map>model://pool/materials/textures/pool_tile_normal.png</normal_map>
+                <roughness_map>model://pool/materials/textures/pool_tile_roughness.png</roughness_map>
+                <metalness>0.0</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+
+        <!-- Wall: -Y side -->
+        <collision name="wall_ny_collision">
+          <pose>0 -12.55 -2.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>25.2 0.1 5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="wall_ny_visual">
+          <pose>0 -12.55 -2.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>25.2 0.1 5</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.85 0.9 1</ambient>
+            <diffuse>0.9 0.93 0.96 1</diffuse>
+            <specular>0.3 0.3 0.3 1</specular>
+            <pbr>
+              <metal>
+                <albedo_map>model://pool/materials/textures/pool_tile.png</albedo_map>
+                <normal_map>model://pool/materials/textures/pool_tile_normal.png</normal_map>
+                <roughness_map>model://pool/materials/textures/pool_tile_roughness.png</roughness_map>
+                <metalness>0.0</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+
+      </link>
+    </model>
+
+    <!-- Water volume (visual only - semi-transparent blue) -->
+    <model name="water">
+      <static>true</static>
+      <pose>0 0 -2.505 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>25 25 4.99</size>
+            </box>
+          </geometry>
+          <transparency>0.6</transparency>
+          <material>
+            <ambient>0.0 0.3 0.5 1</ambient>
+            <diffuse>0.0 0.4 0.7 1</diffuse>
+            <specular>0.2 0.3 0.4 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+  </model>
+</sdf>

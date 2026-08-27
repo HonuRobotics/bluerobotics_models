@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<sdf version="1.12">
+  <model name="deck">
+    <static>true</static>
+    <link name="link">
+
+      <!-- +X deck strip: x from 12.6 to 17.6 -->
+      <collision name="deck_px_col">
+        <pose>15.1 0 0 0 0 0</pose>
+        <geometry><box><size>5.0 25.2 0.1</size></box></geometry>
+      </collision>
+      <visual name="deck_px_vis">
+        <pose>15.1 0 0 0 0 0</pose>
+        <geometry><box><size>5.0 25.2 0.1</size></box></geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.8 0.8 0.8 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://pool/materials/textures/concrete.png</albedo_map>
+              <normal_map>model://pool/materials/textures/concrete_normal.png</normal_map>
+              <roughness_map>model://pool/materials/textures/concrete_roughness.png</roughness_map>
+              <metalness>0.0</metalness>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+
+      <!-- -X deck strip: x from -17.6 to -12.6 -->
+      <collision name="deck_nx_col">
+        <pose>-15.1 0 0 0 0 0</pose>
+        <geometry><box><size>5.0 25.2 0.1</size></box></geometry>
+      </collision>
+      <visual name="deck_nx_vis">
+        <pose>-15.1 0 0 0 0 0</pose>
+        <geometry><box><size>5.0 25.2 0.1</size></box></geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.8 0.8 0.8 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://pool/materials/textures/concrete.png</albedo_map>
+              <normal_map>model://pool/materials/textures/concrete_normal.png</normal_map>
+              <roughness_map>model://pool/materials/textures/concrete_roughness.png</roughness_map>
+              <metalness>0.0</metalness>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+
+      <!-- +Y deck strip: y from 12.6 to 17.6, full width including corners -->
+      <collision name="deck_py_col">
+        <pose>0 15.1 0 0 0 0</pose>
+        <geometry><box><size>35.2 5.0 0.1</size></box></geometry>
+      </collision>
+      <visual name="deck_py_vis">
+        <pose>0 15.1 0 0 0 0</pose>
+        <geometry><box><size>35.2 5.0 0.1</size></box></geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.8 0.8 0.8 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://pool/materials/textures/concrete.png</albedo_map>
+              <normal_map>model://pool/materials/textures/concrete_normal.png</normal_map>
+              <roughness_map>model://pool/materials/textures/concrete_roughness.png</roughness_map>
+              <metalness>0.0</metalness>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+
+      <!-- -Y deck strip: y from -17.6 to -12.6, full width including corners -->
+      <collision name="deck_ny_col">
+        <pose>0 -15.1 0 0 0 0</pose>
+        <geometry><box><size>35.2 5.0 0.1</size></box></geometry>
+      </collision>
+      <visual name="deck_ny_vis">
+        <pose>0 -15.1 0 0 0 0</pose>
+        <geometry><box><size>35.2 5.0 0.1</size></box></geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.8 0.8 0.8 1</diffuse>
+          <pbr>
+            <metal>
+              <albedo_map>model://pool/materials/textures/concrete.png</albedo_map>
+              <normal_map>model://pool/materials/textures/concrete_normal.png</normal_map>
+              <roughness_map>model://pool/materials/textures/concrete_roughness.png</roughness_map>
+              <metalness>0.0</metalness>
+            </metal>
+          </pbr>
+        </material>
+      </visual>
+
+    </link>
+  </model>
+</sdf>
