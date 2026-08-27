@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+<sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
+  <model name="bluerov2_payload_bracket">
+    <link name="bluerov2_payload_bracket_link">
+      <visual name="bluerov2_payload_bracket_visual">
+        <geometry>
+          <mesh>
+            <uri>bluerov2_payload_bracket.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="botttom-frame_collider_box">
+        <pose>0.011554 0.0 -0.054334 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.249045 0.318974 0.01207</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="center-tank_collider_cylinder_collider_box">
+        <pose>0.002147 -0.162625 0.025638 -0.0 1.570796 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.191232 0.011872 0.425088</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="center-tank_collider_cylinder_collider_box.001">
+        <pose>0.002147 0.161151 0.025638 -0.0 1.570796 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.191232 0.011872 0.425088</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+    <light type="directional" name="Sun">
+      <pose>-0.160163 -0.110226 0.027974 0.0 -0.303211 0.0</pose>
+      <intensity>1.0</intensity>
+      <diffuse>(1.0, 1.0, 1.0, 1.0)</diffuse>
+      <cast_shadows>True</cast_shadows>
+      <specular>1.0, 1.0, 1.0</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.0</linear>
+        <constant>1.0</constant>
+        <quadratic>1.0</quadratic>
+      </attenuation>
+    </light>
+  </model>
+</sdf>
