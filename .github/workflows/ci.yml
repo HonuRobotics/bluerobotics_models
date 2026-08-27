@@ -28,7 +28,7 @@ jobs:
         run: |
           printf 'Acquire::Retries "3";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' \
             > /etc/apt/apt.conf.d/80-network-hardening
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           path: src/bluerobotics_models
       - name: Install dependencies
@@ -51,7 +51,7 @@ jobs:
           colcon test --merge-install --event-handlers console_cohesion+
           colcon test-result --verbose
       # Full colcon logs (per-test stdout included) for auditing, pass or fail.
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-logs

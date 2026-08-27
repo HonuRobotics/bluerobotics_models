@@ -83,13 +83,32 @@ edit them. Two supported ways to customize the loadout:
    model and bridge) consistently. See the `bluerov2_gazebo` README.
 
 ## Buoyancy
-The `base_link` collision box is **not hand-tuned**: the xacro sums the total mass
-(hull + thrusters + configured accessories) and solves the box height so that
-`water_density · volume = mass · (1 + margin)`. So adding/removing accessories keeps
-the vehicle slightly positive automatically. Tunables (top of `bluerov2.urdf.xacro`):
-`water_density`, `buoyancy_margin` (default 0.0002), `buoyancy_cob_z`. The buoyancy
-*force* is applied by the world plugin in `bluerov2_gazebo`; this box just sets the
-displaced volume.
+
+Buoyant behavior is declared in `config/bluerov2.yaml`:
+
+```yaml
+buoyancy:
+  net_buoyancy: 0.002        # kg, positive floats up
+  cob_offset: "0 0 0.046"    # m, relative to cob_frame
+  cob_frame: com             # com or base_link
+  fluid_density: 1025.0      # kg/m^3
+```
+
+Every key is optional. The defaults give a barely positive vehicle with the
+center of buoyancy 46 mm above the center of mass. At build time the xacro
+solves the height and center of the `base_link` collision box so the
+declaration holds for the configured loadout, and it refuses to build a
+declaration it cannot meet. Adding or removing accessories keeps the
+declaration true automatically.
+
+Known issue: the fluid density appears in two places, this file and the
+world's Buoyancy plugin, and nothing forces them to agree. Both default to
+1025 (seawater). If you change one, change the other. A test covers the
+playground world shipped in this repo; worlds elsewhere are on the user.
+
+The full parameter documentation lives in `urdf/bluerov2.urdf.xacro`, next to
+the implementation. The buoyancy force itself is applied by the world plugin
+in `bluerov2_gazebo`; the box only sets the displaced volume.
 
 ## View in RViz
 ```bash

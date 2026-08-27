@@ -80,8 +80,8 @@ def test_joint_states_flow(sim):
 
 def test_thruster_and_ping_topics_bridged(sim):
     """The thrust command and echosounder topics exist on the ROS graph."""
-    needed = ('/blueboat/thrusters/port/thrust',
-              '/blueboat/thrusters/stbd/thrust',
+    needed = ('/blueboat/motor_port/thrust',
+              '/blueboat/motor_stbd/thrust',
               '/blueboat/ping/range')
     poll_until(
         lambda: all(t in ros(sim, 'topic', 'list')[1] for t in needed), 30,

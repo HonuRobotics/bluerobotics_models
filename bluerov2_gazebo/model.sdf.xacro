@@ -49,8 +49,9 @@
   <!-- ===================== Sensors (config-driven) =====================
        One <sensor> per sensor-type accessory, emitted as a near-massless link
        fixed to base_link at the accessory's config pose (so the description stays
-       Gazebo-free). The world must load gz-sim-sensors-system, plus
-       gz-sim-dvl-system for the DVL. NOTE: gz sensor axes follow the link frame -
+       Gazebo-free). The world must load gz-sim-sensors-system; the DVL
+       backend (gz-sim-dvl-system) rides with this model, emitted below only
+       when a DVL is configured. NOTE: gz sensor axes follow the link frame -
        a camera looks +X, a gpu_lidar scans the sensor XY plane, DVL beams point
        down per <tilt>; tune each accessory's rpy for the intended view.
 
@@ -75,9 +76,9 @@
 
   <!-- Wrapper: a near-massless sensor link fixed to base_link at `pose`, holding
        the <sensor> block passed in. The accessory's real mass/geometry already
-       live in base_link via the description; 1e-5 kg keeps each wrapper under
-       0.5% of the 0.02% buoyancy margin, so a full sensor loadout cannot tip
-       the trim negative. -->
+       live in base_link via the description; at 1e-5 kg a full sensor loadout
+       stays orders of magnitude under the default 0.002 kg net_buoyancy, so
+       the wrappers cannot tip the trim negative. -->
   <xacro:macro name="sensor_link" params="name pose *sensor">
     <link name="${name}_sensor">
       <pose relative_to="base_link">${pose}</pose>
@@ -164,8 +165,8 @@
 
   <!-- Water Linked DVL-A50: native DopplerVelocityLog custom sensor, 4-beam Janus
        (tilt 22.5 deg). Publishes gz.msgs.DVLVelocityTracking, bridged to
-       marine_acoustic_msgs/msg/Dvl by ros_gz_bridge. Requires
-       gz-sim-dvl-system in the world. -->
+       marine_acoustic_msgs/msg/Dvl by ros_gz_bridge. Its backend system is
+       emitted with the model (see below), so any world works. -->
   <xacro:macro name="dvl_sensor" params="name pose topic_base">
     <xacro:sensor_link name="${name}" pose="${pose}">
       <sensor name="${name}" type="custom" gz:type="dvl">
@@ -291,6 +292,16 @@
 
     <!-- Sensors: one per sensor-type accessory in config/bluerov2.yaml. -->
     <xacro:mount_sensors items="${cfg.get('accessories', [])}"/>
+
+    <!-- The DVL backend, ONLY when a DVL is fitted. Never load it
+         unconditionally: with any rendering sensor present (the default
+         camera) the idle DopplerVelocityLogSystem joins every render
+         iteration and costs half or more of the real time factor. One
+         instance serves every DVL in the model. -->
+    <xacro:if value="${len([a for a in cfg.get('accessories', []) if a['type'] == 'dvl_a50']) > 0}">
+      <plugin filename="gz-sim-dvl-system"
+              name="gz::sim::systems::DopplerVelocityLogSystem"/>
+    </xacro:if>
 
     <!-- Grippers: JointPositionControllers for each gripper accessory. -->
     <xacro:mount_grippers items="${cfg.get('accessories', [])}"/>

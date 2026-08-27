@@ -28,7 +28,8 @@ TOP_XACRO = SHARE / 'urdf' / 'bluerov2.urdf.xacro'
 ACCESSORIES_XACRO = SHARE / 'urdf' / 'accessories.xacro'
 
 WATER_DENSITY = 1025.0
-BUOYANCY_TARGET = 1.0002  # water_density * volume / mass, per buoyancy_margin
+NET_BUOYANCY_DEFAULT = 0.002   # kg, per the default buoyancy declaration
+COB_OFFSET_DEFAULT = (0.0, 0.0, 0.046)  # m, CoB relative to CoM
 
 # Full accessory catalog: type -> (demo pose, links the macro must generate).
 CATALOG = {
@@ -47,11 +48,13 @@ CATALOG = {
 }
 
 
-def make_config(variant='standard', accessories=()):
+def make_config(variant='standard', accessories=(), buoyancy=None):
     """Return vehicle-config yaml text for the given loadout."""
-    lines = [f'variant: {variant}', 'accessories:']
-    if not accessories:
-        lines[-1] = 'accessories: []'
+    lines = [f'variant: {variant}']
+    if buoyancy:
+        lines.append('buoyancy:')
+        lines.extend(f'  {k}: {v}' for k, v in buoyancy.items())
+    lines.append('accessories:' if accessories else 'accessories: []')
     for type_name, name, xyz in accessories:
         lines.append(
             f'  - {{type: {type_name}, name: {name}, '
@@ -119,9 +122,78 @@ def collision_volume(root):
     return total
 
 
-def buoyancy_ratio(root):
-    """Return water_density * total collision volume / total mass."""
-    return WATER_DENSITY * collision_volume(root) / total_mass(root)
+def link_origins(root):
+    """
+    Map each link to its translation in the base frame.
+
+    Mount rpy are zero in every config these tests generate, so translations
+    compose without rotation.
+    """
+    origins = {'base_link': (0.0, 0.0, 0.0)}
+    pending = root.findall('joint')
+    while pending:
+        rest = []
+        for joint in pending:
+            parent = joint.find('parent').get('link')
+            if parent not in origins:
+                rest.append(joint)
+                continue
+            origin = joint.find('origin')
+            xyz = [float(v) for v in origin.get('xyz').split()] \
+                if origin is not None else [0.0, 0.0, 0.0]
+            base = origins[parent]
+            origins[joint.find('child').get('link')] = tuple(
+                base[k] + xyz[k] for k in range(3))
+        assert len(rest) < len(pending), 'joint graph has an orphan'
+        pending = rest
+    return origins
+
+
+def element_offset(parent):
+    """Return the xyz of an element's <origin>, or zero."""
+    origin = parent.find('origin')
+    if origin is None:
+        return [0.0, 0.0, 0.0]
+    return [float(v) for v in origin.get('xyz').split()]
+
+
+def center_of_mass(root):
+    """Mass-weighted centroid of every inertial, in the base frame."""
+    origins = link_origins(root)
+    mass, moment = 0.0, [0.0, 0.0, 0.0]
+    for link in root.findall('link'):
+        inertial = link.find('inertial')
+        if inertial is None:
+            continue
+        m = float(inertial.find('mass').get('value'))
+        off = element_offset(inertial)
+        base = origins[link.get('name')]
+        mass += m
+        for k in range(3):
+            moment[k] += m * (base[k] + off[k])
+    return tuple(mo / mass for mo in moment)
+
+
+def center_of_buoyancy(root):
+    """Volume-weighted centroid of every collision, in the base frame."""
+    origins = link_origins(root)
+    volume, moment = 0.0, [0.0, 0.0, 0.0]
+    for link in root.findall('link'):
+        base = origins[link.get('name')]
+        for col in link.findall('collision'):
+            box = col.find('geometry/box')
+            d = [float(v) for v in box.get('size').split()]
+            vol = d[0] * d[1] * d[2]
+            off = element_offset(col)
+            volume += vol
+            for k in range(3):
+                moment[k] += vol * (base[k] + off[k])
+    return tuple(mo / volume for mo in moment)
+
+
+def net_buoyancy(root):
+    """Return water_density * total collision volume - total mass, in kg."""
+    return WATER_DENSITY * collision_volume(root) - total_mass(root)
 
 
 def test_default_config_camera_only():
@@ -137,7 +209,13 @@ def test_default_config_camera_only():
 
 
 def test_buoyancy_invariant_across_loadouts():
-    """rho*V/mass stays at the target buoyancy margin for any loadout."""
+    """
+    Both declared quantities hold for any loadout.
+
+    rho*V - m stays at the declared net buoyancy, and the CoB sits at the
+    declared offset from the CoM. Tolerance on the offset covers the
+    mount-pose approximation for claw collision volumes.
+    """
     configs = [
         make_config(),
         (SHARE / 'config' / 'bluerov2.yaml').read_text(),
@@ -145,9 +223,59 @@ def test_buoyancy_invariant_across_loadouts():
         make_config('standard', full_catalog_accessories()),
     ]
     for config in configs:
-        ratio = buoyancy_ratio(generate_urdf(config))
-        assert ratio > 1.0  # strictly positive: the fail-safe surfacing trim
-        assert abs(ratio - BUOYANCY_TARGET) < 1e-4
+        root = generate_urdf(config)
+        assert abs(net_buoyancy(root) - NET_BUOYANCY_DEFAULT) < 1e-6
+        com, cob = center_of_mass(root), center_of_buoyancy(root)
+        for k in range(3):
+            assert abs(cob[k] - com[k] - COB_OFFSET_DEFAULT[k]) < 2e-3
+
+
+def test_buoyancy_declaration_honored():
+    """An explicit buoyancy block drives both declared quantities."""
+    root = generate_urdf(make_config(
+        'heavy', full_catalog_accessories(),
+        buoyancy={'net_buoyancy': 0.05, 'cob_offset': '"0.01 0.005 0.03"'}))
+    assert abs(net_buoyancy(root) - 0.05) < 1e-6
+    com, cob = center_of_mass(root), center_of_buoyancy(root)
+    for k, want in enumerate((0.01, 0.005, 0.03)):
+        assert abs(cob[k] - com[k] - want) < 2e-3
+
+
+def test_cob_frame_and_fluid_density_honored():
+    """base_link frame pins the CoB absolutely; density rescales the volume."""
+    root = generate_urdf(make_config(buoyancy={
+        'net_buoyancy': 0.05, 'cob_offset': '"0.02 0 0.1"',
+        'cob_frame': 'base_link', 'fluid_density': 1000.0}))
+    assert abs(1000.0 * collision_volume(root) - total_mass(root) - 0.05) < 1e-6
+    cob = center_of_buoyancy(root)
+    for k, want in enumerate((0.02, 0.0, 0.1)):
+        assert abs(cob[k] - want) < 1e-6  # in base_link, not relative to CoM
+
+
+def test_invalid_cob_frame_fails_loudly():
+    """A cob_frame that is neither com nor base_link refuses to build."""
+    config = make_config(buoyancy={'cob_frame': 'flange'})
+    with tempfile.NamedTemporaryFile('w', suffix='.yaml', delete=False) as f:
+        f.write(config)
+        config_path = f.name
+    out = subprocess.run(
+        ['xacro', str(TOP_XACRO), f'config_file:={config_path}'],
+        capture_output=True, text=True, timeout=60)
+    assert out.returncode != 0
+    assert 'cob_frame' in out.stderr
+
+
+def test_unbuildable_declaration_fails_loudly():
+    """A net buoyancy the hull box cannot realize fails the build by name."""
+    config = make_config(buoyancy={'net_buoyancy': -100.0})
+    with tempfile.NamedTemporaryFile('w', suffix='.yaml', delete=False) as f:
+        f.write(config)
+        config_path = f.name
+    out = subprocess.run(
+        ['xacro', str(TOP_XACRO), f'config_file:={config_path}'],
+        capture_output=True, text=True, timeout=60)
+    assert out.returncode != 0
+    assert 'net_buoyancy' in out.stderr
 
 
 def test_variant_selects_thrusters_and_mesh():

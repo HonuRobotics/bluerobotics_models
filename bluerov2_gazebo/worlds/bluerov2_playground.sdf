@@ -5,7 +5,7 @@
   and the vehicle pulled in via <include>. Started directly with `gz sim` it comes
   up paused; press play and the near-neutral vehicle rises very slowly,
   damped by its hydrodynamics, until it floats essentially awash at the
-  surface (the 0.02% margin leaves almost no freeboard).
+  surface (the default 0.002 kg net_buoyancy leaves almost no freeboard).
 
   Run it directly, no ROS:  gz sim <this file>
 -->
@@ -196,18 +196,20 @@
             name="gz::sim::systems::SceneBroadcaster"/>
 
     <!-- Renders the vehicle's camera / rgbd / gpu_lidar (Ping360) sensors; needs a
-         render path (GPU, or software GL headless). gz-sim-dvl-system drives the DVL-A50 custom sensor. -->
+         render path (GPU, or software GL headless). The DVL backend
+         (gz-sim-dvl-system) is NOT loaded here: the composed model brings it
+         along only when a DVL is configured, because once any rendering
+         sensor exists the idle DVL system joins every render iteration and
+         costs half or more of the real time factor. -->
     <plugin filename="gz-sim-sensors-system"
             name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>
     </plugin>
-    <plugin filename="gz-sim-dvl-system"
-            name="gz::sim::systems::DopplerVelocityLogSystem"/>
 
     <!-- Graded buoyancy: seawater (1025) below z=0, air above, so the vehicle
          has a real free surface (and can share a world with surface vessels).
          Displaced volume comes from the model's collision, sized analytically
-         in bluerov2_description so density*volume = mass*(1+margin); the
+         in bluerov2_description so density*volume = mass + net_buoyancy; the
          model's Hydrodynamics plugin damps the slow rise. -->
     <plugin filename="gz-sim-buoyancy-system"
             name="gz::sim::systems::Buoyancy">

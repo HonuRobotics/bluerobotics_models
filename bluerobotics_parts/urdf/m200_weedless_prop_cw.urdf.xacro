@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!--
+  m200_weedless_prop_cw part macro.
+
+  Bootstrapped from models/m200_weedless_prop_cw/model.sdf by scripts/sdf_to_part.py on
+  2026-08-21. This file is the part: maintain it by hand from here on.
+
+  Inertia: estimated from the delivered collision geometry at 1000 kg/m^3 (SDF auto inertia); replace with measured values.
+
+  Drive: T200 16 V endpoints and prop diameter as placeholders for every
+  propeller option; replace with measured values for this prop.
+
+  Contract (see parts.xacro): <part>_info exports the metadata (attach,
+  slots, frames, drive); <part> instantiates the link, its mounting joint
+  and its slot / frame links.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="m200_weedless_prop_cw_info">
+    <xacro:property name="part_info" scope="parent" value="${dict(
+        attach='0 0 0',
+        slots=dict(
+        ),
+        frames=dict(
+        ),
+        drive=dict(diameter=0.076, max_thrust=51.5, min_thrust=-40.2, rotation='cw'))}"/>
+  </xacro:macro>
+
+  <xacro:macro name="m200_weedless_prop_cw"
+               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='1 0 0'">
+    <xacro:m200_weedless_prop_cw_info/>
+
+    <link name="${name}">
+      <inertial>
+        <origin xyz="0.000336 3e-05 -5e-06" rpy="0 0 0"/>
+        <mass value="0.074472"/>
+        <inertia ixx="1.41779e-05" ixy="0" ixz="-5.54437e-12"
+                 iyy="3.11438e-05" iyz="0"
+                 izz="3.11438e-05"/>
+      </inertial>
+      <xacro:part_visual mesh="package://bluerobotics_parts/models/m200_weedless_prop_cw/m200_weedless_prop_cw.visual.glb"/>
+      <xacro:if value="${collision}">
+        <collision>
+          <origin xyz="0.000336 3e-05 -5e-06" rpy="-0 1.5708 0"/>
+          <geometry>
+            <cylinder radius="0.019513" length="0.062258"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+    </link>
+
+    <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
+                      joint="${joint}" axis="${axis}" attach="${part_info['attach']}"/>
+    <xacro:part_slots name="${name}" items="${list(part_info['slots'].items())}"/>
+    <xacro:part_frames name="${name}" items="${list(part_info['frames'].items())}"/>
+
+  </xacro:macro>
+
+</robot>

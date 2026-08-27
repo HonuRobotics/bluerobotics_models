@@ -1,0 +1,64 @@
+<?xml version="1.0" ?>
+<sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
+  <model name="blueboat_chassis">
+    <link name="blueboat_chassis_link">
+      <visual name="blueboat_chassis_visual">
+        <geometry>
+          <mesh>
+            <uri>blueboat_chassis.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="blueboat_chassis_collider_box">
+        <pose>-0.002666 -0.368156 0.131239 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.439118 0.157103 0.079944</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="blueboat_chassis_collider_box_1">
+        <pose>-0.002666 0.368156 0.131239 0.0 -0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.439118 0.157103 0.079944</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="blueboat_chassis_collider_box_2">
+        <pose>0.299228 0.0 0.126654 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.033317 0.572185 0.041201</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="blueboat_chassis_collider_box_3">
+        <pose>-0.297919 0.0 0.126654 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.033317 0.572185 0.041201</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="blueboat_chassis_collider_cylinder">
+        <pose>0.026602 -0.36148 0.059302 -0.0 1.570796 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.091714</radius>
+            <length>1.050837</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name="blueboat_chassis_collider_cylinder_1">
+        <pose>0.026602 0.36148 0.059302 -0.0 1.570796 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.091714</radius>
+            <length>1.050837</length>
+          </cylinder>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

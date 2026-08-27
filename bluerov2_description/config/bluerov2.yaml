@@ -7,6 +7,16 @@
 #                              heavy frame mesh; standard = 6 thrusters)
 variant: standard
 
+# Buoyancy declaration (optional). Every key has a default; leaving the block
+# out builds the same near neutral vehicle as before. The full contract is
+# documented where it is implemented: urdf/bluerov2.urdf.xacro, section
+# "Buoyancy declaration".
+# buoyancy:
+#   net_buoyancy: 0.002      # kg, positive floats up
+#   cob_offset: "0 0 0.046"  # m, relative to cob_frame
+#   cob_frame: com           # com or base_link
+#   fluid_density: 1025.0    # kg/m^3, must match the world's Buoyancy plugin
+
 # Topic namespace: sensor/claw topics default to /<topic_namespace>/<name>/...
 topic_namespace: bluerov2
 

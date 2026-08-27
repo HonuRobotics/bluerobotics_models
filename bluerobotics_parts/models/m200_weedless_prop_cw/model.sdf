@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
+  <model name="m200_weedless_prop_cw">
+    <link name="m200_weedless_prop_cw_link">
+      <visual name="m200_weedless_prop_cw_visual">
+        <geometry>
+          <mesh>
+            <uri>m200_weedless_prop_cw.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="m200_weedless_prop_cw_collision">
+        <pose>0.000336 3e-05 -5e-06 -0.0 1.570796 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.019513</radius>
+            <length>0.062258</length>
+          </cylinder>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

@@ -22,6 +22,7 @@ import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import (get_package_prefix,
                                          get_package_share_directory)
+import pytest
 import yaml
 
 GZ_SHARE = Path(get_package_share_directory('bluerov2_gazebo'))
@@ -87,6 +88,25 @@ def test_model_generation_follows_config():
     assert not list(std_root.iter('sensor'))
 
 
+def test_dvl_backend_loads_only_with_a_dvl():
+    """
+    Load gz-sim-dvl-system with the model iff a DVL is configured.
+
+    Loaded unconditionally (e.g. from the world), the idle
+    DopplerVelocityLogSystem joins every render iteration once any rendering
+    sensor exists and costs half or more of the real time factor.
+    """
+    default = (DESC_SHARE / 'config' / 'bluerov2.yaml').read_text()
+    root, _ = xacro(MODEL_XACRO, default)
+    assert not plugins(root, 'gz-sim-dvl-system'), \
+        'no DVL configured, yet the DVL backend is loaded'
+    root, _ = xacro(MODEL_XACRO, FULL_CONFIG)
+    assert len(plugins(root, 'gz-sim-dvl-system')) == 1
+    world = (GZ_SHARE / 'worlds' / 'bluerov2_playground.sdf').read_text()
+    assert '<plugin filename="gz-sim-dvl-system"' not in world, \
+        'the world must not load the DVL backend unconditionally'
+
+
 def test_plugin_references_survive_lumping():
     """
     #8: plugin joint/link refs exist in the POST-lumping converted model.
@@ -116,6 +136,18 @@ def test_plugin_references_survive_lumping():
         f'plugin joints lumped away: {joint_refs - surviving_joints}')
     assert link_refs <= surviving_links, (
         f'plugin links lumped away: {link_refs - surviving_links}')
+
+
+def test_installed_model_sdf_carries_the_specs_comment():
+    """The stamped model.sdf repeats the URDF specs; the masses agree."""
+    text = (GZ_SHARE / 'model.sdf').read_text()
+    assert 'model specs' in text, 'installed model.sdf is not stamped'
+    match = re.search(r'^  total mass: +([\d.]+) kg', text, re.M)
+    assert match, 'specs comment misses the total mass row'
+    urdf_root = ET.parse(DESC_SHARE / 'urdf' / 'bluerov2.urdf').getroot()
+    total = sum(float(m.get('value'))
+                for m in urdf_root.findall('.//inertial/mass'))
+    assert float(match.group(1)) == pytest.approx(total, abs=5e-4)
 
 
 def test_sensor_frame_ids_resolve_in_tf():
@@ -187,3 +219,24 @@ def test_full_config_covers_catalog():
     assert config_types == catalog, (
         f'FULL_CONFIG drift: missing {catalog - config_types}, '
         f'unknown {config_types - catalog}')
+
+
+def test_world_fluid_density_matches_the_description():
+    """
+    The world's Buoyancy plugin density equals the declared fluid density.
+
+    The description turns net_buoyancy (kg) into displaced volume using its
+    declared fluid_density; the force the sim applies uses the density the
+    world plugin declares. If they disagree, the net buoyancy observed in sim
+    silently differs from the declared intent.
+    """
+    cfg = yaml.safe_load(
+        (DESC_SHARE / 'config' / 'bluerov2.yaml').read_text())
+    declared = float((cfg.get('buoyancy') or {}).get('fluid_density', 1025.0))
+    world = ET.parse(
+        GZ_SHARE / 'worlds' / 'bluerov2_playground.sdf').getroot()
+    densities = [float(d.text) for d in
+                 world.iter('default_density')]
+    assert densities, 'world has no graded buoyancy default_density'
+    assert all(d == declared for d in densities), (
+        f'world density {densities} != declared fluid density {declared}')

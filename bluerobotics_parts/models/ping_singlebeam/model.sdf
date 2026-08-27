@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
+  <model name="ping_singlebeam">
+    <link name="ping_singlebeam_link">
+      <visual name="ping_singlebeam_visual">
+        <geometry>
+          <mesh>
+            <uri>ping_singlebeam.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="ping_singlebeam_collider_cylinder">
+        <pose>-1e-06 -0.000647 0.001365 1.570796 -0.0 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.024141</radius>
+            <length>0.039739</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name="ping_singlebeam_collider_cylinder_1">
+        <pose>-1e-06 -0.00506 -0.031736 0.0 -0.0 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.005802</radius>
+            <length>0.025072</length>
+          </cylinder>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>
