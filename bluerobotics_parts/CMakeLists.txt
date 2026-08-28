@@ -31,7 +31,6 @@ install(PROGRAMS
   scripts/sdf_to_part.py
   scripts/parts_check_world.py
   scripts/gltf_to_yup.py
-  scripts/gltf_bake_basecolor.py
   scripts/check_assembly.py
   scripts/stamp_model_specs.py
   DESTINATION lib/${PROJECT_NAME})
