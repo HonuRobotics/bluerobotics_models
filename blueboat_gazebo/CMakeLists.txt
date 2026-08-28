@@ -18,6 +18,7 @@ ament_environment_hooks("hooks/resource_paths.sh.in")
 install(DIRECTORY
   launch
   worlds
+  params
   DESTINATION share/${PROJECT_NAME})
 
 # ros_gz bridge config is GENERATED from the vehicle config plus the
@@ -56,6 +57,27 @@ add_custom_command(
   COMMENT "Expanding the Gazebo flavoured blueboat.urdf (gltf_up:=z)")
 add_custom_target(${PROJECT_NAME}_gazebo_urdf ALL DEPENDS ${gazebo_urdf})
 install(FILES ${gazebo_urdf} DESTINATION share/${PROJECT_NAME}/models/blueboat)
+
+# The ArduPilot flavoured model: the SAME model.sdf.xacro expanded with
+# ardupilot:=true, which adds an IMU sensor and the ArduPilotPlugin. A second
+# model rather than a wrapper because <include merge="true"> does not nest and
+# the composed model already merge-includes its URDF; see SITL_DESIGN.md.
+#
+# Must come after find_program(XACRO_EXECUTABLE) and the vehicle_config set()
+# above: CMake evaluates in order, and an empty XACRO_EXECUTABLE turns the
+# COMMAND into an attempt to execute the .xacro itself ("Permission denied").
+# A warm CMake cache hides that, so it only shows up on a clean build.
+set(ap_sdf ${CMAKE_CURRENT_BINARY_DIR}/ardupilot/model.sdf)
+add_custom_command(
+  OUTPUT ${ap_sdf}
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/ardupilot
+  COMMAND ${XACRO_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/model.sdf.xacro
+          config_file:=${vehicle_config} ardupilot:=true -o ${ap_sdf}
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/model.sdf.xacro ${vehicle_config}
+  COMMENT "Expanding model.sdf.xacro with ardupilot:=true")
+add_custom_target(${PROJECT_NAME}_ardupilot_model ALL DEPENDS ${ap_sdf})
+install(FILES ${ap_sdf} models/blueboat_with_ardupilot/model.config
+  DESTINATION share/${PROJECT_NAME}/models/blueboat_with_ardupilot)
 
 # Composed simulation model. model.sdf is GENERATED from model.sdf.xacro at build
 # time (reads blueboat_description/config/blueboat.yaml, adds the Gazebo plugins).

@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<!--
+  Flat water for SITL. The same world as blueboat_water.sdf - seabed, graded
+  buoyancy, no waves - with the ArduPilot flavoured BlueBoat already in it.
+
+  Waves come in phase 4. Flat water first, so that anything odd about the
+  autopilot interface is not confused with anything odd about the sea state.
+
+  Run it directly, no ROS:
+
+      source ~/maritime_ws/thirdparty/setup-ardupilot.sh
+      gz sim -v4 -r blueboat_sitl.sdf
+
+  then, in a second shell, sim_vehicle.py; see docs getting-started/ardupilot_setup.
+-->
+<sdf version="1.12">
+  <world name="blueboat_sitl">
+
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <!-- The IMU system. Required: the Sensors system above drives rendered
+         sensors (cameras, lidar, the echosounder) and does not touch an IMU.
+         Without this the boat's IMU sensor exists but never produces data, so
+         ArduPilotPlugin has no attitude to report, never replies to SITL, and
+         SITL sits printing "No JSON sensor message received, resending
+         servos" while Gazebo prints "Duplicate input frame". -->
+    <plugin filename="gz-sim-imu-system"
+            name="gz::sim::systems::Imu"/>
+
+    <!-- Graded buoyancy, as in blueboat_water.sdf: seawater below z=0, air
+         above, acting only on the boat's hull_displacement link. The link is
+         named for the ENTITY, which is why the include below renames the
+         model to "blueboat". -->
+    <plugin filename="gz-sim-buoyancy-system"
+            name="gz::sim::systems::Buoyancy">
+      <graded_buoyancy>
+        <default_density>1000</default_density>
+        <density_change>
+          <above_depth>0</above_depth>
+          <density>1</density>
+        </density_change>
+      </graded_buoyancy>
+      <enable>blueboat::hull_displacement</enable>
+    </plugin>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <model name="seabed">
+      <static>true</static>
+      <pose>0 0 -3 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>200 200</size></plane></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>200 200</size></plane></geometry>
+          <material>
+            <ambient>0.3 0.28 0.22 1</ambient>
+            <diffuse>0.35 0.32 0.25 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Named "blueboat" on purpose: the buoyancy plugin above and the
+         generated ros_gz bridge both refer to the entity by that name. -->
+    <include>
+      <uri>model://blueboat_with_ardupilot</uri>
+      <name>blueboat</name>
+      <pose>0 0 0 0 0 0</pose>
+    </include>
+
+  </world>
+</sdf>

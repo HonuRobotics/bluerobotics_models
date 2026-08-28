@@ -264,25 +264,64 @@ ROS 2 autopilot interface via AP_DDS — `ap/pose/filtered`, `ap/cmd_vel`, `/ap/
 
 The BlueROV2 on ArduSub follows phase 6.
 
+## Fitting this to the URDF-first assembly
+
+This repository made a deliberate architectural choice that the SITL work has to respect rather than route around. URDF is the source of truth: a part is a URDF xacro macro carrying its own mass, inertia, slots and frames; a vehicle is an assembly resolved from a config and the parts' own slot tables; and everything Gazebo needs is *generated* from that assembly, by running the same resolution with Gazebo emitters. Nothing converts formats at runtime, and ROS and Gazebo see the same geometry.
+
+ArduPilot support does not fit in one place in that pipeline, and pretending otherwise is how it would go wrong. It has four pieces and they belong to three different layers.
+
+**The IMU is a frame.** `ArduPilotPlugin` needs an attitude source, and the honest reason the BlueBoat has one is that its Navigator flight controller contains it. Two obvious homes both turn out to be wrong. Declaring an `imu_link` straight into the Gazebo model is the tempting shortcut, and it produces a link that exists in simulation and not in the description — precisely the ROS-and-Gazebo divergence the architecture exists to prevent. Making it a whole part in `bluerobotics_parts`, with mesh and mass and a slot, is the opposite error: none of that is known or interesting, and inventing it would be worse than omitting it.
+
+Parts already declare **frames** for where they sense, and `part_frames` emits each as a real link fixed to its parent. So the IMU is one line in the chassis's `frames` dict, giving a `base_link_imu` link in the URDF and therefore in TF and RViz, with the composition hanging `<sensor type="imu">` on it exactly as it already does for the Ping's beam frame. No mesh, no mass, no new part, and nothing that exists only in Gazebo.
+
+Its position is a placeholder at the chassis origin. Where the Navigator actually sits inside the enclosure is a measurement nobody here has, and the lever arm only starts to matter when accelerations are compared against the real boat.
+
+**The plugin is composition.** `ArduPilotPlugin` is simulator behavior, not hardware: nothing on the boat corresponds to it. It belongs in `model.sdf.xacro` alongside `Thruster` and `Hydrodynamics`, which is where the composition layer already puts things of that kind. This part is straightforwardly consistent.
+
+**The channel mapping is derived, except for the one thing that cannot be.** Each `<control>` block pairs a servo channel with a thruster topic, and the thruster topics already come from the assembly — the composition emits one `Thruster` per propeller part, named and topic-keyed by the instance. The `<control>` blocks should be emitted by that same iteration, so a loadout with different propellers, or four of them, gets correct blocks without anyone editing SDF.
+
+What is not derivable is *which* `SERVOn` drives which propeller. That is autopilot configuration, not a property of a part, and it has to be stated somewhere. The natural home is the loadout config, as a per-propeller key, so it travels with the rest of the vehicle definition and a four-thruster boat can express its own mapping.
+
+**The parameters are neither.** `blueboat_sitl.params` is derived from Blue Robotics' published file and describes the autopilot, not the vehicle geometry. It is a separate artifact with its own provenance, and nothing in the assembly generates it.
+
+That last split is where the risk sits. The parameter file says `SERVO1_FUNCTION 74`, meaning output 1 carries the right-hand throttle; the composition says channel 0 drives the starboard thruster's topic. Those two statements have to agree, they live in different files with different provenance, and nothing currently checks them. They are exactly the kind of pair that drifts — and when they drift the boat still runs, it just steers the wrong way. Worth a test that reads both and asserts they match.
+
+The rule that falls out, and the one to apply to later phases: if it is on the boat it is a part; if it is simulator behavior it is composition; if it is autopilot configuration it is a parameter file. ArduPilot support touches all three, which is why it cannot be one self-contained file, and why the wrapper model this document originally proposed was the wrong shape for reasons beyond the SDF limitation that killed it.
+
 ## Layout
 
 Following `bluerov2_gz`, and the `_with_ardupilot` wrapper convention from `ardupilot_gazebo` rather than the inline style `SITL_Models` used for the BlueBoat itself:
 
 ```
 blueboat_gazebo/
-  model.sdf.xacro              # thrust limits and deadband; still autopilot-agnostic
+  model.sdf.xacro              # gains an `ardupilot` flag, default false
   models/
-    blueboat_with_ardupilot/   # thin wrapper: merge-include + ArduPilotPlugin block
+    blueboat_with_ardupilot/   # GENERATED from that flag, not hand-written
   params/
-    blueboat.params            # derived from BlueBoat120.params, with provenance
-  launch/
-    blueboat_sitl.launch.py
-  worlds/                      # existing
+    blueboat_sitl.params       # derived from BlueBoat120.params, with provenance
+  worlds/
+    blueboat_sitl.sdf          # flat water, the ArduPilot model already in it
 ```
 
-The wrapper uses `<include merge='true'>` rather than a plain include, so joint names stay unscoped and `<control><jointName>` does not need `blueboat::` prefixes.
+### Amended during phase 1: the wrapper does not work
 
-The ArduPilot binding is additive: the ROS-2-only path keeps working, and after phase 2 it gains a better interface rather than losing the one it has.
+This section originally proposed a hand-written `blueboat_with_ardupilot` model that merge-included `model://blueboat` and added the `ArduPilotPlugin` block — the pattern `ardupilot_gazebo` and PX4 both use, and the one that keeps ArduPilot support in a file of its own. It was tried first and it fails.
+
+`<include merge="true">` does not nest. The composed `model://blueboat` already merge-includes its Gazebo-flavored URDF, creating a frame named `_merged__blueboat__model__`; a wrapper merge-including `blueboat` produces that name a second time and the world will not load:
+
+```
+Warning: Non-unique name[_merged__blueboat__model__] detected 2 times in XML
+         children of model with name[blueboat].
+Error Code 2: frame with name[_merged__blueboat__model__] already exists.
+```
+
+A plain nested `<include>` is the textbook alternative and is worse here. Every joint reference would need a `blueboat::` prefix, and the world's graded buoyancy names its link as `blueboat::hull_displacement`, which nesting pushes to `blueboat::blueboat::hull_displacement`.
+
+So the ArduPilot variant is generated from `model.sdf.xacro` behind a xacro flag, as a second output of the generator that already produces the plain model. One model source, no nesting, and it matches how every other artifact here is made: the URDF, the composed model and the bridge config all come from one config through the same generators.
+
+The cost is honest and worth a reviewer's attention: ArduPilot support is no longer isolated in a file of its own, it lives in the shared model source. The flag defaults to false, so the model generated today is unchanged and the ROS-2-only path is untouched — additive in effect, if not in file layout.
+
+This paragraph is left in rather than quietly rewritten so that the intent and the implementation can be reviewed against each other.
 
 `ardupilot_gazebo` is not vendored and is not a colcon dependency. It is built into the drydock image, or on the host, and found via `GZ_SIM_SYSTEM_PLUGIN_PATH`, as every comparable project does.
 
