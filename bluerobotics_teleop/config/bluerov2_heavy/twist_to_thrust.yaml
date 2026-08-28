@@ -1,0 +1,8 @@
+# Input side settings for twist_to_thrust (calibratable; mixer.yaml is not).
+twist_to_thrust:
+  ros__parameters:
+    cmd_timeout_sec: 0.5
+    btn_deadman: 5
+    axis_epa: 5
+    epa_initial: 0.2
+    epa_step: 0.1
