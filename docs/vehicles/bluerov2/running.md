@@ -30,3 +30,13 @@ To see the model in RViz:
 ```bash
 ros2 launch bluerov2_description display.launch.xml
 ```
+
+```{admonition} RViz shows a part posed differently than Gazebo?
+:class: tip
+
+Both render the same URDF, generated fresh at every launch, so they cannot
+genuinely disagree. An RViz session left open across a rebuild keeps the
+`robot_description` it received when its RobotModel display loaded; restart
+RViz (or toggle the RobotModel display) after rebuilding or switching
+branches.
+```
