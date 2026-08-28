@@ -66,3 +66,31 @@ def test_catalog_includes_every_part_file():
     assert files == set(catalog()), (
         f'catalog drift: not included {files - set(catalog())}, '
         f'missing files {set(catalog()) - files}')
+
+
+def test_glb_textured_materials_have_a_base_color_texture():
+    """
+    A material with only a normal (or similar) map aborts RViz.
+
+    rviz_rendering up to at least 15.2.2 assumes every material texture is
+    a diffuse map; the failed lookup resolves to the mesh's directory and
+    the resource retriever exception terminates RViz. Deliveries with such
+    materials are fixed by scripts/gltf_bake_basecolor.py (a visually
+    neutral 1x1 white base color injection).
+    """
+    import json
+    import struct
+    bad = []
+    for glb in sorted((SHARE / 'models').rglob('*.glb')):
+        data = glb.read_bytes()
+        json_len = struct.unpack('<I', data[12:16])[0]
+        gltf = json.loads(data[20:20 + json_len])
+        for material in gltf.get('materials', []):
+            pbr = material.get('pbrMetallicRoughness', {})
+            textured = ('metallicRoughnessTexture' in pbr or any(
+                k in material for k in
+                ('normalTexture', 'occlusionTexture', 'emissiveTexture')))
+            if textured and 'baseColorTexture' not in pbr:
+                bad.append(f'{glb.name}: {material.get("name", "unnamed")}')
+    assert not bad, ('materials without a base color texture crash RViz; '
+                     f'run gltf_bake_basecolor.py on: {bad}')
