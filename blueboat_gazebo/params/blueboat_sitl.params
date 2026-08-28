@@ -1,0 +1,92 @@
+# BlueBoat parameters for ArduRover SITL.
+#
+# Derived from Blue Robotics' own dump off the vehicle:
+#
+#   bluerobotics/Blueos-Parameter-Repository
+#   params/ardupilot/ArduRover/4.7/Navigator/BlueBoat120.params
+#   (header: Vehicle: Surface Boat / Platform: navigator / Version: 4.7.0-BETA)
+#
+# That file is 951 lines because it is a complete dump, most of which is one
+# unit's calibration, radio setup and logging. This file carries the subset
+# that describes the *vehicle* - frame, outputs, motor limits, control gains,
+# speeds - plus the deltas simulation requires. Every value below is the
+# shipped one unless a DELTA comment says otherwise.
+#
+# Load it AFTER ArduPilot's own rover defaults, which supply the SITL side
+# (accelerometer calibration so pre-arm passes, SIM_PIN_MASK, mode slots) but
+# also set SERVO1/3_MIN/MAX to 1000/2000. Last file wins:
+#
+#   sim_vehicle.py -v Rover -f rover-skid --model JSON --console --map -w \
+#     --add-param-file=$AP/default_params/rover.parm \
+#     --add-param-file=<this file>
+#
+# Do not add rover-skid.parm. It sets SERVO1_FUNCTION 73 / SERVO3_FUNCTION 74,
+# the reverse of the shipped boat.
+
+# ---- Frame ----------------------------------------------------------------
+FRAME_CLASS      2          # Boat
+FRAME_TYPE       0
+
+# ---- Motor outputs --------------------------------------------------------
+# Note the assignment: SERVO1 carries the RIGHT throttle and SERVO3 the LEFT.
+# That is the shipped boat, and it is the opposite of both ArduPilot's
+# rover-skid defaults and the BlueBoat in ArduPilot/SITL_Models.
+SERVO1_FUNCTION  74         # ThrottleRight -> starboard
+SERVO1_MIN       1100
+SERVO1_MAX       1900
+SERVO1_TRIM      1500       # DELTA: shipped 1510. One unit's calibration, not
+                            # a design value; carried into simulation it puts
+                            # a standing +0.025 on the output and the boat
+                            # creeps at idle.
+SERVO1_REVERSED  0
+
+SERVO3_FUNCTION  73         # ThrottleLeft -> port
+SERVO3_MIN       1100
+SERVO3_MAX       1900
+SERVO3_TRIM      1500       # DELTA: as SERVO1_TRIM above.
+SERVO3_REVERSED  0          # DELTA: shipped 1. On the vehicle this
+                            # compensates for how that thruster is wired.
+                            # There is no such wiring in simulation, and
+                            # applying it drives the port thruster backwards,
+                            # so the boat turns on the spot instead of moving.
+
+SERVO_RATE       50
+
+# ---- Motor limits and mixing ----------------------------------------------
+MOT_THR_MIN      0
+MOT_THR_MAX      100
+MOT_SLEWRATE     200
+MOT_STR_THR_MIX  0.6
+MOT_THST_ASYM    1.6        # Forward/reverse thrust ratio. Not yet honored by
+                            # the simulated thruster, which is symmetric about
+                            # its command. Phase 3 reconciles the two.
+
+# ---- Speeds and navigation ------------------------------------------------
+CRUISE_SPEED     1
+CRUISE_THROTTLE  16
+WP_SPEED         1
+WP_RADIUS        1
+TURN_RADIUS      0.1
+PILOT_STEER_TYPE 3
+
+# ---- Control gains --------------------------------------------------------
+# Shipped verbatim. Whether these work unmodified against our thrust model is
+# the exit criterion for phase 3, so they are deliberately not retuned here.
+ATC_SPEED_P      1
+ATC_SPEED_I      0.2
+ATC_SPEED_D      0
+ATC_STR_ANG_P    1.2
+ATC_STR_RAT_P    1
+ATC_STR_RAT_I    0
+ATC_STR_RAT_D    0
+ATC_STR_RAT_FF   0.8
+ATC_STR_RAT_FLTE 10
+ATC_STR_RAT_FLTT 0
+ATC_ACCEL_MAX    0.7
+ATC_DECEL_MAX    1
+ATC_BRAKE        1
+ATC_STOP_SPEED   0.1
+ATC_TURN_MAX_G   0.1
+
+# ---- Arming ---------------------------------------------------------------
+ARMING_REQUIRE   1

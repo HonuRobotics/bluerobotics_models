@@ -20,6 +20,12 @@
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
+  <!-- The imu frame is where the Navigator flight controller senses attitude.
+       Declared as a frame rather than a part because nothing about its mass or
+       appearance matters, but simulation and TF have to agree on where it is.
+       The position is a placeholder at the chassis origin: the real offset
+       inside the enclosure has not been measured, and the lever arm only starts
+       to matter once accelerations are compared against the real boat. -->
   <xacro:macro name="blueboat_chassis_info">
     <xacro:property name="part_info" scope="parent" value="${dict(
         attach='0 0 0',
@@ -32,6 +38,7 @@
             ping_mount=dict(xyz='0 -0.259 0.01', rpy='0 0 0', accepts=['blueboat_ping_singlebeam_mount'], default='blueboat_ping_singlebeam_mount'),
         ),
         frames=dict(
+            imu=dict(xyz='0 0 0', rpy='0 0 0'),
         ))}"/>
   </xacro:macro>
 
