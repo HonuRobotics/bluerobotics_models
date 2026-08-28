@@ -138,7 +138,8 @@ def test_dvl_backend_loads_only_with_a_dvl():
     assert not plugins(root, 'gz-sim-dvl-system')
     root, _ = gen_model(FULL_CONFIG)
     assert len(plugins(root, 'gz-sim-dvl-system')) == 1
-    for world in ('bluerov2_water.sdf', 'bluerov2_playground.sdf'):
+    for world in ('bluerov2_water.sdf', 'bluerov2_pool.sdf',
+                  'bluerov2_playground.sdf'):
         text = (GZ_SHARE / 'worlds' / world).read_text()
         assert '<plugin filename="gz-sim-dvl-system"' not in text, world
 
@@ -164,7 +165,8 @@ def test_buoyancy_displacement_realizes_the_declaration():
     for i in range(3):
         assert centroid[i] == pytest.approx(com[i] + offset[i], abs=1e-4)
     # The worlds enable buoyancy on exactly this link.
-    for world in ('bluerov2_water.sdf', 'bluerov2_playground.sdf'):
+    for world in ('bluerov2_water.sdf', 'bluerov2_pool.sdf',
+                  'bluerov2_playground.sdf'):
         text = (GZ_SHARE / 'worlds' / world).read_text()
         assert '<enable>bluerov2::buoyancy_displacement</enable>' in text, world
 
@@ -251,7 +253,8 @@ def test_installed_artifacts_match_shipped_config():
 def test_world_fluid_density_matches_the_description():
     """The worlds' buoyancy density equals the config's declaration."""
     declared = yaml.safe_load(default_config())['buoyancy']
-    for world in ('bluerov2_water.sdf', 'bluerov2_playground.sdf'):
+    for world in ('bluerov2_water.sdf', 'bluerov2_pool.sdf',
+                  'bluerov2_playground.sdf'):
         text = (GZ_SHARE / 'worlds' / world).read_text()
         density = float(text.split('<default_density>')[1].split('<')[0])
         assert density == pytest.approx(float(declared['fluid_density'])), world
