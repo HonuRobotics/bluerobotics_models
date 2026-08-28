@@ -32,8 +32,9 @@ Running it means three processes, started together by ArduPilot's `sim_vehicle.p
                                         └──────────────┘
 ```
 
-The firmware is `ardurover`. The ground station is MAVProxy, or QGroundControl % CLAUDE: Should we switch to just QGC?  This is what blue robotics uses.
-attached alongside it — the same software you would use on the dock. The backend is everything the firmware would otherwise sense and push against: water, hull, thrusters, GPS, gravity. Gazebo plays that part, through [ArduPilot/ardupilot_gazebo](https://github.com/ArduPilot/ardupilot_gazebo), a Gazebo system plugin that speaks ArduPilot's JSON protocol on one side and drives model joints and sensors on the other.
+The firmware is `ardurover`. Two ground stations are worth showing, and the documentation should use both. `sim_vehicle.py` starts MAVProxy of its own accord — a command-line console and map, which is convenient for scripted work and makes for terse, copyable examples in a document. It also rebroadcasts on UDP 14550, so QGroundControl attaches alongside it exactly as it would to a real vehicle over a telemetry radio. QGC is what Blue Robotics use and what a BlueBoat operator already has in front of them, so occasional QGC examples are what connect the simulation back to the boat.
+
+The backend is everything the firmware would otherwise sense and push against: water, hull, thrusters, GPS, gravity. Gazebo plays that part, through [ArduPilot/ardupilot_gazebo](https://github.com/ArduPilot/ardupilot_gazebo), a Gazebo system plugin that speaks ArduPilot's JSON protocol on one side and drives model joints and sensors on the other.
 
 
 ## The interface question
@@ -83,7 +84,12 @@ Small, and deliberately so. A third input mode taking a command in [-1, 1], scal
 
 This is an interface, not a new physics model — the same mapping the plugin already performs, reached through a different interface. The deliberate simplification is that thrust stays linear in command within each direction, where a real ESC and propeller are not; that is exactly the fidelity we have today, so the new mode loses nothing.
 
-Prior art supports the shape. Stonefish declares `normalized_setpoint` and VRX Classic used `maxCmd` 1.0 — two projects arriving independently at the same convention. VRX Classic went further, mapping a normalized command through a fitted per-direction curve, and lost it in the port to gz-sim; modern `vrx_gz` uses the stock plugin with a bare `thrust_coefficient`. We are not restoring the curve, but we are restoring the interface it sat behind. Asymmetry is universal in the prior art, and gz-sim already permits it through `max_thrust_cmd` and `min_thrust_cmd` — what it does not permit is reaching them from a normalized command. % CLAUDE: What about these projects: /home/bsb/WorkingCopies/oceansim/projects/HoloOcean/ and /home/bsb/WorkingCopies/oceansim/projects/OceanSim/ - what do they do for cmd to thrust-force mapping?   I thought I saw HoloOcean implemented some of the Whitcomb Yoeger models?   
+Prior art supports the shape. Stonefish declares `normalized_setpoint` and VRX Classic used `maxCmd` 1.0 — two projects arriving independently at the same convention, and essentially the only two.
+
+Most simulators do what gz-sim does. HoloOcean's native control schemes take force directly: `AUV_THRUSTERS` is an "8-vector of forces for each thruster", `SV_THRUSTERS` a "2-vector of forces for left and right thruster", both in newtons. Its propeller modeling lives in a separate optional `fossen_dynamics` layer wrapping Fossen's Python Vehicle Simulator, and that works from propeller rpm rather than from a normalized command — a Wageningen B-series `KT`/`KQ` pair varying with advance ratio plus a first-order rotor lag for the REMUS-like thruster, and a simpler forward/reverse bollard quadratic for the Otter USV. OceanSim has no actuator model at all; it is an Isaac Sim perception simulator, and its one control example applies force and torque through the PhysX API straight from the keyboard.
+
+The Yoerger and Bessa thruster-dynamics models are real and worth knowing about, but they live in Stonefish (`<rotor_dynamics type="yoerger">`, `type="bessa"`) and in `uuv_simulator`, not in HoloOcean. They sit on the far side of a command-to-rpm stage that this proposal explicitly does not build.
+
 
 ## What the firmware side commits us to
 
@@ -94,30 +100,29 @@ The firmware is stock ArduRover from the ArduPilot project, unmodified, at the v
 Two files from that repository matter, and both are Blue Robotics' own:
 
 - `params/ardupilot/ArduRover/4.7/Navigator/BlueBoat120.params` — the BlueBoat's configuration for the Navigator flight controller. 951 lines, headed `Vehicle: Surface Boat / Platform: navigator`. This is the real vehicle, and it is what we are trying to be faithful to.
-- `params/ardupilot/ArduRover/4.6/sitl/MotorBoat.params` — Blue Robotics' own parameter set for running ArduRover SITL with no hardware attached. Interesting because it is the same delta we are about to derive: it shows which parameters they consider necessary to change when a boat becomes a simulation. % CLAUDE: Include it in the plan to assess these differences.   I'd like to know now, but we don't have time and need to get out a plan, so plan to address this
+- `params/ardupilot/ArduRover/4.6/sitl/MotorBoat.params` — Blue Robotics' own parameter set for running ArduRover SITL with no hardware attached. Interesting because it is the same delta we are about to derive: it shows which parameters they consider necessary to change when a boat becomes a simulation. How it differs from the hardware set, and from what is in `SITL_Models`, is assessed in phase 1; see below.
 
 ## A note on ArduPilot/SITL_Models
 
-[ArduPilot/SITL_Models](https://github.com/ArduPilot/SITL_Models) contains a Gazebo BlueBoat, and reviewers will reasonably ask why we are not simply using it. % CLAUDE: The reason is that the models are based on CAD, so too computationally demanding for physics and visual rendering.    We want our meshes used not just for sim, but also for visualization (RVIZ) and to be portable across simulators - not just SITL.
+[ArduPilot/SITL_Models](https://github.com/ArduPilot/SITL_Models) contains a Gazebo BlueBoat, and reviewers will reasonably ask why we are not simply using it.
 
-It is a good worked example. Its `ArduPilotPlugin` block shows the wiring — channel numbering, `type COMMAND`, `cmd_topic`, the two frame transforms — more clearly than any documentation does, and we will read it for that, alongside `orca4` and `bluerov2_gz`.
+The meshes are the main reason. They are derived directly from Blue Robotics CAD — the visual assembly is roughly 285,000 triangles — which is heavy enough to slow real-time simulation in both physics and rendering. Our models are not only for simulation: the same geometry has to serve visualization in RViz, and it has to stay portable to simulators other than Gazebo rather than being tied to a SITL setup. That argues for artist-made low-poly visual meshes with simple primitive collision shapes, which is the approach this repository already takes, and it is not a change we could reasonably make to someone else's model.
 
-It is not a source of configuration. Its BlueBoat diverges from the parameters Blue Robotics publish, and we have those directly:
+It remains a good worked example. Its `ArduPilotPlugin` block shows the wiring — channel numbering, `type COMMAND`, `cmd_topic`, the two frame transforms — more clearly than any documentation does, and we will read it for that, alongside `orca4` and `bluerov2_gz`.
 
-| Item | Factory defaults (`BlueBoat120.params`) | `SITL_Models` (`blueboat/model.sdf`) | Consequence |% CLAUDE: Hide all this for now and mention that it will take work to rectify three versions of parameters: what blue robotics uses on the hardware, what blue robotics uses on SITL and what folks pushed to SITL_Models.   Understanding the iterplay and if we should push back to any of these will be important.   Make room in the plan to do this assessment and planning.  Premature to do it now. 
-|---|---|---|---|
-| `SERVO1_FUNCTION` | 74, ThrottleRight | channel 0 wired to `motor_port_joint`, commented 73 ThrottleLeft | Port and starboard swapped |
-| `SERVO3_FUNCTION` | 73, ThrottleLeft | channel 2 wired to `motor_stbd_joint`, commented 74 | Same, mirrored |
-| `SERVO3_REVERSED` | 1 | not represented | One thruster runs backwards |
-| Servo range | 1100–1900 | `servo_min` 1000, `servo_max` 2000 | 20% scale error on all thrust |
-| `SERVO1/3_TRIM` | 1510 | `offset` -0.5, symmetric about 1500 | Standing bias, non-zero thrust at neutral |
-| `MOT_THST_ASYM` | 1.6 | symmetric `thrust_coefficient` | See asymmetry, below |
-| `MOT_SLEWRATE` | 200 %/s | not represented | Sim accelerates faster than the boat can |
-| `CRUISE_SPEED` / `CRUISE_THROTTLE` | 1 m/s / 16% | its docs suggest 2.0 / 50.0 | Speed controller feedforward wrong |
+We are not proposing to vendor that repository or to send changes to it. It is ArduPilot's asset collection for demonstrating their own plugin across many vehicles, and a contribution from us would ask them to maintain a model they have no way to validate.
 
-(`SERVOn_FUNCTION` is an ArduPilot enum naming what an output channel drives; for skid steering the relevant values are 73 ThrottleLeft and 74 ThrottleRight.)
+## Three parameter sets, and reconciling them later
 
-Where the two disagree, the published parameters win. The table exists once, so nobody rediscovers these differences by debugging them. We are not proposing to vendor that repository or to send changes to it — it is ArduPilot's asset collection for demonstrating their own plugin across many vehicles, and a contribution from us would ask them to maintain a model they have no way to validate.
+There are three descriptions of how a BlueBoat should be configured, and they do not agree:
+
+1. What Blue Robotics run on the hardware — `Navigator/BlueBoat120.params`.
+2. What Blue Robotics run in SITL — `sitl/MotorBoat.params`.
+3. What has been contributed to `SITL_Models` — the `ArduPilotPlugin` block in `blueboat/model.sdf`.
+
+The differences are not cosmetic. They include which output channel carries which throttle, whether a thruster is reversed, the servo range, the neutral trim, and the cruise speed and throttle. A model built by copying any one of them without knowing about the other two will behave in ways that take a while to explain.
+
+Working out the interplay — which is authoritative for what, whether the divergences are deliberate or drift, and whether anything should be raised with Blue Robotics or with ArduPilot — is real work and it matters. It is not work that should hold up a roadmap. This document proposes doing that assessment as a task inside phase 1, where the parameter sets are being loaded anyway, and writing up the result rather than folding it silently into our own file.
 
 ## Phases
 
@@ -152,6 +157,7 @@ Get the BlueBoat model moving under ArduRover, using the newtons interface exact
 - Add an ArduPilot wrapper model alongside the existing one (see Layout, below).
 - Wire two `<control>` channels to the existing thruster topics: `type COMMAND` with `<cmd_topic>` set to `/blueboat/motor_port/thrust` and `/blueboat/motor_stbd/thrust`, using the factory defaults' servo functions and ranges.
 - Load `BlueBoat120.params` into SITL, and read `sitl/MotorBoat.params` alongside it. Record the delta we end up needing, and how it compares to theirs.
+- Assess the three parameter sets against each other and write up what differs and why, as a document rather than as a silent choice, with a recommendation on whether anything should be raised with Blue Robotics or ArduPilot.
 - Flat water, no waves.
 
 Exit criterion: `MANUAL` mode, arm, throttle forward, the boat moves forward; steer right, it turns right. Signs and channel mapping correct, magnitudes not yet trusted.
@@ -173,10 +179,10 @@ Exit criterion: the BlueBoat runs end to end on the new mode, with the ArduPilot
 Make the thrust the firmware asks for equal the thrust the water sees.
 
 - Check `max_thrust_cmd` 51.5 and `min_thrust_cmd` -40.2 against Blue Robotics' published T200 data at the boat's actual battery voltage. These are the numbers ±1 lands on, so they are now the whole actuator calibration.
-- Set the autopilot-side calibration from the factory defaults: the 1100–1900 range and `SERVO3_REVERSED`.
+- Set the autopilot-side calibration from the factory defaults: the 1100–1900 range and `SERVO3_REVERSED`. (`SERVOn_FUNCTION` is an ArduPilot enum naming what an output channel drives; for skid steering the values are 73 ThrottleLeft and 74 ThrottleRight, and the factory defaults do not assign them in the order one might guess.)
 - Do not carry the 1510 trim. Set `SERVO1_TRIM` and `SERVO3_TRIM` to 1500 in our SITL parameter set and record it as a deliberate delta. The 10 µs offset is one vehicle's calibration, not a design value, and carrying it means zero throttle arrives as +0.025 and the boat creeps.
 - Set the thruster `<deadband>` from Blue Robotics' T200 performance data rather than guessing it.
-- Check the resulting forward/reverse ratio against `MOT_THST_ASYM` 1.6.
+- Check the resulting forward/reverse ratio against `MOT_THST_ASYM`, which the factory defaults set to 1.6. Our current limits imply 1.28, and that number was never measured — it is whatever the two clamps happen to be. The limits are derived from thruster data; `MOT_THST_ASYM` is an independent check afterwards, and persistent disagreement is a finding about the vehicle's calibration rather than a reason to move the thrust numbers.
 - Represent `MOT_SLEWRATE` 200 %/s, or establish that the thruster's own dynamics already dominate it.
 - Confirm `SERVO_RATE` 50 Hz against `SIM_RATE_HZ`.
 
@@ -249,15 +255,19 @@ Recorded so reviewers can challenge them rather than rediscover them.
 5. Phase 3's exit criterion stands as an aspiration rather than a gate. It may be hard to test in the short term; Blue Robotics have indicated they can share thruster data, which is the route to testing it properly.
 6. No pull requests to `SITL_Models`.
 7. Arbitration between competing commanders is out of scope. A mux is the right answer eventually, and there are many options, but not here.
+8. We pin ArduRover 4.7, matching the newest published BlueBoat parameters, accepting that it is tagged BETA.
+9. `gz-maritime` is the right home for the thruster plugin change; its contents are currently all waves, but it is intended as a sandbox for capability headed to Gazebo.
+10. The new `thirdparty/` directory needs no agreement beyond this PR.
 
-## Open questions
+## What this PR is asking for
 
-The things this PR is genuinely asking about.
+The decisions above are settled unless someone argues otherwise here — that is the main thing this document is for.
 
-1. Which ArduRover snapshot do we pin, as an (ArduPilot tag, parameter directory) pair? 4.7 matches the newest published BlueBoat parameters but is tagged BETA; 4.6 is the conservative choice and is the version whose `sitl/` variant we want to read. Where is the pin recorded, and what moves it? % CLAUDE:  4.7
-2. Are the phase exit criteria the right ones, and are they stated strictly enough to be worth anything? % CLAUDE: yes
-3. Is `gz-maritime` the right home for the thruster plugin change, given its current contents are all waves? % CLAUDE: yes
-4. Does a new `thirdparty/` directory in the workspace need agreement beyond this PR? It changes the documented workspace layout.% CLAUDE: no
+Two things are genuinely open.
+
+The phase sequence spans three repositories. Phase 2 lands in `gz-maritime` and phase 0 touches `drydock`, while everything else lands here. That is the honest split of the work, but it means "one phase, one PR" is not one review queue, and the plan is only as good as whoever is watching all three. Say if it should be organized differently.
+
+The three-way parameter assessment is planned for phase 1. It could reasonably come earlier, as its own piece of work before any code — the argument for doing it inside phase 1 is that the files are being loaded there anyway, and the argument against is that its conclusions could change what phase 1 builds.
 
 ## Risks
 
