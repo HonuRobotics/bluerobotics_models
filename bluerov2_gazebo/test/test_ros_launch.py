@@ -75,3 +75,17 @@ def test_camera_topic_bridged(sim):
         lambda: '/bluerov2/camera/image' in ros(sim, 'topic', 'list')[1], 30,
         lambda: 'camera topic not bridged; last listing:\n'
                 f'{ros(sim, "topic", "list")[1]}')
+
+
+def test_throttle_maps_onto_thrust(sim):
+    """A +1 throttle comes out as the T200's forward thrust limit."""
+    poll_until(
+        lambda: '/throttle_to_thrust' in ros(sim, 'node', 'list')[1], 30,
+        lambda: 'throttle_to_thrust not up; last listing:\n'
+                f'{ros(sim, "node", "list")[1]}')
+    ros(sim, 'topic', 'pub', '--once', '/bluerov2/thruster_1/throttle',
+        'std_msgs/msg/Float64', 'data: 1.0', timeout=30)
+    code, out, err = ros(sim, 'topic', 'echo', '/bluerov2/thruster_1/thrust',
+                         '--once', '--qos-durability', 'transient_local',
+                         '--qos-reliability', 'reliable', timeout=30)
+    assert code == 0 and 'data: 51.5' in out, f'no mapped thrust\n{out}\n{err}'

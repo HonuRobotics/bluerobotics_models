@@ -57,6 +57,16 @@
                  create_own_container="false"
                  use_composition="$(var use_composition)"/>
 
+
+  <!-- Normalized throttle: -1..1 on each <thruster>/throttle topic, mapped
+       onto the part's declared thrust limits and republished on the same
+       thruster's /thrust topic (which stays available as the low level
+       newton interface). -->
+  <node pkg="bluerobotics_parts" exec="throttle_to_thrust.py"
+        name="throttle_to_thrust" output="screen">
+    <param from="$(var vehicle_dir)/throttle.yaml"/>
+  </node>
+
   <!-- robot_state_publisher: composable node in the container when composing... -->
   <load_composable_node target="ros_gz_container" if="$(var use_composition)">
     <composable_node pkg="robot_state_publisher"

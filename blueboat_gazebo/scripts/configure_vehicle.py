@@ -61,7 +61,7 @@ def run(cmd, what):
 
 
 def configure(config, out_dir):
-    """Generate urdf, model.sdf, model.config and ros_gz_bridge.yaml into out_dir."""
+    """Generate urdf, model, bridge and throttle configs into out_dir."""
     desc = pathlib.Path(get_package_share_directory('blueboat_description'))
     gz = pathlib.Path(get_package_share_directory('blueboat_gazebo'))
     gz_lib = pathlib.Path(get_package_prefix('blueboat_gazebo')) / 'lib' / 'blueboat_gazebo'
@@ -86,6 +86,11 @@ def configure(config, out_dir):
     run([sys.executable, str(gz_lib / 'generate_bridge_config.py'),
          str(config), str(urdf), str(out_dir / 'ros_gz_bridge.yaml')],
         'bridge config generation')
+    parts_lib = (pathlib.Path(get_package_prefix('bluerobotics_parts'))
+                 / 'lib' / 'bluerobotics_parts')
+    run([sys.executable, str(parts_lib / 'generate_throttle_config.py'),
+         str(out_dir / 'model.sdf'), str(out_dir / 'throttle.yaml')],
+        'throttle config generation')
     return out_dir
 
 
@@ -111,7 +116,7 @@ def main(argv=None):
         sys.stdout.write(str(out_dir))
     else:
         print(f'wrote blueboat.urdf, blueboat.gazebo.urdf, model.sdf, model.config, '
-              f'ros_gz_bridge.yaml to {out_dir}')
+              f'ros_gz_bridge.yaml, throttle.yaml to {out_dir}')
 
 
 if __name__ == '__main__':

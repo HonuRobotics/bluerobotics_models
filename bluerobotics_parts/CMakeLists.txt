@@ -33,6 +33,8 @@ install(PROGRAMS
   scripts/gltf_to_yup.py
   scripts/check_assembly.py
   scripts/stamp_model_specs.py
+  scripts/generate_throttle_config.py
+  scripts/throttle_to_thrust.py
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
@@ -40,6 +42,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
   find_package(ament_cmake_pytest REQUIRED)
   ament_add_pytest_test(test_parts test/test_parts.py TIMEOUT 180)
+  ament_add_pytest_test(test_throttle test/test_throttle.py TIMEOUT 60)
 endif()
 
 ament_package()

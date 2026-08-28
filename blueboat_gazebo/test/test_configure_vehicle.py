@@ -46,7 +46,7 @@ def test_default_config_reproduces_the_installed_artifacts(tmp_path):
     """Run on the shipped config, the tool regenerates what the build installed."""
     out = configure(DEFAULT_CONFIG, tmp_path / 'v')
     for name in ('blueboat.urdf', 'blueboat.gazebo.urdf', 'model.sdf', 'model.config',
-                 'ros_gz_bridge.yaml'):
+                 'ros_gz_bridge.yaml', 'throttle.yaml'):
         assert (out / name).is_file(), f'{name} not generated'
     assert links(out / 'blueboat.urdf') == links(DESC_SHARE / 'urdf' / 'blueboat.urdf')
     assert yaml.safe_load((out / 'ros_gz_bridge.yaml').read_text()) == \
@@ -149,3 +149,14 @@ def test_cache_mode_prints_only_the_directory():
         again = subprocess.run([str(TOOL), '--config', str(DEFAULT_CONFIG), '--cache'],
                                capture_output=True, text=True, timeout=180, env=env)
         assert again.stdout == out.stdout
+
+
+def test_throttle_config_matches_the_loadout(tmp_path):
+    """One throttle entry per propeller, with the part's declared limits."""
+    out = configure(DEFAULT_CONFIG, tmp_path / 'v')
+    inner = yaml.safe_load((out / 'throttle.yaml').read_text())
+    inner = inner['throttle_to_thrust']['ros__parameters']
+    assert inner['thrust_topics'] == [
+        '/blueboat/motor_port/thrust', '/blueboat/motor_stbd/thrust']
+    assert inner['max_thrust'] == [51.5] * 2
+    assert inner['min_thrust'] == [-40.2] * 2

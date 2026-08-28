@@ -1,8 +1,8 @@
 # Driving the BlueROV2
 
-Thrust commands are **latched**: each thruster holds its last command until a
-new one arrives. The horizontal thrusters (1-4) are vectored at 45 degrees, so
-single-axis motion needs a mix with these signs (thrust in newtons):
+Commands are **latched**: each thruster holds its last command until a new
+one arrives. The horizontal thrusters (1-4) are vectored at 45 degrees, so
+single-axis motion needs a mix with these signs:
 
 | motion | t1 | t2 | t3 | t4 | t5 | t6 |
 |--------|----|----|----|----|----|----|
@@ -11,13 +11,28 @@ single-axis motion needs a mix with these signs (thrust in newtons):
 | yaw +z (counterclockwise) | - | + | + | - | 0 | 0 |
 | heave +z (up) | 0 | 0 | 0 | 0 | - | - |
 
-Each propeller part in the loadout gets a thrust topic named after it,
-`/<namespace>/<name>/thrust`; the default loadout fits `thruster_1` ..
+Each propeller part in the loadout gets its topics named after it,
+`/<namespace>/<name>/...`; the default loadout fits `thruster_1` ..
 `thruster_6`.
 
 ## Over ROS
 
-Thrust is bridged per thruster:
+The primary interface is the normalized throttle, `<name>/throttle`
+(`std_msgs/msg/Float64`, -1..1): the convention real drivers and
+autopilots use (ArduPilot scales every motor output to -1..1; an ESC
+cannot honor a force setpoint, since actual thrust depends on battery
+voltage and propeller state). The command maps linearly onto the thrust
+limits the propeller part declares (about +51 / -40 N for the T200) and lands on
+the same latched plugin input as the thrust topic; note the real thrust to
+throttle curve is not linear, so half throttle is more than half real
+world thrust.
+
+```bash
+ros2 topic pub /bluerov2/thruster_1/throttle std_msgs/msg/Float64 "data: -0.2" -1
+```
+
+The low level `<name>/thrust` topic (newtons, clamped to the same limits)
+stays bridged for controllers that think in forces:
 
 ```bash
 ros2 topic pub /bluerov2/thruster_1/thrust std_msgs/msg/Float64 "data: -10.0" -1

@@ -8,8 +8,10 @@ config that realizes the ROS side is generated from the loadout
 
 | Topic | Type | Direction | Available with |
 |---|---|---|---|
-| `/blueboat/motor_port/thrust` | `std_msgs/msg/Float64` | subscribes | the port propeller (default) |
-| `/blueboat/motor_stbd/thrust` | `std_msgs/msg/Float64` | subscribes | the starboard propeller (default) |
+| `/blueboat/motor_port/throttle` | `std_msgs/msg/Float64` | subscribes | the port propeller (default); normalized -1..1, relayed onto its `/thrust` |
+| `/blueboat/motor_stbd/throttle` | `std_msgs/msg/Float64` | subscribes | the starboard propeller (default); same |
+| `/blueboat/motor_port/thrust` | `std_msgs/msg/Float64` | subscribes | the port propeller (default), newtons |
+| `/blueboat/motor_stbd/thrust` | `std_msgs/msg/Float64` | subscribes | the starboard propeller (default), newtons |
 | `/blueboat/ping/range` | `sensor_msgs/msg/LaserScan` | publishes (lazy) | the Ping2 (default) |
 | `/joint_states` | `sensor_msgs/msg/JointState` | publishes | always |
 | `/clock` | `rosgraph_msgs/msg/Clock` | publishes | always |
@@ -25,6 +27,8 @@ config that realizes the ROS side is generated from the loadout
 | `/blueboat/joint_states` | `gz.msgs.Model` | publishes |
 
 Every topic a part has follows `/<namespace>/<instance name>/<suffix>` on
-both sides (`/thrust` for a propeller, `/range` for the Ping). Per part,
+both sides (`/thrust` for a propeller, `/range` for the Ping). The
+`/throttle` topics are ROS only: the throttle_to_thrust node started by the
+launch maps them onto the bridged `/thrust` topics. Per part,
 `topic` / `gz_topic` / `ros_topic` in the config rename the base; a second
 instance gets `/<ns>/<its name>/...`.
