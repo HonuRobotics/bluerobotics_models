@@ -74,7 +74,7 @@ Per [`Thruster.hh`](https://github.com/gazebosim/gz-sim/blob/main/src/systems/th
        (bridge, Float64 → Double)
 ```
 
-One thruster model, several commanders, identical units and topics. The thrust limits, the deadband and the forward/reverse asymmetry live inside the thruster plugin, where the physical ESC and propeller keep them. The ArduPilot `<control>` block reduces to arithmetic — `servo_min` 1100, `servo_max` 1900, `offset` -0.5, `multiplier` 2 lands exactly on [-1, 1] — carrying no vehicle-specific quantity at all.
+One thruster model, several commanders, identical units and topics. The thrust limits, the deadband and the forward/reverse asymmetry live inside the thruster plugin, where the physical ESC and propeller keep them. The ArduPilot `<control>` block reduces to arithmetic — `servo_min` 1100, `servo_max` 1900, `offset` -0.5, `multiplier` 2 gives exactly [-1, 1] — carrying no vehicle-specific quantity at all.
 
 (Why normalized and not PWM, which is what actually crosses the wire on the boat: PWM is a property of the link between an autopilot and an ESC, not a property of a thruster. A CAN or DShot thruster has no PWM, and neither does a vehicle whose low-level controller is not an RC autopilot. Microseconds in the plugin would make it unupstreamable and would oblige a custom ROS controller to know that 1500 means stop. Note that ±1 means full command in that direction, not equal thrust: +1 is 51.5 N and -1 is -40.2 N, which is the asymmetry ArduPilot's `MOT_THST_ASYM` exists to describe.)
 
@@ -126,7 +126,7 @@ Working out the interplay — which is authoritative for what, whether the diver
 
 ## Phases
 
-Each phase is one pull request. Two of them land in other repositories
+Each phase is one pull request. Two of them belong to other repositories
 
 | Phase | Deliverable | Repository |
 |---|---|---|
@@ -164,7 +164,7 @@ Exit criterion: `MANUAL` mode, arm, throttle forward, the boat moves forward; st
 
 ### Phase 2 — A normalized command interface on the thruster
 
-Lands in `gz-maritime`, which is intended as a sandbox for features headed to Gazebo. A normalized thruster command is vehicle-agnostic — it is the ordinary interface across UUV and USV work — so it does not belong in a vehicle repository.
+This one belongs in `gz-maritime`, which is intended as a sandbox for features headed to Gazebo. A normalized thruster command is vehicle-agnostic — it is the ordinary interface across UUV and USV work — so it does not belong in a vehicle repository.
 
 - Fork `gz-sim-thruster-system` into a package we own. It is a system plugin, so it builds as a standalone shared library against the installed gz-sim development headers and is loaded by filename: no Gazebo source build, no change to the installed Gazebo.
 - Add the mode alongside the existing two.
@@ -178,7 +178,7 @@ Exit criterion: the BlueBoat runs end to end on the new mode, with the ArduPilot
 
 Make the thrust the firmware asks for equal the thrust the water sees.
 
-- Check `max_thrust_cmd` 51.5 and `min_thrust_cmd` -40.2 against Blue Robotics' published T200 data at the boat's actual battery voltage. These are the numbers ±1 lands on, so they are now the whole actuator calibration.
+- Check `max_thrust_cmd` 51.5 and `min_thrust_cmd` -40.2 against Blue Robotics' published T200 data at the boat's actual battery voltage. These are the numbers ±1 maps to, so they are now the whole actuator calibration.
 - Set the autopilot-side calibration from the factory defaults: the 1100–1900 range and `SERVO3_REVERSED`. (`SERVOn_FUNCTION` is an ArduPilot enum naming what an output channel drives; for skid steering the values are 73 ThrottleLeft and 74 ThrottleRight, and the factory defaults do not assign them in the order one might guess.)
 - Do not carry the 1510 trim. Set `SERVO1_TRIM` and `SERVO3_TRIM` to 1500 in our SITL parameter set and record it as a deliberate delta. The 10 µs offset is one vehicle's calibration, not a design value, and carrying it means zero throttle arrives as +0.025 and the boat creeps.
 - Set the thruster `<deadband>` from Blue Robotics' T200 performance data rather than guessing it.
@@ -265,7 +265,7 @@ The decisions above are settled unless someone argues otherwise here — that is
 
 Two things are genuinely open.
 
-The phase sequence spans three repositories. Phase 2 lands in `gz-maritime` and phase 0 touches `drydock`, while everything else lands here. That is the honest split of the work, but it means "one phase, one PR" is not one review queue, and the plan is only as good as whoever is watching all three. Say if it should be organized differently.
+The phase sequence spans three repositories. Phase 2 belongs to `gz-maritime` and phase 0 touches `drydock`, while everything else is work in this repository. That is the honest split of the work, but it means "one phase, one PR" is not one review queue, and the plan is only as good as whoever is watching all three. Say if it should be organized differently.
 
 The three-way parameter assessment is planned for phase 1. It could reasonably come earlier, as its own piece of work before any code — the argument for doing it inside phase 1 is that the files are being loaded there anyway, and the argument against is that its conclusions could change what phase 1 builds.
 
