@@ -29,8 +29,6 @@ setup(
         ('share/' + package_name + '/launch', glob('launch/*.launch.py')),
         ('share/' + package_name + '/config/bluerov2',
          glob('config/bluerov2/*.yaml')),
-        ('share/' + package_name + '/config/bluerov2_heavy',
-         glob('config/bluerov2_heavy/*.yaml')),
         ('share/' + package_name + '/config/blueboat',
          glob('config/blueboat/*.yaml')),
     ],
