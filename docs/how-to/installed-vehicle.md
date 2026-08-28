@@ -2,7 +2,7 @@
 
 From a binary (deb) install nothing under `/opt/ros` should be edited, and
 there is no workspace to rebuild. The vehicle is still fully configurable:
-every artifact (URDF, composed Gazebo model, ros_gz bridge config) is
+every artifact (URDF, composed Gazebo model, bridge and throttle configs) is
 generated from a config file on demand, by the same tools the build uses.
 
 ## The launch does it for you
@@ -26,16 +26,19 @@ ros2 run blueboat_gazebo configure_vehicle.py --config my_loadout.yaml --out-dir
 ```
 
 writes `blueboat.urdf`, `blueboat.gazebo.urdf` (the copy the model merges,
-glTF visuals pre-rotated for Gazebo), `model.sdf`, `model.config` and
-`ros_gz_bridge.yaml`.
+glTF visuals pre-rotated for Gazebo), `model.sdf`, `model.config`,
+`ros_gz_bridge.yaml` and `throttle.yaml`.
 The directory is a Gazebo model: with `~/my_models` prepended to
 `GZ_SIM_RESOURCE_PATH` it is `model://blueboat`, shadowing the installed
 default, so a world can `<include>` it, or spawn it with
 `ros2 run ros_gz_sim create -world <world> -file ~/my_models/blueboat/model.sdf -name blueboat -z 0.05`.
 Start the bridge on the generated config
 (`ros2 run ros_gz_bridge parameter_bridge --ros-args -p config_file:=$HOME/my_models/blueboat/ros_gz_bridge.yaml`)
-and `robot_state_publisher` on the generated URDF. The three files come from
-one resolution of the config, so they agree with each other.
+and `robot_state_publisher` on the generated URDF. For the normalized
+throttle topics, also start the relay on the generated map
+(`ros2 run bluerobotics_parts throttle_to_thrust.py --ros-args --params-file $HOME/my_models/blueboat/throttle.yaml`).
+The files come from one resolution of the config, so they agree with each
+other.
 
 ## Overlay workspace
 

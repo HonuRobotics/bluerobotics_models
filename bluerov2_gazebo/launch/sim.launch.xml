@@ -3,8 +3,8 @@
   Bring up Gazebo with the BlueROV2.
 
   Everything about the vehicle is derived from config_file at launch time by
-  configure_vehicle.py (URDF, composed model, ros_gz bridge config, into a
-  per loadout directory under $ROS_HOME), so a custom loadout needs no
+  configure_vehicle.py (URDF, composed model, bridge and throttle configs,
+  into a per loadout directory under $ROS_HOME), so a custom loadout needs no
   rebuild and works the same from a source build or a binary install. A
   config that does not match the parts (a slot that does not exist, a type
   that does not fit) fails the launch with the reason. The world is vehicle free

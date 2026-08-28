@@ -18,8 +18,9 @@ Generate every artifact of a BlueROV2 loadout from one config file.
 Writes into an output directory the URDF, its Gazebo flavoured copy (glTF
 visuals pre-rotated, merged by the model), the composed Gazebo model
 (model.sdf plus model.config, so the directory works as a model:// root on
-GZ_SIM_RESOURCE_PATH) and the ros_gz bridge config, all derived from the
-same config through the same generators the build uses. This is what lets a
+GZ_SIM_RESOURCE_PATH), the ros_gz bridge config and the throttle map for
+the throttle_to_thrust node, all derived from the same config through the
+same generators the build uses. This is what lets a
 vehicle be reconfigured without rebuilding, also from a binary install:
 
     ros2 run bluerov2_gazebo configure_vehicle.py --config my_loadout.yaml --out-dir ~/my_bluerov2

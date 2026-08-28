@@ -6,7 +6,8 @@ ros2 launch bluerov2_gazebo sim.launch.xml config_file:=/path/my_loadout.yaml
 ```
 
 The launch generates every artifact of the full simulation at start
-(URDF, composed model, bridge config, into directory under `$ROS_HOME`),
+(URDF, composed model, bridge and throttle configs, into a directory
+under `$ROS_HOME`),
 spawns the model as `bluerov2` into the pool world and starts the
 ROS bridge. The vehicle should settle just under the surface at its
 declared trim. Another world can be passed with `world:=`, for example
