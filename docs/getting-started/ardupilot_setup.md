@@ -161,7 +161,7 @@ AP_GZ=$HOME/maritime_ws/thirdparty/ardupilot_gazebo
 
 export GZ_VERSION=jetty
 export GZ_SIM_SYSTEM_PLUGIN_PATH=$AP_GZ/build
-export GZ_SIM_RESOURCE_PATH=$AP_GZ/models:$AP_GZ/worlds
+export GZ_SIM_RESOURCE_PATH=$AP_GZ/models:$AP_GZ/worlds${GZ_SIM_RESOURCE_PATH:+:$GZ_SIM_RESOURCE_PATH}
 export SDF_PATH=$GZ_SIM_RESOURCE_PATH
 
 case ":$PATH:" in
@@ -178,6 +178,8 @@ Then, in every shell doing SITL work:
 ```bash
 source ~/maritime_ws/thirdparty/setup-ardupilot.sh
 ```
+
+Both path variables append to whatever is already set rather than replacing it. That matters as soon as this is combined with a sourced colcon workspace: the vehicle packages put their own model directories on `GZ_SIM_RESOURCE_PATH` through environment hooks, and overwriting it leaves every mesh in the boat unresolvable.
 
 `SDF_PATH` duplicates `GZ_SIM_RESOURCE_PATH` on purpose. They are read by different things, and setting only one produces errors that look like malformed SDF rather than a missing path.
 
