@@ -20,18 +20,10 @@ following the [Add a part](../../how-to/add-part.md) guide.
 
 ### Thrusters (`thruster_<n>` slots)
 
-```{figure} images/thrusters_standard.png
-:alt: Thruster numbering on the standard vehicle, top view
-:width: 380px
+```{figure} images/thrusters.png
+:alt: Thruster numbering on the standard vehicle and the heavy variant, top view
 
-Standard vehicle, top view.
-```
-
-```{figure} images/thrusters_heavy.png
-:alt: Thruster numbering on the heavy variant, top view
-:width: 430px
-
-Heavy variant, top view.
+Thruster numbering, top view.
 ```
 
 Each thruster plugin subscribes to a gz transport topic. Each of those gz

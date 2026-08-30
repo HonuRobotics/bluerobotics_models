@@ -16,8 +16,10 @@
 Regenerate the thruster numbering figures on the actuators page.
 
 Renders each variant top down in Gazebo (built workspace sourced, a GPU
-display) and overlays the thruster numbers at the slot coordinates the
-chassis parts declare. The pixel calibration (u0, v0, scale) is measured
+display, the camera slot emptied with `- {slot: camera, type: none}` so no
+placeholder cylinder blocks the view) and overlays the thruster numbers at
+the slot coordinates the chassis parts declare, then joins both crops into
+one row (images/thrusters.png). The pixel calibration (u0, v0, scale) is measured
 from the vertical propellers visible in the raw screenshot, whose world
 positions are known; re-measure it after changing the camera pose, the
 window size or the slot layout.
