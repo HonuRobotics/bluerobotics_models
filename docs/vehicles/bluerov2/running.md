@@ -11,8 +11,15 @@ ROS bridge. The vehicle should settle just under the surface at its
 declared trim. A custom loadout file is passed with `config_file:=`;
 [Configuring the BlueROV2](configuration.md) lists the slots and
 [Change the loadout](../../how-to/loadout.md) walks through writing one.
-Another world can be passed with `world:=`, for example
-the open water one:
+
+## Choosing the world
+
+By default the vehicle is spawned into the pool world
+(`bluerov2_pool.sdf`, a 25 m basin with its deck). The `world:=` argument
+swaps the environment without changing anything else about the
+simulation: pass any vehicle free world SDF, such as the packaged open
+water one (unbounded water over a bare seabed, and the template for
+[your own world](../../how-to/own-world.md)):
 
 ```bash
 ros2 launch bluerov2_gazebo sim.launch.xml world:=$(ros2 pkg prefix --share bluerov2_gazebo)/worlds/bluerov2_water.sdf
