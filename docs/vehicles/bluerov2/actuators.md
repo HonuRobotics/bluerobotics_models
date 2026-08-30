@@ -39,8 +39,11 @@ To manually send a thruster command via ROS:
 ros2 topic pub /bluerov2/thruster_1/thrust std_msgs/msg/Float64 "data: -10.0" -1
 ```
 
-The horizontal thrusters (1-4) are vectored at 45 degrees, so single-axis
-motion needs a mix with these signs:
+The layout follows ArduSub's
+[Vectored frame](https://ardupilot.org/sub/docs/sub-frames.html)
+(Vectored-6DOF on the heavy variant); the numbering in simulation is the
+figure above. The horizontal thrusters (1-4) are vectored at 45 degrees,
+so single-axis motion needs a mix with these signs:
 
 | motion | t1 | t2 | t3 | t4 | t5 | t6 | t7 | t8 |
 |--------|----|----|----|----|----|----|----|----|
