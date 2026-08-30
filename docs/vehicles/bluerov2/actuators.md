@@ -65,7 +65,7 @@ thrusters.
 
 | ROS Topic | Description | Message type |
 |---|---|---|
-| `/bluerov2/gripper/cmd_pos` | Jaw angle command, 0 rad closed to 0.6 rad open (subscribed) | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
+| `/bluerov2/gripper/cmd_pos` | Jaw angle command, 0 rad closed to 0.6 rad open | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
 
 ## Gazebo transport API
 
@@ -74,9 +74,9 @@ under the same names), plus a speed feedback per thruster:
 
 | gz Topic | Description | Message type |
 |---|---|---|
-| `/bluerov2/thruster_<n>/thrust` | Thrust command in newtons (subscribed) | `gz.msgs.Double` |
+| `/bluerov2/thruster_<n>/thrust` | Thrust command in newtons | `gz.msgs.Double` |
 | `/bluerov2/thruster_<n>/thrust/ang_vel` | Propeller speed feedback (rad/s) | `gz.msgs.Double` |
-| `/bluerov2/gripper/cmd_pos` | Jaw angle command (subscribed) | `gz.msgs.Double` |
+| `/bluerov2/gripper/cmd_pos` | Jaw angle command | `gz.msgs.Double` |
 
 Command the mix **together** (`&` + `wait` publishes in parallel):
 
