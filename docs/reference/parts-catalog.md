@@ -20,9 +20,8 @@ are the directory names in `bluerobotics_parts/models/`.
 | `omniscan_450_sidescan` | Cerulean Omniscan 450 side scan sonar | [link](https://bluerobotics.com/store/the-reef/cerulean-sidescan-sonar/) | geometry only |
 | `surveyor_multibeam` | Cerulean Surveyor 240-16 multibeam | [link](https://bluerobotics.com/store/sonars/echosounders/cerulean-surveyor-240-16-multibeam-echosounder/) | geometry only |
 
-Fourteen of the 28 cataloged parts (`bluerobotics_parts/models/parts.csv`)
-are delivered so far; the rest (BlueROV2 chassis, gripper, cameras, DVL,
-...) appear as they land.
+Parts whose final mesh has not landed yet use placeholder geometry; the
+table notes them.
 
 ## Slots
 

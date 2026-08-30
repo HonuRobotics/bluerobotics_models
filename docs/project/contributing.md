@@ -43,8 +43,7 @@ place, so re-stage and re-run after "files were modified by this hook".
 
 - One line commit subjects, signed off (`git commit -s`).
 - The URDF xacro is the part; `bluerobotics_parts/urdf/<part>.urdf.xacro`
-  is hand maintained source. The bootstrap tool writes it once; never
-  regenerate over hand edits.
+  is hand maintained source.
 - Vehicle configuration lives in each description package's `config/*.yaml`;
   the URDF, the composed Gazebo model and the ros_gz bridge config are all
   generated from it. Never hand edit the generated files.

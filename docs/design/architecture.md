@@ -7,11 +7,8 @@ converts formats at runtime, and ROS and Gazebo see the same geometry.
 
 ```{mermaid}
 flowchart LR
-  subgraph delivery ["modeler delivery (bluerobotics_parts/models)"]
-    GLB["part.visual.glb"]
-    SDF["model.sdf (collision primitives)"]
-  end
-  SDF -- "sdf_to_part.py, once" --> PART["urdf/part.urdf.xacro<br/>the part: link, inertia, visual, collision,<br/>attach, slots, frames"]
+  GLB["models/part.visual.glb"]
+  PART["urdf/part.urdf.xacro<br/>the part: link, inertia, visual, collision,<br/>attach, slots, frames"]
   GLB -. "referenced by the visual" .-> PART
   CFG["config/blueboat.yaml<br/>base, overrides, hull displacement"] --> ASM["assembly.xacro<br/>slots fill with defaults,<br/>config overrides and adds"]
   PART --> ASM
@@ -26,10 +23,9 @@ flowchart LR
 ## The pieces
 
 - **Parts** ([Parts](parts.md)): one file per part in `bluerobotics_parts/urdf/`,
-  hand maintained. It can be bootstrapped from a modeler's SDF delivery or
-  written from scratch; downstream cannot tell. Each part states its own
-  mass, inertia and center of gravity, and declares where other parts fit
-  (slots) and where it senses (frames).
+  hand maintained. Each part states its own mass, inertia and center of
+  gravity, and declares where other parts fit (slots) and where it senses
+  (frames).
 - **Assembly** ([Slots and assembly](slots.md)): `assembly.xacro` instantiates
   the base part and fills every slot, recursively, with its default unless
   the config says otherwise. The default vehicle is therefore defined by the
@@ -48,25 +44,15 @@ flowchart LR
 
 ## Why it works this way
 
-**The problem is transcription, not format.** The modeler's tooling exports
-SDF; the description packages consume URDF. When a person bridges that gap
-by retyping geometry, that hand step is the only place defects can enter. A
-contributed part once arrived with cylinders of radius 0.41 m on a 1.2 m
-hull, collision names containing spaces, geometry yawed 180 degrees, and SDF
-syntax pasted into a URDF file where it could not parse. None of it was
-detectable until the whole vehicle assembled, because there was no smaller
-unit to test. So the conversion is a tool, a part is the unit, and a review
-world shows every part alone.
+**A part is the unit.** Defects in geometry, naming or inertia are
+invisible once a whole vehicle is assembled; keeping each part a small,
+self contained file with its own review world (`parts_check.sdf`) makes
+them visible one part at a time.
 
-**SDF first was prototyped and rejected.** Parts as standalone SDF models,
-composed with `<include merge="true">` and converted for ROS by
-`sdformat_urdf`, is what [Gazebo's interoperability docs](https://gazebosim.org/docs/latest/ros2_interop/)
-recommend, and it works. It was rejected on ecosystem grounds: robots that
-ship to both ROS and Gazebo (`clearpath_common`, `turtlebot4`,
-`Universal_Robots_ROS2_Description`) are URDF first without exception, and a
-young converter on the critical path of every description would make its
-bugs ours. The URDF stays canonical; SDF deliveries are an optional on ramp
-and move to a side branch once converted.
+**URDF is canonical.** Robots that ship to both ROS and Gazebo
+(`clearpath_common`, `turtlebot4`, `Universal_Robots_ROS2_Description`)
+are URDF first without exception; Gazebo consumes the same description
+through a merge include, so both sides always see identical geometry.
 
 **Defaults live in the parts.** The previous design kept a hand written
 "standalone" vehicle and a separate programmatic path and declared them
@@ -77,5 +63,4 @@ with an empty config.
 **The structure is Clearpath's.** [`clearpath_common`](https://github.com/clearpathrobotics/clearpath_common)
 is the closest analogue, a family of configurable robots for ROS and Gazebo
 built from a shared parts library plus a YAML driven generator. The
-additions here are the slot tables and the bootstrap tool, which they do not
-need because their geometry does not arrive from an artist exporting SDF.
+addition here is the slot tables.

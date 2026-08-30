@@ -25,7 +25,7 @@ segments (`length`, `width`, `height`, `x`, `y`, `z`, `segments`). The Gazebo
 composition places them on a dedicated `hull_displacement` link, fixed to
 `base_link`, and the worlds enable graded buoyancy **on that link only**
 (`<enable>blueboat::hull_displacement</enable>`). Buoyancy is evaluated per
-link, so the parts' own collisions (the modeler's hull cylinders, hatch
+link, so the parts' own collisions (the hull cylinders, hatch
 boxes, the prop hubs) stay what they are, contact geometry, and never
 displace; the chassis keeps them on. The URDF carries no displacement
 geometry at all: displacement is a simulator concern. Segmenting matters:
