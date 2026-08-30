@@ -1,10 +1,9 @@
 # Project
 
-Contributing and release information.
+How to contribute.
 
 ```{toctree}
 :maxdepth: 1
 
 contributing
-releases
 ```
