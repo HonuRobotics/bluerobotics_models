@@ -5,8 +5,12 @@ The composed model needs two things from the world: **graded buoyancy**
 displacement link, `<enable>blueboat::hull_displacement</enable>`; enabling
 the whole model `blueboat` also works, with warnings about the parts'
 non box collisions) and, for the echosounder, `gz-sim-sensors-system` with
-the ogre2 render engine. Copy both plugin blocks from
-`blueboat_gazebo/worlds/blueboat_water.sdf`.
+the ogre2 render engine. The simplest start is a copy of the water world,
+which holds both plugin blocks:
+
+```bash
+cp $(ros2 pkg prefix --share blueboat_gazebo)/worlds/blueboat_water.sdf my_world.sdf
+```
 
 ## Include the default model
 
