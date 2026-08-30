@@ -12,6 +12,19 @@ rename the instance and the topic follows. Topic bases are
 | `/bluerov2/dvl/velocity` | `marine_acoustic_msgs/msg/Dvl` | `dvl_a50` (native DVL sensor) | `dvl` slot |
 | `/bluerov2/gripper/cmd_pos` | `Float64` (subscribes) | `newton_gripper` / `sediment_sampler` | `gripper` slot |
 
+Each is one slot entry in the loadout config
+([Configuring the BlueROV2](configuration.md)). This loadout produces the
+`stereo`, `sonar` and `dvl` rows above:
+
+```yaml
+topic_namespace: bluerov2
+base: {type: bluerov2_chassis, name: base_link}
+parts:
+  - {slot: camera, type: marinesitu_c3, name: stereo}   # instead of the default camera
+  - {slot: sonar, type: ping360, name: sonar}
+  - {slot: dvl, type: dvl_a50, name: dvl}
+```
+
 The imaging sonars (`sonoptix_echo`, `omniscan_450_fs`) are
 geometry only: no acoustic model ships. Sensor messages carry the part's
 own link as `frame_id`, which TF resolves; cameras deliberately use the
