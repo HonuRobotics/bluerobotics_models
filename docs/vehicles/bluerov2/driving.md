@@ -4,12 +4,17 @@ Thrust commands are **latched**: each thruster holds its last command until a
 new one arrives. The horizontal thrusters (1-4) are vectored at 45 degrees, so
 single-axis motion needs a mix with these signs (thrust in newtons):
 
-| motion | t1 | t2 | t3 | t4 | t5 | t6 |
-|--------|----|----|----|----|----|----|
-| surge +x (forward) | - | - | + | + | 0 | 0 |
-| sway +y (left) | - | + | - | + | 0 | 0 |
-| yaw +z (counterclockwise) | - | + | + | - | 0 | 0 |
-| heave +z (up) | 0 | 0 | 0 | 0 | - | - |
+| motion | t1 | t2 | t3 | t4 | t5 | t6 | t7* | t8* |
+|--------|----|----|----|----|----|----|----|----|
+| surge +x (forward) | - | - | + | + | 0 | 0 | 0 | 0 |
+| sway +y (left) | - | + | - | + | 0 | 0 | 0 | 0 |
+| yaw +z (counterclockwise) | - | + | + | - | 0 | 0 | 0 | 0 |
+| heave +z (up) | 0 | 0 | 0 | 0 | - | - | - | - |
+
+\* `thruster_7` and `thruster_8` exist on the heavy variant only
+(`bluerov2_heavy_chassis`), where all four corner verticals share heave;
+differential use of its verticals also gives the heavy vehicle roll and
+pitch authority the standard vehicle does not have.
 
 Each propeller part in the loadout gets a thrust topic named after it,
 `/<namespace>/<name>/thrust`; the default loadout fits `thruster_1` ..
