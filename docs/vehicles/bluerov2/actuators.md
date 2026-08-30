@@ -33,6 +33,8 @@ topics is bridged to ROS and indexed by number, starting at 1:
 |---|---|---|
 | `/bluerov2/thruster_<n>/thrust` | Thrust command in newtons, clamped to the propeller's limits | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
 
+To manually send a thruster command via ROS:
+
 ```bash
 ros2 topic pub /bluerov2/thruster_1/thrust std_msgs/msg/Float64 "data: -10.0" -1
 ```
