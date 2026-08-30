@@ -28,7 +28,7 @@ ros2 launch bluerov2_gazebo sim.launch.xml world:=$(ros2 pkg prefix --share blue
 
 ## In RViz
 
-To see the model without Gazebo:
+To see the model in RViz:
 
 ```bash
 ros2 launch bluerov2_description display.launch.xml
