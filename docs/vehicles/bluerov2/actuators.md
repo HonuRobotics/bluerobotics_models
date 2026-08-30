@@ -25,7 +25,7 @@ topics is bridged to ROS and indexed by number, starting at 1:
 
 | ROS Topic | Description | Message type |
 |---|---|---|
-| `/bluerov2/thruster_<n>/thrust` | Thrust command in newtons, clamped to the propeller's limits (about +51 / -40 N); latched: the thruster holds the last command until a new one arrives (subscribed) | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
+| `/bluerov2/thruster_<n>/thrust` | Thrust command in newtons, clamped to the propeller's limits (about +51 / -40 N) | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
 
 ```bash
 ros2 topic pub /bluerov2/thruster_1/thrust std_msgs/msg/Float64 "data: -10.0" -1
