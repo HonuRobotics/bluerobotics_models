@@ -9,9 +9,9 @@ full simulation is generated at start (URDF, composed model, bridge
 config, into a directory under `$ROS_HOME`), the model is spawned as
 `bluerov2` into the pool world and the ROS bridge comes up with it.
 
-To run a custom vehicle instead, pass a loadout file with `config_file:=`;
+To run a custom vehicle instead, pass its config with `config_file:=`;
 the [configuration page](configuration.md) lists the slots and
-[Change the loadout](../../how-to/loadout.md) walks through writing one.
+[Change the fitted parts](../../how-to/change-parts.md) walks through writing one.
 
 ## Choosing the world
 
@@ -38,5 +38,5 @@ Starts `robot_state_publisher`, `joint_state_publisher_gui` (sliders to
 spin the propellers) and RViz with the packaged config, showing the model
 and its frames (parts, slots, the camera and sonar frames). It takes the
 same `config_file:=` argument, and the xacro is expanded at launch time,
-so a custom loadout needs no rebuild. Running next to `sim.launch.xml`,
+so a custom config needs no rebuild. Running next to `sim.launch.xml`,
 `/joint_states` arrives over the bridge and RViz animates the propellers.

@@ -29,12 +29,12 @@ TOP_XACRO = SHARE / 'urdf' / 'bluerov2.urdf.xacro'
 DEFAULT_CONFIG = (SHARE / 'config' / 'bluerov2.yaml').read_text()
 
 # What the chassis slots fill with when the config is silent.
-DEFAULT_LOADOUT = {'base_link': 'bluerov2_chassis',
-                   'thruster_1': 't200_prop_ccw', 'thruster_2': 't200_prop_ccw',
-                   'thruster_3': 't200_prop_cw', 'thruster_4': 't200_prop_cw',
-                   'thruster_5': 't200_prop_ccw', 'thruster_6': 't200_prop_cw',
-                   'camera': 'explorehd_camera'}
-DEFAULT_LOADOUT |= {f'thruster_body_{n}': 't200_thruster' for n in range(1, 7)}
+DEFAULT_PARTS = {'base_link': 'bluerov2_chassis',
+                 'thruster_1': 't200_prop_ccw', 'thruster_2': 't200_prop_ccw',
+                 'thruster_3': 't200_prop_cw', 'thruster_4': 't200_prop_cw',
+                 'thruster_5': 't200_prop_ccw', 'thruster_6': 't200_prop_cw',
+                 'camera': 'explorehd_camera'}
+DEFAULT_PARTS |= {f'thruster_body_{n}': 't200_thruster' for n in range(1, 7)}
 
 # The parts library is shared across vehicles; each vehicle's suite sweeps
 # only the parts of its own world (the catalog wide guarantee lives in
@@ -103,11 +103,11 @@ def manifest(root):
     return {e.get('name'): e.get('type') for e in root.findall('assembly_part')}
 
 
-def test_default_config_is_the_default_loadout():
+def test_default_config_yields_the_default_parts():
     """The shipped default builds 6 props + the camera from slot defaults."""
     root = generate_urdf(DEFAULT_CONFIG)
-    assert manifest(root) == DEFAULT_LOADOUT
-    assert set(DEFAULT_LOADOUT) <= link_names(root)
+    assert manifest(root) == DEFAULT_PARTS
+    assert set(DEFAULT_PARTS) <= link_names(root)
 
 
 def test_vectored_spin_convention():

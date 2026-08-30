@@ -39,7 +39,7 @@ packages flow into later distros automatically).
 
 - Binary jobs build without running tests; devel/PR jobs run `colcon test`,
   which is headless safe by design.
-- From debs, the default vehicle is baked in; custom loadouts are a
+- From debs, the default vehicle is baked in; custom configs are a
   `config_file:=` away ([Configure an installed vehicle](docs/how-to/installed-vehicle.md)).
 - The build farm runs `rosdoc2` per package; packages without a `doc/`
   folder get an auto generated stub at `docs.ros.org/en/<distro>/p/<pkg>`.

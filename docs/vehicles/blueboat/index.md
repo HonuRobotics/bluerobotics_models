@@ -15,7 +15,7 @@ configuration
 
 ## The default vehicle
 
-The default loadout is the chassis (pontoons, crossbeams, hatches and the
+The default configuration is the chassis (pontoons, crossbeams, hatches and the
 outboard thruster bodies) with its two M200 weedless propellers, the flag
 on the aft crossbeam and the Ping2 echosounder on its integration kit
 bracket, face below the waterline. Everything else in the catalog can be

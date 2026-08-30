@@ -40,15 +40,15 @@ ros2 run ros_gz_sim create -world <your_world> -name blueboat -z 0.05 \
 ros2 launch blueboat_gazebo sim.launch.xml world:=/path/my_world.sdf
 ```
 
-spawns the boat (default or `config_file:=` loadout) into it and starts the
+spawns the boat (default or a `config_file:=` custom) into it and starts the
 bridge and `robot_state_publisher`.
 
-## With a custom loadout
+## With a custom config
 
 Generate the model first and point at it instead of the installed one:
 
 ```bash
-ros2 run blueboat_gazebo configure_vehicle.py --config my_loadout.yaml --out-dir ~/my_models/blueboat
+ros2 run blueboat_gazebo configure_vehicle.py --config my_vehicle.yaml --out-dir ~/my_models/blueboat
 ```
 
 See [Configure an installed vehicle](installed-vehicle.md).

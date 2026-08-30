@@ -10,13 +10,13 @@ purpose:
 | Mass, inertia, center of mass | **Derived.** Composed from the parts; each part's macro is the source for its own values. Mass is never declared at the assembly |
 | Displacement and center of buoyancy | **Declared** at the assembly. A USV declares hull collision geometry; a UUV declares a net buoyant balance and a center of buoyancy offset |
 
-Deriving mass keeps one source of truth per part: a loadout change (a
+Deriving mass keeps one source of truth per part: a config change (a
 battery, a sensor, an empty slot) propagates on its own and is visible in
 the generated model's specs comment. Displacement cannot work that way: for
 a USV the displacing shape must be the hull and only the hull, so that
 fitting a bracket does not change the draft by whatever collision volume the
 bracket carries; for a UUV, flotation is a trim the operator sets with foam
-and lead, stated directly and held across loadouts.
+and lead, stated directly and held across configurations.
 
 ## USV: hull displacement
 
@@ -39,7 +39,7 @@ waterline for the BlueBoat.
 
 `buoyancy:` in the BlueROV2 config takes `net_buoyancy` (kg, positive floats
 up; a displaced mass, not a fraction, so the trim does not scale silently
-with a heavier loadout), `cob_offset` and `cob_frame` (`com`: the offset is
+with heavier parts fitted), `cob_offset` and `cob_frame` (`com`: the offset is
 the BG vector and sets righting stiffness directly; `base_link`: the center
 of buoyancy is pinned in the hull like the real vehicle), and
 `fluid_density` (must match the world's buoyancy plugin; both default to
@@ -47,7 +47,7 @@ of buoyancy is pinned in the hull like the real vehicle), and
 generation computes the assembled total mass and center of mass from the
 URDF and solves an analytic box on a dedicated `buoyancy_displacement`
 link, the only link the worlds enable buoyancy on, so both declarations
-hold for the configured loadout and the parts' own collisions stay pure
+hold for the configured vehicle and the parts' own collisions stay pure
 contact geometry. The same pattern as the BlueBoat's pontoons, with the
 box solved instead of declared.
 

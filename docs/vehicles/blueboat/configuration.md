@@ -1,7 +1,7 @@
 # Configuration
 
 The BlueBoat needs no configuration: every slot the parts declare fills
-itself with its default. The loadout config
+itself with its default. The vehicle config
 (`blueboat_description/config/blueboat.yaml`, or any file passed as
 `config_file:=`) states differences only.
 
@@ -32,6 +32,6 @@ config entry each. The fitted options and their topics live in
 
 Slot entries, free placements, ad hoc slots and topic overrides are
 described in the {ref}`Configuration keys <configuration-keys>` and
-walked through in [Change the loadout](../../how-to/loadout.md); the
+walked through in [Change the fitted parts](../../how-to/change-parts.md); the
 instance key is `of:`, not `on:`. Mistakes fail the build or the launch
 with a message naming the problem.

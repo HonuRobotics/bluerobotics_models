@@ -8,7 +8,7 @@ topics), and the few genuine vehicle differences are called out inline.
 ```{toctree}
 :maxdepth: 1
 
-loadout
+change-parts
 installed-vehicle
 add-part
 add-sensor-part

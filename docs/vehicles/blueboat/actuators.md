@@ -64,4 +64,4 @@ wait
 
 Topic bases follow `/<namespace>/<instance>/...`: fit a different
 propeller, rename it or leave a motor slot empty and the thrust topics
-follow the loadout.
+follow the fitted parts.

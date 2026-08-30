@@ -3,7 +3,7 @@
   Vehicle free underwater world for the BlueROV2: seabed, graded buoyancy
   (seawater below z=0, air above) acting only on a spawned model's dedicated
   buoyancy_displacement link, the sensor render backend and the core
-  systems. sim.launch.xml spawns the model generated from the loadout
+  systems. sim.launch.xml spawns the model generated from the vehicle
   config into it.
 
   Run it directly, no ROS:  gz sim <this file>

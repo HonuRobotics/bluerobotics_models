@@ -170,7 +170,7 @@ def test_physics_steps(sim):
 
 
 def test_camera_renders(sim):
-    """The default loadout's camera streams frames at its configured size."""
+    """The default configuration's camera streams frames at its configured size."""
     code, out, err = gz(sim, 'topic', '-e', '-t', '/bluerov2/camera/image',
                         '-n', '1', timeout=30)
     assert code == 0 and 'data' in out, (

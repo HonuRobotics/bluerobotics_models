@@ -4,7 +4,7 @@
 
   Everything about the vehicle is derived from config_file at launch time by
   configure_vehicle.py (URDF, composed model, ros_gz bridge config, into a
-  per loadout directory under $ROS_HOME), so a custom loadout needs no
+  per config directory under $ROS_HOME), so a custom config needs no
   rebuild and works the same from a source build or a binary install. A
   config that does not match the parts (a slot that does not exist, a type
   that does not fit) fails the launch with the reason. The world is vehicle free
@@ -16,7 +16,7 @@
   vehicle settles at its declared trim.
 
       ros2 launch bluerov2_gazebo sim.launch.xml
-      ros2 launch bluerov2_gazebo sim.launch.xml config_file:=/path/my_loadout.yaml
+      ros2 launch bluerov2_gazebo sim.launch.xml config_file:=/path/my_vehicle.yaml
 -->
 <launch>
   <arg name="world"
@@ -27,12 +27,12 @@
   <arg name="gui" default="true" description="Launch the Gazebo GUI."/>
   <arg name="config_file"
        default="$(find-pkg-share bluerov2_description)/config/bluerov2.yaml"
-       description="Vehicle loadout config, expanded at launch."/>
+       description="Vehicle vehicle config, expanded at launch."/>
   <arg name="name" default="bluerov2"
        description="Model name to spawn as; the world's buoyancy enable expects bluerov2."/>
   <arg name="z" default="0.5" description="Spawn height (m); the vehicle drops in and settles."/>
 
-  <!-- Every artifact of this loadout, generated now from config_file. -->
+  <!-- Every artifact of this configuration, generated now from config_file. -->
   <let name="vehicle_dir"
        value="$(command '$(find-pkg-prefix bluerov2_gazebo)/lib/bluerov2_gazebo/configure_vehicle.py --config $(var config_file) --cache')"/>
   <let name="robot_description" value="$(command 'cat $(var vehicle_dir)/bluerov2.urdf')"/>

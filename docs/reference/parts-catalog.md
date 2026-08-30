@@ -117,7 +117,7 @@ bare values too, or quote them.
 ## Frames
 
 Published as TF by `robot_state_publisher` from the generated URDF. The
-frames follow the loadout, with the same naming patterns on both vehicles:
+frames follow the fitted parts, with the same naming patterns on both vehicles:
 
 | Pattern | Kind | Meaning |
 |---|---|---|

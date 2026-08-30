@@ -2,7 +2,7 @@
 
 ## xacro fails with "ASSEMBLY ERROR: ..."
 
-The loadout config asked for something the parts cannot do: a type the slot
+The vehicle config asked for something the parts cannot do: a type the slot
 does not accept (the message lists what it accepts), an unknown slot on the
 base, a slot configured twice, a bare `on:` key (YAML reads it as `true`;
 the instance key is `of:`). "unknown macro name: xacro:<type>" means a

@@ -1,16 +1,16 @@
-# Change the loadout
+# Change the fitted parts
 
-Recipes for the loadout config. The concepts (slots, defaults, free
+Recipes for the vehicle config. The concepts (slots, defaults, free
 placement) are explained in [Configuring the BlueBoat](../vehicles/blueboat/configuration.md);
 the full key list is in {ref}`Configuration keys <configuration-keys>`.
 
 Start from a copy of the shipped config:
 
 ```bash
-cp $(ros2 pkg prefix --share blueboat_description)/config/blueboat.yaml my_loadout.yaml
+cp $(ros2 pkg prefix --share blueboat_description)/config/blueboat.yaml my_vehicle.yaml
 ```
 
-and try it without rebuilding: `ros2 launch blueboat_gazebo sim.launch.xml config_file:=$PWD/my_loadout.yaml`.
+and try it without rebuilding: `ros2 launch blueboat_gazebo sim.launch.xml config_file:=$PWD/my_vehicle.yaml`.
 
 ## Fit the other propellers
 
@@ -74,7 +74,7 @@ An ad hoc slot behaves like the parts' own: it becomes the frame
 ## See what you got
 
 ```bash
-ros2 run blueboat_gazebo configure_vehicle.py --config my_loadout.yaml --out-dir /tmp/boat
+ros2 run blueboat_gazebo configure_vehicle.py --config my_vehicle.yaml --out-dir /tmp/boat
 grep assembly_part /tmp/boat/blueboat.urdf
 ```
 

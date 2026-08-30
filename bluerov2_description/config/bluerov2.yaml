@@ -1,7 +1,7 @@
 # BlueROV2 build time configuration.
 #
 # Edit this file and rebuild (colcon build) to regenerate the URDF, the
-# composed Gazebo model AND the ros_gz bridge config. To try a loadout
+# composed Gazebo model AND the ros_gz bridge config. To try a config
 # without rebuilding, pass config_file:=<your.yaml> to the launches.
 #
 # The default BlueROV2 needs nothing here: every slot of every part fills
@@ -53,7 +53,7 @@ parts: []
 #   net_buoyancy   net buoyancy as displaced mass, kg. Positive floats up.
 #   cob_offset     "x y z" (m): center of buoyancy, relative to cob_frame.
 #   cob_frame      com (default; preserves righting stiffness across
-#                  loadouts) or base_link (pins the CoB like the hull).
+#                  configurations) or base_link (pins the CoB like the hull).
 #   fluid_density  kg/m^3; MUST match the world's buoyancy plugin (a test
 #                  enforces it for the shipped world).
 #   footprint      "x y" (m): the box footprint; height is solved. The

@@ -1,7 +1,7 @@
 # Configuration
 
 The BlueROV2 needs no configuration: every slot the parts declare fills
-itself with its default. The loadout config
+itself with its default. The vehicle config
 (`bluerov2_description/config/bluerov2.yaml`, or any file passed as
 `config_file:=`) states differences only.
 
@@ -37,7 +37,7 @@ trim directly instead of asking you to tune volumes:
 
 The Gazebo composition realizes the declaration as a dedicated
 displacement volume solved from the assembled mass, so the declared trim
-holds when the loadout changes ([Buoyancy](../../design/buoyancy.md)).
+holds when the config changes ([Buoyancy](../../design/buoyancy.md)).
 
 ## Payload
 

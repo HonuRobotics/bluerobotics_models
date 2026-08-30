@@ -10,7 +10,7 @@ ros2 launch blueboat_gazebo sim.launch.xml
 The simulation starts running, with the camera a few meters off the boat's
 port quarter. The boat is spawned at its static waterline and floats there:
 two hulls, the two outboard propellers, the flag and the Ping2 echosounder
-fitted under the starboard hull. That is the default loadout; no
+fitted under the starboard hull. That is the default configuration; no
 configuration was involved.
 
 In a second terminal (also sourced), watch the echosounder and spin the
@@ -31,4 +31,4 @@ Next: [drive it](../vehicles/blueboat/actuators.md), then
 vehicle's Running page
 ([BlueBoat](../vehicles/blueboat/running.md),
 [BlueROV2](../vehicles/bluerov2/running.md)) covers worlds, custom
-loadouts and RViz.
+configs and RViz.

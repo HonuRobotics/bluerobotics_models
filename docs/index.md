@@ -4,7 +4,7 @@ Simulation ready models of the [Blue Robotics](https://bluerobotics.com)
 vehicles for **ROS 2** and **Gazebo**. Each vehicle is assembled from a
 shared library of parts (hulls, thrusters, propellers, brackets, sensors),
 ships as a complete default model that needs no configuration, and can be
-reconfigured from one YAML file when you want the exact loadout.
+reconfigured from one YAML file when you want different parts.
 
 - **BlueBoat**: twin hull differential drive USV with the Ping2 echosounder
   fitted by default: [BlueBoat manual](vehicles/blueboat/index.md)
@@ -26,7 +26,7 @@ Press play in Gazebo: the BlueBoat floats at its waterline, the propellers
 take thrust commands and the echosounder streams ranges. Nothing to
 configure; [First simulation](getting-started/first-simulation.md) walks
 through it, [Configuring the BlueBoat](vehicles/blueboat/configuration.md)
-shows how to change the loadout, and [Design](design/index.md) explains how
+shows how to change the fitted parts, and [Design](design/index.md) explains how
 parts, slots and the generated models fit together.
 
 These models target **ROS 2 Lyrical** and **Gazebo Jetty** on Ubuntu 26.04.

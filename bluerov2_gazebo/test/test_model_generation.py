@@ -37,7 +37,7 @@ _spec = importlib.util.spec_from_file_location(
 bridge_gen = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(bridge_gen)
 
-# A loadout with every simulated part type fitted.
+# A config with every simulated part type fitted.
 FULL_CONFIG = """\
 topic_namespace: bluerov2
 base: {type: bluerov2_heavy_chassis, name: base_link}

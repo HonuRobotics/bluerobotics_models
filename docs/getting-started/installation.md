@@ -43,6 +43,6 @@ ros2 launch bluerov2_gazebo sim.launch.xml    # or the ROV
 ```
 
 Nothing under `/opt/ros` is meant to be edited. The default vehicle is baked
-into the packages; a custom loadout is a YAML file anywhere on disk passed
+into the packages; a custom config is a YAML file anywhere on disk passed
 to the launch (`config_file:=`), which regenerates every artifact at launch
 time. See [Configuring an installed vehicle](../how-to/installed-vehicle.md).

@@ -278,7 +278,7 @@
       </link>
     </model>
 
-    <!-- The vehicle, the composed model of the default loadout (the
+    <!-- The vehicle, the composed model of the default configuration (the
          playground only; the pool world is spawned into instead). -->
     <xacro:if value="$(arg vehicle)">
       <include>
