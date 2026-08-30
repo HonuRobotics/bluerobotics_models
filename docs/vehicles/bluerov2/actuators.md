@@ -18,7 +18,7 @@ following the [Add a part](../../how-to/add-part.md) guide.
 
 ## Actuators ROS API
 
-### Thrusters (`thruster_<n>` slots)
+### Thrusters
 
 ```{figure} images/thrusters.png
 :alt: Thruster numbering on the standard vehicle and the heavy variant, top view
@@ -61,7 +61,7 @@ ArduPilot, MAVROS) are unaffected. Stop by publishing `data: 0.0` to all
 thrusters.
 ```
 
-### Grippers (`newton_gripper` / `sediment_sampler`, `gripper` slot)
+### Grippers
 
 | ROS Topic | Description | Message type |
 |---|---|---|
