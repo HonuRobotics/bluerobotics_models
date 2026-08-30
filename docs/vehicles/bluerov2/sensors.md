@@ -17,22 +17,6 @@ sensors can be added following the
 | Newton gripper | `newton_gripper` | `gripper` | no |
 | Sediment sampler | `sediment_sampler` | `gripper` | no |
 
-Fitting one is a slot entry in the loadout config. This loadout produces
-the topics documented in the API below:
-
-```yaml
-topic_namespace: bluerov2
-base: {type: bluerov2_chassis, name: base_link}
-parts:
-  - {slot: camera, type: marinesitu_c3, name: stereo}   # instead of the default camera
-  - {slot: sonar, type: ping360, name: sonar}
-  - {slot: dvl, type: dvl_a50, name: dvl}
-  - {slot: gripper, type: newton_gripper, name: gripper}
-```
-
-The imaging sonars (`sonoptix_echo`, `omniscan_450_fs`) are geometry only:
-no acoustic model ships, so they carry no topics.
-
 ## Sensors API
 
 ### Cameras (`explorehd_camera`, default `camera` slot)

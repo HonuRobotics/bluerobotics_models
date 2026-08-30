@@ -62,4 +62,3 @@ macro (`bluerobotics_parts/urdf/<part>.urdf.xacro`); this page mirrors them.
 | `dvl_a50` | Water Linked DVL A50 | sensor part (native DVL); backend loads only when fitted |
 | `newton_gripper`, `sediment_sampler` | 1 DOF claws | multi body parts; cmd_pos controllers |
 | `payload_skid`, `roof_rack` | payload skid, top rack | geometry only |
-| `sonoptix_echo`, `omniscan_450_fs` | imaging sonars | geometry only (no acoustic model ships) |

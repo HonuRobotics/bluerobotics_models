@@ -233,8 +233,7 @@
   <!-- Emitters for the assembly dispatcher. Per resolved part instance: a
        propeller (a part with a `drive` table) gets a Thruster on its joint,
        the sensor types get their <sensor>, the claws their controllers;
-       geometry only parts (payload_skid, roof_rack, and the parked imaging
-       sonars sonoptix_echo / omniscan_450_fs) emit nothing here. Topic
+       geometry only parts (payload_skid, roof_rack) emit nothing here. Topic
        overrides come from the config entry that fitted the instance. Ad
        hoc slots are URDF frames; nothing to emit. -->
   <xacro:macro name="gz_part" params="ptype name parent xyz rpy collision joint axis info">

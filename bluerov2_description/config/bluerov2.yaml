@@ -38,8 +38,6 @@ parts: []
   # - {slot: gripper, type: sediment_sampler}
   # - {slot: payload, type: payload_skid}
   # - {slot: rack, type: roof_rack}
-  # - {type: sonoptix_echo,   name: sonar_l, xyz: "0.14 0.16 -0.05",  rpy: "0 0 0"}
-  # - {type: omniscan_450_fs, name: sonar_r, xyz: "0.14 -0.16 -0.05", rpy: "0 0 0"}
 
 # slots: ad hoc slots on any instance, usable like the parts' own. (The
 # instance key is of:, not on:, which YAML would read as the boolean true.)

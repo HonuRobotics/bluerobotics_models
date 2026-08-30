@@ -43,8 +43,8 @@ DEFAULT_LOADOUT |= {f'thruster_body_{n}': 't200_thruster' for n in range(1, 7)}
 BLUEROV2_PARTS = sorted({
     'bluerov2_chassis', 'bluerov2_heavy_chassis', 'dvl_a50',
     'explorehd_camera', 'marinesitu_c3', 'newton_gripper',
-    'omniscan_450_fs', 'payload_skid', 'ping360', 'roof_rack',
-    'sediment_sampler', 'sonoptix_echo', 't200_prop_ccw', 't200_prop_cw',
+    'payload_skid', 'ping360', 'roof_rack',
+    'sediment_sampler', 't200_prop_ccw', 't200_prop_cw',
     't200_thruster'})
 
 
@@ -176,11 +176,11 @@ def test_bare_on_key_is_rejected():
 def test_free_placement_and_adhoc_slot():
     """Free placements and ad hoc slots work as in the config schema."""
     root = generate_urdf(make_config(
-        parts=[{'type': 'sonoptix_echo', 'name': 'sonar_l',
+        parts=[{'type': 'payload_skid', 'name': 'pod',
                 'xyz': '0.14 0.16 -0.05', 'rpy': '0 0 0'},
                {'slot': 'light', 'type': 'roof_rack', 'name': 'bar'}],
         slots=[{'of': 'base_link', 'name': 'light', 'xyz': '0.2 0.1 0.1'}]))
-    assert {'sonar_l', 'bar', 'base_link_light'} <= link_names(root)
+    assert {'pod', 'bar', 'base_link_light'} <= link_names(root)
 
 
 def test_check_catches_what_the_expansion_cannot():
@@ -203,8 +203,6 @@ def test_catalog_covered_by_defaults_plus_overrides():
                {'slot': 'gripper', 'type': 'newton_gripper'},
                {'slot': 'payload', 'type': 'payload_skid'},
                {'slot': 'rack', 'type': 'roof_rack'},
-               {'type': 'sonoptix_echo', 'name': 'sonar_l', 'xyz': '0.14 0.16 -0.05'},
-               {'type': 'omniscan_450_fs', 'name': 'sonar_r', 'xyz': '0.14 -0.16 -0.05'},
                {'type': 'marinesitu_c3', 'name': 'stereo', 'xyz': '-0.16 0 0.16'},
                {'type': 'sediment_sampler', 'name': 'sampler', 'xyz': '-0.26 0 -0.06'},
                {'type': 'bluerov2_heavy_chassis', 'name': 'trailer', 'xyz': '0 0 0.6'}]))
