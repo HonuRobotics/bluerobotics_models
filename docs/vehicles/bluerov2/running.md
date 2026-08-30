@@ -4,12 +4,12 @@
 ros2 launch bluerov2_gazebo sim.launch.xml
 ```
 
-The launch generates every artifact of the full simulation at start
-(URDF, composed model, bridge config, into directory under `$ROS_HOME`),
-spawns the model as `bluerov2` into the pool world and starts the
-ROS bridge. The vehicle should settle just under the surface at its
-declared trim. The camera, ping360 and stereo camera are rendered
-sensors and need a GPU. A custom loadout file is passed with `config_file:=`;
+Launches the vehicle in its default configuration: every artifact of the
+full simulation is generated at start (URDF, composed model, bridge
+config, into a directory under `$ROS_HOME`), the model is spawned as
+`bluerov2` into the pool world and the ROS bridge comes up with it.
+
+To run a custom vehicle instead, pass a loadout file with `config_file:=`;
 [Configuring the BlueROV2](configuration.md) lists the slots and
 [Change the loadout](../../how-to/loadout.md) walks through writing one.
 
