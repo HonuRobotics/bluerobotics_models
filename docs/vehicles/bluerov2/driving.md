@@ -17,7 +17,8 @@ Each propeller part in the loadout gets a thrust topic named after it,
 
 ## Over ROS
 
-Thrust is bridged per thruster:
+Each thruster plugin subscribes to a gz transport topic. Each of those gz
+topics is bridged to ROS and indexed by number, starting at 1, e.g.,
 
 ```bash
 ros2 topic pub /bluerov2/thruster_1/thrust std_msgs/msg/Float64 "data: -10.0" -1
