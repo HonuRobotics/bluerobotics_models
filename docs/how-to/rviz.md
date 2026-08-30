@@ -5,7 +5,8 @@ ros2 launch blueboat_description display.launch.xml                  # default l
 ros2 launch blueboat_description display.launch.xml config_file:=my_loadout.yaml
 ```
 
-The xacro is expanded at launch time, so a custom loadout needs no rebuild.
+The xacro is expanded at launch time, so a custom loadout
+([Change the loadout](loadout.md)) needs no rebuild.
 The launch starts `robot_state_publisher`, `joint_state_publisher_gui`
 (sliders for the propeller joints) and RViz with the packaged config.
 

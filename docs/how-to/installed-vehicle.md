@@ -3,7 +3,8 @@
 From a binary (deb) install nothing under `/opt/ros` should be edited, and
 there is no workspace to rebuild. The vehicle is still fully configurable:
 every artifact (URDF, composed Gazebo model, ros_gz bridge config) is
-generated from a config file on demand, by the same tools the build uses.
+generated from a config file on demand, by the same tools the build uses
+(writing the config: [Change the loadout](loadout.md)).
 
 ## The launch does it for you
 
