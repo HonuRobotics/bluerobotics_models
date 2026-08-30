@@ -25,18 +25,30 @@ the two input side configs the teleop launch reads:
 The mixer config (thruster topics and gains) is model truth, not user
 preference, and is never touched here. Run with the joystick plugged in:
 
-    ros2 run joy joy_node --ros-args -p autorepeat_rate:=20.0 &
     ros2 run bluerobotics_teleop joy_calibrate --vehicle blueboat
+
+If nothing is publishing /joy, a joy_node is started for the duration of
+the calibration and stopped on exit, however the walkthrough ends. A
+leftover background joy_node is exactly the thing that used to break the
+next teleop session (two publishers interleaving on /joy, one of them
+autorepeating stale state), so the tool owns its helper's lifetime.
+Calibrating next to an already running teleop session still works: its
+joy_node is detected and no second one is started.
 """
 
 import argparse
+import ctypes
 import curses
 from dataclasses import dataclass, field
 import os
+import signal
+import subprocess
 import sys
 import threading
+import time
 from typing import Optional
 
+from ament_index_python.packages import get_package_prefix
 from ament_index_python.packages import get_package_share_directory
 import rclpy
 from rclpy.node import Node
@@ -452,6 +464,28 @@ def main(args=None):
     executor = rclpy.executors.SingleThreadedExecutor()
     executor.add_node(node)
 
+    # Self-contained input: if nobody is publishing /joy (no teleop session
+    # up), run our own joy_node for the walkthrough and stop it on exit.
+    # autorepeat is required: without it joy_node stays silent while no
+    # control moves and the baseline capture times out. The executable is
+    # spawned directly (no ros2 run wrapper, which does not forward
+    # signals reliably) with PDEATHSIG so the kernel reaps it even if
+    # this process dies without reaching the cleanup below.
+    joy_proc = None
+    time.sleep(0.5)  # let discovery settle before counting publishers
+    if node.count_publishers('joy') == 0:
+        joy_exe = os.path.join(
+            get_package_prefix('joy'), 'lib', 'joy', 'joy_node')
+
+        def _die_with_parent():
+            libc = ctypes.CDLL('libc.so.6', use_errno=True)
+            libc.prctl(1, signal.SIGTERM)  # PR_SET_PDEATHSIG
+
+        joy_proc = subprocess.Popen(
+            [joy_exe, '--ros-args', '-p', 'autorepeat_rate:=20.0'],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            start_new_session=True, preexec_fn=_die_with_parent)
+
     def _spin():
         try:
             executor.spin()
@@ -471,6 +505,12 @@ def main(args=None):
     except KeyboardInterrupt:
         pass
     finally:
+        if joy_proc is not None:
+            try:
+                joy_proc.terminate()
+                joy_proc.wait(timeout=3.0)
+            except (ProcessLookupError, subprocess.TimeoutExpired):
+                joy_proc.kill()
         executor.shutdown()
         spin_thread.join(timeout=2.0)
         node.destroy_node()

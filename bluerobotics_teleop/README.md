@@ -23,14 +23,14 @@ Left stick: surge and yaw. Right stick (BlueROV2): sway and heave.
 ## Calibrate a different gamepad
 
 ```bash
-ros2 run joy joy_node --ros-args -p autorepeat_rate:=20.0 &
 ros2 run bluerobotics_teleop joy_calibrate --vehicle bluerov2
 ```
 
-Without autorepeat, joy_node stays silent while no control moves and
-the baseline capture times out. The joy_node started by
-teleop.launch.py already sets it, so calibrating next to a running
-teleop session also works.
+The tool starts its own joy_node (with the autorepeat the baseline
+capture needs) when nothing is publishing `/joy`, and stops it on exit —
+there is no background node to forget, which used to break the next
+teleop session. Calibrating next to a running teleop session also works:
+its joy_node is detected and reused.
 
 The walkthrough detects each control against a no touch baseline and
 rewrites `config/<vehicle>/joystick.config.yaml` and
