@@ -2,7 +2,7 @@
 
 Recipes for the loadout config. The concepts (slots, defaults, free
 placement) are explained in [Configuring the BlueBoat](../vehicles/blueboat/configuration.md);
-the full key list is in [Config schema](../reference/config-schema.md).
+the full key list is in {ref}`Configuration keys <configuration-keys>`.
 
 Start from a copy of the shipped config:
 

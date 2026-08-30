@@ -1,15 +1,11 @@
 # Reference
 
-Exhaustive tables: configuration keys, the parts catalog and slots, topics,
-frames, worlds and packages.
+The parts catalog: every part type, the slots each chassis and part
+declares, the configuration keys that fit them, and the frame naming both
+vehicles share.
 
 ```{toctree}
 :maxdepth: 1
 
-config-schema
 parts-catalog
-topics
-frames
-worlds
-packages
 ```

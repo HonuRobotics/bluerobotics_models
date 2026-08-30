@@ -31,7 +31,7 @@ config entry each. The fitted options and their topics live in
 | `ping_mount` | `blueboat_ping_singlebeam_mount` | the bracket (which fits the Ping in its own `ping` slot) |
 
 Slot entries, free placements, ad hoc slots and topic overrides are
-described in the [Config schema](../../reference/config-schema.md) and
+described in the {ref}`Configuration keys <configuration-keys>` and
 walked through in [Change the loadout](../../how-to/loadout.md); the
 instance key is `of:`, not `on:`. Mistakes fail the build or the launch
 with a message naming the problem.
