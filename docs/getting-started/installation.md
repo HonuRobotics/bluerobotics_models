@@ -30,14 +30,16 @@ The build generates the default vehicle artifacts from each vehicle's config
 
 ## From ROS packages (debs)
 
-Binary packages (`ros-<distro>-blueboat-gazebo`, `ros-<distro>-blueboat-description`,
-`ros-<distro>-bluerobotics-parts`, ...) are planned for the ROS build farm
-and are not published yet. When they are, installation is:
+Binary packages (`ros-<distro>-blueboat-gazebo`, `ros-<distro>-bluerov2-gazebo`,
+the `*-description` packages, `ros-<distro>-bluerobotics-parts`, ...) are
+planned for the ROS build farm and are not published yet. When they are,
+installation is one package per vehicle you want:
 
 ```bash
-sudo apt install ros-lyrical-blueboat-gazebo
+sudo apt install ros-lyrical-blueboat-gazebo ros-lyrical-bluerov2-gazebo
 source /opt/ros/lyrical/setup.bash
-ros2 launch blueboat_gazebo sim.launch.xml
+ros2 launch blueboat_gazebo sim.launch.xml    # the boat
+ros2 launch bluerov2_gazebo sim.launch.xml    # or the ROV
 ```
 
 Nothing under `/opt/ros` is meant to be edited. The default vehicle is baked
