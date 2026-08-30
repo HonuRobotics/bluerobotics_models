@@ -4,7 +4,8 @@ Sensors are parts fitted into slots. The concepts live in
 [Slots and assembly](../../design/slots.md), the vehicle's slots and their
 accepted types in [Configuring the BlueROV2](configuration.md), and new
 sensors can be added following the
-[Add a sensor part](../../how-to/add-sensor-part.md) guide.
+[Add a sensor part](../../how-to/add-sensor-part.md) guide. The grippers
+live with the [actuators](actuators.md).
 
 ## Available sensors
 
@@ -14,10 +15,8 @@ sensors can be added following the
 | MarineSitu C3 stereo camera | `marinesitu_c3` | `camera` | no |
 | Ping360 scanning sonar | `ping360` | `sonar` | no |
 | A50 DVL | `dvl_a50` | `dvl` | no |
-| Newton gripper | `newton_gripper` | `gripper` | no |
-| Sediment sampler | `sediment_sampler` | `gripper` | no |
 
-## Sensors API
+## Sensors ROS API
 
 ### Cameras (`explorehd_camera`, default `camera` slot)
 
@@ -46,12 +45,6 @@ sensors can be added following the
 | ROS Topic | Description | Message type |
 |---|---|---|
 | `/bluerov2/dvl/velocity` | Bottom track velocity | [marine_acoustic_msgs/msg/Dvl](https://github.com/apl-ocean-engineering/hydrographic_msgs/blob/main/marine_acoustic_msgs/msg/Dvl.msg) |
-
-### Grippers (`newton_gripper` / `sediment_sampler`, `gripper` slot)
-
-| ROS Topic | Description | Message type |
-|---|---|---|
-| `/bluerov2/gripper/cmd_pos` | Jaw angle command, 0 rad closed to 0.6 rad open (subscribed) | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
 
 Topic bases follow `/<namespace>/<instance>/...`: empty a slot and its
 topics disappear, rename the instance and they follow, and per part

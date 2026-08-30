@@ -9,7 +9,7 @@ parts.
 :maxdepth: 1
 
 running
-driving
+actuators
 sensors
 configuration
 ```
