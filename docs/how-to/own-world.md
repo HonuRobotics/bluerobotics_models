@@ -1,12 +1,14 @@
 # Run in your own world
 
 The composed model needs two things from the world: **graded buoyancy**
-(water below z = 0, `gz-sim-buoyancy-system` enabled on the boat's
-displacement link, `<enable>blueboat::hull_displacement</enable>`; enabling
-the whole model `blueboat` also works, with warnings about the parts'
-non box collisions) and, for the echosounder, `gz-sim-sensors-system` with
-the ogre2 render engine. The simplest start is a copy of the water world,
-which holds both plugin blocks:
+(water below z = 0, `gz-sim-buoyancy-system` enabled on the vehicle's
+displacement link: `<enable>blueboat::hull_displacement</enable>` for the
+boat, `<enable>bluerov2::buoyancy_displacement</enable>` for the ROV;
+enabling the whole model also works, with warnings about the parts'
+non box collisions) and, for the rendered sensors, `gz-sim-sensors-system`
+with the ogre2 render engine. The simplest start is a copy of the
+vehicle's water world, which holds both plugin blocks
+(`blueboat_water.sdf` / `bluerov2_water.sdf`):
 
 ```bash
 cp $(ros2 pkg prefix --share blueboat_gazebo)/worlds/blueboat_water.sdf my_world.sdf
