@@ -23,11 +23,12 @@ ros2 topic pub /blueboat/motor_stbd/thrust std_msgs/msg/Float64 "data: 10.0" -1 
 wait
 ```
 
-Or inspect the model and its frames in RViz, without Gazebo:
-
-```bash
-ros2 launch blueboat_description display.launch.xml
-```
+The BlueROV2 equivalent is `ros2 launch bluerov2_gazebo sim.launch.xml`,
+which spawns the ROV hovering near the surface of its pool.
 
 Next: [drive it](../vehicles/blueboat/actuators.md), then
-[change what is fitted](../vehicles/blueboat/configuration.md).
+[change what is fitted](../vehicles/blueboat/configuration.md). Each
+vehicle's Running page
+([BlueBoat](../vehicles/blueboat/running.md),
+[BlueROV2](../vehicles/bluerov2/running.md)) covers worlds, custom
+loadouts and RViz.
