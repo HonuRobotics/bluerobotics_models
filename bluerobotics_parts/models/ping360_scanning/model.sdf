@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
+  <model name="ping360_scanning">
+    <link name="ping360_scanning_link">
+      <visual name="ping360_scanning_visual">
+        <geometry>
+          <mesh>
+            <uri>ping360_scanning.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="ping360_collider_cylinder">
+        <pose>0.0 0.0 0.041275 0.0 -0.0 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.037245</radius>
+            <length>0.082004</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name="ping360_collider_cylinder.001">
+        <pose>-1e-06 0.041167 0.011738 -1.570796 -0.0 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.007791</radius>
+            <length>0.020607</length>
+          </cylinder>
+        </geometry>
+      </collision>
+    </link>
+    <light type="directional" name="Sun">
+      <pose>-0.160163 -0.110226 0.027974 0.0 -0.303211 0.0</pose>
+      <intensity>1.0</intensity>
+      <diffuse>(1.0, 1.0, 1.0, 1.0)</diffuse>
+      <cast_shadows>True</cast_shadows>
+      <specular>1.0, 1.0, 1.0</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.0</linear>
+        <constant>1.0</constant>
+        <quadratic>1.0</quadratic>
+      </attenuation>
+    </light>
+  </model>
+</sdf>
