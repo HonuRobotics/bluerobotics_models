@@ -41,7 +41,7 @@ def test_mixer_topics_exist_in_the_bridge(vehicle, gazebo_pkg):
         entries = yaml.safe_load(f)
     bridged = {e['ros_topic_name'] for e in entries
                if e['direction'] == 'ROS_TO_GZ'
-               and e['gz_topic_name'].endswith('/cmd_thrust')}
+               and e['gz_topic_name'].endswith(('/thrust', '/cmd_thrust'))}
     assert set(params['thruster_topics']) == bridged
 
 
