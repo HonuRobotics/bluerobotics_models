@@ -6,20 +6,19 @@ accepted types in [Configuring the BlueROV2](configuration.md), and new
 sensors can be added following the
 [Add a sensor part](../../how-to/add-sensor-part.md) guide.
 
-## Default configuration
-
-The default loadout carries one sensor, the exploreHD camera in the
-`camera` slot:
-
-| ROS Topic | Description | Message type |
-|---|---|---|
-| `/bluerov2/camera/image` | Camera image | [sensor_msgs/msg/Image](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Image.html) |
-| `/bluerov2/camera/camera_info` | Camera intrinsics | [sensor_msgs/msg/CameraInfo](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/CameraInfo.html) |
-
 ## Available sensors
 
-The other sensor parts fit through the loadout config, one slot entry
-each. This loadout produces the topics documented below:
+| Sensor | Part | Slot | Fitted by default |
+|---|---|---|---|
+| exploreHD camera | `explorehd_camera` | `camera` | yes |
+| MarineSitu C3 stereo camera | `marinesitu_c3` | `camera` | no |
+| Ping360 scanning sonar | `ping360` | `sonar` | no |
+| A50 DVL | `dvl_a50` | `dvl` | no |
+| Newton gripper | `newton_gripper` | `gripper` | no |
+| Sediment sampler | `sediment_sampler` | `gripper` | no |
+
+Fitting one is a slot entry in the loadout config. This loadout produces
+the topics documented in the API below:
 
 ```yaml
 topic_namespace: bluerov2
@@ -30,6 +29,18 @@ parts:
   - {slot: dvl, type: dvl_a50, name: dvl}
   - {slot: gripper, type: newton_gripper, name: gripper}
 ```
+
+The imaging sonars (`sonoptix_echo`, `omniscan_450_fs`) are geometry only:
+no acoustic model ships, so they carry no topics.
+
+## Sensors API
+
+### Cameras (`explorehd_camera`, default `camera` slot)
+
+| ROS Topic | Description | Message type |
+|---|---|---|
+| `/bluerov2/camera/image` | Camera image | [sensor_msgs/msg/Image](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Image.html) |
+| `/bluerov2/camera/camera_info` | Camera intrinsics | [sensor_msgs/msg/CameraInfo](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/CameraInfo.html) |
 
 ### Stereo camera (`marinesitu_c3`, `camera` slot)
 
@@ -57,11 +68,6 @@ parts:
 | ROS Topic | Description | Message type |
 |---|---|---|
 | `/bluerov2/gripper/cmd_pos` | Jaw angle command, 0 rad closed to 0.6 rad open (subscribed) | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
-
-The imaging sonars (`sonoptix_echo`, `omniscan_450_fs`) are geometry only:
-no acoustic model ships.
-
-## Sensors API conventions
 
 Topic bases follow `/<namespace>/<instance>/...`: empty a slot and its
 topics disappear, rename the instance and they follow, and per part
