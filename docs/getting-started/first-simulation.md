@@ -29,5 +29,5 @@ Or inspect the model and its frames in RViz, without Gazebo:
 ros2 launch blueboat_description display.launch.xml
 ```
 
-Next: [drive it](../vehicles/blueboat/driving.md), then
+Next: [drive it](../vehicles/blueboat/actuators.md), then
 [change what is fitted](../vehicles/blueboat/configuration.md).

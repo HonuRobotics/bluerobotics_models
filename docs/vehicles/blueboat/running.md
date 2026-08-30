@@ -1,46 +1,39 @@
-# Running the BlueBoat
-
-## Full ROS bring up
+# Running the simulation
 
 ```bash
 ros2 launch blueboat_gazebo sim.launch.xml
 ```
 
-Starts the Gazebo server (composed in one container with the ros_gz bridge
-and `robot_state_publisher`), the Gazebo GUI, and spawns the boat into the
-vehicle free water world. The simulation starts running.
-
-| Argument | Default | Meaning |
-|---|---|---|
-| `config_file` | the package default | loadout YAML; every artifact is regenerated from it at launch |
-| `world` | `blueboat_water.sdf` | a vehicle free world SDF to spawn into |
-| `gui` | `true` | start the Gazebo GUI |
-| `use_composition` | `true` | server, bridge and state publisher in one process |
-| `name` | `blueboat` | model name to spawn as (the world's buoyancy and the bridge expect it) |
-| `z` | `0.05` | spawn height; the default sits at the waterline |
-
-A `[kdl_parser] root link ... inertia` warning from `robot_state_publisher`
+Launches the vehicle in its default configuration: every artifact of the
+full simulation is generated at start (URDF, composed model, bridge
+config, into a directory under `$ROS_HOME`), the model is spawned as
+`blueboat` into the water world and the ROS bridge comes up with it. A
+`[kdl_parser] root link ... inertia` warning from `robot_state_publisher`
 is expected and harmless.
 
-## Gazebo only, no ROS
+To run a custom vehicle instead, pass a loadout file with `config_file:=`;
+the [configuration page](configuration.md) lists the slots and
+[Change the loadout](../../how-to/loadout.md) walks through writing one.
 
-The playground world includes the default composed model (started this way
-the world comes up paused; press play):
+## Choosing the world
+
+By default the boat is spawned into the open water world
+(`blueboat_water.sdf`: graded buoyancy, a seabed at 3 m and a visual
+surface). The `world:=` argument swaps the environment without changing
+anything else about the simulation: pass any vehicle free world SDF
+([Run in your own world](../../how-to/own-world.md)):
 
 ```bash
-gz sim $(ros2 pkg prefix --share blueboat_gazebo)/worlds/blueboat_playground.sdf
+ros2 launch blueboat_gazebo sim.launch.xml world:=/path/my_world.sdf
 ```
 
-## RViz only, no Gazebo
+## In RViz
+
+To see the model in RViz:
 
 ```bash
-ros2 launch blueboat_description display.launch.xml          # config_file:= works here too
+ros2 launch blueboat_description display.launch.xml
 ```
 
-Shows the model and its frames (parts, slots, the Ping `beam`), with sliders
-to spin the propellers.
-
-## In your own world
-
-Include `model://blueboat` or spawn the generated model; see
-[Run in your own world](../../how-to/own-world.md).
+Shows the model and its frames (parts, slots, the Ping `beam`), with
+sliders to spin the propellers.

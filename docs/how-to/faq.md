@@ -28,7 +28,7 @@ if in doubt) so the converted meshes replace the old copies.
 Thrust commands latch, and sequential one shot publications stagger thruster
 onset, applying a momentary unbalanced wrench that yaws the vehicle before it
 translates. Command both thrusters **in parallel**; see
-[Driving](../vehicles/blueboat/driving.md).
+[Driving](../vehicles/blueboat/actuators.md).
 
 ## No ranges on /blueboat/ping/range
 

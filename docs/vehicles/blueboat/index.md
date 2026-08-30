@@ -25,7 +25,7 @@ parts can be swapped or left off; see [Configuration](configuration.md).
 :maxdepth: 1
 
 running
-driving
+actuators
 sensors
 configuration
 ```
