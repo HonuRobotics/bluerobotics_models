@@ -1,8 +1,8 @@
-# BlueROV2 sensors
+# Sensors
 
 Sensors are parts fitted into slots. The concepts live in
 [Slots and assembly](../../design/slots.md), the vehicle's slots and their
-accepted types in [Configuring the BlueROV2](configuration.md), and new
+accepted types in the [configuration page](configuration.md), and new
 sensors can be added following the
 [Add a sensor part](../../how-to/add-sensor-part.md) guide. The grippers
 live with the [actuators](actuators.md).

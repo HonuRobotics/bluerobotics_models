@@ -1,9 +1,9 @@
-# BlueROV2 actuators
+# Actuators
 
 Actuators are parts fitted into slots, exactly like the sensors. The
 concepts live in [Slots and assembly](../../design/slots.md), the
-vehicle's slots and their accepted types in
-[Configuring the BlueROV2](configuration.md), and new parts can be added
+vehicle's slots and their accepted types in the
+[configuration page](configuration.md), and new parts can be added
 following the [Add a part](../../how-to/add-part.md) guide.
 
 ## Available actuators

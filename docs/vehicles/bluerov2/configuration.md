@@ -1,4 +1,4 @@
-# Configuring the BlueROV2
+# Configuration
 
 The BlueROV2 needs no configuration: every slot the parts declare fills
 itself with its default. The loadout config

@@ -1,4 +1,4 @@
-# Running the BlueROV2 simulation
+# Running the simulation
 
 ```bash
 ros2 launch bluerov2_gazebo sim.launch.xml
@@ -10,7 +10,7 @@ config, into a directory under `$ROS_HOME`), the model is spawned as
 `bluerov2` into the pool world and the ROS bridge comes up with it.
 
 To run a custom vehicle instead, pass a loadout file with `config_file:=`;
-[Configuring the BlueROV2](configuration.md) lists the slots and
+the [configuration page](configuration.md) lists the slots and
 [Change the loadout](../../how-to/loadout.md) walks through writing one.
 
 ## Choosing the world
