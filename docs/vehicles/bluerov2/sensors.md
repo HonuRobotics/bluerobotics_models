@@ -12,9 +12,7 @@ rename the instance and the topic follows. Topic bases are
 | `/bluerov2/dvl/velocity` | `marine_acoustic_msgs/msg/Dvl` | `dvl_a50` (native DVL sensor) | `dvl` slot |
 | `/bluerov2/gripper/cmd_pos` | `Float64` (subscribes) | `newton_gripper` / `sediment_sampler` | `gripper` slot |
 
-The DVL's backend system plugin loads with the model only when a DVL is
-fitted (an idle backend costs half or more of the real time factor once any
-camera exists). The imaging sonars (`sonoptix_echo`, `omniscan_450_fs`) are
+The imaging sonars (`sonoptix_echo`, `omniscan_450_fs`) are
 geometry only: no acoustic model ships. Sensor messages carry the part's
 own link as `frame_id`, which TF resolves; cameras deliberately use the
 body frame (x forward), not a REP 145 optical frame.
