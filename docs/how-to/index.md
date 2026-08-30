@@ -13,7 +13,6 @@ installed-vehicle
 add-part
 add-sensor-part
 own-world
-rviz
 namespaces
 faq
 ```

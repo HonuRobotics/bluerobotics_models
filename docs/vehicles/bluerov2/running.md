@@ -33,3 +33,10 @@ To see the model in RViz:
 ```bash
 ros2 launch bluerov2_description display.launch.xml
 ```
+
+Starts `robot_state_publisher`, `joint_state_publisher_gui` (sliders to
+spin the propellers) and RViz with the packaged config, showing the model
+and its frames (parts, slots, the camera and sonar frames). It takes the
+same `config_file:=` argument, and the xacro is expanded at launch time,
+so a custom loadout needs no rebuild. Running next to `sim.launch.xml`,
+`/joint_states` arrives over the bridge and RViz animates the propellers.
