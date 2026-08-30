@@ -18,14 +18,14 @@ live with the [actuators](actuators.md).
 
 ## Sensors ROS API
 
-### Cameras (`explorehd_camera`, default `camera` slot)
+### Camera
 
 | ROS Topic | Description | Message type |
 |---|---|---|
 | `/bluerov2/camera/image` | Camera image | [sensor_msgs/msg/Image](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Image.html) |
 | `/bluerov2/camera/camera_info` | Camera intrinsics | [sensor_msgs/msg/CameraInfo](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/CameraInfo.html) |
 
-### Stereo camera (`marinesitu_c3`, `camera` slot)
+### Stereo camera
 
 | ROS Topic | Description | Message type |
 |---|---|---|
@@ -34,13 +34,13 @@ live with the [actuators](actuators.md).
 | `/bluerov2/stereo/points` | Point cloud | [sensor_msgs/msg/PointCloud2](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/PointCloud2.html) |
 | `/bluerov2/stereo/camera_info` | Camera intrinsics | [sensor_msgs/msg/CameraInfo](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/CameraInfo.html) |
 
-### Scanning sonar (`ping360`, `sonar` slot)
+### Scanning sonar
 
 | ROS Topic | Description | Message type |
 |---|---|---|
 | `/bluerov2/sonar/scan` | Horizontal range scan (modelled as a planar gpu_lidar; no acoustics) | [sensor_msgs/msg/LaserScan](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/LaserScan.html) |
 
-### DVL (`dvl_a50`, `dvl` slot)
+### DVL
 
 | ROS Topic | Description | Message type |
 |---|---|---|
