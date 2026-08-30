@@ -11,23 +11,15 @@ sensors can be added following the
 The default loadout carries one sensor, the exploreHD camera in the
 `camera` slot:
 
-| Topic | Type | From |
+| ROS Topic | Description | Message type |
 |---|---|---|
-| `/bluerov2/camera/image`, `.../camera_info` | `Image` / `CameraInfo` | `explorehd_camera` |
+| `/bluerov2/camera/image` | Camera image | [sensor_msgs/msg/Image](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Image.html) |
+| `/bluerov2/camera/camera_info` | Camera intrinsics | [sensor_msgs/msg/CameraInfo](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/CameraInfo.html) |
 
 ## Available sensors
 
-The other sensor parts fit through the loadout config:
-
-| Topic | Type | From | Slot |
-|---|---|---|---|
-| `/bluerov2/stereo/{image,depth_image,points,camera_info}` | `Image` / `PointCloud2` / `CameraInfo` | `marinesitu_c3` | `camera` (instead of the default) |
-| `/bluerov2/sonar/scan` | `LaserScan` | `ping360` (planar gpu_lidar; no acoustics) | `sonar` |
-| `/bluerov2/dvl/velocity` | `marine_acoustic_msgs/msg/Dvl` | `dvl_a50` (native DVL sensor) | `dvl` |
-| `/bluerov2/gripper/cmd_pos` | `Float64` (subscribes) | `newton_gripper` / `sediment_sampler` | `gripper` |
-
-Each is one slot entry. This loadout produces the `stereo`, `sonar` and
-`dvl` rows above:
+The other sensor parts fit through the loadout config, one slot entry
+each. This loadout produces the topics documented below:
 
 ```yaml
 topic_namespace: bluerov2
@@ -36,12 +28,40 @@ parts:
   - {slot: camera, type: marinesitu_c3, name: stereo}   # instead of the default camera
   - {slot: sonar, type: ping360, name: sonar}
   - {slot: dvl, type: dvl_a50, name: dvl}
+  - {slot: gripper, type: newton_gripper, name: gripper}
 ```
+
+### Stereo camera (`marinesitu_c3`, `camera` slot)
+
+| ROS Topic | Description | Message type |
+|---|---|---|
+| `/bluerov2/stereo/image` | RGB image | [sensor_msgs/msg/Image](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Image.html) |
+| `/bluerov2/stereo/depth_image` | Depth image | [sensor_msgs/msg/Image](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Image.html) |
+| `/bluerov2/stereo/points` | Point cloud | [sensor_msgs/msg/PointCloud2](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/PointCloud2.html) |
+| `/bluerov2/stereo/camera_info` | Camera intrinsics | [sensor_msgs/msg/CameraInfo](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/CameraInfo.html) |
+
+### Scanning sonar (`ping360`, `sonar` slot)
+
+| ROS Topic | Description | Message type |
+|---|---|---|
+| `/bluerov2/sonar/scan` | Horizontal range scan (modelled as a planar gpu_lidar; no acoustics) | [sensor_msgs/msg/LaserScan](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/LaserScan.html) |
+
+### DVL (`dvl_a50`, `dvl` slot)
+
+| ROS Topic | Description | Message type |
+|---|---|---|
+| `/bluerov2/dvl/velocity` | Bottom track velocity | [marine_acoustic_msgs/msg/Dvl](https://github.com/apl-ocean-engineering/hydrographic_msgs/blob/main/marine_acoustic_msgs/msg/Dvl.msg) |
+
+### Grippers (`newton_gripper` / `sediment_sampler`, `gripper` slot)
+
+| ROS Topic | Description | Message type |
+|---|---|---|
+| `/bluerov2/gripper/cmd_pos` | Jaw angle command, 0 rad closed to 0.6 rad open (subscribed) | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
 
 The imaging sonars (`sonoptix_echo`, `omniscan_450_fs`) are geometry only:
 no acoustic model ships.
 
-## Sensors API
+## Sensors API conventions
 
 Topic bases follow `/<namespace>/<instance>/...`: empty a slot and its
 topics disappear, rename the instance and they follow, and per part
