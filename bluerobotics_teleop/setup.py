@@ -27,6 +27,8 @@ setup(
          ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/launch', glob('launch/*.launch.py')),
+        ('share/' + package_name + '/config/pad',
+         glob('config/pad/*.yaml')),
         ('share/' + package_name + '/config/bluerov2',
          glob('config/bluerov2/*.yaml')),
         ('share/' + package_name + '/config/bluerov2_heavy',

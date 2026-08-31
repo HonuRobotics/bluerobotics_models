@@ -36,7 +36,7 @@ captures a no touch baseline, then detects each stick and button as you
 move it, refusing double assignments.
 
 ```bash
-ros2 run bluerobotics_teleop joy_map --vehicle bluerov2   # or blueboat
+ros2 run bluerobotics_teleop joy_map
 ```
 
 If nothing is publishing `/joy`, the tool starts its own `joy_node`
@@ -45,8 +45,11 @@ however the walkthrough ends, so there is no background node to forget.
 Running the walkthrough next to a live teleop session also works: its `joy_node`
 is detected and reused.
 
-Saving rewrites `config/<vehicle>/joystick.config.yaml` and
+One walkthrough maps every function (surge, sway, heave, yaw, deadman,
+EPA) for every vehicle at once: the mapping describes the pad, not a
+vehicle, and a vehicle without a motion zeroes it in its mixer gains.
+Saving rewrites `config/pad/joystick.config.yaml` and
 `twist_to_thrust.yaml` in the package's installed share (with a symlink
 install that is the repository copy: commit it to keep the mapping).
-The mixer config (thruster topics and gains) is model truth and is never
-touched by the mapping tool.
+The per vehicle mixer config (thruster topics and gains) is model truth
+and is never touched by the mapping tool.

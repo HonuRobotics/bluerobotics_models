@@ -1,6 +1,8 @@
-# teleop_twist_joy mapping, generated for the connected pad.
+# teleop_twist_joy mapping, generated for the connected pad. Shared by
+# every vehicle: a vehicle without a motion (the boat has no sway or
+# heave) zeroes it in its mixer gains instead.
 # Left stick: surge + yaw. Right stick: sway + heave. RB: deadman.
-# Regenerate with: ros2 run bluerobotics_teleop joy_map --vehicle bluerov2
+# Regenerate with: ros2 run bluerobotics_teleop joy_map
 teleop_twist_joy_node:
   ros__parameters:
     axis_linear:

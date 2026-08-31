@@ -17,15 +17,17 @@ Interactive gamepad mapping for the teleop pipeline.
 A curses walkthrough: capture a no touch baseline, then prompt for each
 control (deadman, motion axes, EPA clicks), detecting buttons vs axes
 against the baseline noise and refusing double assignments. Saving writes
-the two input side configs the teleop launch reads:
+the two input side configs the teleop launch reads, shared by every
+vehicle (a vehicle without a motion zeroes it in its mixer gains):
 
-    config/<vehicle>/joystick.config.yaml   (teleop_twist_joy mapping)
-    config/<vehicle>/twist_to_thrust.yaml   (deadman + EPA input indices)
+    config/pad/joystick.config.yaml   (teleop_twist_joy mapping)
+    config/pad/twist_to_thrust.yaml   (deadman + EPA input indices)
 
-The mixer config (thruster topics and gains) is model truth, not user
-preference, and is never touched here. Run with the joystick plugged in:
+The per vehicle mixer config (thruster topics and gains) is model truth,
+not user preference, and is never touched here. Run with the joystick
+plugged in:
 
-    ros2 run bluerobotics_teleop joy_map --vehicle blueboat
+    ros2 run bluerobotics_teleop joy_map
 
 If nothing is publishing /joy, a joy_node is started for the duration of
 the walkthrough and stopped on exit, however it ends. A
@@ -115,7 +117,7 @@ COMMON_STEPS = [
         prefer_button=False),
 ]
 
-ROV_STEPS = [
+PLANE_STEPS = [
     MappingStep(
         'Sway', 'Push the axis for SWAY LEFT (strafe)',
         'Translates sideways  [recommended: Right stick left]',
@@ -136,12 +138,9 @@ EPA_STEPS = [
 ]
 
 
-def steps_for(vehicle):
-    """Return the mapping walk: common steps + planes it moves in."""
-    steps = list(COMMON_STEPS)
-    if vehicle.startswith('bluerov2'):
-        steps += ROV_STEPS
-    return steps + EPA_STEPS
+def all_steps():
+    """Return the full mapping walk: every function any vehicle uses."""
+    return list(COMMON_STEPS) + PLANE_STEPS + EPA_STEPS
 
 
 def capture_baseline(stdscr, node, steps, n_samples=20, timeout_sec=5.0):
@@ -453,10 +452,9 @@ def run_curses(stdscr, node, steps, output_dir):
 
 
 def main(args=None):
-    parser = argparse.ArgumentParser(description='Map a gamepad to the teleop functions')
-    parser.add_argument('--vehicle', default='bluerov2',
-                        choices=['blueboat', 'bluerov2', 'bluerov2_heavy'])
-    known, ros_args = parser.parse_known_args(
+    parser = argparse.ArgumentParser(
+        description='Map a gamepad to the teleop functions')
+    _, ros_args = parser.parse_known_args(
         args if args is not None else sys.argv[1:])
 
     rclpy.init(args=ros_args)
@@ -495,10 +493,10 @@ def main(args=None):
     spin_thread = threading.Thread(target=_spin, daemon=True)
     spin_thread.start()
 
-    steps = steps_for(known.vehicle)
+    steps = all_steps()
     output_dir = os.path.join(
         get_package_share_directory('bluerobotics_teleop'),
-        'config', known.vehicle)
+        'config', 'pad')
     try:
         curses.wrapper(
             lambda stdscr: run_curses(stdscr, node, steps, output_dir))
