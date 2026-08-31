@@ -14,7 +14,7 @@
 """
 Gamepad teleop bring up: joy_node -> teleop_twist_joy -> twist_to_thrust.
 
-Select the vehicle with vehicle:=bluerov2|blueboat (default bluerov2); the
+Select the vehicle with vehicle:=bluerov2|bluerov2_heavy|blueboat (default bluerov2); the
 argument picks the config directory. Run next to a running simulation
 (sim.launch.xml) or a bridged real vehicle.
 """
@@ -34,7 +34,7 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument(
             'vehicle', default_value='bluerov2',
-            choices=['bluerov2', 'blueboat'],
+            choices=['bluerov2', 'bluerov2_heavy', 'blueboat'],
             description='Which vehicle config directory to load.'),
         Node(
             package='joy',
