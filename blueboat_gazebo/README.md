@@ -11,5 +11,5 @@ ros2 launch blueboat_gazebo sim.launch.xml                      # config_file:=m
 
 Documentation: <https://honurobotics.github.io/bluerobotics_models/>, see
 [Running](https://honurobotics.github.io/bluerobotics_models/lyrical/vehicles/blueboat/running.html),
-[Driving](https://honurobotics.github.io/bluerobotics_models/lyrical/vehicles/blueboat/driving.html)
+[Actuators](https://honurobotics.github.io/bluerobotics_models/lyrical/vehicles/blueboat/actuators.html)
 and [Gazebo composition](https://honurobotics.github.io/bluerobotics_models/lyrical/design/gazebo-composition.html).
