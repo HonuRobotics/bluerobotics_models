@@ -3,16 +3,17 @@
 From a binary (deb) install nothing under `/opt/ros` should be edited, and
 there is no workspace to rebuild. The vehicle is still fully configurable:
 every artifact (URDF, composed Gazebo model, ros_gz bridge config) is
-generated from a config file on demand, by the same tools the build uses.
+generated from a config file on demand, by the same tools the build uses
+(writing the config: [Change the fitted parts](change-parts.md)).
 
 ## The launch does it for you
 
 ```bash
-ros2 launch blueboat_gazebo sim.launch.xml config_file:=/path/my_loadout.yaml
-ros2 launch blueboat_description display.launch.xml config_file:=/path/my_loadout.yaml
+ros2 launch blueboat_gazebo sim.launch.xml config_file:=/path/my_vehicle.yaml
+ros2 launch blueboat_description display.launch.xml config_file:=/path/my_vehicle.yaml
 ```
 
-`sim.launch.xml` runs `configure_vehicle.py` into a per loadout directory under `$ROS_HOME` at
+`sim.launch.xml` runs `configure_vehicle.py` into a per config directory under `$ROS_HOME` at
 start, spawns that model and starts the bridge on that config. The default
 (no argument) is the baked default vehicle.
 
@@ -22,7 +23,7 @@ For anything beyond the stock launch (your own world and launch files, a
 model to hand to somebody else):
 
 ```bash
-ros2 run blueboat_gazebo configure_vehicle.py --config my_loadout.yaml --out-dir ~/my_models/blueboat
+ros2 run blueboat_gazebo configure_vehicle.py --config my_vehicle.yaml --out-dir ~/my_models/blueboat
 ```
 
 writes `blueboat.urdf`, `blueboat.gazebo.urdf` (the copy the model merges,

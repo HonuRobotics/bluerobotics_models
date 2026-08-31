@@ -49,6 +49,9 @@ Rules, in words:
   to `parent`.
 - **Ad hoc slots** declared under `slots:` on any instance behave like the
   parts' own, `accepts` and `default` included.
+- A slot may declare `collision: false` for its occupant: a propeller
+  spinning inside a duct or hull volume would grind on the surrounding
+  collision geometry (the thruster slots of every chassis use this).
 - Mistakes fail, naming the problem. The expansion itself catches a type
   the slot does not accept, an unknown slot on the base, a slot configured
   twice, a bare `on:` key (YAML reads it as `true`; the key is `of:`), a
@@ -89,5 +92,5 @@ trim follow.
 
 In the part (one line in its `_info`, plus `accepts`), as a pull request,
 when it corresponds to a real mounting point everyone has; in the config
-(`slots:`) when it is specific to one loadout; in your own part when you
+(`slots:`) when it is specific to one vehicle; in your own part when you
 author a bracket of your own.

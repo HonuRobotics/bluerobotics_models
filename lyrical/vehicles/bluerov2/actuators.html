@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration &mdash; BlueRobotics Models lyrical documentation</title>
+  <title>Actuators &mdash; BlueRobotics Models lyrical documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/honu.css?v=44af46ee" />
@@ -21,8 +21,8 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="BlueROV2" href="../bluerov2/index.html" />
-    <link rel="prev" title="Sensors" href="sensors.html" /> 
+    <link rel="next" title="Sensors" href="sensors.html" />
+    <link rel="prev" title="Running the simulation" href="running.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -57,71 +57,71 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Vehicles</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">BlueBoat</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../blueboat/index.html">BlueBoat</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../blueboat/running.html">Running the simulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../blueboat/running.html#choosing-the-world">Choosing the world</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../blueboat/running.html#in-rviz">In RViz</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../blueboat/actuators.html">Actuators</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../blueboat/actuators.html#available-actuators">Available actuators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../blueboat/actuators.html#actuators-ros-api">Actuators ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../blueboat/actuators.html#thrusters">Thrusters</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../blueboat/actuators.html#gazebo-transport-api">Gazebo transport API</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../blueboat/sensors.html">Sensors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../blueboat/sensors.html#available-sensors">Available sensors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../blueboat/sensors.html#sensors-ros-api">Sensors ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../blueboat/sensors.html#echosounder">Echosounder</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../blueboat/configuration.html">Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../blueboat/configuration.html#hull-displacement">Hull displacement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../blueboat/configuration.html#payload">Payload</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../blueboat/index.html#the-default-vehicle">The default vehicle</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">BlueROV2</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="running.html">Running the simulation</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="running.html#choosing-the-world">Choosing the world</a></li>
 <li class="toctree-l4"><a class="reference internal" href="running.html#in-rviz">In RViz</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="actuators.html">Actuators</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="actuators.html#available-actuators">Available actuators</a></li>
-<li class="toctree-l4"><a class="reference internal" href="actuators.html#actuators-ros-api">Actuators ROS API</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="actuators.html#thrusters">Thrusters</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Actuators</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#available-actuators">Available actuators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#actuators-ros-api">Actuators ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#thrusters">Thrusters</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#grippers">Grippers</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="actuators.html#gazebo-transport-api">Gazebo transport API</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gazebo-transport-api">Gazebo transport API</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="sensors.html">Sensors</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="sensors.html#available-sensors">Available sensors</a></li>
 <li class="toctree-l4"><a class="reference internal" href="sensors.html#sensors-ros-api">Sensors ROS API</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="sensors.html#echosounder">Echosounder</a></li>
+<li class="toctree-l5"><a class="reference internal" href="sensors.html#camera">Camera</a></li>
+<li class="toctree-l5"><a class="reference internal" href="sensors.html#stereo-camera">Stereo camera</a></li>
+<li class="toctree-l5"><a class="reference internal" href="sensors.html#scanning-sonar">Scanning sonar</a></li>
+<li class="toctree-l5"><a class="reference internal" href="sensors.html#dvl">DVL</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Configuration</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#hull-displacement">Hull displacement</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#payload">Payload</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html">Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="configuration.html#variants">Variants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="configuration.html#buoyancy">Buoyancy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="configuration.html#payload">Payload</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="index.html#the-default-vehicle">The default vehicle</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../bluerov2/index.html">BlueROV2</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../bluerov2/running.html">Running the simulation</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../bluerov2/running.html#choosing-the-world">Choosing the world</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../bluerov2/running.html#in-rviz">In RViz</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../bluerov2/actuators.html">Actuators</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../bluerov2/actuators.html#available-actuators">Available actuators</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../bluerov2/actuators.html#actuators-ros-api">Actuators ROS API</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="../bluerov2/actuators.html#thrusters">Thrusters</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../bluerov2/actuators.html#grippers">Grippers</a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="../bluerov2/actuators.html#gazebo-transport-api">Gazebo transport API</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../bluerov2/sensors.html">Sensors</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../bluerov2/sensors.html#available-sensors">Available sensors</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../bluerov2/sensors.html#sensors-ros-api">Sensors ROS API</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="../bluerov2/sensors.html#camera">Camera</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../bluerov2/sensors.html#stereo-camera">Stereo camera</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../bluerov2/sensors.html#scanning-sonar">Scanning sonar</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../bluerov2/sensors.html#dvl">DVL</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../bluerov2/configuration.html">Configuration</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../bluerov2/configuration.html#variants">Variants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../bluerov2/configuration.html#buoyancy">Buoyancy</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../bluerov2/configuration.html#payload">Payload</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../bluerov2/index.html#the-default-vehicle">The default vehicle</a></li>
 </ul>
 </li>
 </ul>
@@ -245,10 +245,10 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Vehicles</a></li>
-          <li class="breadcrumb-item"><a href="index.html">BlueBoat</a></li>
-      <li class="breadcrumb-item active">Configuration</li>
+          <li class="breadcrumb-item"><a href="index.html">BlueROV2</a></li>
+      <li class="breadcrumb-item active">Actuators</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/vehicles/blueboat/configuration.md" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/vehicles/bluerov2/actuators.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -256,63 +256,208 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="configuration">
-<h1>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h1>
-<p>The BlueBoat needs no configuration: every slot the parts declare fills
-itself with its default. The vehicle config
-(<code class="docutils literal notranslate"><span class="pre">blueboat_description/config/blueboat.yaml</span></code>, or any file passed as
-<code class="docutils literal notranslate"><span class="pre">config_file:=</span></code>) states differences only.</p>
-<section id="hull-displacement">
-<h2>Hull displacement<a class="headerlink" href="#hull-displacement" title="Link to this heading"></a></h2>
-<p>The boat floats on graded buoyancy acting on a declared displacement,
-not on the meshes: the config states box pontoons
-(<code class="docutils literal notranslate"><span class="pre">hull_displacement:</span></code> block: <code class="docutils literal notranslate"><span class="pre">length</span></code>, <code class="docutils literal notranslate"><span class="pre">width</span></code>, <code class="docutils literal notranslate"><span class="pre">height</span></code>, the pontoon
-positions <code class="docutils literal notranslate"><span class="pre">x</span></code>/<code class="docutils literal notranslate"><span class="pre">y</span></code>/<code class="docutils literal notranslate"><span class="pre">z</span></code>, and <code class="docutils literal notranslate"><span class="pre">segments</span></code>) which the Gazebo composition
-realizes as a dedicated displacement link. Splitting each pontoon into
-segments models a pitched waterplane, and the boat self settles to a
-draft of roughly <code class="docutils literal notranslate"><span class="pre">mass</span> <span class="pre">/</span> <span class="pre">(water_density</span> <span class="pre">*</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">length</span> <span class="pre">*</span> <span class="pre">width)</span></code>
-(<a class="reference internal" href="../../design/buoyancy.html"><span class="std std-doc">Buoyancy</span></a>).</p>
-</section>
-<section id="payload">
-<h2>Payload<a class="headerlink" href="#payload" title="Link to this heading"></a></h2>
-<p>Everything else is payload: sensors and actuators fitted into slots, one
-config entry each. The fitted options and their topics live in
-<a class="reference internal" href="sensors.html"><span class="std std-doc">Sensors</span></a> and <a class="reference internal" href="actuators.html"><span class="std std-doc">Actuators</span></a>; the slots are:</p>
+  <section id="actuators">
+<h1>Actuators<a class="headerlink" href="#actuators" title="Link to this heading"></a></h1>
+<p>Actuators are parts fitted into slots, exactly like the sensors. The
+concepts live in <a class="reference internal" href="../../design/slots.html"><span class="std std-doc">Slots and assembly</span></a>, the
+vehicle’s slots and their accepted types in the
+<a class="reference internal" href="configuration.html"><span class="std std-doc">configuration page</span></a>, and new parts can be added
+following the <a class="reference internal" href="../../how-to/add-part.html"><span class="std std-doc">Add a part</span></a> guide.</p>
+<section id="available-actuators">
+<h2>Available actuators<a class="headerlink" href="#available-actuators" title="Link to this heading"></a></h2>
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Slot</p></th>
-<th class="head"><p>Accepts</p></th>
-<th class="head"><p>Default</p></th>
+<tr class="row-odd"><th class="head"><p>Actuator</p></th>
+<th class="head"><p>Part</p></th>
+<th class="head"><p>Slot</p></th>
+<th class="head"><p>Fitted by default</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">motor_port</span></code>, <code class="docutils literal notranslate"><span class="pre">motor_stbd</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">m200_weedless_prop_ccw</span></code>/<code class="docutils literal notranslate"><span class="pre">_cw</span></code>, <code class="docutils literal notranslate"><span class="pre">t200_prop_ccw</span></code>/<code class="docutils literal notranslate"><span class="pre">_cw</span></code></p></td>
-<td><p>the M200 weedless props</p></td>
+<tr class="row-even"><td><p>T200 thrusters, vectored horizontals</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">t200_prop_ccw</span></code> / <code class="docutils literal notranslate"><span class="pre">t200_prop_cw</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">thruster_1</span></code> .. <code class="docutils literal notranslate"><span class="pre">thruster_4</span></code></p></td>
+<td><p>yes</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">flag</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">blueboat_flag</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">blueboat_flag</span></code></p></td>
+<tr class="row-odd"><td><p>T200 thrusters, verticals</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">t200_prop_ccw</span></code> / <code class="docutils literal notranslate"><span class="pre">t200_prop_cw</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">thruster_5</span></code>, <code class="docutils literal notranslate"><span class="pre">thruster_6</span></code></p></td>
+<td><p>yes</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mast</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">blueboat_antenna_mast</span></code></p></td>
-<td><p>none</p></td>
+<tr class="row-even"><td><p>T200 thrusters, verticals (heavy variant only)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">t200_prop_ccw</span></code> / <code class="docutils literal notranslate"><span class="pre">t200_prop_cw</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">thruster_7</span></code>, <code class="docutils literal notranslate"><span class="pre">thruster_8</span></code></p></td>
+<td><p>heavy only</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">payload</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">blueboat_payload_bracket</span></code></p></td>
-<td><p>none</p></td>
+<tr class="row-odd"><td><p>Newton gripper</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">newton_gripper</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gripper</span></code></p></td>
+<td><p>no</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ping_mount</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">blueboat_ping_singlebeam_mount</span></code></p></td>
-<td><p>the bracket (which fits the Ping in its own <code class="docutils literal notranslate"><span class="pre">ping</span></code> slot)</p></td>
+<tr class="row-even"><td><p>Sediment sampler</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sediment_sampler</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gripper</span></code></p></td>
+<td><p>no</p></td>
 </tr>
 </tbody>
 </table>
-<p>Slot entries, free placements, ad hoc slots and topic overrides are
-described in the <a class="reference internal" href="../../reference/parts-catalog.html#configuration-keys"><span class="std std-ref">Configuration keys</span></a> and
-walked through in <a class="reference internal" href="../../how-to/change-parts.html"><span class="std std-doc">Change the fitted parts</span></a>; the
-instance key is <code class="docutils literal notranslate"><span class="pre">of:</span></code>, not <code class="docutils literal notranslate"><span class="pre">on:</span></code>. Mistakes fail the build or the launch
-with a message naming the problem.</p>
+</section>
+<section id="actuators-ros-api">
+<h2>Actuators ROS API<a class="headerlink" href="#actuators-ros-api" title="Link to this heading"></a></h2>
+<section id="thrusters">
+<h3>Thrusters<a class="headerlink" href="#thrusters" title="Link to this heading"></a></h3>
+<figure class="align-default" id="id1">
+<img alt="Thruster numbering on the standard vehicle and the heavy variant, top view" src="../../_images/thrusters.png" />
+<figcaption>
+<p><span class="caption-text">Thruster numbering, top view.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>Each thruster plugin subscribes to a gz transport topic. Each of those gz
+topics is bridged to ROS and indexed by number, starting at 1:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>ROS Topic</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Message type</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/bluerov2/thruster_&lt;n&gt;/thrust</span></code></p></td>
+<td><p>Thrust command in newtons, clamped to the propeller’s limits</p></td>
+<td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html">std_msgs/msg/Float64</a></p></td>
+</tr>
+</tbody>
+</table>
+<p>To manually send a thruster command via ROS:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>topic<span class="w"> </span>pub<span class="w"> </span>/bluerov2/thruster_1/thrust<span class="w"> </span>std_msgs/msg/Float64<span class="w"> </span><span class="s2">"data: -10.0"</span><span class="w"> </span>-1
+</pre></div>
+</div>
+<p>The layout follows ArduSub’s
+<a class="reference external" href="https://ardupilot.org/sub/docs/sub-frames.html">Vectored frame</a>
+(Vectored-6DOF on the heavy variant); the numbering in simulation is the
+figure above. The horizontal thrusters (1-4) are vectored at 45 degrees,
+so single-axis motion needs a mix with these signs:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>motion</p></th>
+<th class="head"><p>t1</p></th>
+<th class="head"><p>t2</p></th>
+<th class="head"><p>t3</p></th>
+<th class="head"><p>t4</p></th>
+<th class="head"><p>t5</p></th>
+<th class="head"><p>t6</p></th>
+<th class="head"><p>t7</p></th>
+<th class="head"><p>t8</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>surge +x (forward)</p></td>
+<td><p>-</p></td>
+<td><p>-</p></td>
+<td><p>+</p></td>
+<td><p>+</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>sway +y (left)</p></td>
+<td><p>-</p></td>
+<td><p>+</p></td>
+<td><p>-</p></td>
+<td><p>+</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>yaw +z (counterclockwise)</p></td>
+<td><p>-</p></td>
+<td><p>+</p></td>
+<td><p>+</p></td>
+<td><p>-</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>heave +z (up)</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>-</p></td>
+<td><p>-</p></td>
+<td><p>-</p></td>
+<td><p>-</p></td>
+</tr>
+</tbody>
+</table>
+<p>On the heavy variant all four corner verticals share heave; differential
+use of its verticals also gives it roll and pitch authority the standard
+vehicle does not have.</p>
+<div class="warning admonition">
+<p class="admonition-title">Command all thrusters together</p>
+<p>Bringing thrusters up one command at a time leaves the wrench unbalanced
+while the remaining commands arrive, yawing the vehicle off its heading
+before it translates. Controllers that publish continuously (teleop,
+ArduPilot, MAVROS) are unaffected. Stop by publishing <code class="docutils literal notranslate"><span class="pre">data:</span> <span class="pre">0.0</span></code> to all
+thrusters.</p>
+</div>
+</section>
+<section id="grippers">
+<h3>Grippers<a class="headerlink" href="#grippers" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>ROS Topic</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Message type</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/bluerov2/gripper/cmd_pos</span></code></p></td>
+<td><p>Jaw angle command, 0 rad closed to 0.6 rad open</p></td>
+<td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html">std_msgs/msg/Float64</a></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="gazebo-transport-api">
+<h2>Gazebo transport API<a class="headerlink" href="#gazebo-transport-api" title="Link to this heading"></a></h2>
+<p>The same topics exist on the Gazebo side (the bridge exposes them to ROS
+under the same names), plus a speed feedback per thruster:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>gz Topic</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Message type</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/bluerov2/thruster_&lt;n&gt;/thrust</span></code></p></td>
+<td><p>Thrust command in newtons</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gz.msgs.Double</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/bluerov2/thruster_&lt;n&gt;/thrust/ang_vel</span></code></p></td>
+<td><p>Propeller speed feedback (rad/s)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gz.msgs.Double</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/bluerov2/gripper/cmd_pos</span></code></p></td>
+<td><p>Jaw angle command</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gz.msgs.Double</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>Command the mix <strong>together</strong> (<code class="docutils literal notranslate"><span class="pre">&amp;</span></code> + <code class="docutils literal notranslate"><span class="pre">wait</span></code> publishes in parallel):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># surge forward at ~28 N</span>
+gz<span class="w"> </span>topic<span class="w"> </span>-t<span class="w"> </span>/bluerov2/thruster_1/thrust<span class="w"> </span>-m<span class="w"> </span>gz.msgs.Double<span class="w"> </span>-p<span class="w"> </span><span class="s1">'data: -10.0'</span><span class="w"> </span><span class="p">&amp;</span>
+gz<span class="w"> </span>topic<span class="w"> </span>-t<span class="w"> </span>/bluerov2/thruster_2/thrust<span class="w"> </span>-m<span class="w"> </span>gz.msgs.Double<span class="w"> </span>-p<span class="w"> </span><span class="s1">'data: -10.0'</span><span class="w"> </span><span class="p">&amp;</span>
+gz<span class="w"> </span>topic<span class="w"> </span>-t<span class="w"> </span>/bluerov2/thruster_3/thrust<span class="w"> </span>-m<span class="w"> </span>gz.msgs.Double<span class="w"> </span>-p<span class="w"> </span><span class="s1">'data: 10.0'</span><span class="w"> </span><span class="p">&amp;</span>
+gz<span class="w"> </span>topic<span class="w"> </span>-t<span class="w"> </span>/bluerov2/thruster_4/thrust<span class="w"> </span>-m<span class="w"> </span>gz.msgs.Double<span class="w"> </span>-p<span class="w"> </span><span class="s1">'data: 10.0'</span><span class="w"> </span><span class="p">&amp;</span>
+<span class="nb">wait</span>
+</pre></div>
+</div>
 </section>
 </section>
 
@@ -320,8 +465,8 @@ with a message naming the problem.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="sensors.html" class="btn btn-neutral float-left" title="Sensors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../bluerov2/index.html" class="btn btn-neutral float-right" title="BlueROV2" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="running.html" class="btn btn-neutral float-left" title="Running the simulation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sensors.html" class="btn btn-neutral float-right" title="Sensors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
