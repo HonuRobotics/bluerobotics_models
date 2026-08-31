@@ -28,25 +28,25 @@ Left stick: surge and yaw. Right stick (BlueROV2): sway and heave.
   stepped in 10% increments from the D pad, so full thrust is opt in.
 - **50 Hz republish**: latched commands downstream can never go stale.
 
-## Calibrate a different gamepad
+## Map a different gamepad
 
-The shipped mapping matches the pad it was last calibrated with. For a
-different pad, run the calibration walkthrough: a terminal screen that
+The shipped mapping matches the pad it was last mapped with. For a
+different pad, run the mapping walkthrough: a terminal screen that
 captures a no touch baseline, then detects each stick and button as you
 move it, refusing double assignments.
 
 ```bash
-ros2 run bluerobotics_teleop joy_calibrate --vehicle bluerov2   # or blueboat
+ros2 run bluerobotics_teleop joy_map --vehicle bluerov2   # or blueboat
 ```
 
 If nothing is publishing `/joy`, the tool starts its own `joy_node`
 (with the autorepeat the baseline capture needs) and stops it on exit,
 however the walkthrough ends, so there is no background node to forget.
-Calibrating next to a running teleop session also works: its `joy_node`
+Running the walkthrough next to a live teleop session also works: its `joy_node`
 is detected and reused.
 
 Saving rewrites `config/<vehicle>/joystick.config.yaml` and
 `twist_to_thrust.yaml` in the package's installed share (with a symlink
-install that is the repository copy: commit it to keep the calibration).
+install that is the repository copy: commit it to keep the mapping).
 The mixer config (thruster topics and gains) is model truth and is never
-touched by calibration.
+touched by the mapping tool.

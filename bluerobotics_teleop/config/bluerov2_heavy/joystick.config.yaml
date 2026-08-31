@@ -1,6 +1,6 @@
-# teleop_twist_joy mapping, calibrated for the connected pad.
+# teleop_twist_joy mapping, generated for the connected pad.
 # Left stick: surge + yaw. Right stick: sway + heave. RB: deadman.
-# Regenerate with: ros2 run bluerobotics_teleop joy_calibrate --vehicle bluerov2_heavy
+# Regenerate with: ros2 run bluerobotics_teleop joy_map --vehicle bluerov2_heavy
 teleop_twist_joy_node:
   ros__parameters:
     axis_linear:

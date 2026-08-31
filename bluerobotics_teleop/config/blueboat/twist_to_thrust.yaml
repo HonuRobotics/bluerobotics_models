@@ -1,4 +1,4 @@
-# Input side settings for twist_to_thrust (calibratable; mixer.yaml is not).
+# Input side settings for twist_to_thrust (joy_map rewrites this; mixer.yaml is model truth).
 twist_to_thrust:
   ros__parameters:
     cmd_timeout_sec: 0.5
