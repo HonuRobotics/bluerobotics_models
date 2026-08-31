@@ -13,6 +13,7 @@ installed-vehicle
 add-part
 add-sensor-part
 own-world
+teleop
 namespaces
 faq
 ```

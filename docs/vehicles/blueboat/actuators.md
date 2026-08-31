@@ -46,6 +46,10 @@ controllers that publish continuously are unaffected. Stop with
 `data: 0.0` to both.
 ```
 
+
+To drive with a gamepad instead, a ready mixer for either vehicle is in
+[Teleoperate with a gamepad](../../how-to/teleop.md).
+
 ## Gazebo transport API
 
 The same topics exist on the Gazebo side (the bridge exposes them to ROS
