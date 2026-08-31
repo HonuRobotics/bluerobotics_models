@@ -48,8 +48,12 @@ is detected and reused.
 One walkthrough maps every function (surge, sway, heave, yaw, deadman,
 EPA) for every vehicle at once: the mapping describes the pad, not a
 vehicle, and a vehicle without a motion zeroes it in its mixer gains.
-Saving rewrites `config/pad/joystick.config.yaml` and
-`twist_to_thrust.yaml` in the package's installed share (with a symlink
-install that is the repository copy: commit it to keep the mapping).
-The per vehicle mixer config (thruster topics and gains) is model truth
-and is never touched by the mapping tool.
+
+Saving writes `$ROS_HOME/bluerobotics_teleop/pad/` (default
+`~/.ros/...`): the mapping is user state, so it survives rebuilds and
+works from a binary install. The teleop launch prefers it over the
+defaults shipped with the package and logs which one it loaded; delete
+the directory to fall back. To make a mapping the new shipped default,
+copy the files into the repository at `bluerobotics_teleop/config/pad/`
+and commit. The per vehicle mixer config (thruster topics and gains) is
+model truth and is never touched by the mapping tool.

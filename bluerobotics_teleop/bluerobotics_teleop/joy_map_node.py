@@ -20,8 +20,14 @@ against the baseline noise and refusing double assignments. Saving writes
 the two input side configs the teleop launch reads, shared by every
 vehicle (a vehicle without a motion zeroes it in its mixer gains):
 
-    config/pad/joystick.config.yaml   (teleop_twist_joy mapping)
-    config/pad/twist_to_thrust.yaml   (deadman + EPA input indices)
+    $ROS_HOME/bluerobotics_teleop/pad/joystick.config.yaml
+    $ROS_HOME/bluerobotics_teleop/pad/twist_to_thrust.yaml
+
+The mapping is user state: it lives under $ROS_HOME (default ~/.ros),
+survives rebuilds and needs no permissions from a binary install. The
+launch prefers it over the defaults shipped in the package share; to
+make a mapping the new shipped default, copy the files into the repo's
+bluerobotics_teleop/config/pad/ and commit.
 
 The per vehicle mixer config (thruster topics and gains) is model truth,
 not user preference, and is never touched here. Run with the joystick
@@ -51,7 +57,7 @@ import time
 from typing import Optional
 
 from ament_index_python.packages import get_package_prefix
-from ament_index_python.packages import get_package_share_directory
+from bluerobotics_teleop import pad_paths
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Joy
@@ -494,9 +500,7 @@ def main(args=None):
     spin_thread.start()
 
     steps = all_steps()
-    output_dir = os.path.join(
-        get_package_share_directory('bluerobotics_teleop'),
-        'config', 'pad')
+    output_dir = str(pad_paths.user_pad_dir())
     try:
         curses.wrapper(
             lambda stdscr: run_curses(stdscr, node, steps, output_dir))
@@ -513,6 +517,10 @@ def main(args=None):
         spin_thread.join(timeout=2.0)
         node.destroy_node()
         rclpy.try_shutdown()
+    print(f'Pad mapping directory: {output_dir}')
+    print('The teleop launch prefers it over the shipped defaults. To make '
+          'it the new shipped default, copy the files into the repository at '
+          'bluerobotics_teleop/config/pad/ and commit.')
 
 
 if __name__ == '__main__':

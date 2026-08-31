@@ -97,3 +97,18 @@ def test_no_per_vehicle_pad_configs_remain():
     for vehicle in ('bluerov2', 'bluerov2_heavy', 'blueboat'):
         files = {p.name for p in (TELEOP / 'config' / vehicle).iterdir()}
         assert files == {'mixer.yaml'}, (vehicle, files)
+
+
+def test_pad_resolution_prefers_the_user_mapping(tmp_path, monkeypatch):
+    """$ROS_HOME mapping wins when present; shipped defaults otherwise."""
+    from bluerobotics_teleop import pad_paths
+    monkeypatch.setenv('ROS_HOME', str(tmp_path))
+    shipped = str(TELEOP / 'config' / 'pad' / 'joystick.config.yaml')
+    assert pad_paths.resolve_pad_file('joystick.config.yaml') == shipped
+    user_dir = tmp_path / 'bluerobotics_teleop' / 'pad'
+    user_dir.mkdir(parents=True)
+    user = user_dir / 'joystick.config.yaml'
+    user.write_text('teleop_twist_joy_node: {ros__parameters: {}}\n')
+    assert pad_paths.resolve_pad_file('joystick.config.yaml') == str(user)
+    assert pad_paths.resolve_pad_file('twist_to_thrust.yaml') == str(
+        TELEOP / 'config' / 'pad' / 'twist_to_thrust.yaml')
