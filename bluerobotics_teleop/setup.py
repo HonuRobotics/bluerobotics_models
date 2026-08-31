@@ -36,7 +36,7 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='Carlos Aguero',
+    maintainer='Carlos Agüero',
     maintainer_email='caguero@honurobotics.com',
     description='Gamepad teleoperation for the BlueROV2 and BlueBoat.',
     license='Apache-2.0',
