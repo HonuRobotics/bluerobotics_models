@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Run in your own world &mdash; BlueRobotics Models lyrical documentation</title>
+  <title>Teleoperate with a gamepad &mdash; BlueRobotics Models lyrical documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/honu.css?v=44af46ee" />
@@ -21,8 +21,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Teleoperate with a gamepad" href="teleop.html" />
-    <link rel="prev" title="Add a sensor part" href="add-sensor-part.html" /> 
+    <link rel="next" title="Topic namespaces and several simulations" href="namespaces.html" />
+    <link rel="prev" title="Run in your own world" href="own-world.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -148,17 +148,17 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="add-sensor-part.html">Add a sensor part</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Run in your own world</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#include-the-default-model">Include the default model</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#spawn-at-runtime">Spawn at runtime</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#use-the-stock-launch-with-your-world">Use the stock launch with your world</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#with-a-custom-config">With a custom config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="own-world.html">Run in your own world</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="own-world.html#include-the-default-model">Include the default model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="own-world.html#spawn-at-runtime">Spawn at runtime</a></li>
+<li class="toctree-l3"><a class="reference internal" href="own-world.html#use-the-stock-launch-with-your-world">Use the stock launch with your world</a></li>
+<li class="toctree-l3"><a class="reference internal" href="own-world.html#with-a-custom-config">With a custom config</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="teleop.html">Teleoperate with a gamepad</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="teleop.html#run">Run</a></li>
-<li class="toctree-l3"><a class="reference internal" href="teleop.html#safety-behavior">Safety behavior</a></li>
-<li class="toctree-l3"><a class="reference internal" href="teleop.html#calibrate-a-different-gamepad">Calibrate a different gamepad</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Teleoperate with a gamepad</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#run">Run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#safety-behavior">Safety behavior</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#calibrate-a-different-gamepad">Calibrate a different gamepad</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="namespaces.html">Topic namespaces and several simulations</a></li>
@@ -251,9 +251,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">How-to guides</a></li>
-      <li class="breadcrumb-item active">Run in your own world</li>
+      <li class="breadcrumb-item active">Teleoperate with a gamepad</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/how-to/own-world.md" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/how-to/teleop.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -261,54 +261,54 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="run-in-your-own-world">
-<h1>Run in your own world<a class="headerlink" href="#run-in-your-own-world" title="Link to this heading"></a></h1>
-<p>The composed model needs two things from the world: <strong>graded buoyancy</strong>
-(water below z = 0, <code class="docutils literal notranslate"><span class="pre">gz-sim-buoyancy-system</span></code> enabled on the vehicle’s
-displacement link: <code class="docutils literal notranslate"><span class="pre">&lt;enable&gt;blueboat::hull_displacement&lt;/enable&gt;</span></code> for the
-boat, <code class="docutils literal notranslate"><span class="pre">&lt;enable&gt;bluerov2::buoyancy_displacement&lt;/enable&gt;</span></code> for the ROV;
-enabling the whole model also works, with warnings about the parts’
-non box collisions) and, for the rendered sensors, <code class="docutils literal notranslate"><span class="pre">gz-sim-sensors-system</span></code>
-with the ogre2 render engine. The simplest start is a copy of the
-vehicle’s water world, which holds both plugin blocks
-(<code class="docutils literal notranslate"><span class="pre">blueboat_water.sdf</span></code> / <code class="docutils literal notranslate"><span class="pre">bluerov2_water.sdf</span></code>):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span><span class="k">$(</span>ros2<span class="w"> </span>pkg<span class="w"> </span>prefix<span class="w"> </span>--share<span class="w"> </span>blueboat_gazebo<span class="k">)</span>/worlds/blueboat_water.sdf<span class="w"> </span>my_world.sdf
+  <section id="teleoperate-with-a-gamepad">
+<h1>Teleoperate with a gamepad<a class="headerlink" href="#teleoperate-with-a-gamepad" title="Link to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">bluerobotics_teleop</span></code> drives either vehicle with a standard gamepad:
+<code class="docutils literal notranslate"><span class="pre">joy_node</span></code> reads the pad, <code class="docutils literal notranslate"><span class="pre">teleop_twist_joy</span></code> maps the sticks to a
+normalized <code class="docutils literal notranslate"><span class="pre">/cmd_vel</span></code>, and the <code class="docutils literal notranslate"><span class="pre">twist_to_thrust</span></code> mixer turns that Twist
+into per thruster thrust commands through a per vehicle gain matrix. The
+thrust topics it publishes are the ones documented in each vehicle’s
+Actuators page (<a class="reference internal" href="../vehicles/blueboat/actuators.html"><span class="std std-doc">BlueBoat</span></a>,
+<a class="reference internal" href="../vehicles/bluerov2/actuators.html"><span class="std std-doc">BlueROV2</span></a>), so the same launch works
+against the simulation or a bridged real vehicle.</p>
+<section id="run">
+<h2>Run<a class="headerlink" href="#run" title="Link to this heading"></a></h2>
+<p>Start a simulation, then:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>bluerobotics_teleop<span class="w"> </span>teleop.launch.py<span class="w"> </span>vehicle:<span class="o">=</span>bluerov2<span class="w">   </span><span class="c1"># or blueboat</span>
 </pre></div>
 </div>
-<section id="include-the-default-model">
-<h2>Include the default model<a class="headerlink" href="#include-the-default-model" title="Link to this heading"></a></h2>
-<p>Sourcing the workspace puts the package’s models directory on
-<code class="docutils literal notranslate"><span class="pre">GZ_SIM_RESOURCE_PATH</span></code>, so <code class="docutils literal notranslate"><span class="pre">model://blueboat</span></code> resolves:</p>
-<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;include&gt;</span>
-<span class="w">  </span><span class="nt">&lt;uri&gt;</span>model://blueboat<span class="nt">&lt;/uri&gt;</span>
-<span class="w">  </span><span class="nt">&lt;name&gt;</span>blueboat<span class="nt">&lt;/name&gt;</span>
-<span class="w">  </span><span class="nt">&lt;pose&gt;</span>0<span class="w"> </span>0<span class="w"> </span>0.05<span class="w"> </span>0<span class="w"> </span>0<span class="w"> </span>0<span class="nt">&lt;/pose&gt;</span>
-<span class="nt">&lt;/include&gt;</span>
-</pre></div>
-</div>
+<p>Left stick: surge and yaw. Right stick (BlueROV2): sway and heave.</p>
 </section>
-<section id="spawn-at-runtime">
-<h2>Spawn at runtime<a class="headerlink" href="#spawn-at-runtime" title="Link to this heading"></a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>run<span class="w"> </span>ros_gz_sim<span class="w"> </span>create<span class="w"> </span>-world<span class="w"> </span>&lt;your_world&gt;<span class="w"> </span>-name<span class="w"> </span>blueboat<span class="w"> </span>-z<span class="w"> </span><span class="m">0</span>.05<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-file<span class="w"> </span><span class="k">$(</span>ros2<span class="w"> </span>pkg<span class="w"> </span>prefix<span class="w"> </span>--share<span class="w"> </span>blueboat_gazebo<span class="k">)</span>/models/blueboat/model.sdf
-</pre></div>
-</div>
+<section id="safety-behavior">
+<h2>Safety behavior<a class="headerlink" href="#safety-behavior" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Deadman</strong>: holding the deadman button (RB by default) is required for
+any output; releasing it zeroes every thruster immediately.</p></li>
+<li><p><strong>Command timeout</strong>: a stale <code class="docutils literal notranslate"><span class="pre">/cmd_vel</span></code> zeroes every thruster.</p></li>
+<li><p><strong>EPA (end point adjustment)</strong>: the thrust ceiling starts at 20% and is
+stepped in 10% increments from the D pad, so full thrust is opt in.</p></li>
+<li><p><strong>50 Hz republish</strong>: latched commands downstream can never go stale.</p></li>
+</ul>
 </section>
-<section id="use-the-stock-launch-with-your-world">
-<h2>Use the stock launch with your world<a class="headerlink" href="#use-the-stock-launch-with-your-world" title="Link to this heading"></a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>blueboat_gazebo<span class="w"> </span>sim.launch.xml<span class="w"> </span>world:<span class="o">=</span>/path/my_world.sdf
+<section id="calibrate-a-different-gamepad">
+<h2>Calibrate a different gamepad<a class="headerlink" href="#calibrate-a-different-gamepad" title="Link to this heading"></a></h2>
+<p>The shipped mapping matches the pad it was last calibrated with. For a
+different pad, run the calibration walkthrough: a terminal screen that
+captures a no touch baseline, then detects each stick and button as you
+move it, refusing double assignments.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>run<span class="w"> </span>joy<span class="w"> </span>joy_node<span class="w"> </span>--ros-args<span class="w"> </span>-p<span class="w"> </span>autorepeat_rate:<span class="o">=</span><span class="m">20</span>.0<span class="w"> </span><span class="p">&amp;</span>
+ros2<span class="w"> </span>run<span class="w"> </span>bluerobotics_teleop<span class="w"> </span>joy_calibrate<span class="w"> </span>--vehicle<span class="w"> </span>bluerov2<span class="w">   </span><span class="c1"># or blueboat</span>
 </pre></div>
 </div>
-<p>spawns the boat (default or a <code class="docutils literal notranslate"><span class="pre">config_file:=</span></code> custom) into it and starts the
-bridge and <code class="docutils literal notranslate"><span class="pre">robot_state_publisher</span></code>.</p>
-</section>
-<section id="with-a-custom-config">
-<h2>With a custom config<a class="headerlink" href="#with-a-custom-config" title="Link to this heading"></a></h2>
-<p>Generate the model first and point at it instead of the installed one:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>run<span class="w"> </span>blueboat_gazebo<span class="w"> </span>configure_vehicle.py<span class="w"> </span>--config<span class="w"> </span>my_vehicle.yaml<span class="w"> </span>--out-dir<span class="w"> </span>~/my_models/blueboat
-</pre></div>
-</div>
-<p>See <a class="reference internal" href="installed-vehicle.html"><span class="std std-doc">Configure an installed vehicle</span></a>.</p>
+<p>Without autorepeat, <code class="docutils literal notranslate"><span class="pre">joy_node</span></code> stays silent while no control moves and
+the baseline capture times out; the <code class="docutils literal notranslate"><span class="pre">joy_node</span></code> started by
+<code class="docutils literal notranslate"><span class="pre">teleop.launch.py</span></code> already sets it, so calibrating next to a running
+teleop session also works.</p>
+<p>Saving rewrites <code class="docutils literal notranslate"><span class="pre">config/&lt;vehicle&gt;/joystick.config.yaml</span></code> and
+<code class="docutils literal notranslate"><span class="pre">twist_to_thrust.yaml</span></code> in the package’s installed share (with a symlink
+install that is the repository copy: commit it to keep the calibration).
+The mixer config (thruster topics and gains) is model truth and is never
+touched by calibration.</p>
 </section>
 </section>
 
@@ -316,8 +316,8 @@ bridge and <code class="docutils literal notranslate"><span class="pre">robot_st
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="add-sensor-part.html" class="btn btn-neutral float-left" title="Add a sensor part" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="teleop.html" class="btn btn-neutral float-right" title="Teleoperate with a gamepad" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="own-world.html" class="btn btn-neutral float-left" title="Run in your own world" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="namespaces.html" class="btn btn-neutral float-right" title="Topic namespaces and several simulations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
