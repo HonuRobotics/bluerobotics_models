@@ -11,4 +11,4 @@ ros2 launch blueboat_description display.launch.xml            # config_file:=my
 
 Documentation: <https://honurobotics.github.io/bluerobotics_models/>, see the
 [BlueBoat manual](https://honurobotics.github.io/bluerobotics_models/lyrical/vehicles/blueboat/index.html)
-and [Configuring the BlueBoat](https://honurobotics.github.io/bluerobotics_models/lyrical/vehicles/blueboat/configuration.html).
+and [Configuration](https://honurobotics.github.io/bluerobotics_models/lyrical/vehicles/blueboat/configuration.html).

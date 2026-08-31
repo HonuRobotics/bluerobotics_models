@@ -72,6 +72,10 @@ thrusters.
 |---|---|---|
 | `/bluerov2/gripper/cmd_pos` | Jaw angle command, 0 rad closed to 0.6 rad open | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
 
+
+To drive with a gamepad instead, a ready mixer for either vehicle is in
+[Teleoperate with a gamepad](../../how-to/teleop.md).
+
 ## Gazebo transport API
 
 The same topics exist on the Gazebo side (the bridge exposes them to ROS

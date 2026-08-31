@@ -1,0 +1,52 @@
+# Teleoperate with a gamepad
+
+`bluerobotics_teleop` drives either vehicle with a standard gamepad:
+`joy_node` reads the pad, `teleop_twist_joy` maps the sticks to a
+normalized `/cmd_vel`, and the `twist_to_thrust` mixer turns that Twist
+into per thruster thrust commands through a per vehicle gain matrix. The
+thrust topics it publishes are the ones documented in each vehicle's
+Actuators page ([BlueBoat](../vehicles/blueboat/actuators.md),
+[BlueROV2](../vehicles/bluerov2/actuators.md)), so the same launch works
+against the simulation or a bridged real vehicle.
+
+## Run
+
+Start a simulation, then:
+
+```bash
+ros2 launch bluerobotics_teleop teleop.launch.py vehicle:=bluerov2   # or blueboat
+```
+
+Left stick: surge and yaw. Right stick (BlueROV2): sway and heave.
+
+## Safety behavior
+
+- **Deadman**: holding the deadman button (RB by default) is required for
+  any output; releasing it zeroes every thruster immediately.
+- **Command timeout**: a stale `/cmd_vel` zeroes every thruster.
+- **EPA (end point adjustment)**: the thrust ceiling starts at 20% and is
+  stepped in 10% increments from the D pad, so full thrust is opt in.
+- **50 Hz republish**: latched commands downstream can never go stale.
+
+## Calibrate a different gamepad
+
+The shipped mapping matches the pad it was last calibrated with. For a
+different pad, run the calibration walkthrough: a terminal screen that
+captures a no touch baseline, then detects each stick and button as you
+move it, refusing double assignments.
+
+```bash
+ros2 run joy joy_node --ros-args -p autorepeat_rate:=20.0 &
+ros2 run bluerobotics_teleop joy_calibrate --vehicle bluerov2   # or blueboat
+```
+
+Without autorepeat, `joy_node` stays silent while no control moves and
+the baseline capture times out; the `joy_node` started by
+`teleop.launch.py` already sets it, so calibrating next to a running
+teleop session also works.
+
+Saving rewrites `config/<vehicle>/joystick.config.yaml` and
+`twist_to_thrust.yaml` in the package's installed share (with a symlink
+install that is the repository copy: commit it to keep the calibration).
+The mixer config (thruster topics and gains) is model truth and is never
+touched by calibration.
