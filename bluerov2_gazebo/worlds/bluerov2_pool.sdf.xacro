@@ -1,16 +1,25 @@
 <?xml version="1.0"?>
 <!--
-  Self-contained underwater world for the BlueROV2: sun, a pool environment,
-  the core + sensor systems, graded buoyancy (seawater below z 0, air above)
-  and the vehicle pulled in via <include>. Started directly with `gz sim` it comes
-  up paused; press play and the near-neutral vehicle rises very slowly,
+  Pool world template for the BlueROV2, expanded by the build into two
+  worlds that share the exact same scene:
+
+    bluerov2_pool.sdf        vehicle free; what sim.launch.xml spawns the
+                             configured vehicle into
+    bluerov2_playground.sdf  the same scene with the default composed model
+                             included; run it directly, no ROS:
+                             gz sim bluerov2_playground.sdf
+
+  Both hold sun, a pool environment, the core + sensor systems and graded
+  buoyancy (seawater below z 0, air above). Started paused; in the
+  playground, press play and the near neutral vehicle rises very slowly,
   damped by its hydrodynamics, until it floats essentially awash at the
   surface (the default 0.002 kg net_buoyancy leaves almost no freeboard).
-
-  Run it directly, no ROS:  gz sim <this file>
 -->
-<sdf version="1.12">
-  <world name="bluerov2_playground">
+<sdf version="1.12" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:arg name="world_name" default="bluerov2_pool"/>
+  <xacro:arg name="vehicle" default="false"/>
+  <world name="$(arg world_name)">
+
 
     <!-- Keep 1 ms: the vectored thruster mix is step sensitive. At 4 ms the
          surge mix crabs ~45 deg off the nose, and 2 ms is flaky under load
@@ -220,7 +229,7 @@
           <density>1</density>
         </density_change>
       </graded_buoyancy>
-      <enable>bluerov2</enable>
+      <enable>bluerov2::buoyancy_displacement</enable>
     </plugin>
 
     <light type="directional" name="sun">
@@ -269,12 +278,34 @@
       </link>
     </model>
 
-    <!-- The vehicle, pulled in from bluerov2_gazebo (the composed model). -->
-    <include>
-      <uri>model://bluerov2_gazebo</uri>
-      <name>bluerov2</name>
-      <pose>0 0 -1 0 0 0</pose>
-    </include>
+    <!-- The vehicle, the composed model of the default configuration (the
+         playground only; the pool world is spawned into instead). -->
+    <xacro:if value="$(arg vehicle)">
+      <include>
+        <uri>model://bluerov2</uri>
+        <name>bluerov2</name>
+        <pose>0 0 -1 0 0 0</pose>
+      </include>
+    </xacro:if>
+
+    <!-- Visual only water surface at the z=0 graded buoyancy waterline,
+         sized to the pool basin so it does not flood the deck. -->
+    <model name="water_surface">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <transparency>0.4</transparency>
+          <geometry>
+            <plane><normal>0 0 1</normal><size>24.8 24.8</size></plane>
+          </geometry>
+          <material>
+            <ambient>0.10 0.30 0.50 1</ambient>
+            <diffuse>0.10 0.35 0.55 1</diffuse>
+            <specular>0.20 0.30 0.40 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
 
   </world>
 </sdf>

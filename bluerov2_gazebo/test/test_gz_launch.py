@@ -107,7 +107,7 @@ def latch_thrusters(env, mapping, period=0.3):
     """
     procs = []
     for n, value in mapping.items():
-        topic = f'/model/bluerov2/joint/thruster{n}_joint/cmd_thrust'
+        topic = f'/bluerov2/thruster_{n}/thrust'
         loop = (f'while true; do gz topic -t {topic} -m gz.msgs.Double '
                 f'-p "data: {value}"; sleep {period}; done')
         procs.append(subprocess.Popen(
@@ -151,8 +151,8 @@ def test_model_loaded(sim):
 
 def test_interfaces_advertised(sim):
     """Thruster commands and sensor topics are advertised."""
-    needed = ('/model/bluerov2/joint/thruster1_joint/cmd_thrust',
-              '/model/bluerov2/joint/thruster6_joint/cmd_thrust',
+    needed = ('/bluerov2/thruster_1/thrust',
+              '/bluerov2/thruster_6/thrust',
               f'/world/{WORLD_NAME}/clock')
     poll_until(
         lambda: all(t in gz(sim, 'topic', '-l')[1] for t in needed), 30,
@@ -170,7 +170,7 @@ def test_physics_steps(sim):
 
 
 def test_camera_renders(sim):
-    """The default loadout's camera streams frames at its configured size."""
+    """The default configuration's camera streams frames at its configured size."""
     code, out, err = gz(sim, 'topic', '-e', '-t', '/bluerov2/camera/image',
                         '-n', '1', timeout=30)
     assert code == 0 and 'data' in out, (

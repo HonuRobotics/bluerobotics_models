@@ -4,53 +4,100 @@ project(bluerov2_gazebo)
 find_package(ament_cmake REQUIRED)
 find_package(xacro REQUIRED)
 find_package(bluerov2_description REQUIRED)
+find_package(bluerobotics_parts REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
-# Put this package's share dir on GZ_SIM_RESOURCE_PATH so model://bluerov2_gazebo
-# (the composed model below) resolves in Gazebo.
+# Put this package's models dir on GZ_SIM_RESOURCE_PATH so model://bluerov2
+# (the composed model, installed under share/bluerov2_gazebo/models/bluerov2)
+# resolves in Gazebo. The model is deliberately NOT named after the package:
+# Gazebo tries model:// names relative to the current directory first, and a
+# source checkout has a directory called bluerov2_gazebo.
 ament_environment_hooks("hooks/resource_paths.dsv.in")
 ament_environment_hooks("hooks/resource_paths.sh.in")
 
 install(DIRECTORY
   launch
-  worlds
   DESTINATION share/${PROJECT_NAME})
 
-# ros_gz bridge config is GENERATED from the vehicle config (same source the
-# model generation reads), so bridge topics always match the configured
-# accessories. Re-runs when the config or the generator changes.
+# The pool worlds are expanded from one template so the vehicle free world
+# sim.launch.xml spawns into (bluerov2_pool.sdf) and the self contained demo
+# (bluerov2_playground.sdf, default vehicle included) never drift apart.
+find_program(XACRO_EXECUTABLE xacro REQUIRED)
+set(pool_template ${CMAKE_CURRENT_SOURCE_DIR}/worlds/bluerov2_pool.sdf.xacro)
+set(pool_world ${CMAKE_CURRENT_BINARY_DIR}/worlds/bluerov2_pool.sdf)
+set(playground_world ${CMAKE_CURRENT_BINARY_DIR}/worlds/bluerov2_playground.sdf)
+add_custom_command(
+  OUTPUT ${pool_world} ${playground_world}
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/worlds
+  COMMAND ${XACRO_EXECUTABLE} ${pool_template}
+          world_name:=bluerov2_pool vehicle:=false -o ${pool_world}
+  COMMAND ${XACRO_EXECUTABLE} ${pool_template}
+          world_name:=bluerov2_playground vehicle:=true -o ${playground_world}
+  DEPENDS ${pool_template}
+  COMMENT "Expanding the pool worlds from bluerov2_pool.sdf.xacro")
+add_custom_target(${PROJECT_NAME}_worlds ALL
+  DEPENDS ${pool_world} ${playground_world})
+install(FILES
+  worlds/bluerov2_water.sdf
+  ${pool_world}
+  ${playground_world}
+  DESTINATION share/${PROJECT_NAME}/worlds)
+
+# ros_gz bridge config is GENERATED from the vehicle config plus the
+# assembled URDF (whose <assembly_part> manifest lists the resolved parts,
+# defaults included), so bridge topics always match the fitted parts.
 set(vehicle_config ${bluerov2_description_DIR}/../config/bluerov2.yaml)
+set(desc_urdf ${bluerov2_description_DIR}/../urdf/bluerov2.urdf)
 set(bridge_yaml ${CMAKE_CURRENT_BINARY_DIR}/ros_gz_bridge.yaml)
 add_custom_command(
   OUTPUT ${bridge_yaml}
   COMMAND Python3::Interpreter
           ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_bridge_config.py
-          ${vehicle_config} ${bridge_yaml}
-  DEPENDS ${vehicle_config}
+          ${vehicle_config} ${desc_urdf} ${bridge_yaml}
+  DEPENDS ${vehicle_config} ${desc_urdf}
           ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_bridge_config.py
-  COMMENT "Generating ros_gz_bridge.yaml from bluerov2.yaml")
+  COMMENT "Generating ros_gz_bridge.yaml from bluerov2.yaml and bluerov2.urdf")
 add_custom_target(${PROJECT_NAME}_bridge_yaml ALL DEPENDS ${bridge_yaml})
 install(FILES ${bridge_yaml} DESTINATION share/${PROJECT_NAME}/config)
 
-# Composed simulation model. model.sdf is GENERATED from model.sdf.xacro at build
-# time: it reads bluerov2_description/config/bluerov2.yaml (variant -> thruster
-# count) and adds the Gazebo plugins. xacro_add_files (no DESTINATION) installs it
-# to share/${PROJECT_NAME}/model.sdf, next to the static model.config. The config
-# dependency is EXPLICIT: the configure time xacro --deps snapshot cannot resolve
-# $(find) and fails with only a warning, leaving the rule without deps.
-xacro_add_files(model.sdf.xacro DEPENDS ${vehicle_config} TARGET model_raw)
+# The URDF Gazebo merges: the same description expanded with gltf_up:=z, which
+# pre-rotates the (Y-up, spec conforming) glTF visuals for Gazebo, which does
+# not convert the glTF up axis as ROS tools do. Installed next to the model.
+set(desc_xacro ${bluerov2_description_DIR}/../urdf/bluerov2.urdf.xacro)
+set(gazebo_urdf ${CMAKE_CURRENT_BINARY_DIR}/gazebo/bluerov2.urdf)
+add_custom_command(
+  OUTPUT ${gazebo_urdf}
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/gazebo
+  COMMAND ${XACRO_EXECUTABLE} ${desc_xacro}
+          config_file:=${vehicle_config} gltf_up:=z -o ${gazebo_urdf}
+  DEPENDS ${desc_xacro} ${vehicle_config} ${desc_urdf}
+  COMMENT "Expanding the Gazebo flavoured bluerov2.urdf (gltf_up:=z)")
+add_custom_target(${PROJECT_NAME}_gazebo_urdf ALL DEPENDS ${gazebo_urdf})
+install(FILES ${gazebo_urdf} DESTINATION share/${PROJECT_NAME}/models/bluerov2)
 
-# Stamp model.sdf with the same model specs comment the installed URDF
-# carries (the numbers come from that URDF, the loadout from the config).
-set(stamper
-  ${bluerov2_description_DIR}/../../../lib/bluerov2_description/stamp_model_specs.py)
-set(desc_urdf ${bluerov2_description_DIR}/../urdf/bluerov2.urdf)
+# Composed simulation model. model.sdf is GENERATED by generate_model.py
+# (reads the config, computes the assembled mass from the URDF for the
+# buoyancy solve, expands model.sdf.xacro) and then stamped with the same
+# model specs comment the installed URDF carries; only the stamped copy is
+# installed, as models/bluerov2/model.sdf next to the static model.config,
+# i.e. model://bluerov2.
 set(raw_sdf ${CMAKE_CURRENT_BINARY_DIR}/model.sdf)
+add_custom_command(
+  OUTPUT ${raw_sdf}
+  COMMAND Python3::Interpreter
+          ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_model.py
+          ${vehicle_config} ${desc_urdf}
+          ${CMAKE_CURRENT_SOURCE_DIR}/model.sdf.xacro ${raw_sdf}
+  DEPENDS ${vehicle_config} ${desc_urdf}
+          ${CMAKE_CURRENT_SOURCE_DIR}/model.sdf.xacro
+          ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_model.py
+  COMMENT "Generating model.sdf from bluerov2.yaml and the assembled URDF")
+set(stamper
+  ${bluerobotics_parts_DIR}/../../../lib/bluerobotics_parts/stamp_model_specs.py)
 set(stamped_sdf ${CMAKE_CURRENT_BINARY_DIR}/stamped/model.sdf)
 add_custom_command(
   OUTPUT ${stamped_sdf}
   COMMAND Python3::Interpreter ${stamper}
-          --vehicle bluerov2
           --urdf ${desc_urdf}
           --config ${vehicle_config}
           --stamp ${raw_sdf}
@@ -58,13 +105,13 @@ add_custom_command(
   DEPENDS ${raw_sdf} ${desc_urdf} ${vehicle_config} ${stamper}
   COMMENT "Stamping model.sdf with model specs")
 add_custom_target(${PROJECT_NAME}_model_specs ALL DEPENDS ${stamped_sdf})
-install(FILES ${stamped_sdf} DESTINATION share/${PROJECT_NAME})
-install(FILES
-  model.config
-  model.sdf.xacro
-  DESTINATION share/${PROJECT_NAME})
+install(FILES ${stamped_sdf} model.config
+  DESTINATION share/${PROJECT_NAME}/models/bluerov2)
+install(FILES model.sdf.xacro DESTINATION share/${PROJECT_NAME})
 install(PROGRAMS
   scripts/generate_bridge_config.py
+  scripts/generate_model.py
+  scripts/configure_vehicle.py
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
@@ -73,17 +120,14 @@ if(BUILD_TESTING)
   find_package(ament_cmake_pytest REQUIRED)
   ament_add_pytest_test(test_bridge_generator test/test_bridge_generator.py
     TIMEOUT 60)
+  ament_add_pytest_test(test_configure_vehicle test/test_configure_vehicle.py
+    TIMEOUT 300)
   ament_add_pytest_test(test_model_generation test/test_model_generation.py
     TIMEOUT 180)
-  # Headless gz server integration test (render assertions skip on CPU-only
-  # hosts); includes the buoyancy-rise and surge behavior checks, which watch
-  # the vehicle for several seconds each; see test/test_gz_launch.py.
-  # NOCAPTURE so the sim output printed at teardown reaches the test logs even
-  # when every assertion passes (pytest captures stdout of passing tests).
+  # NOCAPTURE so the sim output printed at teardown reaches the test logs
+  # even when every assertion passes.
   ament_add_pytest_test(test_gz_launch test/test_gz_launch.py TIMEOUT 420
     NOCAPTURE)
-  # Headless ROS bring-up test: container + bridge + robot_state_publisher
-  # through sim.launch.xml; see test/test_ros_launch.py.
   ament_add_pytest_test(test_ros_launch test/test_ros_launch.py TIMEOUT 300
     NOCAPTURE)
 endif()

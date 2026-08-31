@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""configure_vehicle.py: every loadout artifact from one config, at any time."""
+"""configure_vehicle.py: every config artifact from one config, at any time."""
 
 import os
 from pathlib import Path
@@ -70,8 +70,8 @@ def test_default_config_reproduces_the_installed_artifacts(tmp_path):
     assert ros_rpys == {'0 0 0'} and gz_rpys == {'1.5708 0 0'}
 
 
-def test_custom_loadout_flows_to_every_artifact(tmp_path):
-    """A different loadout changes URDF, model and bridge consistently."""
+def test_custom_config_flows_to_every_artifact(tmp_path):
+    """A different config changes URDF, model and bridge consistently."""
     cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
     cfg['parts'] = [{'slot': 'ping_mount', 'type': 'none'},
                     {'slot': 'mast', 'type': 'blueboat_antenna_mast'}]

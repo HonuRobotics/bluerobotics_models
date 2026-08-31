@@ -1,12 +1,12 @@
 # blueboat_description
 
 URDF description of the Blue Robotics BlueBoat, assembled from
-`bluerobotics_parts`: the loadout config (`config/blueboat.yaml`, which
+`bluerobotics_parts`: the vehicle config (`config/blueboat.yaml`, which
 configures nothing for the default boat), the vehicle xacro and an RViz
 launch. Pure description, no simulator code.
 
 ```bash
-ros2 launch blueboat_description display.launch.xml            # config_file:=my_loadout.yaml
+ros2 launch blueboat_description display.launch.xml            # config_file:=my_vehicle.yaml
 ```
 
 Documentation: <https://honurobotics.github.io/bluerobotics_models/>, see the

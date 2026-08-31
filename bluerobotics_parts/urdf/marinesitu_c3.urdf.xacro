@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!--
+  marinesitu_c3 part macro: a MarineSitu C3 stereo camera; simulated as an rgbd camera.
+
+  Ported from the BlueROV2 accessory macros; a sized box placeholder until a
+  real mesh is delivered. Visual only, like the accessory it replaces (the
+  chassis carries the vehicle's contact geometry).
+
+  Contract (see parts.xacro): <part>_info exports the metadata (attach,
+  slots, frames, drive); <part> instantiates the link, its mounting joint
+  and its slot / frame links.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="marinesitu_c3_info">
+    <xacro:property name="part_info" scope="parent" value="${dict(
+        attach='0 0 0',
+        slots=dict(
+        ),
+        frames=dict(
+        ))}"/>
+  </xacro:macro>
+
+  <xacro:macro name="marinesitu_c3"
+               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='1 0 0'">
+    <xacro:marinesitu_c3_info/>
+    <xacro:property name="_d" value="${[0.095, 0.165, 0.089]}"/>
+    <xacro:property name="_m" value="0.43"/>
+
+    <link name="${name}">
+      <inertial>
+        <mass value="${_m}"/>
+        <inertia ixx="${_m/12.0 * (_d[1]**2 + _d[2]**2)}" ixy="0" ixz="0"
+                 iyy="${_m/12.0 * (_d[0]**2 + _d[2]**2)}" iyz="0"
+                 izz="${_m/12.0 * (_d[0]**2 + _d[1]**2)}"/>
+      </inertial>
+      <visual>
+        <geometry><box size="${_d[0]} ${_d[1]} ${_d[2]}"/></geometry>
+        <material name="${name}_mat"><color rgba="0.5 0.5 0.55 1"/></material>
+      </visual>
+    </link>
+
+    <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
+                      joint="${joint}" axis="${axis}" attach="${part_info['attach']}"/>
+    <xacro:part_slots name="${name}" items="${list(part_info['slots'].items())}"/>
+    <xacro:part_frames name="${name}" items="${list(part_info['frames'].items())}"/>
+
+  </xacro:macro>
+
+</robot>

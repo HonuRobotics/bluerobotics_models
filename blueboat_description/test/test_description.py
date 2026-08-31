@@ -14,7 +14,6 @@
 """Generation pipeline tests: config yaml + part slots -> URDF (displacement is Gazebo side)."""
 
 from pathlib import Path
-import re
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
@@ -27,26 +26,35 @@ import yaml
 SHARE = Path(get_package_share_directory('blueboat_description'))
 PARTS_SHARE = Path(get_package_share_directory('bluerobotics_parts'))
 TOP_XACRO = SHARE / 'urdf' / 'blueboat.urdf.xacro'
-PARTS_XACRO = PARTS_SHARE / 'urdf' / 'parts.xacro'
 DEFAULT_CONFIG = (SHARE / 'config' / 'blueboat.yaml').read_text()
 
 WATER_DENSITY = 1025.0
 HULL = yaml.safe_load(DEFAULT_CONFIG)['hull_displacement']
 # What the chassis slots fill with when the config is silent.
-DEFAULT_LOADOUT = {'base_link': 'blueboat_chassis',
-                   'motor_port': 'm200_weedless_prop_ccw',
-                   'motor_stbd': 'm200_weedless_prop_cw',
-                   'flag': 'blueboat_flag',
-                   'ping_mount': 'blueboat_ping_singlebeam_mount',
-                   'ping': 'ping_singlebeam'}
+DEFAULT_PARTS = {'base_link': 'blueboat_chassis',
+                 'motor_port': 'm200_weedless_prop_ccw',
+                 'motor_stbd': 'm200_weedless_prop_cw',
+                 'flag': 'blueboat_flag',
+                 'ping_mount': 'blueboat_ping_singlebeam_mount',
+                 'ping': 'ping_singlebeam'}
 # The Ping2 transducer face sits this far below the part origin (delivered mesh).
 PING_FACE_BELOW_ORIGIN = 0.044
 
 
+# The parts library is shared across vehicles; each vehicle's suite sweeps
+# only the parts of its own world (the catalog wide guarantee that every
+# part is well formed lives in bluerobotics_parts/test/test_parts.py).
+BLUEBOAT_PARTS = sorted({
+    'basestation_antenna', 'blueboat_antenna_mast', 'blueboat_chassis',
+    'blueboat_flag', 'blueboat_payload_bracket',
+    'blueboat_ping_singlebeam_mount', 'm200_weedless_prop_ccw',
+    'm200_weedless_prop_cw', 'omniscan_450_sidescan', 'ping_singlebeam',
+    'surveyor_multibeam', 't200_prop_ccw', 't200_prop_cw', 't200_thruster'})
+
+
 def catalog():
-    """Part types the library offers: the include list of parts.xacro."""
-    names = re.findall(r'/urdf/([a-z0-9_]+)\.urdf\.xacro', PARTS_XACRO.read_text())
-    return sorted(set(names) - {'part_probe'})
+    """Part types the BlueBoat sweep covers."""
+    return BLUEBOAT_PARTS
 
 
 def make_config(parts=(), slots=(), hull=True):
@@ -134,14 +142,14 @@ def position_in_base(root, link):
     return pos
 
 
-def test_default_config_is_the_default_loadout():
+def test_default_config_yields_the_default_parts():
     """With no parts configured, the slots fill with their defaults."""
     root = generate_urdf(DEFAULT_CONFIG)
-    assert manifest(root) == DEFAULT_LOADOUT
+    assert manifest(root) == DEFAULT_PARTS
     assert 'hull_displacement' not in link_names(root), 'displacement belongs to the Gazebo side'
     base = next(li for li in root.findall('link') if li.get('name') == 'base_link')
     assert base.findall('collision'), 'the chassis keeps its delivered contact geometry'
-    assert set(DEFAULT_LOADOUT) <= link_names(root)
+    assert set(DEFAULT_PARTS) <= link_names(root)
     motors = {j.get('name'): j for j in root.findall('joint')
               if j.get('name') in ('motor_port_joint', 'motor_stbd_joint')}
     assert set(motors) == {'motor_port_joint', 'motor_stbd_joint'}

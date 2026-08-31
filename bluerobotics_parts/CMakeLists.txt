@@ -25,17 +25,21 @@ ament_python_install_package(${PROJECT_NAME})
 # Tooling run by a person, never by the build: sdf_to_part.py bootstraps a
 # part macro from a modeler's model.sdf, gltf_to_yup.py fixes a Z-up glTF
 # delivery, parts_check_world.py regenerates worlds/parts_check.sdf, and
-# check_assembly.py is the config check as a CLI.
+# check_assembly.py is the config check as a CLI, and
+# stamp_model_specs.py writes the specs comment the builds stamp.
 install(PROGRAMS
   scripts/sdf_to_part.py
   scripts/parts_check_world.py
   scripts/gltf_to_yup.py
   scripts/check_assembly.py
+  scripts/stamp_model_specs.py
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
+  find_package(ament_cmake_pytest REQUIRED)
+  ament_add_pytest_test(test_parts test/test_parts.py TIMEOUT 180)
 endif()
 
 ament_package()

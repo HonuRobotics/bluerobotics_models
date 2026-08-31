@@ -1,0 +1,155 @@
+<?xml version="1.0"?>
+<!--
+  bluerov2_heavy_chassis part macro.
+
+  Hand derived from the bluerov2_chassis part: the Heavy kit hull (wider
+  frame, 8 thrusters) as one rigid body, with T200 bodies and propellers
+  as parts on their slots. The visual is the DAVE heavy mesh, a
+  PLACEHOLDER until the artist delivers the heavy shell; collisions are the
+  standard chassis set (approximate for the wider hull). Mass is the heavy
+  hull plus eight T200 bodies (12.75 + 8 x 0.3049 kg), totalling the
+  reference ~15.5 kg with props.
+
+  Contract (see parts.xacro): <part>_info exports the metadata (attach,
+  slots, frames, drive); <part> instantiates the link, its mounting joint
+  and its slot / frame links.
+  Slots other parts fit into, as frames <name>_<slot> (thruster slot +x is
+  the thrust axis; ArduSub vectored frame convention preserved):
+    thruster_1 .. thruster_4: vectored horizontals (1 FR ccw, 2 FL ccw,
+      3 RR cw, 4 RL cw); default the matching t200 prop
+    thruster_5 .. thruster_8: corner verticals (5 FR ccw, 6 FL cw,
+      7 RR cw, 8 RL ccw)
+    camera: explorehd_camera (default) or marinesitu_c3
+    sonar: ping360; default none
+    dvl: dvl_a50; default none
+    gripper: newton_gripper or sediment_sampler; default none
+    payload: payload_skid; default none
+    rack: roof_rack; default none
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Body slots: +x faces the propeller, so the motor bulk trails away
+       from the prop plane (downward pointing verticals: motor below,
+       inside the chassis; only the duct ring shows at the foam). -->
+  <xacro:macro name="bluerov2_heavy_chassis_info">
+    <xacro:property name="part_info" scope="parent" value="${dict(
+        attach='0 0 0',
+        slots=dict(
+            thruster_1=dict(xyz='0.14 -0.092 0.0', rpy='0 0 -2.3562', accepts=['t200_prop_ccw'], default='t200_prop_ccw', collision=False),
+            thruster_2=dict(xyz='0.14 0.092 0.0', rpy='0 0 2.3562', accepts=['t200_prop_ccw'], default='t200_prop_ccw', collision=False),
+            thruster_3=dict(xyz='-0.15 -0.092 0.0', rpy='0 0 -0.7854', accepts=['t200_prop_cw'], default='t200_prop_cw', collision=False),
+            thruster_4=dict(xyz='-0.15 0.092 0.0', rpy='0 0 0.7854', accepts=['t200_prop_cw'], default='t200_prop_cw', collision=False),
+            thruster_5=dict(xyz='0.118 -0.215 0.064', rpy='0 1.5708 0', accepts=['t200_prop_ccw'], default='t200_prop_ccw', collision=False),
+            thruster_6=dict(xyz='0.118 0.215 0.064', rpy='0 1.5708 0', accepts=['t200_prop_cw'], default='t200_prop_cw', collision=False),
+            thruster_7=dict(xyz='-0.118 -0.215 0.064', rpy='0 1.5708 0', accepts=['t200_prop_cw'], default='t200_prop_cw', collision=False),
+            thruster_8=dict(xyz='-0.118 0.215 0.064', rpy='0 1.5708 0', accepts=['t200_prop_ccw'], default='t200_prop_ccw', collision=False),
+            camera=dict(xyz='0.22 0 0.05', rpy='0 0 0', accepts=['explorehd_camera', 'marinesitu_c3'], default='explorehd_camera'),
+            sonar=dict(xyz='0.16 0 0.13', rpy='0 0 0', accepts=['ping360'], default='none'),
+            dvl=dict(xyz='-0.12 0 -0.14', rpy='0 0 0', accepts=['dvl_a50'], default='none'),
+            gripper=dict(xyz='0.28 0 -0.08', rpy='0 0 0', accepts=['newton_gripper', 'sediment_sampler'], default='none'),
+            payload=dict(xyz='0 0 -0.17', rpy='0 0 0', accepts=['payload_skid'], default='none'),
+            rack=dict(xyz='0 0 0.17', rpy='0 0 0', accepts=['roof_rack'], default='none'),
+            thruster_body_1=dict(xyz='0.14 -0.092 0.0', rpy='0 0 -2.3562', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_2=dict(xyz='0.14 0.092 0.0', rpy='0 0 2.3562', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_3=dict(xyz='-0.15 -0.092 0.0', rpy='0 0 -0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_4=dict(xyz='-0.15 0.092 0.0', rpy='0 0 0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_5=dict(xyz='0.118 -0.215 0.064', rpy='0 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_6=dict(xyz='0.118 0.215 0.064', rpy='0 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_7=dict(xyz='-0.118 -0.215 0.064', rpy='0 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_8=dict(xyz='-0.118 0.215 0.064', rpy='0 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+        ),
+        frames=dict(
+        ))}"/>
+  </xacro:macro>
+
+  <xacro:macro name="bluerov2_heavy_chassis"
+               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='1 0 0'">
+    <xacro:bluerov2_heavy_chassis_info/>
+
+    <link name="${name}">
+      <inertial>
+        <!-- CoM height hand tuned to the reference vehicle (+0.011 m,
+             slightly above the thruster line so forward thrust pitches
+             gently nose down); the bootstrap estimate from the collision
+             volumes put it 3 cm low, which made surge climb. -->
+        <origin xyz="0.00979373 -0.000225576 0.011" rpy="0 0 0"/>
+        <mass value="12.75"/>
+        <!-- Bare hull: the T200 bodies and props are parts on the
+             thruster_body / thruster slots. Tensor scaled to this mass. -->
+        <inertia ixx="1.898021e-01" ixy="-7.690769e-06" ixz="-6.832182e-04"
+                 iyy="2.365183e-01" iyz="2.803739e-05"
+                 izz="2.996732e-01"/>
+      </inertial>
+      <!-- DAVE heavy hull, authored in 25 mm units (0.025 scales to metres). -->
+      <visual>
+        <geometry>
+          <mesh filename="package://bluerobotics_parts/models/bluerov2_heavy_chassis/bluerov2_heavy.dae"
+                scale="0.025 0.025 0.025"/>
+        </geometry>
+      </visual>
+      <xacro:if value="${collision}">
+        <collision>
+          <origin xyz="0.009119 0 0" rpy="-0 1.5708 0"/>
+          <geometry>
+            <cylinder radius="0.057041" length="0.355013"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0.010901 0 -0.114987" rpy="-0 1.5708 0"/>
+          <geometry>
+            <cylinder radius="0.050417" length="0.290967"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0.143232 -0.109491 0.019975" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.163831 0.100479 0.085132"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0.143232 0.108931 0.019975" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.163831 0.100479 0.085132"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="-0.115357 -0.109491 0.019975" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.166789 0.100479 0.085132"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="-0.115357 0.108931 0.019975" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.166789 0.100479 0.085132"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0.011554 0 -0.17038" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.249045 0.318974 0.01207"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0.002147 -0.162625 -0.056151" rpy="-0 1.5708 0"/>
+          <geometry>
+            <box size="0.242382 0.011872 0.425088"/>
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0.002147 0.161151 -0.056151" rpy="-0 1.5708 0"/>
+          <geometry>
+            <box size="0.242382 0.011872 0.425088"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+    </link>
+
+    <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
+                      joint="${joint}" axis="${axis}" attach="${part_info['attach']}"/>
+    <xacro:part_slots name="${name}" items="${list(part_info['slots'].items())}"/>
+    <xacro:part_frames name="${name}" items="${list(part_info['frames'].items())}"/>
+
+  </xacro:macro>
+
+</robot>

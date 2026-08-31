@@ -32,7 +32,11 @@
 
     <link name="${name}">
       <inertial>
-        <origin xyz="5.2e-05 0.002765 0.000116" rpy="0 0 0"/>
+        <!-- Balanced: the mesh centroid sat ~2.8 mm off the spin axis, a
+             sampling artifact; a real prop is balanced, and the offset
+             makes an enforced spin pump a ~1.5 N rotating force through
+             the joint at full speed. -->
+        <origin xyz="5.2e-05 0 0" rpy="0 0 0"/>
         <mass value="0.0390534"/>
         <inertia ixx="7.71723e-06" ixy="0" ixz="2.08761e-13"
                  iyy="7.07841e-06" iyz="0"

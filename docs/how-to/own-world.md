@@ -1,12 +1,18 @@
 # Run in your own world
 
 The composed model needs two things from the world: **graded buoyancy**
-(water below z = 0, `gz-sim-buoyancy-system` enabled on the boat's
-displacement link, `<enable>blueboat::hull_displacement</enable>`; enabling
-the whole model `blueboat` also works, with warnings about the parts'
-non box collisions) and, for the echosounder, `gz-sim-sensors-system` with
-the ogre2 render engine. Copy both plugin blocks from
-`blueboat_gazebo/worlds/blueboat_water.sdf`.
+(water below z = 0, `gz-sim-buoyancy-system` enabled on the vehicle's
+displacement link: `<enable>blueboat::hull_displacement</enable>` for the
+boat, `<enable>bluerov2::buoyancy_displacement</enable>` for the ROV;
+enabling the whole model also works, with warnings about the parts'
+non box collisions) and, for the rendered sensors, `gz-sim-sensors-system`
+with the ogre2 render engine. The simplest start is a copy of the
+vehicle's water world, which holds both plugin blocks
+(`blueboat_water.sdf` / `bluerov2_water.sdf`):
+
+```bash
+cp $(ros2 pkg prefix --share blueboat_gazebo)/worlds/blueboat_water.sdf my_world.sdf
+```
 
 ## Include the default model
 
@@ -34,15 +40,15 @@ ros2 run ros_gz_sim create -world <your_world> -name blueboat -z 0.05 \
 ros2 launch blueboat_gazebo sim.launch.xml world:=/path/my_world.sdf
 ```
 
-spawns the boat (default or `config_file:=` loadout) into it and starts the
+spawns the boat (default or a `config_file:=` custom) into it and starts the
 bridge and `robot_state_publisher`.
 
-## With a custom loadout
+## With a custom config
 
 Generate the model first and point at it instead of the installed one:
 
 ```bash
-ros2 run blueboat_gazebo configure_vehicle.py --config my_loadout.yaml --out-dir ~/my_models/blueboat
+ros2 run blueboat_gazebo configure_vehicle.py --config my_vehicle.yaml --out-dir ~/my_models/blueboat
 ```
 
 See [Configure an installed vehicle](installed-vehicle.md).

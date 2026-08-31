@@ -5,12 +5,12 @@
 twist_to_thrust:
   ros__parameters:
     thruster_topics:
-      - /bluerov2/thrusters/thruster1/thrust
-      - /bluerov2/thrusters/thruster2/thrust
-      - /bluerov2/thrusters/thruster3/thrust
-      - /bluerov2/thrusters/thruster4/thrust
-      - /bluerov2/thrusters/thruster5/thrust
-      - /bluerov2/thrusters/thruster6/thrust
+      - /bluerov2/thruster_1/thrust
+      - /bluerov2/thruster_2/thrust
+      - /bluerov2/thruster_3/thrust
+      - /bluerov2/thruster_4/thrust
+      - /bluerov2/thruster_5/thrust
+      - /bluerov2/thruster_6/thrust
     gains_linear_x:  [-1.0, -1.0,  1.0,  1.0,  0.0,  0.0]
     gains_linear_y:  [-1.0,  1.0, -1.0,  1.0,  0.0,  0.0]
     gains_linear_z:  [ 0.0,  0.0,  0.0,  0.0, -1.0, -1.0]
