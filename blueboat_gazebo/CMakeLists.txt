@@ -68,13 +68,12 @@ xacro_add_files(model.sdf.xacro DEPENDS ${vehicle_config} TARGET model_raw)
 # Stamp model.sdf with the same model specs comment the installed URDF
 # carries (the numbers come from that URDF, the loadout from the config).
 set(stamper
-  ${blueboat_description_DIR}/../../../lib/blueboat_description/stamp_model_specs.py)
+  ${bluerobotics_parts_DIR}/../../../lib/bluerobotics_parts/stamp_model_specs.py)
 set(raw_sdf ${CMAKE_CURRENT_BINARY_DIR}/model.sdf)
 set(stamped_sdf ${CMAKE_CURRENT_BINARY_DIR}/stamped/model.sdf)
 add_custom_command(
   OUTPUT ${stamped_sdf}
   COMMAND Python3::Interpreter ${stamper}
-          --vehicle blueboat
           --urdf ${desc_urdf}
           --config ${vehicle_config}
           --stamp ${raw_sdf}

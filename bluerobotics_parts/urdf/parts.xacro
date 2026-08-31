@@ -26,6 +26,9 @@
                     default     the type fitted when the config is silent,
                                 or 'none'
                     joint       joint type for the occupant (default fixed)
+                    collision   false to fit occupants without contact
+                                geometry (a propeller spinning inside a
+                                duct or hull volume would grind on it)
          frames   named reference frames (a sensor's beam origin, a lens),
                   each with xyz / rpy
          drive    propellers only: what a simulator needs to drive the part
@@ -148,10 +151,20 @@
   <xacro:include filename="$(find bluerobotics_parts)/urdf/blueboat_flag.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/blueboat_payload_bracket.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/blueboat_ping_singlebeam_mount.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/bluerov2_chassis.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/bluerov2_heavy_chassis.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/dvl_a50.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/explorehd_camera.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/m200_weedless_prop_ccw.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/m200_weedless_prop_cw.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/marinesitu_c3.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/newton_gripper.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/omniscan_450_sidescan.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/payload_skid.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/ping360.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/ping_singlebeam.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/roof_rack.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/sediment_sampler.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/surveyor_multibeam.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/t200_prop_ccw.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/t200_prop_cw.urdf.xacro"/>

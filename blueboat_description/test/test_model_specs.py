@@ -58,7 +58,7 @@ def test_specs_comment_matches_the_model():
     assert net == pytest.approx(WATER_DENSITY * volume - total, abs=5e-4)
 
 
-def test_specs_comment_reports_the_loadout():
+def test_specs_comment_reports_the_fitted_parts():
     """The parts row lists every part the assembly resolved to."""
     text = URDF.read_text()
     parts = spec(text, 'parts')

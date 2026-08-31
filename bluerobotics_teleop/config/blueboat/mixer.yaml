@@ -4,8 +4,8 @@
 twist_to_thrust:
   ros__parameters:
     thruster_topics:
-      - /blueboat/thrusters/port/thrust
-      - /blueboat/thrusters/stbd/thrust
+      - /blueboat/motor_port/thrust
+      - /blueboat/motor_stbd/thrust
     gains_linear_x:  [ 1.0,  1.0]
     gains_linear_y:  [ 0.0,  0.0]
     gains_linear_z:  [ 0.0,  0.0]

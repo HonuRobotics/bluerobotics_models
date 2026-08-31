@@ -4,6 +4,9 @@ Changelog for package bluerobotics_parts
 
 Forthcoming
 -----------
+* BlueROV2 parts: standard and heavy chassis (artist delivery, slots for
+  thrusters and accessories), cameras, sonars, DVL, claws; slot level
+  collision control; assembly.mass_properties for the buoyancy solve.
 * Part library: one URDF xacro macro per part with attach, slots (accepted
   types, defaults), frames and, for propellers, a drive table; assembly
   dispatcher with a manifest (assembly_part, assembly_slot) and the

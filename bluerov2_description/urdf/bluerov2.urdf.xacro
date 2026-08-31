@@ -1,193 +1,30 @@
 <?xml version="1.0"?>
 <!--
-  BlueROV2 description, configured from config/bluerov2.yaml at build time.
+  BlueROV2 remotely operated vehicle, assembled from bluerobotics_parts.
 
-  - `variant: standard|heavy` selects the 6-thruster hull or the Heavy kit
-    (heavy frame mesh + 8-thruster vectored layout).
-  - `accessories:` is a list of {type, name, xyz, rpy}; each is mounted by the
-    recursive dispatcher in accessories.xacro.
-  - `buoyancy:` optionally declares net_buoyancy (kg) and cob_offset (m, from
-    the center of mass); see the buoyancy declaration block below.
+  Everything about the vehicle comes from the config (which parts, where)
+  and from the part macros (geometry, inertia). The base picks the variant:
+  bluerov2_chassis (standard, 6 thrusters) or bluerov2_heavy_chassis
+  (Heavy kit, 8). Buoyancy is a simulator concern: bluerov2_gazebo realizes
+  the config's buoyancy declaration as a dedicated displacement link (docs:
+  design/buoyancy). No Gazebo tags or plugins here.
 
-  Still a pure description (no Gazebo tags/plugins; those live in bluerov2_gazebo).
+      xacro bluerov2.urdf.xacro > bluerov2.urdf                    # default configuration
+      xacro bluerov2.urdf.xacro config_file:=/path/my_vehicle.yaml # custom
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="bluerov2">
 
-  <!-- Relative includes so they resolve at build time. -->
-  <xacro:include filename="thruster.xacro"/>
-  <xacro:include filename="accessories.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/assembly.xacro"/>
 
-  <!-- Config file: REMAP'd to the source config at build time; the default is the
-       installed copy for manual/runtime use (lazy - not evaluated when REMAP'd). -->
+  <!-- Config file: REMAP'd to the source config at build time; the default
+       is the installed copy for manual/runtime use. -->
   <xacro:arg name="config_file"
              default="$(find bluerov2_description)/config/bluerov2.yaml"/>
   <xacro:property name="cfg" value="${xacro.load_yaml('$(arg config_file)')}"/>
-  <xacro:property name="heavy" value="${cfg.get('variant', 'standard') == 'heavy'}"/>
 
-  <!-- ===================== Thruster layout =====================
-       One list drives both the link generation (mount_thrusters below) and the
-       center of mass sum for the buoyancy solve, so the two cannot drift apart.
-       Horizontal vectored thrusters 1-4 are identical for both variants; the
-       vertical set is 4 corner (heavy) or 2 center (standard). dict() rather
-       than a brace literal: xacro closes ${...} on the first }. -->
-  <xacro:property name="thruster_layout" value="${[
-      dict(number=1, xyz='0.14 -0.092 0.0',  rpy='-1.571 1.571 -0.785', spin='ccw', visual_rpy='-1.571 0 0'),
-      dict(number=2, xyz='0.14 0.092 0.0',   rpy='-1.571 1.571 -2.356', spin='ccw', visual_rpy='-1.571 0 0'),
-      dict(number=3, xyz='-0.15 -0.092 0.0', rpy='-1.571 1.571 0.785',  spin='cw',  visual_rpy='1.571 0 0'),
-      dict(number=4, xyz='-0.15 0.092 0.0',  rpy='-1.571 1.571 2.356',  spin='cw',  visual_rpy='1.571 0 0')]
-    + ([dict(number=5, xyz='0.118 -0.215 0.064',  rpy='0 0 0', spin='ccw', visual_rpy='-1.571 0 1.571'),
-        dict(number=6, xyz='0.118 0.215 0.064',   rpy='0 0 0', spin='cw',  visual_rpy='1.571 0 1.571'),
-        dict(number=7, xyz='-0.118 -0.215 0.064', rpy='0 0 0', spin='cw',  visual_rpy='1.571 0 1.571'),
-        dict(number=8, xyz='-0.118 0.215 0.064',  rpy='0 0 0', spin='ccw', visual_rpy='-1.571 0 1.571')]
-       if heavy else
-       [dict(number=5, xyz='0.0 -0.109 0.077', rpy='0 0 0', spin='ccw', visual_rpy='-1.571 0 1.571'),
-        dict(number=6, xyz='0.0 0.109 0.077',  rpy='0 0 0', spin='cw',  visual_rpy='1.571 0 1.571')])}"/>
-
-  <!-- ==================== Buoyancy declaration ====================
-       Optional keys under `buoyancy:` in the config declare the vehicle's
-       buoyant behavior for the assembled loadout (docs: design/buoyancy).
-       An absent block or key takes its default below:
-
-         net_buoyancy    net buoyancy as displaced mass, in kg. Positive floats
-                         up. Kilograms rather than a fraction so the trim does
-                         not scale silently with vehicle mass, and rather than
-                         Newtons so no gravity value enters the declaration.
-         cob_offset      "x y z" in meters: where the center of buoyancy sits,
-                         relative to cob_frame.
-         cob_frame       `com` (default) or `base_link`. `com` declares the BG
-                         vector, so a loadout change preserves the tuned
-                         righting stiffness; `base_link` pins the CoB in the
-                         chassis frame like the physical hull, and a loadout
-                         change then calls for an explicit re-trim.
-         fluid_density   kg/m^3, default 1025 (seawater). Realizing a net mass
-                         as a volume requires it; MUST match the density the
-                         world's Buoyancy plugin declares or the simulated net
-                         buoyancy differs from the declared intent (a test in
-                         bluerov2_gazebo enforces the match for the shipped
-                         world).
-
-       The Buoyancy world plugin (in bluerov2_gazebo) derives displaced volume
-       from the model's collisions, so the declaration is realized as geometry:
-       base_link carries one analytic box sized and placed below so that
-         fluid_density * displaced_volume = total_mass + net_buoyancy
-       and the combined centroid of every collision lands on the declared CoB.
-       The footprint stays the real one per variant (the box doubles as the
-       contact shape); only the height and center are solved. -->
-  <xacro:property name="buoyancy_cfg"  value="${cfg.get('buoyancy') or dict()}"/>
-  <xacro:property name="water_density" value="${float(buoyancy_cfg.get('fluid_density', 1025.0))}"/>
-  <xacro:property name="net_buoyancy"  value="${float(buoyancy_cfg.get('net_buoyancy', 0.002))}"/>
-  <xacro:property name="cob_offset"
-    value="${[float(v) for v in str(buoyancy_cfg.get('cob_offset', '0 0 0.046')).split()]}"/>
-  <xacro:property name="cob_frame" value="${str(buoyancy_cfg.get('cob_frame', 'com'))}"/>
-  <xacro:unless value="${cob_frame in ['com', 'base_link']}">
-    <xacro:ERROR_cob_frame_must_be_com_or_base_link/>
-  </xacro:unless>
-  <xacro:property name="footprint_x" value="0.457"/>
-  <xacro:property name="footprint_y" value="${0.575 if heavy else 0.338}"/>
-
-  <!-- Hull masses chosen so the all-up vehicle (hull + real 0.344 kg T200s)
-       matches the reference in-air masses: ~11.5 kg standard, ~15.5 kg heavy. -->
-  <xacro:property name="base_mass"     value="${12.75 if heavy else 9.4}"/>
-  <xacro:property name="base_com_z"    value="0.011"/>
-  <xacro:property name="thruster_mass" value="0.344"/>
-  <xacro:property name="hull_height"   value="0.065"/>  <!-- effective slab height for inertia -->
-  <xacro:property name="acc_items"     value="${cfg.get('accessories', [])}"/>
-  <xacro:property name="acc_mass_total"
-    value="${fsum([accessory_mass[a['type']] for a in acc_items])}"/>
-  <xacro:property name="n_thrusters"   value="${len(thruster_layout)}"/>
-  <xacro:property name="total_mass"
-    value="${base_mass + n_thrusters * thruster_mass + acc_mass_total}"/>
-
-  <!-- Composed center of mass, from the same data that builds the links: the
-       base inertial, the thruster layout and the configured accessories, each
-       a point mass at its inertial origin in the base frame. -->
-  <xacro:property name="mass_points" value="${
-      [(base_mass, [0.0, 0.0, base_com_z])]
-    + [(thruster_mass, [float(v) for v in t['xyz'].split()]) for t in thruster_layout]
-    + [(accessory_mass[a['type']], [float(v) for v in str(a['xyz']).split()]) for a in acc_items]}"/>
-  <xacro:property name="com_x" value="${fsum([m * p[0] for (m, p) in mass_points]) / total_mass}"/>
-  <xacro:property name="com_y" value="${fsum([m * p[1] for (m, p) in mass_points]) / total_mass}"/>
-  <xacro:property name="com_z" value="${fsum([m * p[2] for (m, p) in mass_points]) / total_mass}"/>
-
-  <!-- The Buoyancy plugin sums EVERY collision in the model, so accessories
-       that carry collisions (the claws) already displace water. Shrink the hull
-       box by their volume, and solve its center so the COMBINED centroid hits
-       the declared CoB; each accessory's collision is taken as displacing at
-       its mount pose. A load that would need a non-positive box volume cannot
-       be built - the unknown-macro failure below names the reason. -->
-  <xacro:property name="displaced_volume"
-    value="${(total_mass + net_buoyancy) / water_density}"/>
-  <xacro:property name="acc_volume_total"
-    value="${fsum([accessory_volume[a['type']] for a in acc_items])}"/>
-  <xacro:property name="buoyancy_volume"
-    value="${displaced_volume - acc_volume_total}"/>
-  <xacro:unless value="${buoyancy_volume > 0}">
-    <xacro:ERROR_declared_net_buoyancy_needs_non_positive_displacement/>
-  </xacro:unless>
-  <xacro:property name="buoyancy_height"
-    value="${buoyancy_volume / (footprint_x * footprint_y)}"/>
-  <xacro:property name="cob_target" value="${
-      [(([com_x, com_y, com_z][i] if cob_frame == 'com' else 0.0) + cob_offset[i])
-       for i in [0, 1, 2]]}"/>
-  <xacro:property name="box_center" value="${
-      [(displaced_volume * cob_target[i]
-        - fsum([accessory_volume[a['type']] * float(str(a['xyz']).split()[i])
-                for a in acc_items]))
-       / buoyancy_volume for i in [0, 1, 2]]}"/>
-
-  <!-- ===================== Base link (hull) ===================== -->
-  <link name="base_link">
-    <inertial>
-      <origin xyz="0 0 ${base_com_z}" rpy="0 0 0"/>
-      <mass value="${base_mass}"/>
-      <!-- Box-slab inertia from the variant footprint, so heavy gets the wider
-           hull's tensor instead of inheriting the standard one. -->
-      <inertia ixx="${base_mass/12.0 * (footprint_y**2 + hull_height**2)}" ixy="0.0" ixz="0.0"
-               iyy="${base_mass/12.0 * (footprint_x**2 + hull_height**2)}" iyz="0.0"
-               izz="${base_mass/12.0 * (footprint_x**2 + footprint_y**2)}"/>
-    </inertial>
-
-    <!-- The DAVE hull meshes are authored in 25 mm units with a +90-deg-about-Y
-     node transform, so 0.025 puts them in metres: 0.450 x 0.339 x 0.250 m,
-     matching the real 457 x 338 x 254 mm and footprint_x/footprint_y above.
-     Both variant meshes share the scale. -->
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <xacro:if value="${heavy}">
-          <mesh filename="package://bluerov2_description/meshes/bluerov2_heavy.dae"
-                scale="0.025 0.025 0.025"/>
-        </xacro:if>
-        <xacro:unless value="${heavy}">
-          <mesh filename="package://bluerov2_description/meshes/bluerov2.dae"
-                scale="0.025 0.025 0.025"/>
-        </xacro:unless>
-      </geometry>
-    </visual>
-
-    <!-- Buoyancy/contact collision: footprint per variant, height and center
-         solved above from the declared net_buoyancy and cob_offset. Doubles as
-         the coarse contact box. -->
-    <collision>
-      <origin xyz="${box_center[0]} ${box_center[1]} ${box_center[2]}" rpy="0 0 0"/>
-      <geometry>
-        <box size="${footprint_x} ${footprint_y} ${buoyancy_height}"/>
-      </geometry>
-    </collision>
-  </link>
-
-  <!-- ===================== Thrusters ===================== -->
-  <xacro:macro name="mount_thrusters" params="items">
-    <xacro:if value="${len(items) > 0}">
-      <xacro:property name="t" value="${items[0]}"/>
-      <xacro:t200_thruster number="${t['number']}" xyz="${t['xyz']}" rpy="${t['rpy']}"
-                           spin="${t['spin']}" visual_rpy="${t['visual_rpy']}"/>
-      <xacro:mount_thrusters items="${items[1:]}"/>
-    </xacro:if>
-  </xacro:macro>
-  <xacro:mount_thrusters items="${thruster_layout}"/>
-
-  <!-- ===================== Accessories (from config) ===================== -->
-  <xacro:mount_accessories items="${cfg.get('accessories', [])}"/>
+  <!-- Chassis as the root; its slots fill with their defaults, the config
+       overrides and adds. -->
+  <xacro:assemble base="${cfg['base']}" parts="${cfg.get('parts') or []}"
+                  slots="${cfg.get('slots') or []}"/>
 
 </robot>

@@ -24,7 +24,7 @@
   <!-- The URDF to merge: the Gazebo flavoured expansion (gltf_up:=z, glTF
        visuals pre-rotated because Gazebo does not convert the glTF up axis)
        installed next to this model, or (configure_vehicle.py, launch time
-       loadouts) a file:// URI of one generated from the same config. -->
+       configs) a file:// URI of one generated from the same config. -->
   <xacro:arg name="urdf_uri" default="model://blueboat/blueboat.urdf"/>
 
   <!-- Topic namespace: every part topic is /<topic_namespace>/<part name>/...
@@ -46,7 +46,7 @@
   <!-- A propeller part drives its mounting joint: one Thruster plugin per
        propeller instance, with the limits and diameter the part declares in
        its `drive` table. Counter rotating pairs (ccw to port, cw to
-       starboard in the default loadout) get opposite coefficient signs so
+       starboard in the default configuration) get opposite coefficient signs so
        their reaction yaw cancels in straight line running. Thrust commands
        (N) on <topic_base>/thrust, speed feedback on <topic_base>/thrust/ang_vel:
        the plugin prefixes a custom <topic> with its <namespace> (the model

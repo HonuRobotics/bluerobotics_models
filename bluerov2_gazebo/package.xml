@@ -23,6 +23,7 @@
 
   <!-- build-time too: model.sdf.xacro reads bluerov2_description's config via $(find) -->
   <depend>bluerov2_description</depend>
+  <depend>bluerobotics_parts</depend>
   <!-- The playground world includes the shared pool environment models. -->
   <exec_depend>bluerobotics_common</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>

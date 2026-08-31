@@ -1,57 +1,83 @@
 <?xml version="1.0"?>
 <!--
-  Simulation-ready BlueROV2 model, GENERATED from config/bluerov2.yaml at build
-  time (the variant selects the thruster count). It merge-includes the
-  bluerov2_description geometry and adds the Gazebo plugins: hydrodynamics, one
-  Thruster per propeller joint, and one <sensor> per sensor-type accessory
-  (camera / rgbd / gpu_lidar / DVL). Buoyancy is a world plugin (in the playground
-  world), not here.
+  Simulation ready BlueROV2 model, GENERATED from config/bluerov2.yaml at
+  generation time (the base type selects the standard or heavy chassis). It
+  merge includes the bluerov2_description geometry (assembled from
+  bluerobotics_parts) and adds the Gazebo plugins: hydrodynamics, one
+  Thruster per propeller part, one <sensor> per sensor part and the claw
+  controllers, all placed by the same assembly resolution the URDF went
+  through. Buoyancy is a world plugin acting on the dedicated
+  buoyancy_displacement link below, solved from the config's declaration
+  and the assembled mass (passed in as args by generate_model.py; docs:
+  design/buoyancy).
 
-  In a world:  <include><uri>model://bluerov2_gazebo</uri></include>
+  In a world:  <include><uri>model://bluerov2</uri></include>
 -->
 <sdf version="1.12" xmlns:xacro="http://ros.org/wiki/xacro"
      xmlns:gz="http://gazebosim.org/schema">
 
+  <!-- The assembly dispatcher, run here with Gazebo side emitters. -->
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/assembly.xacro"/>
+
   <xacro:arg name="config_file"
              default="$(find bluerov2_description)/config/bluerov2.yaml"/>
   <xacro:property name="cfg" value="${xacro.load_yaml('$(arg config_file)')}"/>
-  <xacro:property name="heavy" value="${cfg.get('variant', 'standard') == 'heavy'}"/>
+  <!-- The URDF to merge: the Gazebo flavoured expansion (gltf_up:=z, glTF
+       visuals pre-rotated because Gazebo does not convert the glTF up axis)
+       installed next to this model, or (configure_vehicle.py, launch time
+       configs) a file:// URI of one generated from the same config. -->
+  <xacro:arg name="urdf_uri" default="model://bluerov2/bluerov2.urdf"/>
+  <!-- Assembled mass properties, computed FROM the generated URDF by
+       generate_model.py and needed by the buoyancy solve below. xacro
+       cannot read the URDF itself, so generating this file by hand without
+       them fails loudly rather than floating wrong. -->
+  <xacro:arg name="total_mass" default=""/>
+  <xacro:arg name="com" default=""/>
 
-  <!-- Topic namespace for sensor/claw topics: /<topic_namespace>/<accessory name>/...
-       Per accessory, `gz_topic` / `topic` override the gz-side base (the bridge
-       config is generated from the same yaml, so gz and ROS sides stay in sync). -->
+  <!-- Topic namespace: every part topic is /<topic_namespace>/<part name>/...
+       on both sides (a camera's /image, a claw's /cmd_pos). Per part,
+       `gz_topic` / `topic` override the gz side base; the bridge config is
+       generated from the same yaml, so gz and ROS sides stay in sync. -->
   <xacro:property name="topic_ns" value="${cfg.get('topic_namespace', 'bluerov2')}"/>
+  <!-- The root link the assembly names (the config's base.name). -->
+  <xacro:property name="base_name" value="${cfg['base'].get('name', 'base_link')}"/>
 
-  <!-- T200 thrust saturation (forward > reverse). Values are the ~16 V
-       full-throttle endpoints of the T200 performance curve (approx. 5.25 kgf
-       forward / 4.1 kgf reverse); tune down for 12 V, up for 20 V. Curve/datasheet:
-       https://bluerobotics.com/store/rov/bluerov2-components-spares/t200-thruster-brov2-spare-r1-vp/ -->
-  <xacro:property name="t200_max_thrust" value="51.5"/>    <!-- N, forward -->
-  <xacro:property name="t200_min_thrust" value="-40.2"/>   <!-- N, reverse -->
+  <!-- Config entry that fitted an instance, or {} (slot entries default
+       their name to the slot). -->
+  <xacro:macro name="part_entry" params="name">
+    <xacro:property name="ovr"
+                    value="${[e for e in (cfg.get('parts') or []) if e.get('name', e.get('slot')) == name]}"/>
+    <xacro:property name="entry" scope="parent" value="${ovr[0] if ovr else dict()}"/>
+  </xacro:macro>
 
-  <!-- One Thruster plugin per propeller joint. ccw props take +coeff, cw props
-       -coeff so the reaction torques balance; matches the description layout.
-       max/min_thrust_cmd clamp the commanded thrust (N) -> saturation + asymmetry. -->
-  <xacro:macro name="thruster" params="n coeff">
-    <!-- No <namespace>: the plugin defaults to the model name, so the command
-         topics track the instance name and multiple vehicles stay distinct. -->
+
+  <!-- A propeller part drives its mounting joint: one Thruster plugin per
+       propeller instance, with the limits the part declares in its `drive`
+       table (the T200 endpoints). ccw props take +coeff, cw props -coeff so
+       the reaction torques balance. Thrust commands (N) on
+       <topic_base>/thrust, speed feedback on <topic_base>/thrust/ang_vel:
+       the plugin prefixes a custom <topic> with its <namespace> (the model
+       name unless given), so the namespace is emptied and the topic follows
+       the config like every other part topic, not the spawn name. -->
+  <xacro:macro name="prop_thruster" params="name drive topic_base">
     <plugin filename="gz-sim-thruster-system" name="gz::sim::systems::Thruster">
-      <joint_name>thruster${n}_joint</joint_name>
-      <thrust_coefficient>${coeff}</thrust_coefficient>
+      <joint_name>${name}_joint</joint_name>
+      <namespace></namespace>
+      <topic>${topic_base}/thrust</topic>
+      <thrust_coefficient>${0.02 if drive['rotation'] == 'ccw' else -0.02}</thrust_coefficient>
       <fluid_density>1025.0</fluid_density>
-      <propeller_diameter>0.1</propeller_diameter>
+      <propeller_diameter>${drive['diameter']}</propeller_diameter>
       <velocity_control>true</velocity_control>
-      <max_thrust_cmd>${t200_max_thrust}</max_thrust_cmd>
-      <min_thrust_cmd>${t200_min_thrust}</min_thrust_cmd>
+      <max_thrust_cmd>${drive['max_thrust']}</max_thrust_cmd>
+      <min_thrust_cmd>${drive['min_thrust']}</min_thrust_cmd>
     </plugin>
   </xacro:macro>
 
   <!-- ===================== Sensors (config-driven) =====================
        One <sensor> per sensor-type accessory, emitted as a near-massless link
        fixed to base_link at the accessory's config pose (so the description stays
-       Gazebo-free). The world must load gz-sim-sensors-system; the DVL
-       backend (gz-sim-dvl-system) rides with this model, emitted below only
-       when a DVL is configured. NOTE: gz sensor axes follow the link frame -
+       Gazebo-free). The world must load gz-sim-sensors-system, plus
+       gz-sim-dvl-system for the DVL. NOTE: gz sensor axes follow the link frame -
        a camera looks +X, a gpu_lidar scans the sensor XY plane, DVL beams point
        down per <tilt>; tune each accessory's rpy for the intended view.
 
@@ -76,12 +102,15 @@
 
   <!-- Wrapper: a near-massless sensor link fixed to base_link at `pose`, holding
        the <sensor> block passed in. The accessory's real mass/geometry already
-       live in base_link via the description; at 1e-5 kg a full sensor loadout
+       live in base_link via the description; at 1e-5 kg a full set of sensors
        stays orders of magnitude under the default 0.002 kg net_buoyancy, so
        the wrappers cannot tip the trim negative. -->
-  <xacro:macro name="sensor_link" params="name pose *sensor">
+  <xacro:macro name="sensor_link" params="name frame *sensor">
     <link name="${name}_sensor">
-      <pose relative_to="base_link">${pose}</pose>
+      <!-- Posed at the part's own frame: the URDF conversion lumps the part
+           into the root link but keeps every link as a frame by name, so
+           the sensor follows the part wherever the config mounted it. -->
+      <pose relative_to="${frame}">0 0 0 0 0 0</pose>
       <inertial>
         <mass>1e-5</mass>
         <inertia>
@@ -92,14 +121,14 @@
       <xacro:insert_block name="sensor"/>
     </link>
     <joint name="${name}_sensor_joint" type="fixed">
-      <parent>base_link</parent>
+      <parent>${base_name}</parent>
       <child>${name}_sensor</child>
     </joint>
   </xacro:macro>
 
   <!-- exploreHD USB HD camera. -->
-  <xacro:macro name="camera_sensor" params="name pose topic_base">
-    <xacro:sensor_link name="${name}" pose="${pose}">
+  <xacro:macro name="camera_sensor" params="name frame topic_base">
+    <xacro:sensor_link name="${name}" frame="${frame}">
       <sensor name="${name}" type="camera">
         <!-- Body frame; see the FRAMES note above on the optical convention. -->
         <frame_id>${name}</frame_id>
@@ -122,8 +151,8 @@
 
   <!-- MarineSitu C3 stereo camera, modelled as an RGBD sensor (rgb + depth +
        points); swap to two <camera>s at the 7.5 cm baseline for a true pair. -->
-  <xacro:macro name="rgbd_sensor" params="name pose topic_base">
-    <xacro:sensor_link name="${name}" pose="${pose}">
+  <xacro:macro name="rgbd_sensor" params="name frame topic_base">
+    <xacro:sensor_link name="${name}" frame="${frame}">
       <sensor name="${name}" type="rgbd_camera">
         <frame_id>${name}</frame_id>
         <topic>${topic_base}</topic>
@@ -142,8 +171,8 @@
 
   <!-- Ping360 scanning imaging sonar, APPROXIMATED by a 360-deg gpu_lidar sweep
        (geometry/range only, no acoustics). Real Ping360 range ~0.75-50 m. -->
-  <xacro:macro name="ping360_sensor" params="name pose topic_base">
-    <xacro:sensor_link name="${name}" pose="${pose}">
+  <xacro:macro name="ping360_sensor" params="name frame topic_base">
+    <xacro:sensor_link name="${name}" frame="${frame}">
       <sensor name="${name}" type="gpu_lidar">
         <frame_id>${name}</frame_id>
         <topic>${topic_base}/scan</topic>
@@ -165,10 +194,13 @@
 
   <!-- Water Linked DVL-A50: native DopplerVelocityLog custom sensor, 4-beam Janus
        (tilt 22.5 deg). Publishes gz.msgs.DVLVelocityTracking, bridged to
-       marine_acoustic_msgs/msg/Dvl by ros_gz_bridge. Its backend system is
-       emitted with the model (see below), so any world works. -->
-  <xacro:macro name="dvl_sensor" params="name pose topic_base">
-    <xacro:sensor_link name="${name}" pose="${pose}">
+       marine_acoustic_msgs/msg/Dvl by ros_gz_bridge. Its backend system
+       (gz-sim-dvl-system) is emitted with the model, ONLY when a DVL is
+       fitted: loaded unconditionally, the idle backend joins every render
+       iteration once any rendering sensor exists and costs half or more of
+       the real time factor. -->
+  <xacro:macro name="dvl_sensor" params="name frame topic_base">
+    <xacro:sensor_link name="${name}" frame="${frame}">
       <sensor name="${name}" type="custom" gz:type="dvl">
         <frame_id>${name}</frame_id>
         <topic>${topic_base}/velocity</topic>
@@ -198,21 +230,29 @@
     </xacro:sensor_link>
   </xacro:macro>
 
-  <!-- Recursive dispatcher: emit one sensor per sensor-type accessory in the
-       config. Non-sensor accessories (payload_skid, roof_rack) and the parked
-       imaging sonars (sonoptix_echo, omniscan_450_fs) emit nothing here. -->
-  <xacro:macro name="mount_sensors" params="items">
-    <xacro:if value="${len(items) > 0}">
-      <xacro:property name="a" value="${items[0]}"/>
-      <xacro:property name="t" value="${a['type']}"/>
-      <xacro:property name="p" value="${a['xyz'] + ' ' + a['rpy']}"/>
-      <xacro:property name="tb" value="${a.get('gz_topic', a.get('topic', topic_ns + '/' + a['name']))}"/>
-      <xacro:if value="${t == 'explorehd_camera'}"><xacro:camera_sensor name="${a['name']}" pose="${p}" topic_base="${tb}"/></xacro:if>
-      <xacro:if value="${t == 'marinesitu_c3'}">   <xacro:rgbd_sensor    name="${a['name']}" pose="${p}" topic_base="${tb}"/></xacro:if>
-      <xacro:if value="${t == 'ping360'}">         <xacro:ping360_sensor name="${a['name']}" pose="${p}" topic_base="${tb}"/></xacro:if>
-      <xacro:if value="${t == 'dvl_a50'}">         <xacro:dvl_sensor     name="${a['name']}" pose="${p}" topic_base="${tb}"/></xacro:if>
-      <xacro:mount_sensors items="${items[1:]}"/>
+  <!-- Emitters for the assembly dispatcher. Per resolved part instance: a
+       propeller (a part with a `drive` table) gets a Thruster on its joint,
+       the sensor types get their <sensor>, the claws their controllers;
+       geometry only parts (payload_skid, roof_rack) emit nothing here. Topic
+       overrides come from the config entry that fitted the instance. Ad
+       hoc slots are URDF frames; nothing to emit. -->
+  <xacro:macro name="gz_part" params="ptype name parent xyz rpy collision joint axis info">
+    <xacro:part_entry name="${name}"/>
+    <xacro:property name="topic_base"
+                    value="${entry.get('gz_topic', entry.get('topic', topic_ns + '/' + name))}"/>
+    <!-- A propeller on a fixed joint (a spare, say) is lumped away and
+         drives nothing. -->
+    <xacro:if value="${'drive' in info and joint != 'fixed'}">
+      <xacro:prop_thruster name="${name}" drive="${info['drive']}" topic_base="${topic_base}"/>
     </xacro:if>
+    <xacro:if value="${ptype == 'explorehd_camera'}"><xacro:camera_sensor name="${name}" frame="${name}" topic_base="${topic_base}"/></xacro:if>
+    <xacro:if value="${ptype == 'marinesitu_c3'}">   <xacro:rgbd_sensor    name="${name}" frame="${name}" topic_base="${topic_base}"/></xacro:if>
+    <xacro:if value="${ptype == 'ping360'}">         <xacro:ping360_sensor name="${name}" frame="${name}" topic_base="${topic_base}"/></xacro:if>
+    <xacro:if value="${ptype == 'dvl_a50'}">         <xacro:dvl_sensor     name="${name}" frame="${name}" topic_base="${topic_base}"/></xacro:if>
+    <xacro:if value="${ptype == 'newton_gripper'}">  <xacro:claw_controller topic_base="${topic_base}" left_joint="${name}_jaw_left_joint" right_joint="${name}_jaw_right_joint"/></xacro:if>
+    <xacro:if value="${ptype == 'sediment_sampler'}"><xacro:claw_controller topic_base="${topic_base}" left_joint="${name}_cup_left_joint" right_joint="${name}_cup_right_joint"/></xacro:if>
+  </xacro:macro>
+  <xacro:macro name="gz_no_slot" params="name parent xyz rpy:='0 0 0'">
   </xacro:macro>
 
   <!-- Claw actuation (gripper jaws / sampler cups): one JointPositionController per
@@ -234,22 +274,75 @@
     </plugin>
   </xacro:macro>
 
-  <!-- Recursive dispatcher: emit the controllers for each claw accessory. -->
-  <xacro:macro name="mount_grippers" params="items">
-    <xacro:if value="${len(items) > 0}">
-      <xacro:property name="a" value="${items[0]}"/>
-      <xacro:property name="n" value="${a['name']}"/>
-      <xacro:property name="tb" value="${a.get('gz_topic', a.get('topic', topic_ns + '/' + n))}"/>
-      <xacro:if value="${a['type'] == 'newton_gripper'}">  <xacro:claw_controller topic_base="${tb}" left_joint="${n}_jaw_left_joint" right_joint="${n}_jaw_right_joint"/></xacro:if>
-      <xacro:if value="${a['type'] == 'sediment_sampler'}"><xacro:claw_controller topic_base="${tb}" left_joint="${n}_cup_left_joint" right_joint="${n}_cup_right_joint"/></xacro:if>
-      <xacro:mount_grippers items="${items[1:]}"/>
-    </xacro:if>
-  </xacro:macro>
-
   <model name="bluerov2">
     <include merge="true">
-      <uri>package://bluerov2_description/urdf/bluerov2.urdf</uri>
+      <uri>$(arg urdf_uri)</uri>
     </include>
+
+    <!-- ===================== Buoyancy displacement =====================
+       The config's buoyancy declaration realized as geometry: one analytic
+       box on a dedicated link that the world's buoyancy plugin is enabled
+       on (<enable>bluerov2::buoyancy_displacement</enable>), so the parts'
+       own collisions are contact geometry and never displace. Solved here:
+         fluid_density * volume = total_mass + net_buoyancy
+       with the box centroid on the declared CoB (cob_offset from the CoM
+       or from the root link). total_mass / com come from the assembled
+       URDF via generate_model.py. Fixed jointed: physics sees one body. -->
+    <xacro:property name="buoyancy_cfg" value="${cfg.get('buoyancy') or dict()}"/>
+    <xacro:if value="${'$(arg total_mass)' == '' or '$(arg com)' == ''}">
+      <xacro:assembly_fail message="model.sdf.xacro needs total_mass and com args; generate it with generate_model.py (the build and configure_vehicle.py do)"/>
+    </xacro:if>
+    <xacro:property name="total_mass" value="${float('$(arg total_mass)')}"/>
+    <xacro:property name="com" value="${[float(v) for v in '$(arg com)'.split()]}"/>
+    <xacro:property name="water_density" value="${float(buoyancy_cfg.get('fluid_density', 1025.0))}"/>
+    <xacro:property name="net_buoyancy" value="${float(buoyancy_cfg.get('net_buoyancy', 0.002))}"/>
+    <xacro:property name="cob_offset"
+      value="${[float(v) for v in str(buoyancy_cfg.get('cob_offset', '0 0 0.046')).split()]}"/>
+    <xacro:property name="cob_frame" value="${str(buoyancy_cfg.get('cob_frame', 'com'))}"/>
+    <xacro:if value="${cob_frame not in ['com', 'base_link']}">
+      <xacro:assembly_fail message="buoyancy cob_frame must be com or base_link, not '${cob_frame}'"/>
+    </xacro:if>
+    <xacro:property name="footprint"
+      value="${[float(v) for v in str(buoyancy_cfg.get('footprint', '0.457 0.338')).split()]}"/>
+    <xacro:property name="displaced_volume" value="${(total_mass + net_buoyancy) / water_density}"/>
+    <xacro:property name="box_height" value="${displaced_volume / (footprint[0] * footprint[1])}"/>
+    <xacro:property name="cob_target"
+      value="${[(com[i] if cob_frame == 'com' else 0.0) + cob_offset[i] for i in [0, 1, 2]]}"/>
+    <link name="buoyancy_displacement">
+      <pose relative_to="${base_name}">0 0 0 0 0 0</pose>
+      <inertial>
+        <mass>1e-5</mass>
+        <inertia>
+          <ixx>1e-8</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>1e-8</iyy><iyz>0</iyz><izz>1e-8</izz>
+        </inertia>
+      </inertial>
+      <collision name="displacement">
+        <pose>${cob_target[0]} ${cob_target[1]} ${cob_target[2]} 0 0 0</pose>
+        <geometry>
+          <box><size>${footprint[0]} ${footprint[1]} ${box_height}</size></box>
+        </geometry>
+      </collision>
+    </link>
+    <joint name="buoyancy_displacement_joint" type="fixed">
+      <parent>${base_name}</parent>
+      <child>buoyancy_displacement</child>
+    </joint>
+
+    <!-- Joint states for the propeller and claw joints, so
+         robot_state_publisher can animate them in RViz. Bridged to
+         /joint_states. -->
+    <plugin filename="gz-sim-joint-state-publisher-system"
+            name="gz::sim::systems::JointStatePublisher">
+      <topic>${topic_ns}/joint_states</topic>
+    </plugin>
+
+    <!-- The DVL backend, ONLY when a DVL is fitted (see the dvl_sensor
+         comment). One instance serves every DVL in the model. -->
+    <xacro:if value="${len([e for e in (cfg.get('parts') or []) if e.get('type') == 'dvl_a50']) > 0}">
+      <plugin filename="gz-sim-dvl-system"
+              name="gz::sim::systems::DopplerVelocityLogSystem"/>
+    </xacro:if>
 
     <!-- Hydrodynamic damping (Fossen quadratic drag, reference BlueROV2).
          Added mass (xDotU etc., e.g. von Benzon 2022) is intentionally left at
@@ -259,7 +352,7 @@
          conversion so base_link's inertial can carry it. -->
     <plugin filename="gz-sim-hydrodynamics-system"
             name="gz::sim::systems::Hydrodynamics">
-      <link_name>base_link</link_name>
+      <link_name>${base_name}</link_name>
       <water_density>1025.0</water_density>
       <xU>0</xU>   <yV>0</yV>   <zW>0</zW>
       <kP>0</kP>   <mQ>0</mQ>   <nR>0</nR>
@@ -271,39 +364,11 @@
       <nRabsR>-3.992</nRabsR>
     </plugin>
 
-    <!-- Thrusters: horizontal vectored 1-4 (both variants), then vertical
-         (2 for standard, 4 for heavy). Command each with a thrust in Newtons on
-         /model/bluerov2/joint/thruster<n>_joint/cmd_thrust; feedback (rad/s) on
-         .../ang_vel. -->
-    <xacro:thruster n="1" coeff="0.02"/>
-    <xacro:thruster n="2" coeff="0.02"/>
-    <xacro:thruster n="3" coeff="-0.02"/>
-    <xacro:thruster n="4" coeff="-0.02"/>
-    <xacro:if value="${heavy}">
-      <xacro:thruster n="5" coeff="0.02"/>
-      <xacro:thruster n="6" coeff="-0.02"/>
-      <xacro:thruster n="7" coeff="-0.02"/>
-      <xacro:thruster n="8" coeff="0.02"/>
-    </xacro:if>
-    <xacro:unless value="${heavy}">
-      <xacro:thruster n="5" coeff="0.02"/>
-      <xacro:thruster n="6" coeff="-0.02"/>
-    </xacro:unless>
-
-    <!-- Sensors: one per sensor-type accessory in config/bluerov2.yaml. -->
-    <xacro:mount_sensors items="${cfg.get('accessories', [])}"/>
-
-    <!-- The DVL backend, ONLY when a DVL is fitted. Never load it
-         unconditionally: with any rendering sensor present (the default
-         camera) the idle DopplerVelocityLogSystem joins every render
-         iteration and costs half or more of the real time factor. One
-         instance serves every DVL in the model. -->
-    <xacro:if value="${len([a for a in cfg.get('accessories', []) if a['type'] == 'dvl_a50']) > 0}">
-      <plugin filename="gz-sim-dvl-system"
-              name="gz::sim::systems::DopplerVelocityLogSystem"/>
-    </xacro:if>
-
-    <!-- Grippers: JointPositionControllers for each gripper accessory. -->
-    <xacro:mount_grippers items="${cfg.get('accessories', [])}"/>
+    <!-- Thrusters, sensors and claw controllers: one per matching part
+         the assembly resolves to. No manifest: that lives in the merged
+         URDF. -->
+    <xacro:assemble base="${cfg['base']}" parts="${cfg.get('parts') or []}"
+                    slots="${cfg.get('slots') or []}" emit="gz_part" emit_slot="gz_no_slot"
+                    manifest="false"/>
   </model>
 </sdf>

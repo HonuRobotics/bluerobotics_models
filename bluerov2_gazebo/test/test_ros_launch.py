@@ -70,7 +70,7 @@ def test_robot_description_published(sim):
 
 
 def test_camera_topic_bridged(sim):
-    """The default loadout's camera topics exist on the ROS graph."""
+    """The default configuration's camera topics exist on the ROS graph."""
     poll_until(
         lambda: '/bluerov2/camera/image' in ros(sim, 'topic', 'list')[1], 30,
         lambda: 'camera topic not bridged; last listing:\n'

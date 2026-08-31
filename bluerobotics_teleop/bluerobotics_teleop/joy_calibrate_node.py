@@ -139,7 +139,7 @@ EPA_STEPS = [
 def steps_for(vehicle):
     """Return the calibration walk: common steps + planes it moves in."""
     steps = list(COMMON_STEPS)
-    if vehicle == 'bluerov2':
+    if vehicle.startswith('bluerov2'):
         steps += ROV_STEPS
     return steps + EPA_STEPS
 
@@ -455,7 +455,7 @@ def run_curses(stdscr, node, steps, output_dir):
 def main(args=None):
     parser = argparse.ArgumentParser(description='Calibrate a gamepad')
     parser.add_argument('--vehicle', default='bluerov2',
-                        choices=['blueboat', 'bluerov2'])
+                        choices=['blueboat', 'bluerov2', 'bluerov2_heavy'])
     known, ros_args = parser.parse_known_args(
         args if args is not None else sys.argv[1:])
 

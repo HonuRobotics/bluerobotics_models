@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+<!--
+  Vehicle free underwater world for the BlueROV2: seabed, graded buoyancy
+  (seawater below z=0, air above) acting only on a spawned model's dedicated
+  buoyancy_displacement link, the sensor render backend and the core
+  systems. sim.launch.xml spawns the model generated from the vehicle
+  config into it.
+
+  Run it directly, no ROS:  gz sim <this file>
+-->
+<sdf version="1.12">
+  <world name="bluerov2_water">
+
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster"/>
+
+    <!-- Renders the vehicle's camera / rgbd / gpu_lidar (Ping360) sensors; needs a
+         render path (GPU, or software GL headless). The DVL backend
+         (gz-sim-dvl-system) is NOT loaded here: the composed model brings it
+         along only when a DVL is configured, because once any rendering
+         sensor exists the idle DVL system joins every render iteration and
+         costs half or more of the real time factor. -->
+    <plugin filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <!-- Graded buoyancy: seawater (1025) below z=0, air above, so the vehicle
+         has a real free surface (and can share a world with surface vessels).
+         Displacement comes from the model's dedicated buoyancy_displacement
+         link, solved at generation time so density*volume = mass +
+         net_buoyancy; the model's Hydrodynamics plugin damps the slow rise. -->
+    <plugin filename="gz-sim-buoyancy-system"
+            name="gz::sim::systems::Buoyancy">
+      <graded_buoyancy>
+        <default_density>1025</default_density>
+        <density_change>
+          <above_depth>0</above_depth>
+          <density>1</density>
+        </density_change>
+      </graded_buoyancy>
+      <enable>bluerov2::buoyancy_displacement</enable>
+    </plugin>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <!-- Seabed, well below the z=0 water surface. Without this pose the
+           collision plane sits AT the waterline and the vehicle lands on
+           it, pinned by contact friction with the thrusters spinning. -->
+      <pose>0 0 -5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.3 0.3 0.35 1</ambient>
+            <diffuse>0.3 0.3 0.35 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Visual only water surface at the z=0 graded buoyancy waterline. -->
+    <model name="water_surface">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <transparency>0.4</transparency>
+          <geometry>
+            <plane><normal>0 0 1</normal><size>200 200</size></plane>
+          </geometry>
+          <material>
+            <ambient>0.10 0.30 0.50 1</ambient>
+            <diffuse>0.10 0.35 0.55 1</diffuse>
+            <specular>0.20 0.30 0.40 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

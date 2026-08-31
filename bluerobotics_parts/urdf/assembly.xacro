@@ -117,7 +117,7 @@
       </xacro:if>
       <xacro:place_part ptype="${chosen}" name="${entry.get('name', slot)}" parent="${inst}_${slot}"
                         xyz="${entry.get('xyz', '0 0 0')}" rpy="${entry.get('rpy', '0 0 0')}"
-                        collision="${entry.get('collision', True)}"
+                        collision="${entry.get('collision', spec.get('collision', True))}"
                         joint="${entry.get('joint', spec.get('joint', ''))}"
                         axis="${entry.get('axis', '')}"
                         entries="${entries}" adhoc="${adhoc}" emit="${emit}" emit_slot="${emit_slot}"/>

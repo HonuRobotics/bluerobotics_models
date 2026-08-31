@@ -29,10 +29,13 @@
     <link name="${name}">
       <inertial>
         <origin xyz="-0.00688307 0.00285552 -0.000166273" rpy="0 0 0"/>
-        <mass value="0.344"/>
-        <inertia ixx="0.00031312" ixy="-1.30503e-08" ixz="-2.56102e-07"
-                 iyy="0.00029151" iyz="-3.50359e-10"
-                 izz="0.000291503"/>
+        <!-- Body only: the full T200 is 0.344 kg in air; its propeller is
+             the separate t200_prop part (0.0391 kg), so body + prop sum to
+             the real thruster. -->
+        <mass value="0.3049466"/>
+        <inertia ixx="2.775723e-04" ixy="-1.156873e-08" ixz="-2.270274e-07"
+                 iyy="2.584156e-04" iyz="-3.105837e-10"
+                 izz="2.584094e-04"/>
       </inertial>
       <xacro:part_visual mesh="package://bluerobotics_parts/models/t200_thruster/t200_thruster.visual.glb"/>
       <xacro:if value="${collision}">

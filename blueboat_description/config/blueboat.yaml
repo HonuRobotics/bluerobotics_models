@@ -1,7 +1,7 @@
 # BlueBoat build time configuration.
 #
 # Edit this file and rebuild (colcon build) to regenerate the URDF, the
-# composed Gazebo model AND the ros_gz bridge config. To try a loadout without
+# composed Gazebo model AND the ros_gz bridge config. To try a config without
 # rebuilding, pass config_file:=<your.yaml> to the launches.
 #
 # The default BlueBoat needs nothing here: every slot of every part fills

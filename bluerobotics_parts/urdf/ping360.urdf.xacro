@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!--
+  ping360 part macro: a Blue Robotics Ping360 scanning imaging sonar.
+
+  Mesh reused from CentraleNantes (Apache 2.0), ~100x oversized as authored
+  (no COLLADA unit element); the 0.01 scale matches upstream usage. Visual
+  only, like the accessory it replaces. Simulated as a planar gpu_lidar
+  (geometry/range, no acoustics) by bluerov2_gazebo.
+
+  Contract (see parts.xacro): <part>_info exports the metadata (attach,
+  slots, frames, drive); <part> instantiates the link, its mounting joint
+  and its slot / frame links.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="ping360_info">
+    <xacro:property name="part_info" scope="parent" value="${dict(
+        attach='0 0 0',
+        slots=dict(
+        ),
+        frames=dict(
+        ))}"/>
+  </xacro:macro>
+
+  <xacro:macro name="ping360"
+               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='1 0 0'">
+    <xacro:ping360_info/>
+    <xacro:property name="_m" value="0.5"/>
+
+    <link name="${name}">
+      <inertial>
+        <mass value="${_m}"/>
+        <!-- Solid cylinder over the device envelope (r 38 mm, h 117 mm). -->
+        <inertia ixx="${_m/12.0 * (3*0.038**2 + 0.117**2)}" ixy="0" ixz="0"
+                 iyy="${_m/12.0 * (3*0.038**2 + 0.117**2)}" iyz="0"
+                 izz="${_m/2.0 * 0.038**2}"/>
+      </inertial>
+      <visual>
+        <geometry>
+          <mesh filename="package://bluerobotics_parts/models/ping360/ping360.dae"
+                scale="0.01 0.01 0.01"/>
+        </geometry>
+      </visual>
+    </link>
+
+    <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
+                      joint="${joint}" axis="${axis}" attach="${part_info['attach']}"/>
+    <xacro:part_slots name="${name}" items="${list(part_info['slots'].items())}"/>
+    <xacro:part_frames name="${name}" items="${list(part_info['frames'].items())}"/>
+
+  </xacro:macro>
+
+</robot>
