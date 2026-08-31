@@ -18,7 +18,7 @@
           </cylinder>
         </geometry>
       </collision>
-      <collision name="ping360_collider_cylinder.001">
+      <collision name="ping360_collider_cylinder_001">
         <pose>-1e-06 0.041167 0.011738 -1.570796 -0.0 0.0</pose>
         <geometry>
           <cylinder>

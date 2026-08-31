@@ -1,35 +1,35 @@
 <?xml version="1.0" ?>
 <sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
-  <model name="bluerov2_payload_bracket">
-    <link name="bluerov2_payload_bracket_link">
-      <visual name="bluerov2_payload_bracket_visual">
+  <model name="bluerov2_roof_rack">
+    <link name="bluerov2_roof_rack_link">
+      <visual name="bluerov2_roof_rack_visual">
         <geometry>
           <mesh>
-            <uri>bluerov2_payload_bracket.visual.glb</uri>
+            <uri>bluerov2_roof_rack.visual.glb</uri>
           </mesh>
         </geometry>
       </visual>
-      <collision name="botttom-frame_collider_box">
-        <pose>0.011554 0.0 -0.054334 0.0 0.0 0.0</pose>
+      <collision name="bluerov2_roof_rack_collider_box">
+        <pose>-0.00021 -0.0 0.001435 3.141592 0.0 -1.570796</pose>
         <geometry>
           <box>
-            <size>0.249045 0.318974 0.01207</size>
+            <size>0.311697 0.059279 0.003123</size>
           </box>
         </geometry>
       </collision>
-      <collision name="center-tank_collider_cylinder_collider_box">
-        <pose>0.002147 -0.162625 0.025638 -0.0 1.570796 0.0</pose>
+      <collision name="bluerov2_roof_rack_collider_box_001">
+        <pose>-0.012522 0.157519 -0.01132 3.141592 0.0 -1.570796</pose>
         <geometry>
           <box>
-            <size>0.191232 0.011872 0.425088</size>
+            <size>0.003059 0.063696 0.02235</size>
           </box>
         </geometry>
       </collision>
-      <collision name="center-tank_collider_cylinder_collider_box_001">
-        <pose>0.002147 0.161151 0.025638 -0.0 1.570796 0.0</pose>
+      <collision name="bluerov2_roof_rack_collider_box_002">
+        <pose>-0.012522 -0.157492 -0.01132 3.141592 0.0 -1.570796</pose>
         <geometry>
           <box>
-            <size>0.191232 0.011872 0.425088</size>
+            <size>0.003059 0.063696 0.02235</size>
           </box>
         </geometry>
       </collision>
