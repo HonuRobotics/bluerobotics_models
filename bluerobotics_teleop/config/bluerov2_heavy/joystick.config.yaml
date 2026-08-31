@@ -1,16 +1,16 @@
-# teleop_twist_joy mapping (Xbox style pad, joy_node linux layout).
+# teleop_twist_joy mapping, calibrated for the connected pad.
 # Left stick: surge + yaw. Right stick: sway + heave. RB: deadman.
-# Regenerate with: ros2 run bluerobotics_teleop joy_calibrate --vehicle bluerov2
+# Regenerate with: ros2 run bluerobotics_teleop joy_calibrate --vehicle bluerov2_heavy
 teleop_twist_joy_node:
   ros__parameters:
     axis_linear:
       x: 1
-      y: 3
-      z: 4
+      y: 2
+      z: 3
     scale_linear:
       x: 1.0
       y: 1.0
-      z: 1.0
+      z: -1.0
     axis_angular:
       yaw: 0
     scale_angular:

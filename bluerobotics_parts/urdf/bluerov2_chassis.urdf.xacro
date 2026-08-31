@@ -10,7 +10,7 @@
   with T200 bodies and propellers as parts on the thruster_body_N and
   thruster_N slots (all fitted by default). Mass is the hull plus six T200 bodies (9.4 + 6 x
   0.3049 kg, the T200 in air mass minus its prop part), so the default
-  loadout totals the reference ~11.5 kg in air. Inertia: tensor shape
+  configuration totals the reference ~11.5 kg in air. Inertia: tensor shape
   estimated from the collision geometry, scaled to that mass.
 
   Contract (see parts.xacro): <part>_info exports the metadata (attach,

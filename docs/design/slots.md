@@ -92,5 +92,5 @@ trim follow.
 
 In the part (one line in its `_info`, plus `accepts`), as a pull request,
 when it corresponds to a real mounting point everyone has; in the config
-(`slots:`) when it is specific to one loadout; in your own part when you
+(`slots:`) when it is specific to one vehicle; in your own part when you
 author a bracket of your own.

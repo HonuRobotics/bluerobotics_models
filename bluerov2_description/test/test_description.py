@@ -29,12 +29,12 @@ TOP_XACRO = SHARE / 'urdf' / 'bluerov2.urdf.xacro'
 DEFAULT_CONFIG = (SHARE / 'config' / 'bluerov2.yaml').read_text()
 
 # What the chassis slots fill with when the config is silent.
-DEFAULT_LOADOUT = {'base_link': 'bluerov2_chassis',
-                   'thruster_1': 't200_prop_ccw', 'thruster_2': 't200_prop_ccw',
-                   'thruster_3': 't200_prop_cw', 'thruster_4': 't200_prop_cw',
-                   'thruster_5': 't200_prop_ccw', 'thruster_6': 't200_prop_cw',
-                   'camera': 'explorehd_camera'}
-DEFAULT_LOADOUT |= {f'thruster_body_{n}': 't200_thruster' for n in range(1, 7)}
+DEFAULT_PARTS = {'base_link': 'bluerov2_chassis',
+                 'thruster_1': 't200_prop_ccw', 'thruster_2': 't200_prop_ccw',
+                 'thruster_3': 't200_prop_cw', 'thruster_4': 't200_prop_cw',
+                 'thruster_5': 't200_prop_ccw', 'thruster_6': 't200_prop_cw',
+                 'camera': 'explorehd_camera'}
+DEFAULT_PARTS |= {f'thruster_body_{n}': 't200_thruster' for n in range(1, 7)}
 
 # The parts library is shared across vehicles; each vehicle's suite sweeps
 # only the parts of its own world (the catalog wide guarantee lives in
@@ -43,8 +43,8 @@ DEFAULT_LOADOUT |= {f'thruster_body_{n}': 't200_thruster' for n in range(1, 7)}
 BLUEROV2_PARTS = sorted({
     'bluerov2_chassis', 'bluerov2_heavy_chassis', 'dvl_a50',
     'explorehd_camera', 'marinesitu_c3', 'newton_gripper',
-    'omniscan_450_fs', 'payload_skid', 'ping360', 'roof_rack',
-    'sediment_sampler', 'sonoptix_echo', 't200_prop_ccw', 't200_prop_cw',
+    'payload_skid', 'ping360', 'roof_rack',
+    'sediment_sampler', 't200_prop_ccw', 't200_prop_cw',
     't200_thruster'})
 
 
@@ -103,11 +103,11 @@ def manifest(root):
     return {e.get('name'): e.get('type') for e in root.findall('assembly_part')}
 
 
-def test_default_config_is_the_default_loadout():
+def test_default_config_yields_the_default_parts():
     """The shipped default builds 6 props + the camera from slot defaults."""
     root = generate_urdf(DEFAULT_CONFIG)
-    assert manifest(root) == DEFAULT_LOADOUT
-    assert set(DEFAULT_LOADOUT) <= link_names(root)
+    assert manifest(root) == DEFAULT_PARTS
+    assert set(DEFAULT_PARTS) <= link_names(root)
 
 
 def test_vectored_spin_convention():
@@ -176,11 +176,11 @@ def test_bare_on_key_is_rejected():
 def test_free_placement_and_adhoc_slot():
     """Free placements and ad hoc slots work as in the config schema."""
     root = generate_urdf(make_config(
-        parts=[{'type': 'sonoptix_echo', 'name': 'sonar_l',
+        parts=[{'type': 'payload_skid', 'name': 'pod',
                 'xyz': '0.14 0.16 -0.05', 'rpy': '0 0 0'},
                {'slot': 'light', 'type': 'roof_rack', 'name': 'bar'}],
         slots=[{'of': 'base_link', 'name': 'light', 'xyz': '0.2 0.1 0.1'}]))
-    assert {'sonar_l', 'bar', 'base_link_light'} <= link_names(root)
+    assert {'pod', 'bar', 'base_link_light'} <= link_names(root)
 
 
 def test_check_catches_what_the_expansion_cannot():
@@ -203,8 +203,6 @@ def test_catalog_covered_by_defaults_plus_overrides():
                {'slot': 'gripper', 'type': 'newton_gripper'},
                {'slot': 'payload', 'type': 'payload_skid'},
                {'slot': 'rack', 'type': 'roof_rack'},
-               {'type': 'sonoptix_echo', 'name': 'sonar_l', 'xyz': '0.14 0.16 -0.05'},
-               {'type': 'omniscan_450_fs', 'name': 'sonar_r', 'xyz': '0.14 -0.16 -0.05'},
                {'type': 'marinesitu_c3', 'name': 'stereo', 'xyz': '-0.16 0 0.16'},
                {'type': 'sediment_sampler', 'name': 'sampler', 'xyz': '-0.26 0 -0.06'},
                {'type': 'bluerov2_heavy_chassis', 'name': 'trailer', 'xyz': '0 0 0.6'}]))

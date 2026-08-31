@@ -2,7 +2,7 @@
 
 ## xacro fails with "ASSEMBLY ERROR: ..."
 
-The loadout config asked for something the parts cannot do: a type the slot
+The vehicle config asked for something the parts cannot do: a type the slot
 does not accept (the message lists what it accepts), an unknown slot on the
 base, a slot configured twice, a bare `on:` key (YAML reads it as `true`;
 the instance key is `of:`). "unknown macro name: xacro:<type>" means a
@@ -28,7 +28,7 @@ if in doubt) so the converted meshes replace the old copies.
 Thrust commands latch, and sequential one shot publications stagger thruster
 onset, applying a momentary unbalanced wrench that yaws the vehicle before it
 translates. Command both thrusters **in parallel**; see
-[Driving](../vehicles/blueboat/driving.md).
+[Driving](../vehicles/blueboat/actuators.md).
 
 ## No ranges on /blueboat/ping/range
 

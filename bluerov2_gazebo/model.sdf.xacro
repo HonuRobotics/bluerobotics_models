@@ -25,7 +25,7 @@
   <!-- The URDF to merge: the Gazebo flavoured expansion (gltf_up:=z, glTF
        visuals pre-rotated because Gazebo does not convert the glTF up axis)
        installed next to this model, or (configure_vehicle.py, launch time
-       loadouts) a file:// URI of one generated from the same config. -->
+       configs) a file:// URI of one generated from the same config. -->
   <xacro:arg name="urdf_uri" default="model://bluerov2/bluerov2.urdf"/>
   <!-- Assembled mass properties, computed FROM the generated URDF by
        generate_model.py and needed by the buoyancy solve below. xacro
@@ -102,7 +102,7 @@
 
   <!-- Wrapper: a near-massless sensor link fixed to base_link at `pose`, holding
        the <sensor> block passed in. The accessory's real mass/geometry already
-       live in base_link via the description; at 1e-5 kg a full sensor loadout
+       live in base_link via the description; at 1e-5 kg a full set of sensors
        stays orders of magnitude under the default 0.002 kg net_buoyancy, so
        the wrappers cannot tip the trim negative. -->
   <xacro:macro name="sensor_link" params="name frame *sensor">
@@ -233,8 +233,7 @@
   <!-- Emitters for the assembly dispatcher. Per resolved part instance: a
        propeller (a part with a `drive` table) gets a Thruster on its joint,
        the sensor types get their <sensor>, the claws their controllers;
-       geometry only parts (payload_skid, roof_rack, and the parked imaging
-       sonars sonoptix_echo / omniscan_450_fs) emit nothing here. Topic
+       geometry only parts (payload_skid, roof_rack) emit nothing here. Topic
        overrides come from the config entry that fitted the instance. Ad
        hoc slots are URDF frames; nothing to emit. -->
   <xacro:macro name="gz_part" params="ptype name parent xyz rpy collision joint axis info">

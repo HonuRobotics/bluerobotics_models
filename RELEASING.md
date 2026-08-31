@@ -1,6 +1,7 @@
 # Releasing
 
-Runbook for releasing the packages into a ROS 2 distro through the ROS
+Maintainer runbook, deliberately outside the user documentation site.
+Covers releasing the packages into a ROS 2 distro through the ROS
 build farm (target: **Lyrical**; releasing into **Rolling** first makes the
 packages flow into later distros automatically).
 
@@ -38,8 +39,8 @@ packages flow into later distros automatically).
 
 - Binary jobs build without running tests; devel/PR jobs run `colcon test`,
   which is headless safe by design.
-- From debs, the default vehicle is baked in; custom loadouts are a
-  `config_file:=` away ([Configure an installed vehicle](../how-to/installed-vehicle.md)).
+- From debs, the default vehicle is baked in; custom configs are a
+  `config_file:=` away ([Configure an installed vehicle](docs/how-to/installed-vehicle.md)).
 - The build farm runs `rosdoc2` per package; packages without a `doc/`
   folder get an auto generated stub at `docs.ros.org/en/<distro>/p/<pkg>`.
   Before the first release, add a minimal per package `doc/` that links

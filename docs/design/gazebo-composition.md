@@ -62,7 +62,7 @@ At build, the installed defaults are generated from the shipped config: the
 URDF, `model.sdf` (`model://blueboat`, with a specs comment
 stamped in) and `config/ros_gz_bridge.yaml`. At launch, `sim.launch.xml`
 runs `configure_vehicle.py --config <file> --cache`, which regenerates the
-three into a per loadout directory under `$ROS_HOME/blueboat_gazebo/`
+three into a per config directory under `$ROS_HOME/blueboat_gazebo/`
 (named after the config's content, so nothing piles up), spawns that model
 into the vehicle free water world and starts the bridge on that config. The same tool with
 `--out-dir` gives a user, including one on a binary install, a model

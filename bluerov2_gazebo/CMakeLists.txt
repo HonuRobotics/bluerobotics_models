@@ -17,8 +17,31 @@ ament_environment_hooks("hooks/resource_paths.sh.in")
 
 install(DIRECTORY
   launch
-  worlds
   DESTINATION share/${PROJECT_NAME})
+
+# The pool worlds are expanded from one template so the vehicle free world
+# sim.launch.xml spawns into (bluerov2_pool.sdf) and the self contained demo
+# (bluerov2_playground.sdf, default vehicle included) never drift apart.
+find_program(XACRO_EXECUTABLE xacro REQUIRED)
+set(pool_template ${CMAKE_CURRENT_SOURCE_DIR}/worlds/bluerov2_pool.sdf.xacro)
+set(pool_world ${CMAKE_CURRENT_BINARY_DIR}/worlds/bluerov2_pool.sdf)
+set(playground_world ${CMAKE_CURRENT_BINARY_DIR}/worlds/bluerov2_playground.sdf)
+add_custom_command(
+  OUTPUT ${pool_world} ${playground_world}
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/worlds
+  COMMAND ${XACRO_EXECUTABLE} ${pool_template}
+          world_name:=bluerov2_pool vehicle:=false -o ${pool_world}
+  COMMAND ${XACRO_EXECUTABLE} ${pool_template}
+          world_name:=bluerov2_playground vehicle:=true -o ${playground_world}
+  DEPENDS ${pool_template}
+  COMMENT "Expanding the pool worlds from bluerov2_pool.sdf.xacro")
+add_custom_target(${PROJECT_NAME}_worlds ALL
+  DEPENDS ${pool_world} ${playground_world})
+install(FILES
+  worlds/bluerov2_water.sdf
+  ${pool_world}
+  ${playground_world}
+  DESTINATION share/${PROJECT_NAME}/worlds)
 
 # ros_gz bridge config is GENERATED from the vehicle config plus the
 # assembled URDF (whose <assembly_part> manifest lists the resolved parts,
@@ -40,7 +63,6 @@ install(FILES ${bridge_yaml} DESTINATION share/${PROJECT_NAME}/config)
 # The URDF Gazebo merges: the same description expanded with gltf_up:=z, which
 # pre-rotates the (Y-up, spec conforming) glTF visuals for Gazebo, which does
 # not convert the glTF up axis as ROS tools do. Installed next to the model.
-find_program(XACRO_EXECUTABLE xacro REQUIRED)
 set(desc_xacro ${bluerov2_description_DIR}/../urdf/bluerov2.urdf.xacro)
 set(gazebo_urdf ${CMAKE_CURRENT_BINARY_DIR}/gazebo/bluerov2.urdf)
 add_custom_command(

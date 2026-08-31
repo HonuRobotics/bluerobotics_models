@@ -7,8 +7,8 @@
   concern: blueboat_gazebo declares it from the same config (docs:
   design/buoyancy). No Gazebo tags or plugins here.
 
-      xacro blueboat.urdf.xacro > blueboat.urdf                     # default loadout
-      xacro blueboat.urdf.xacro config_file:=/path/my_loadout.yaml  # custom
+      xacro blueboat.urdf.xacro > blueboat.urdf                     # default configuration
+      xacro blueboat.urdf.xacro config_file:=/path/my_vehicle.yaml  # custom
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="blueboat">
 

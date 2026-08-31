@@ -159,14 +159,12 @@
   <xacro:include filename="$(find bluerobotics_parts)/urdf/m200_weedless_prop_cw.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/marinesitu_c3.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/newton_gripper.urdf.xacro"/>
-  <xacro:include filename="$(find bluerobotics_parts)/urdf/omniscan_450_fs.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/omniscan_450_sidescan.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/payload_skid.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/ping360.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/ping_singlebeam.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/roof_rack.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/sediment_sampler.urdf.xacro"/>
-  <xacro:include filename="$(find bluerobotics_parts)/urdf/sonoptix_echo.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/surveyor_multibeam.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/t200_prop_ccw.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/t200_prop_cw.urdf.xacro"/>

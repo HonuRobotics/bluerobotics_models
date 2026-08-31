@@ -9,8 +9,8 @@
   the config's buoyancy declaration as a dedicated displacement link (docs:
   design/buoyancy). No Gazebo tags or plugins here.
 
-      xacro bluerov2.urdf.xacro > bluerov2.urdf                    # default loadout
-      xacro bluerov2.urdf.xacro config_file:=/path/my_loadout.yaml # custom
+      xacro bluerov2.urdf.xacro > bluerov2.urdf                    # default configuration
+      xacro bluerov2.urdf.xacro config_file:=/path/my_vehicle.yaml # custom
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="bluerov2">
 

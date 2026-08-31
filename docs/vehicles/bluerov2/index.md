@@ -9,14 +9,14 @@ parts.
 :maxdepth: 1
 
 running
-driving
+actuators
 sensors
 configuration
 ```
 
 ## The default vehicle
 
-The default loadout is the standard chassis with its six T200 propellers
+The default configuration is the standard chassis with its six T200 propellers
 and the exploreHD camera, trimmed 2 g positively buoyant. The chassis
 visual is the delivered art; the heavy chassis still uses a placeholder
 mesh.

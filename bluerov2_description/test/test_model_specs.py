@@ -61,8 +61,8 @@ def test_specs_stamp_matches_model_and_declaration():
         assert offset[k] == pytest.approx(cob_declared[k], abs=1e-3)
 
 
-def test_specs_stamp_reports_the_loadout():
-    """The parts row reflects the resolved default loadout, defaults included."""
+def test_specs_stamp_reports_the_fitted_parts():
+    """The parts row reflects the resolved default configuration, defaults included."""
     text = URDF.read_text()
     parts = spec(text, 'parts')
     for expected in ('bluerov2_chassis', 't200_prop_ccw', 'explorehd_camera'):
