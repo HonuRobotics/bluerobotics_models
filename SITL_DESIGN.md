@@ -102,6 +102,50 @@ Two files from that repository matter, and both are Blue Robotics' own:
 - `params/ardupilot/ArduRover/4.7/Navigator/BlueBoat120.params` — the BlueBoat's configuration for the Navigator flight controller. 951 lines, headed `Vehicle: Surface Boat / Platform: navigator`. This is the real vehicle, and it is what we are trying to be faithful to.
 - `params/ardupilot/ArduRover/4.6/sitl/MotorBoat.params` — Blue Robotics' own parameter set for running ArduRover SITL with no hardware attached. Interesting because it is the same delta we are about to derive: it shows which parameters they consider necessary to change when a boat becomes a simulation. How it differs from the hardware set, and from what is in `SITL_Models`, is assessed in phase 1; see below.
 
+## PX4: community supported, and not designed out
+
+This document is ArduPilot-shaped, and that is deliberate rather than accidental. It is worth stating the position explicitly so users know what to expect.
+
+**ArduPilot is the supported integration.** Both vehicles ship with it — the BlueBoat runs ArduRover on a Navigator, the BlueROV2 runs ArduSub — and Blue Robotics publish working parameter sets for both. That gives us something to be faithful to and something to check against. A PX4 airframe configuration would have to be invented, with no hardware to validate it and no published reference to disagree with, and it would carry ongoing test and maintenance cost against a user base that overwhelmingly runs ArduPilot on these two vehicles.
+
+**PX4 is community supported.** We will not write airframe configurations, ship parameter sets, run it in CI, or debug its behavior. What we will do is avoid designing it out, and the distinction is worth being concrete about because it is cheap to honor and expensive to recover.
+
+### Why the architecture already accommodates it
+
+The URDF-first assembly does most of the work here. The vehicle description — links, joints, inertia, sensor frames — is autopilot-agnostic and is exactly what PX4 would need. Nothing about ArduPilot reaches into it. The Gazebo composition then adds plugins on top, and an autopilot integration is a set of plugins: for ArduPilot, `ArduPilotPlugin` plus per-thruster command topics. A PX4 flavor is another composition variant over the same URDF, which is the same mechanism phase 2 introduces rather than a new one. If the `ardupilot` flag ever needs to become an `autopilot` selector, that is a rename and a second branch, not a redesign.
+
+### What PX4 actually expects, and why our interface fits
+
+Worth checking rather than assuming, so: PX4's own BlueROV2 Heavy model in [PX4-gazebo-models](https://github.com/PX4/PX4-gazebo-models) drives each thruster through `GenericMotorModel` configured like this:
+
+```xml
+<motorType>force_polynomial</motorType>
+<controlMethod>duty_cycle</controlMethod>
+<minDutyCycle>1100</minDutyCycle>
+<maxDutyCycle>1900</maxDutyCycle>
+<bidirectionalMotor>1</bidirectionalMotor>
+<positiveThrustPolynomial>[0.0, 2.379, 149.2, -327.4, 436.6, -194.4]</positiveThrustPolynomial>
+<negativeThrustPolynomial>[0.0, 0.343, 134.4, -284.6, 351.7, -152.2]</negativeThrustPolynomial>
+```
+
+Three things follow, and all of them support the direction this document already argues for.
+
+PX4 commands thrusters by **duty cycle over the same 1100–1900 band** the BlueBoat's shipped parameters use. It has never fed newtons to a thruster. So a normalized command is not merely compatible with PX4 — it is closer to what PX4 already does than the newtons interface we have today. The nexus argued for in the interface section is the one both autopilots meet at.
+
+PX4 models **forward and reverse separately**, with two fitted polynomials. That is independent confirmation that the thruster asymmetry discussed above is real and that a symmetric mapping is the odd one out.
+
+The difference that does exist is message shape rather than semantics: PX4 publishes one aggregated `gz.msgs.Actuators` on `command/motor_speed` indexed by motor number, where the ArduPilot plugin publishes one `gz.msgs.Double` per thruster topic. That is a property of the autopilot's own plugin, not of the thruster, and it is the plugin a PX4 variant would swap in.
+
+### What this commits us to
+
+Three things, none of them costly:
+
+1. The URDF stays autopilot-agnostic. Nothing ArduPilot-specific goes into a part, a slot or a frame.
+2. The thruster's command interface stays a normalized number, not PWM microseconds and not `SERVOn` semantics. We had already decided this for upstreaming reasons; PX4 is a second reason.
+3. A PX4 composition variant contributed by someone else is welcome, and would be reviewed for whether it breaks the ArduPilot path — not for whether PX4 flies correctly, which we are not in a position to judge.
+
+It is worth adding that the phase 2 change benefits PX4 too. A normalized command mode in gz-sim's own `Thruster` is useful to anyone driving a marine vehicle, and PX4 currently carries `GenericMotorModel` as its own plugin partly because the stock one cannot express this. That widens the upstreaming argument beyond our own convenience.
+
 ## A note on ArduPilot/SITL_Models
 
 [ArduPilot/SITL_Models](https://github.com/ArduPilot/SITL_Models) contains a Gazebo BlueBoat, and reviewers will reasonably ask why we are not simply using it.
@@ -254,6 +298,7 @@ Recorded so reviewers can challenge them rather than rediscover them.
 4. We maintain our own derived SITL parameter file rather than tracking `BlueBoat120.params` verbatim with an overlay. Easier to read; revisit if the delta grows.
 5. Phase 3's exit criterion stands as an aspiration rather than a gate. It may be hard to test in the short term; Blue Robotics have indicated they can share thruster data, which is the route to testing it properly.
 6. No pull requests to `SITL_Models`.
+7. ArduPilot is the supported autopilot; PX4 is community supported. We keep the design open to it and do not test it.
 7. Arbitration between competing commanders is out of scope. A mux is the right answer eventually, and there are many options, but not here.
 8. We pin ArduRover 4.7, matching the newest published BlueBoat parameters, accepting that it is tagged BETA.
 9. `gz-maritime` is the right home for the thruster plugin change; its contents are currently all waves, but it is intended as a sandbox for capability headed to Gazebo.
