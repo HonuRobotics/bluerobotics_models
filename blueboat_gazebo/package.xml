@@ -9,11 +9,16 @@
     and (later) plugins live here, keeping blueboat_description free of
     simulator code.
   </description>
+  <maintainer email="acordero@honurobotics.com">Alejandro Hernández Cordero</maintainer>
+  <maintainer email="bbingham@honurobotics.com">Brian Bingham</maintainer>
   <maintainer email="caguero@honurobotics.com">Carlos Agüero</maintainer>
-  <license>Apache-2.0</license>
+  <maintainer email="jrivero@honurobotics.com">Jose Luis Rivero</maintainer>
+  <license file="LICENSE">Apache-2.0</license>
+  <url type="website">https://honurobotics.github.io/bluerobotics_models/</url>
   <url type="repository">https://github.com/HonuRobotics/bluerobotics_models</url>
   <url type="bugtracker">https://github.com/HonuRobotics/bluerobotics_models/issues</url>
   <author email="caguero@honurobotics.com">Carlos Agüero</author>
+  <author>Honu Robotics</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>xacro</buildtool_depend>
