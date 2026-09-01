@@ -39,7 +39,7 @@ import yaml
 
 # type -> [(topic suffix, ROS type, gz type, direction)]
 # Parts (bluerobotics_parts types) and the topics each has in simulation.
-THRUST = ('thrust', 'std_msgs/msg/Float64', 'gz.msgs.Double', 'ROS_TO_GZ')
+THRUST = ('cmd', 'std_msgs/msg/Float64', 'gz.msgs.Double', 'ROS_TO_GZ')
 CMD_POS = ('cmd_pos', 'std_msgs/msg/Float64', 'gz.msgs.Double', 'ROS_TO_GZ')
 PART_TOPICS = {
     # Propellers: thrust command in newtons to the Thruster on their joint.
