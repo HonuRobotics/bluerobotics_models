@@ -546,9 +546,6 @@ def main(args=None):
         node.destroy_node()
         rclpy.try_shutdown()
     print(f'Pad mapping directory: {output_dir}')
-    print('The teleop launch prefers it over the shipped defaults. To make '
-          'it the new shipped default, copy the files into the repository at '
-          'bluerobotics_teleop/config/pad/ and commit.')
 
 
 if __name__ == '__main__':
