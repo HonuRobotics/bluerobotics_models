@@ -19,8 +19,15 @@ from bluerobotics_teleop import joy_map_node
 import pytest
 
 
+def fake_joy_prefix(monkeypatch):
+    """Fake the joy prefix so the tests need no joy package installed."""
+    monkeypatch.setattr(joy_map_node, 'get_package_prefix',
+                        lambda pkg: '/opt/fake')
+
+
 def test_linux_ties_the_helper_with_the_parent_death_signal(monkeypatch):
     monkeypatch.setattr(sys, 'platform', 'linux')
+    fake_joy_prefix(monkeypatch)
     kwargs = joy_map_node.spawn_kwargs()
     assert kwargs['start_new_session'] is True
     assert callable(kwargs['preexec_fn'])
@@ -35,6 +42,7 @@ def test_macos_has_no_parent_death_signal(monkeypatch):
 
 def test_windows_relies_on_the_exit_cleanup_and_the_exe_suffix(monkeypatch):
     monkeypatch.setattr(sys, 'platform', 'win32')
+    fake_joy_prefix(monkeypatch)
     assert joy_map_node.spawn_kwargs() == {}
     assert joy_map_node.joy_node_command()[0].endswith('.exe')
 
