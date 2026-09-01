@@ -39,9 +39,11 @@ import yaml
 
 # type -> [(topic suffix, ROS type, gz type, direction)]
 # Parts (bluerobotics_parts types) and the topics each has in simulation.
-THRUST = ('thrust', 'std_msgs/msg/Float64', 'gz.msgs.Double', 'ROS_TO_GZ')
+# Propeller command: normalized [-1, 1], not newtons. Named /cmd rather than
+# /thrust so the units cannot be mistaken; see blueboat_gazebo/model.sdf.xacro.
+THRUST = ('cmd', 'std_msgs/msg/Float64', 'gz.msgs.Double', 'ROS_TO_GZ')
 PART_TOPICS = {
-    # Propellers: thrust command in newtons to the Thruster on their joint.
+    # Propellers: normalized command to the Thruster on their joint.
     'm200_weedless_prop_ccw': [THRUST],
     'm200_weedless_prop_cw': [THRUST],
     't200_prop_ccw': [THRUST],
