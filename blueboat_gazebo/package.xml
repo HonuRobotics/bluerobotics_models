@@ -9,11 +9,16 @@
     and (later) plugins live here, keeping blueboat_description free of
     simulator code.
   </description>
+  <maintainer email="acordero@honurobotics.com">Alejandro Hernández Cordero</maintainer>
+  <maintainer email="bbingham@honurobotics.com">Brian Bingham</maintainer>
   <maintainer email="caguero@honurobotics.com">Carlos Agüero</maintainer>
-  <license>Apache-2.0</license>
+  <maintainer email="jrivero@honurobotics.com">Jose Luis Rivero</maintainer>
+  <license file="LICENSE">Apache-2.0</license>
+  <url type="website">https://honurobotics.github.io/bluerobotics_models/</url>
   <url type="repository">https://github.com/HonuRobotics/bluerobotics_models</url>
   <url type="bugtracker">https://github.com/HonuRobotics/bluerobotics_models/issues</url>
   <author email="caguero@honurobotics.com">Carlos Agüero</author>
+  <author>Honu Robotics</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>xacro</buildtool_depend>
@@ -45,6 +50,14 @@
   <test_depend>python3-pytest</test_depend>
   <test_depend>xacro</test_depend>
   <test_depend>ros2cli</test_depend>
+  <!-- Headless render path for the launch tests. test_gz_launch.py asserts
+       the ping sensor actually returns ranges, which needs a working EGL
+       render path, and it fails rather than skips when there is none.
+       mesa-utils is the only rosdep key that covers this: libegl1, libgl1,
+       libgl1-mesa-dri and libglvnd0 have no rosdep keys of their own, and all
+       four arrive as mesa-utils dependencies. Release jobs build with nocheck
+       and never install it. -->
+  <test_depend>mesa-utils</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
