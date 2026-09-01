@@ -47,12 +47,6 @@ place, so re-stage and re-run after "files were modified by this hook".
 - Vehicle configuration lives in each description package's `config/*.yaml`;
   the URDF, the composed Gazebo model and the ros_gz bridge config are all
   generated from it. Never hand edit the generated files.
-- Runtime code is written portable: `pathlib` over hand built paths, no
-  shell tools in launches, no POSIX only APIs outside explicit platform
-  guards (`joy_map`'s helper spawn documents the per platform behavior).
-  The test suites and the docs figure tooling are deliberately Linux
-  (process groups, X11); CI runs Linux, and Gazebo's own platform support
-  bounds where the simulation itself runs.
 - Slots, accepted types and defaults live in the parts. Adding a part that
   fits a slot means listing it in that slot's `accepts`; the tests check the
   catalog stays coherent.
