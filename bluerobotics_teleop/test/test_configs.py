@@ -33,7 +33,12 @@ def mixer_params(vehicle):
     ('blueboat', 'blueboat_gazebo'),
 ])
 def test_mixer_topics_exist_in_the_bridge(vehicle, gazebo_pkg):
-    """Every mixer output is a ROS_TO_GZ thrust topic the bridge carries."""
+    """Every mixer output is a ROS_TO_GZ thruster topic the bridge carries.
+
+    The two vehicles name it differently on purpose: the BlueBoat's thruster
+    takes a normalized command on `/cmd`, the BlueROV2 still takes newtons on
+    the stock plugin's `/cmd_thrust`.
+    """
     params = mixer_params(vehicle)
     bridge_yaml = (Path(get_package_share_directory(gazebo_pkg))
                    / 'config' / 'ros_gz_bridge.yaml')
@@ -41,7 +46,8 @@ def test_mixer_topics_exist_in_the_bridge(vehicle, gazebo_pkg):
         entries = yaml.safe_load(f)
     bridged = {e['ros_topic_name'] for e in entries
                if e['direction'] == 'ROS_TO_GZ'
-               and e['gz_topic_name'].endswith('/thrust')}
+               and (e['gz_topic_name'].endswith('/thrust')
+                    or e['gz_topic_name'].endswith('/cmd'))}
     assert set(params['thruster_topics']) == bridged
 
 
