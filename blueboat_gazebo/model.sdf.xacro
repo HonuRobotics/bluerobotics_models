@@ -56,15 +56,23 @@
        its `drive` table. Counter rotating pairs (ccw to port, cw to
        starboard in the default configuration) get opposite coefficient signs so
        their reaction yaw cancels in straight line running. Thrust commands
-       (N) on <topic_base>/thrust, speed feedback on <topic_base>/thrust/ang_vel:
+       ([-1, 1]) on <topic_base>/cmd, speed feedback on <topic_base>/cmd/ang_vel:
        the plugin prefixes a custom <topic> with its <namespace> (the model
        name unless given), so the namespace is emptied and the topic follows
        the config like every other part topic, not the spawn name. -->
   <xacro:macro name="thruster" params="name drive topic_base">
-    <plugin filename="gz-sim-thruster-system" name="gz::sim::systems::Thruster">
+    <plugin filename="gz-maritime-thruster-system"
+            name="gz::sim::maritime::Thruster">
       <joint_name>${name}_joint</joint_name>
       <namespace></namespace>
-      <topic>${topic_base}/thrust</topic>
+      <topic>${topic_base}/cmd</topic>
+      <!-- Normalized command in [-1, 1], scaled onto the thrust limits below.
+           This is how a thruster is actually driven: an autopilot scales every
+           output to a normalized range and an ESC maps it onto its own band.
+           Newtons are not something a driver can honor, since thrust depends
+           on battery voltage and propeller state - so a commander asked for
+           newtons ends up carrying its own copy of these limits. -->
+      <use_normalized_cmd>true</use_normalized_cmd>
       <thrust_coefficient>${0.02 if drive['rotation'] == 'ccw' else -0.02}</thrust_coefficient>
       <fluid_density>1025.0</fluid_density>
       <propeller_diameter>${drive['diameter']}</propeller_diameter>
@@ -110,7 +118,7 @@
       <servo_min>1100</servo_min>
       <servo_max>1900</servo_max>
       <offset>-0.5</offset>
-      <multiplier>80.4</multiplier>
+      <multiplier>2</multiplier>
       <type>COMMAND</type>
       <cmd_topic>${topic}</cmd_topic>
     </control>
@@ -292,15 +300,15 @@
           checks that they do, and if they drift the boat steers backwards.
 
           cmd = multiplier * (clamp((pwm - min)/(max - min)) + offset), so
-          offset -0.5 puts stop at mid-stick and multiplier is newtons at full
-          deflection. It is symmetric and a T200 is not (+51.5 N against
-          -40.2 N): the smaller magnitude is used for both, which under-drives
-          ahead but keeps the mapping linear. Phase 3's problem.
+          offset -0.5 puts stop at mid-stick and multiplier 2 spans [-1, 1].
+          That is the whole of it: no thrust limits, no vehicle physics, just
+          the servo band converted to a normalized command. The thruster owns
+          the newtons, including the asymmetry between ahead and astern.
         -->
         <xacro:ardupilot_control channel="0" joint="motor_stbd_joint"
-                                 topic="/${topic_ns}/motor_stbd/thrust"/>
+                                 topic="/${topic_ns}/motor_stbd/cmd"/>
         <xacro:ardupilot_control channel="2" joint="motor_port_joint"
-                                 topic="/${topic_ns}/motor_port/thrust"/>
+                                 topic="/${topic_ns}/motor_port/cmd"/>
       </plugin>
 
     </xacro:if>
