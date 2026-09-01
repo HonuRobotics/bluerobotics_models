@@ -27,7 +27,7 @@ jobs:
           environment-name: ros
           condarc: |
             channels:
-              - robostack-staging
+              - robostack-jazzy
               - conda-forge
           create-args: >-
             ros-jazzy-rclpy
