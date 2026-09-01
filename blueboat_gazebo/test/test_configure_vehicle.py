@@ -46,7 +46,7 @@ def test_default_config_reproduces_the_installed_artifacts(tmp_path):
     """Run on the shipped config, the tool regenerates what the build installed."""
     out = configure(DEFAULT_CONFIG, tmp_path / 'v')
     for name in ('blueboat.urdf', 'blueboat.gazebo.urdf', 'model.sdf', 'model.config',
-                 'ros_gz_bridge.yaml'):
+                 'ros_gz_bridge.yaml', 'robot_description.yaml'):
         assert (out / name).is_file(), f'{name} not generated'
     assert links(out / 'blueboat.urdf') == links(DESC_SHARE / 'urdf' / 'blueboat.urdf')
     assert yaml.safe_load((out / 'ros_gz_bridge.yaml').read_text()) == \
