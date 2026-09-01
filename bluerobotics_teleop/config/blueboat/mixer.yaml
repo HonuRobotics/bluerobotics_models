@@ -4,11 +4,14 @@
 twist_to_thrust:
   ros__parameters:
     thruster_topics:
-      - /blueboat/motor_port/thrust
-      - /blueboat/motor_stbd/thrust
+      - /blueboat/motor_port/cmd
+      - /blueboat/motor_stbd/cmd
     gains_linear_x:  [ 1.0,  1.0]
     gains_linear_y:  [ 0.0,  0.0]
     gains_linear_z:  [ 0.0,  0.0]
     gains_angular_z: [-1.0,  1.0]
-    max_thrust_forward: 50.0
-    max_thrust_reverse: -40.0
+    # The BlueBoat's thruster takes a normalized command, so the envelope is
+    # unity: the limits themselves live in the model, declared once, and the
+    # mixer no longer carries a second copy of them to drift from.
+    max_thrust_forward: 1.0
+    max_thrust_reverse: -1.0
