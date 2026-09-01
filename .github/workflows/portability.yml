@@ -46,9 +46,17 @@ jobs:
           cp -r bluerobotics_teleop ci_ws/src/
           cd ci_ws && colcon build --merge-install
       - name: Run the unit tests
+        # Paths computed by Python so they are native on every platform
+        # (PYTHONPATH separators and drive letters differ on Windows).
         run: |
-          export AMENT_PREFIX_PATH="$PWD/ci_ws/install"
-          site=$(ls -d "$PWD"/ci_ws/install/lib/python*/site-packages "$PWD"/ci_ws/install/Lib/site-packages 2>/dev/null | head -1)
-          export PYTHONPATH="$site:$PYTHONPATH"
+          python -c "
+          import glob, os
+          prefix = os.path.join(os.getcwd(), 'ci_ws', 'install')
+          site = glob.glob(os.path.join(prefix, '**', 'site-packages'),
+                           recursive=True)[0]
+          print(prefix); print(site)
+          " > paths.txt
+          export AMENT_PREFIX_PATH="$(sed -n 1p paths.txt)"
+          export PYTHONPATH="$(sed -n 2p paths.txt)"
           python -m pytest bluerobotics_teleop/test/test_portability.py \
               bluerobotics_teleop/test/test_configs.py -k "not bridge" -v
