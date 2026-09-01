@@ -46,7 +46,10 @@ joy_node is detected and no second one is started.
 
 import argparse
 import ctypes
-import curses
+try:
+    import curses
+except ImportError:  # Windows ships no curses; the windows-curses wheel does.
+    curses = None
 from dataclasses import dataclass, field
 import os
 import signal
@@ -457,7 +460,39 @@ def run_curses(stdscr, node, steps, output_dir):
         stdscr.getch()
 
 
+def joy_node_command():
+    """Return the joy_node command line for this platform."""
+    exe = os.path.join(get_package_prefix('joy'), 'lib', 'joy', 'joy_node')
+    if sys.platform == 'win32':
+        exe += '.exe'
+    return [exe, '--ros-args', '-p', 'autorepeat_rate:=20.0']
+
+
+def spawn_kwargs():
+    """
+    Return the Popen keywords tying the helper's lifetime to ours.
+
+    On Linux the kernel delivers SIGTERM to the helper when this process
+    dies, however it dies (PR_SET_PDEATHSIG). macOS has no parent death
+    signal and Windows supports neither process sessions nor pre exec
+    hooks, so there the explicit cleanup on exit is the only reaper.
+    """
+    if sys.platform.startswith('linux'):
+        def _die_with_parent():
+            libc = ctypes.CDLL('libc.so.6', use_errno=True)
+            libc.prctl(1, signal.SIGTERM)  # PR_SET_PDEATHSIG
+        return {'start_new_session': True, 'preexec_fn': _die_with_parent}
+    if sys.platform == 'win32':
+        new_group = getattr(subprocess, 'CREATE_NEW_PROCESS_GROUP', 0x200)
+        return {'creationflags': new_group}
+    return {'start_new_session': True}  # macOS and other POSIX
+
+
 def main(args=None):
+    if curses is None:
+        sys.exit('joy_map needs the curses module; on Windows install the '
+                 'windows-curses package (python -m pip install '
+                 'windows-curses)')
     parser = argparse.ArgumentParser(
         description='Map a gamepad to the teleop functions')
     _, ros_args = parser.parse_known_args(
@@ -473,22 +508,15 @@ def main(args=None):
     # autorepeat is required: without it joy_node stays silent while no
     # control moves and the baseline capture times out. The executable is
     # spawned directly (no ros2 run wrapper, which does not forward
-    # signals reliably) with PDEATHSIG so the kernel reaps it even if
-    # this process dies without reaching the cleanup below.
+    # signals reliably), tied to this process as tightly as the platform
+    # allows (see spawn_kwargs).
     joy_proc = None
     time.sleep(0.5)  # let discovery settle before counting publishers
     if node.count_publishers('joy') == 0:
-        joy_exe = os.path.join(
-            get_package_prefix('joy'), 'lib', 'joy', 'joy_node')
-
-        def _die_with_parent():
-            libc = ctypes.CDLL('libc.so.6', use_errno=True)
-            libc.prctl(1, signal.SIGTERM)  # PR_SET_PDEATHSIG
-
         joy_proc = subprocess.Popen(
-            [joy_exe, '--ros-args', '-p', 'autorepeat_rate:=20.0'],
+            joy_node_command(),
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-            start_new_session=True, preexec_fn=_die_with_parent)
+            **spawn_kwargs())
 
     def _spin():
         try:
