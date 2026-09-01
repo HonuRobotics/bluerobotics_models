@@ -60,10 +60,18 @@
        name unless given), so the namespace is emptied and the topic follows
        the config like every other part topic, not the spawn name. -->
   <xacro:macro name="prop_thruster" params="name drive topic_base">
-    <plugin filename="gz-sim-thruster-system" name="gz::sim::systems::Thruster">
+    <plugin filename="gz-maritime-thruster-system"
+            name="gz::sim::maritime::Thruster">
       <joint_name>${name}_joint</joint_name>
       <namespace></namespace>
-      <topic>${topic_base}/thrust</topic>
+      <topic>${topic_base}/cmd</topic>
+      <!-- Normalized command in [-1, 1], scaled onto the thrust limits below.
+           This is how a thruster is actually driven: an autopilot scales every
+           output to a normalized range and an ESC maps it onto its own band.
+           Newtons are not something a driver can honor, since thrust depends
+           on battery voltage and propeller state - so a commander asked for
+           newtons ends up carrying its own copy of these limits. -->
+      <use_normalized_cmd>true</use_normalized_cmd>
       <thrust_coefficient>${0.02 if drive['rotation'] == 'ccw' else -0.02}</thrust_coefficient>
       <fluid_density>1025.0</fluid_density>
       <propeller_diameter>${drive['diameter']}</propeller_diameter>

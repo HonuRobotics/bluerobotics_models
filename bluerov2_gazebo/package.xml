@@ -25,6 +25,10 @@
   <depend>bluerov2_description</depend>
   <depend>bluerobotics_parts</depend>
   <!-- The playground world includes the shared pool environment models. -->
+  <!-- The thruster plugin the model names by filename. Not a build
+       dependency - gz-sim loads it from GZ_SIM_SYSTEM_PLUGIN_PATH - but it
+       has to be built and on that path before the vehicle will run. -->
+  <exec_depend>gz_thruster</exec_depend>
   <exec_depend>bluerobotics_common</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>ros_gz_sim</exec_depend>
