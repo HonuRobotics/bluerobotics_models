@@ -6,8 +6,10 @@
 name: Portability
 
 on:
-  push:
-    branches: [caguero/portability]
+  pull_request:
+    paths:
+      - 'bluerobotics_teleop/**'
+      - '.github/workflows/portability.yml'
   workflow_dispatch:
 
 jobs:
