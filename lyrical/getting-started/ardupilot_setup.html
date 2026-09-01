@@ -1,0 +1,623 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ArduPilot SITL setup &mdash; BlueRobotics Models lyrical documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/honu.css?v=44af46ee" />
+
+  
+    <link rel="shortcut icon" href="../_static/honu-robotics-favicon.svg"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=46f74c5b"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Vehicles" href="../vehicles/index.html" />
+    <link rel="prev" title="First simulation" href="first-simulation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            BlueRobotics Models
+              <img src="../_static/honu-robotics-white-logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Getting started</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#from-source">From source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#from-ros-packages-debs">From ROS packages (debs)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="first-simulation.html">First simulation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ArduPilot SITL setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-you-are-installing">What you are installing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#host-container-prerequisites">Host/Container prerequisites</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#source-repo-clones">Source repo clones</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#build-the-gazebo-plugin">Build the Gazebo plugin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-the-ardupilot-firmware">Build the ArduPilot firmware</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#verify-the-python-environment">Verify the Python environment</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#environment">Environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#smoke-test">Smoke test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reference">Reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#why-a-venv-and-why-not-to-skip-it">Why a venv, and why not to skip it</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../vehicles/index.html">Vehicles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../vehicles/blueboat/index.html">BlueBoat</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/running.html">Running the simulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/running.html#choosing-the-world">Choosing the world</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/running.html#in-rviz">In RViz</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/actuators.html">Actuators</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/actuators.html#available-actuators">Available actuators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/actuators.html#actuators-ros-api">Actuators ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/blueboat/actuators.html#thrusters">Thrusters</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/actuators.html#gazebo-transport-api">Gazebo transport API</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/sensors.html">Sensors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/sensors.html#available-sensors">Available sensors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/sensors.html#sensors-ros-api">Sensors ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/blueboat/sensors.html#echosounder">Echosounder</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/configuration.html">Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/configuration.html#hull-displacement">Hull displacement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/configuration.html#payload">Payload</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/index.html#the-default-vehicle">The default vehicle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../vehicles/bluerov2/index.html">BlueROV2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/running.html">Running the simulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/running.html#choosing-the-world">Choosing the world</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/running.html#in-rviz">In RViz</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/actuators.html">Actuators</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/actuators.html#available-actuators">Available actuators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/actuators.html#actuators-ros-api">Actuators ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/actuators.html#thrusters">Thrusters</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/actuators.html#grippers">Grippers</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/actuators.html#gazebo-transport-api">Gazebo transport API</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/sensors.html">Sensors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#available-sensors">Available sensors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#sensors-ros-api">Sensors ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#camera">Camera</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#stereo-camera">Stereo camera</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#scanning-sonar">Scanning sonar</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#dvl">DVL</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/configuration.html">Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/configuration.html#variants">Variants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/configuration.html#buoyancy">Buoyancy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/configuration.html#payload">Payload</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/index.html#the-default-vehicle">The default vehicle</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/index.html">How-to guides</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/change-parts.html">Change the fitted parts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#fit-the-other-propellers">Fit the other propellers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#leave-the-ping2-kit-off">Leave the Ping2 kit off</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#add-the-antenna-mast-or-the-payload-bracket">Add the antenna mast or the payload bracket</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#rename-the-ping-topics">Rename the Ping topics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#add-a-part-somewhere-specific">Add a part somewhere specific</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#declare-your-own-mount-point">Declare your own mount point</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#see-what-you-got">See what you got</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/installed-vehicle.html">Configure an installed vehicle</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/installed-vehicle.html#the-launch-does-it-for-you">The launch does it for you</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/installed-vehicle.html#generate-the-artifacts-yourself">Generate the artifacts yourself</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/installed-vehicle.html#overlay-workspace">Overlay workspace</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/add-part.html">Add a part</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/add-part.html#where-a-part-goes">Where a part goes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/add-sensor-part.html">Add a sensor part</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/own-world.html">Run in your own world</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/own-world.html#include-the-default-model">Include the default model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/own-world.html#spawn-at-runtime">Spawn at runtime</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/own-world.html#use-the-stock-launch-with-your-world">Use the stock launch with your world</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/own-world.html#with-a-custom-config">With a custom config</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/teleop.html">Teleoperate with a gamepad</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/teleop.html#run">Run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/teleop.html#safety-behavior">Safety behavior</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/teleop.html#calibrate-a-different-gamepad">Calibrate a different gamepad</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/namespaces.html">Topic namespaces and several simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/faq.html">Troubleshooting / FAQ</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/faq.html#xacro-fails-with-assembly-error">xacro fails with “ASSEMBLY ERROR: …”</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/faq.html#the-boat-appears-rolled-90-degrees-in-rviz-parts-detached">The boat appears rolled 90 degrees in RViz, parts detached</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/faq.html#the-boat-moves-sideways-instead-of-forward">The boat moves sideways instead of forward</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/faq.html#no-ranges-on-blueboat-ping-range">No ranges on /blueboat/ping/range</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/faq.html#a-part-looks-rolled-90-degrees-in-rviz-but-fine-in-gazebo">A part looks rolled 90 degrees in RViz but fine in Gazebo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/faq.html#cannot-locate-rosdep-definition">“Cannot locate rosdep definition”</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/faq.html#two-simulations-interfere-with-each-other">Two simulations interfere with each other</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/faq.html#robot-state-publisher-warns-about-the-root-link-inertia">robot_state_publisher warns about the root link inertia</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/parts-catalog.html">Parts catalog and slots</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/parts-catalog.html#catalog">Catalog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/parts-catalog.html#slots">Slots</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/parts-catalog.html#blueboat-chassis">BlueBoat chassis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/parts-catalog.html#bluerov2-chassis">BlueROV2 chassis</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/parts-catalog.html#configuration-keys">Configuration keys</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/parts-catalog.html#frames">Frames</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../design/index.html">Design</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../design/architecture.html">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design/architecture.html#the-pieces">The pieces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/architecture.html#why-it-works-this-way">Why it works this way</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design/parts.html">Parts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design/parts.html#the-part-contract">The part contract</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/parts.html#meshes">Meshes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/parts.html#reviewing-parts">Reviewing parts</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design/slots.html">Slots and assembly</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design/slots.html#resolution">Resolution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/slots.html#what-a-slot-is-in-the-urdf">What a slot is in the URDF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/slots.html#why-defaults-live-in-the-parts">Why defaults live in the parts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/slots.html#where-to-add-a-slot">Where to add a slot</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design/buoyancy.html">Buoyancy: all up round mass and displacement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design/buoyancy.html#usv-hull-displacement">USV: hull displacement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/buoyancy.html#uuv-declared-trim-bluerov2">UUV: declared trim (BlueROV2)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/buoyancy.html#constraints">Constraints</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design/gazebo-composition.html">Gazebo composition</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design/gazebo-composition.html#merge-include-and-lumping">Merge include and lumping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/gazebo-composition.html#sensors-and-thrusters-follow-their-part">Sensors and thrusters follow their part</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/gazebo-composition.html#the-bridge-agrees-by-construction">The bridge agrees by construction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/gazebo-composition.html#build-time-and-launch-time">Build time and launch time</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/gazebo-composition.html#what-is-in-the-composed-model">What is in the composed model</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../project/index.html">Project</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../project/contributing.html">Contributing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../project/contributing.html#build-and-test">Build and test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../project/contributing.html#pre-commit-hooks">Pre-commit hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../project/contributing.html#conventions">Conventions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../project/contributing.html#documentation">Documentation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">BlueRobotics Models</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Getting started</a></li>
+      <li class="breadcrumb-item active">ArduPilot SITL setup</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/getting-started/ardupilot_setup.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ardupilot-sitl-setup">
+<h1>ArduPilot SITL setup<a class="headerlink" href="#ardupilot-sitl-setup" title="Link to this heading"></a></h1>
+<p>Setting up ArduPilot optional.</p>
+<p>Not necessary to simuate many robots, but ArduPilot is the default for many low-level control and navigation solutions.  Therefore, as reference implmentations, we illustrate how to integrate the Gazebo robot simuation with ArduPilot software in the loop (SITL).</p>
+<p>Set up ArduPilot SITL and the Gazebo plugin, so a vehicle in these models can be driven by the same autopilot firmware it runs on the water.</p>
+<p>Two ways to work, and the build commands are identical in both. On a host already set up for this repository — Ubuntu 26.04 with ROS 2 Lyrical and <code class="docutils literal notranslate"><span class="pre">ros_gz</span></code>, per <a class="reference internal" href="requirements.html"><span class="std std-doc">Requirements</span></a> — everything below runs directly. In <a class="reference external" href="https://github.com/HonuRobotics/drydock">drydock</a>, the same commands run inside the <code class="docutils literal notranslate"><span class="pre">maritime</span></code> container. Only the prerequisite step differs.</p>
+<section id="what-you-are-installing">
+<h2>What you are installing<a class="headerlink" href="#what-you-are-installing" title="Link to this heading"></a></h2>
+<p>Four pieces, which stay separate:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Piece</p></th>
+<th class="head"><p>What it is</p></th>
+<th class="head"><p>How it is installed</p></th>
+<th class="head"><p>Where it goes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ArduPilot firmware</p></td>
+<td><p>the real flight code compiled for x86 — <code class="docutils literal notranslate"><span class="pre">ardurover</span></code>, plus <code class="docutils literal notranslate"><span class="pre">sim_vehicle.py</span></code></p></td>
+<td><p>source, built with <code class="docutils literal notranslate"><span class="pre">waf</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">~/maritime_ws/thirdparty/ardupilot</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo</span></code></p></td>
+<td><p>a Gazebo system plugin that speaks ArduPilot’s UDP protocol and drives model joints</p></td>
+<td><p>source, built with <code class="docutils literal notranslate"><span class="pre">cmake</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">~/maritime_ws/thirdparty/ardupilot_gazebo</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>MAVProxy</p></td>
+<td><p>command-line ground station; comes up with <code class="docutils literal notranslate"><span class="pre">sim_vehicle.py</span></code></p></td>
+<td><p>pip, by ArduPilot’s prereq script</p></td>
+<td><p>that script’s Python environment</p></td>
+</tr>
+<tr class="row-odd"><td><p>QGroundControl</p></td>
+<td><p>GUI ground station, what a BlueBoat operator uses</p></td>
+<td><p>AppImage download</p></td>
+<td><p>anywhere; not needed for the smoke test</p></td>
+</tr>
+</tbody>
+</table>
+<p>Neither source build is a colcon package, so neither belongs in <code class="docutils literal notranslate"><span class="pre">src/</span></code>. For this example, those source repositories are cloned in <code class="docutils literal notranslate"><span class="pre">~/maritime_ws/thirdparty/</span></code>, but it can be located in another location.   We build from this source, but do not anticipate making commits.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>-p<span class="w"> </span>~/maritime_ws/thirdparty
+</pre></div>
+</div>
+</section>
+<section id="host-container-prerequisites">
+<h2>Host/Container prerequisites<a class="headerlink" href="#host-container-prerequisites" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo</span></code> needs a few development packages beyond what this repository already requires. Gazebo itself is not among them: it arrives as <code class="docutils literal notranslate"><span class="pre">ros_gz</span></code>’s dependency, as <a class="reference internal" href="requirements.html"><span class="std std-doc">Requirements</span></a> describes.</p>
+<p>On a host:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>cmake<span class="w"> </span>rapidjson-dev<span class="w"> </span>libopencv-dev<span class="w"> </span><span class="se">\</span>
+<span class="w">                 </span>libgstreamer1.0-dev<span class="w"> </span>libgstreamer-plugins-base1.0-dev
+</pre></div>
+</div>
+<p>In drydock they are listed in <code class="docutils literal notranslate"><span class="pre">projects/maritime/apt-packages.txt</span></code>, so rebuilding the image is all that is needed:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>~/maritime_ws/tools/drydock/drydock<span class="w"> </span>build<span class="w"> </span>maritime
+</pre></div>
+</div>
+<p>GStreamer is required unconditionally by the plugin’s CMakeLists, even though
+only its optional camera plugin uses it. A configure that stops at
+<code class="docutils literal notranslate"><span class="pre">gstreamer-1.0</span> <span class="pre">not</span> <span class="pre">found</span></code> means these packages are missing, not that anything
+is wrong with your Gazebo.</p>
+<section id="source-repo-clones">
+<h3>Source repo clones<a class="headerlink" href="#source-repo-clones" title="Link to this heading"></a></h3>
+<p>On the host (if using drydock, assume the container is mounting the users home)</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/maritime_ws/thirdparty
+git<span class="w"> </span>clone<span class="w"> </span>--recurse-submodules<span class="w"> </span>https://github.com/ArduPilot/ardupilot.git
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ArduPilot/ardupilot_gazebo.git<span class="w"> </span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="build-the-gazebo-plugin">
+<h2>Build the Gazebo plugin<a class="headerlink" href="#build-the-gazebo-plugin" title="Link to this heading"></a></h2>
+<p>From host (or in drydock, attach to the container first with <code class="docutils literal notranslate"><span class="pre">~/maritime_ws/tools/drydock/drydock</span> <span class="pre">join</span> <span class="pre">maritime</span></code>.)</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/maritime_ws/thirdparty/ardupilot_gazebo
+
+<span class="nb">export</span><span class="w"> </span><span class="nv">GZ_VERSION</span><span class="o">=</span>jetty
+cmake<span class="w"> </span>-S<span class="w"> </span>.<span class="w"> </span>-B<span class="w"> </span>build<span class="w"> </span>-DCMAKE_BUILD_TYPE<span class="o">=</span>RelWithDebInfo
+cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span>
+</pre></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><code class="docutils literal notranslate"><span class="pre">GZ_VERSION=jetty</span></code> is not optional. With the variable unset, <code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo</span></code>’s
+CMakeLists falls through to its Harmonic branch and looks for <code class="docutils literal notranslate"><span class="pre">gz-sim8</span></code>, which
+does not exist here — the failure reads as a missing Gazebo rather than a wrong
+one.</p>
+</div>
+<p>(The reason is that Jetty dropped the version suffix from its CMake package names. <code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo</span></code>’s Jetty branch accordingly calls <code class="docutils literal notranslate"><span class="pre">find_package(gz-sim)</span></code> with no number and sets its version variables to the empty string, where the Harmonic and Ionic branches ask for <code class="docutils literal notranslate"><span class="pre">gz-sim8</span></code> and <code class="docutils literal notranslate"><span class="pre">gz-sim9</span></code>. That holds whether Gazebo came from upstream packages or, as under ROS 2 Lyrical, from <code class="docutils literal notranslate"><span class="pre">ros-lyrical-gz-sim-vendor</span></code> — both install <code class="docutils literal notranslate"><span class="pre">gz-sim-config.cmake</span></code>.)</p>
+<p>The resulting shared libraries are in <code class="docutils literal notranslate"><span class="pre">build/</span></code>, e.g.,  <code class="docutils literal notranslate"><span class="pre">libArduPilotPlugin.so</span></code>.</p>
+</section>
+<section id="build-the-ardupilot-firmware">
+<h2>Build the ArduPilot firmware<a class="headerlink" href="#build-the-ardupilot-firmware" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The steps below are the documented upstream ones and have not yet been run
+end to end in drydock. The clone is large (submodules included) and the build
+takes a while. Correct this section once you have been through it.</p>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/maritime_ws/thirdparty/ardupilot
+
+<span class="c1"># Create the venv inside the checkout; the prereq script finds and uses it.</span>
+python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>--system-site-packages<span class="w"> </span>venv-ardupilot
+
+<span class="nv">DO_PYTHON_VENV_ENV</span><span class="o">=</span><span class="m">0</span><span class="w"> </span>Tools/environment_install/install-prereqs-ubuntu.sh<span class="w"> </span>-y
+
+<span class="nb">source</span><span class="w"> </span>venv-ardupilot/bin/activate
+./waf<span class="w"> </span>configure<span class="w"> </span>--board<span class="w"> </span>sitl
+./waf<span class="w"> </span>rover
+</pre></div>
+</div>
+<p>Also build ArduCopter</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./waf<span class="w"> </span>copter
+</pre></div>
+</div>
+<p>to rund the Iris UAV test below</p>
+<p>Ubuntu 26.04 (“resolute”) is on the prereq script’s supported list, so it should not need coaxing.</p>
+<p>The venv is not optional and is worth understanding; see <a class="reference internal" href="#why-a-venv">Why a venv</a> below if the reason matters to you.</p>
+<p>The script offers to edit your shell login file twice — once to activate its venv in every terminal, once to add <code class="docutils literal notranslate"><span class="pre">Tools/autotest</span></code> to <code class="docutils literal notranslate"><span class="pre">PATH</span></code>. Decline both. <code class="docutils literal notranslate"><span class="pre">DO_PYTHON_VENV_ENV=0</span></code> handles the first; answer <code class="docutils literal notranslate"><span class="pre">N</span></code> to the second if you are prompted, and note that plain <code class="docutils literal notranslate"><span class="pre">-y</span></code> answers <code class="docutils literal notranslate"><span class="pre">y</span></code> to it. Both edits go to the host’s <code class="docutils literal notranslate"><span class="pre">~/.profile</span></code> through the bind mount, and both are handled instead by the environment script below.</p>
+<section id="verify-the-python-environment">
+<h3>Verify the Python environment<a class="headerlink" href="#verify-the-python-environment" title="Link to this heading"></a></h3>
+<p>The prereq script installs its Python dependencies as a single <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code>, and if that resolution fails part-way it leaves an incomplete environment without stopping the script. This is worth checking rather than discovering later as an import error inside MAVProxy.</p>
+<p>With the venv active:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span>m<span class="w"> </span><span class="k">in</span><span class="w"> </span>future<span class="w"> </span>pymavlink<span class="w"> </span>serial<span class="w"> </span>MAVProxy<span class="w"> </span>em<span class="w"> </span>pexpect<span class="w"> </span>lxml<span class="w"> </span>numpy<span class="w"> </span>psutil<span class="w"> </span>yaml<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import </span><span class="nv">$m</span><span class="s2">"</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"MISSING </span><span class="nv">$m</span><span class="s2">"</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+<p>Install anything it reports. Each package installs cleanly on its own — the failure is in the batch, not in the packages, so there is nothing to work around.</p>
+<p>Two are worth knowing about specifically. <strong>MAVProxy</strong> is often absent, and <strong><code class="docutils literal notranslate"><span class="pre">future</span></code></strong> is a MAVProxy dependency that MAVProxy does not declare, so installing MAVProxy alone does not bring it and the first symptom is <code class="docutils literal notranslate"><span class="pre">ModuleNotFoundError:</span> <span class="pre">No</span> <span class="pre">module</span> <span class="pre">named</span> <span class="pre">'future'</span></code> from <code class="docutils literal notranslate"><span class="pre">rline.py</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>MAVProxy<span class="w"> </span>future
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">--map</span></code> and <code class="docutils literal notranslate"><span class="pre">--console</span></code> additionally need wxPython, which comes from apt rather than pip — the pip build compiles wxWidgets and takes the best part of an hour, while the venv’s <code class="docutils literal notranslate"><span class="pre">--system-site-packages</span></code> makes the apt module visible from inside it. It is in drydock’s package list; on a host, <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">python3-wxgtk4.0</span></code>.</p>
+<p>ArduPilot’s list also includes <code class="docutils literal notranslate"><span class="pre">dronecan</span></code>, <code class="docutils literal notranslate"><span class="pre">geocoder</span></code>, <code class="docutils literal notranslate"><span class="pre">tabulate</span></code>, <code class="docutils literal notranslate"><span class="pre">wsproto</span></code>, <code class="docutils literal notranslate"><span class="pre">junitparser</span></code> and <code class="docutils literal notranslate"><span class="pre">intelhex</span></code>. None are needed for SITL — they cover CAN peripherals, map geocoding, autotest reporting and hex generation for real flight boards — so leave them missing unless something asks.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Do not inspect this venv from the host. It is created with
+<code class="docutils literal notranslate"><span class="pre">--system-site-packages</span></code>, so a <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">list</span></code> run outside the container reports
+the host’s packages as though they were the venv’s, and a module can appear
+installed when it is not.</p>
+</div>
+</section>
+</section>
+<section id="environment">
+<h2>Environment<a class="headerlink" href="#environment" title="Link to this heading"></a></h2>
+<p>SITL needs four things on the environment that nothing else in this workspace wants: the Gazebo variables, <code class="docutils literal notranslate"><span class="pre">Tools/autotest</span></code> on <code class="docutils literal notranslate"><span class="pre">PATH</span></code>, and the ArduPilot venv. Put them in one script rather than in a shell login file — under drydock, <code class="docutils literal notranslate"><span class="pre">$HOME</span></code> is shared with the host, so a login file is the wrong place for paths that only make sense inside the container.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cat<span class="w"> </span>&gt;<span class="w"> </span>~/maritime_ws/thirdparty/setup-ardupilot.sh<span class="w"> </span><span class="s">&lt;&lt;'EOF'</span>
+<span class="s"># Source before running gz sim or sim_vehicle.py.</span>
+<span class="s">AP=$HOME/maritime_ws/thirdparty/ardupilot</span>
+<span class="s">AP_GZ=$HOME/maritime_ws/thirdparty/ardupilot_gazebo</span>
+
+<span class="s"># Activate the venv FIRST. Sourcing activate restores PATH to its pre-venv</span>
+<span class="s"># value, so anything added before it is silently discarded.</span>
+<span class="s">[ "$VIRTUAL_ENV" = "$AP/venv-ardupilot" ] || . "$AP/venv-ardupilot/bin/activate"</span>
+
+<span class="s">export GZ_VERSION=jetty</span>
+<span class="s">export GZ_SIM_SYSTEM_PLUGIN_PATH=$AP_GZ/build</span>
+<span class="s">export GZ_SIM_RESOURCE_PATH=$AP_GZ/models:$AP_GZ/worlds${GZ_SIM_RESOURCE_PATH:+:$GZ_SIM_RESOURCE_PATH}</span>
+<span class="s">export SDF_PATH=$GZ_SIM_RESOURCE_PATH</span>
+
+<span class="s">case ":$PATH:" in</span>
+<span class="s">  *":$AP/Tools/autotest:"*) ;;</span>
+<span class="s">  *) export PATH="$AP/Tools/autotest:$PATH" ;;</span>
+<span class="s">esac</span>
+<span class="s">EOF</span>
+</pre></div>
+</div>
+<p>The venv activation has to come before the <code class="docutils literal notranslate"><span class="pre">PATH</span></code> line, not after. A venv’s <code class="docutils literal notranslate"><span class="pre">activate</span></code> restores <code class="docutils literal notranslate"><span class="pre">PATH</span></code> to its pre-activation value when it runs, so a <code class="docutils literal notranslate"><span class="pre">PATH</span></code> entry added first disappears the moment the venv is activated — and only in shells where the venv was already active, which makes it look intermittent. The <code class="docutils literal notranslate"><span class="pre">case</span></code> guard keeps repeated sourcing from stacking duplicate entries.</p>
+<p>Then, in every shell doing SITL work:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>~/maritime_ws/thirdparty/setup-ardupilot.sh
+</pre></div>
+</div>
+<p>Both path variables append to whatever is already set rather than replacing it. That matters as soon as this is combined with a sourced colcon workspace: the vehicle packages put their own model directories on <code class="docutils literal notranslate"><span class="pre">GZ_SIM_RESOURCE_PATH</span></code> through environment hooks, and overwriting it leaves every mesh in the boat unresolvable.</p>
+<p><code class="docutils literal notranslate"><span class="pre">SDF_PATH</span></code> duplicates <code class="docutils literal notranslate"><span class="pre">GZ_SIM_RESOURCE_PATH</span></code> on purpose. They are read by different things, and setting only one produces errors that look like malformed SDF rather than a missing path.</p>
+</section>
+<section id="smoke-test">
+<h2>Smoke test<a class="headerlink" href="#smoke-test" title="Link to this heading"></a></h2>
+<p>Two shells. In the first:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>~/maritime_ws/thirdparty/setup-ardupilot.sh
+gz<span class="w"> </span>sim<span class="w"> </span>-v4<span class="w"> </span>-r<span class="w"> </span>iris_runway.sdf
+</pre></div>
+</div>
+<p>You should see the Iris UAV on a runway:</p>
+<figure class="align-default" id="id1">
+<img alt="The Iris quadcopter standing on a runway in the Gazebo viewport" src="../_images/iris_gazebo.png" />
+<figcaption>
+<p><span class="caption-text">The <code class="docutils literal notranslate"><span class="pre">iris_runway</span></code> world with the Iris model loaded, before SITL connects. The
+vehicle sits inert at this point: the plugin is listening on UDP 9002 and
+nothing is commanding it.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>In  second terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>~/maritime_ws/thirdparty/setup-ardupilot.sh
+<span class="nv">AP</span><span class="o">=</span><span class="nv">$HOME</span>/maritime_ws/thirdparty/ardupilot/Tools/autotest/default_params
+sim_vehicle.py<span class="w"> </span>-v<span class="w"> </span>ArduCopter<span class="w"> </span>-f<span class="w"> </span>gazebo-iris<span class="w"> </span>--model<span class="w"> </span>JSON<span class="w"> </span>--console<span class="w"> </span>--map<span class="w"> </span>-w<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--add-param-file<span class="o">=</span><span class="nv">$AP</span>/copter.parm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--add-param-file<span class="o">=</span><span class="nv">$AP</span>/gazebo-iris.parm
+</pre></div>
+</div>
+<p>The two <code class="docutils literal notranslate"><span class="pre">--add-param-file</span></code> arguments are not optional, and the reason is worth understanding because it recurs with the boat. Recent ArduPilot moved frame defaults into the SITL binary’s embedded <code class="docutils literal notranslate"><span class="pre">vehicleinfo.json</span></code>, which it looks up <strong>keyed by <code class="docutils literal notranslate"><span class="pre">--model</span></code></strong> rather than by the <code class="docutils literal notranslate"><span class="pre">-f</span></code> frame name. We pass <code class="docutils literal notranslate"><span class="pre">--model</span> <span class="pre">JSON</span></code>, no frame is named <code class="docutils literal notranslate"><span class="pre">JSON</span></code>, so nothing is found and no defaults are applied — <code class="docutils literal notranslate"><span class="pre">-f</span> <span class="pre">gazebo-iris</span></code> still selects the right build target, but its parameter files never reach the vehicle. The symptom is <code class="docutils literal notranslate"><span class="pre">PreArm:</span> <span class="pre">Motors:</span> <span class="pre">Check</span> <span class="pre">frame</span> <span class="pre">class</span> <span class="pre">and</span> <span class="pre">type</span></code>, because <code class="docutils literal notranslate"><span class="pre">FRAME_CLASS</span></code> was never set.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo</span></code>’s README predates this change and its command alone will not arm.</p>
+<p><code class="docutils literal notranslate"><span class="pre">-w</span></code> wipes the EEPROM so the frame’s parameters are reloaded. Worth using on the first run and after any aborted one: this version of ArduPilot embeds frame defaults in the SITL binary’s ROMFS rather than passing them with <code class="docutils literal notranslate"><span class="pre">--defaults</span></code>, and they are only written to a <em>fresh</em> EEPROM. An EEPROM left behind by an earlier attempt keeps whatever it had, which for a first run means no <code class="docutils literal notranslate"><span class="pre">FRAME_CLASS</span></code> at all.</p>
+<p>Then at the MAVProxy prompt:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mode</span> <span class="n">guided</span>
+<span class="n">arm</span> <span class="n">throttle</span>
+<span class="n">takeoff</span> <span class="mi">5</span>
+</pre></div>
+</div>
+<p>The quadcopter should lift off in the Gazebo window and hold five meters.</p>
+<figure class="align-default" id="id2">
+<img alt="The Iris quadcopter hovering above the runway, with the MAVProxy console and map alongside" src="../_images/iris_takeoff.png" />
+<figcaption>
+<p><span class="caption-text">The Iris holding altitude under ArduCopter. This is phase 0 complete: the
+firmware, the plugin and the ground station are all talking, on a vehicle
+nobody here has modified.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<p><strong><code class="docutils literal notranslate"><span class="pre">Could</span> <span class="pre">NOT</span> <span class="pre">find</span> <span class="pre">gz-sim8</span></code></strong> — <code class="docutils literal notranslate"><span class="pre">GZ_VERSION</span></code> is unset or not <code class="docutils literal notranslate"><span class="pre">jetty</span></code>. See above.</p>
+<p><strong><code class="docutils literal notranslate"><span class="pre">gstreamer-1.0</span></code> not found at configure time</strong> — the GStreamer development packages are missing; see Container prerequisites. The plugin requires them unconditionally, even though only the camera plugin uses them.</p>
+<p><strong><code class="docutils literal notranslate"><span class="pre">[Errno</span> <span class="pre">2]</span> <span class="pre">No</span> <span class="pre">such</span> <span class="pre">file</span> <span class="pre">or</span> <span class="pre">directory:</span> <span class="pre">'mavproxy.py'</span></code></strong>, or <strong><code class="docutils literal notranslate"><span class="pre">ModuleNotFoundError:</span> <span class="pre">No</span> <span class="pre">module</span> <span class="pre">named</span> <span class="pre">'future'</span></code></strong> from <code class="docutils literal notranslate"><span class="pre">rline.py</span></code> — the prereq script’s batch install left gaps. Run the verification above; both install cleanly on their own.</p>
+<p><strong><code class="docutils literal notranslate"><span class="pre">sim_vehicle.py:</span> <span class="pre">command</span> <span class="pre">not</span> <span class="pre">found</span></code></strong> — <code class="docutils literal notranslate"><span class="pre">setup-ardupilot.sh</span></code> has not been sourced in this shell. The prereq script only adds <code class="docutils literal notranslate"><span class="pre">Tools/autotest</span></code> to <code class="docutils literal notranslate"><span class="pre">PATH</span></code> if you accept its prompt, which under drydock you should not.</p>
+<p><strong><code class="docutils literal notranslate"><span class="pre">you</span> <span class="pre">need</span> <span class="pre">to</span> <span class="pre">install</span> <span class="pre">pexpect</span> <span class="pre">with</span> <span class="pre">'python3</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pexpect'</span></code></strong> — the prereq script has not been run, or its venv is not active. If <code class="docutils literal notranslate"><span class="pre">venv-ardupilot</span></code> does not exist, the script has not run; it is what creates it. <code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">~/venv-ardupilot/bin/activate</span></code> and try again. Resist the suggestion in the message: a system-wide pip install is refused on Ubuntu 26.04, and forcing it past that puts ArduPilot’s pinned dependencies alongside ROS’s.</p>
+<p><strong>Gazebo starts but the vehicle never arms, and MAVProxy reports no heartbeat from the physics backend</strong> — the two processes are not talking. SITL sends to UDP 9002 and the plugin listens there; check that the model’s <code class="docutils literal notranslate"><span class="pre">&lt;fdm_addr&gt;</span></code> is <code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code> and that both are running inside the same container.</p>
+<p><strong><code class="docutils literal notranslate"><span class="pre">PreArm:</span> <span class="pre">Motors:</span> <span class="pre">Check</span> <span class="pre">frame</span> <span class="pre">class</span> <span class="pre">and</span> <span class="pre">type</span></code></strong> — the frame’s parameters were never applied. Add the <code class="docutils literal notranslate"><span class="pre">--add-param-file</span></code> arguments above; <code class="docutils literal notranslate"><span class="pre">-w</span></code> alone does not help, because there are no defaults for it to reload. Setting <code class="docutils literal notranslate"><span class="pre">FRAME_CLASS</span> <span class="pre">1</span></code> and <code class="docutils literal notranslate"><span class="pre">FRAME_TYPE</span> <span class="pre">1</span></code> by hand and rebooting also arms the Iris, but leaves the frame’s other defaults missing.</p>
+<p><strong>The vehicle arms but does not move</strong> — usually the frame argument. The frame passed to <code class="docutils literal notranslate"><span class="pre">sim_vehicle.py</span></code> has to match the model’s <code class="docutils literal notranslate"><span class="pre">&lt;control&gt;</span></code> channel wiring, and <code class="docutils literal notranslate"><span class="pre">--model</span> <span class="pre">JSON</span></code> has to be present or SITL uses its own internal physics and ignores Gazebo entirely.</p>
+</section>
+<section id="reference">
+<h2>Reference<a class="headerlink" href="#reference" title="Link to this heading"></a></h2>
+<p>Optional background. None of it is needed to follow the steps above.</p>
+<section id="why-a-venv-and-why-not-to-skip-it">
+<span id="why-a-venv"></span><h3>Why a venv, and why not to skip it<a class="headerlink" href="#why-a-venv-and-why-not-to-skip-it" title="Link to this heading"></a></h3>
+<p>On Ubuntu 24.04 and later the script installs ArduPilot’s Python dependencies into a virtual environment at <code class="docutils literal notranslate"><span class="pre">~/venv-ardupilot</span></code> rather than into the system Python. That is worth understanding rather than working around. The system Python is externally managed, so <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> into it is refused without <code class="docutils literal notranslate"><span class="pre">--break-system-packages</span></code>; and ArduPilot pins <code class="docutils literal notranslate"><span class="pre">empy==3.3.4</span></code> while ROS 2’s <code class="docutils literal notranslate"><span class="pre">ament</span></code> uses empy 4.x, so installing their list system-wide would break colcon in a way that is unpleasant to diagnose.</p>
+<p>The venv is created with <code class="docutils literal notranslate"><span class="pre">--system-site-packages</span></code>, so ROS stays visible from inside it. Activate it before <code class="docutils literal notranslate"><span class="pre">waf</span></code> and before <code class="docutils literal notranslate"><span class="pre">sim_vehicle.py</span></code> — a build outside it fails on a missing <code class="docutils literal notranslate"><span class="pre">pexpect</span></code> import.</p>
+<p>Left to itself the script creates <code class="docutils literal notranslate"><span class="pre">~/venv-ardupilot</span></code>, but it looks in the ArduPilot checkout first: if <code class="docutils literal notranslate"><span class="pre">venv-ardupilot</span></code>, <code class="docutils literal notranslate"><span class="pre">venv</span></code> or <code class="docutils literal notranslate"><span class="pre">.venv</span></code> already exists there it uses that instead. Creating it in the checkout is worth the extra line. It keeps the venv beside the source it belongs to rather than loose in a home directory that, under drydock, is shared with the host and already full of things that are not container-specific.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>For drydock: <code class="docutils literal notranslate"><span class="pre">$HOME</span></code> is bind-mounted into the drydock container at the same path, so
+anything the prereq script writes to your home directory appears on the host
+too. Run with <code class="docutils literal notranslate"><span class="pre">-y</span></code> alone and it answers yes to both of its shell-login
+prompts, appending a venv activation and a <code class="docutils literal notranslate"><span class="pre">PATH</span></code> line to your <code class="docutils literal notranslate"><span class="pre">~/.profile</span></code> —
+so every <em>host</em> terminal would then try to activate a venv built against the
+container’s Python. <code class="docutils literal notranslate"><span class="pre">DO_PYTHON_VENV_ENV=0</span></code> suppresses the venv one; decline
+the <code class="docutils literal notranslate"><span class="pre">PATH</span></code> one. Set both explicitly in the environment script instead.</p>
+</div>
+<p>Building <code class="docutils literal notranslate"><span class="pre">rover</span></code> alone is enough for the BlueBoat. <code class="docutils literal notranslate"><span class="pre">./waf</span> <span class="pre">copter</span></code> as well if you want the Iris smoke test below.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="first-simulation.html" class="btn btn-neutral float-left" title="First simulation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../vehicles/index.html" class="btn btn-neutral float-right" title="Vehicles" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Honu Robotics.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: lyrical
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl id="honu-version-list">
+      <dt>Distributions</dt>
+      <dd><a href="/bluerobotics_models/lyrical/" data-version="lyrical">Lyrical</a></dd>
+    </dl>
+  </div>
+</div>
+<script>
+  (function () {
+    var current = "lyrical";
+    var base = "/bluerobotics_models/";
+
+    /* Keep the reader on the same page when switching versions; the
+       version root href stays as the fallback for pages a version lacks. */
+    function wire() {
+      document.querySelectorAll('.rst-other-versions a[data-version]').forEach(function (a) {
+        var target = a.getAttribute('data-version');
+        var path = window.location.pathname;
+        if (target !== current && path.indexOf('/' + current + '/') !== -1) {
+          a.href = path.replace('/' + current + '/', '/' + target + '/');
+        }
+      });
+    }
+
+    if (!window.fetch) { wire(); return; }
+
+    /* The deploy tool maintains versions.json at the site root; reading it
+       at runtime lets builds published before a new distribution existed
+       still offer it in the flyout. Offline or local preview builds fall
+       back to the build time list rendered above. */
+    fetch(base + 'versions.json', {cache: 'no-cache'}).then(function (response) {
+      if (!response.ok) { throw new Error(response.status); }
+      return response.json();
+    }).then(function (entries) {
+      var list = document.getElementById('honu-version-list');
+      if (!list || !entries.length) { return; }
+      list.querySelectorAll('dd').forEach(function (dd) { dd.remove(); });
+      entries.forEach(function (entry) {
+        var a = document.createElement('a');
+        a.href = entry.url;
+        a.setAttribute('data-version', entry.name);
+        a.textContent = entry.name.charAt(0).toUpperCase() + entry.name.slice(1);
+        var dd = document.createElement('dd');
+        dd.appendChild(a);
+        list.appendChild(dd);
+      });
+    }).catch(function () {}).finally(wire);
+  })();
+</script><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
