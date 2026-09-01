@@ -34,7 +34,6 @@
   <!-- Every artifact of this configuration, generated now from config_file. -->
   <let name="vehicle_dir"
        value="$(command '$(find-pkg-prefix blueboat_gazebo)/lib/blueboat_gazebo/configure_vehicle.py --config $(var config_file) --cache')"/>
-  <let name="robot_description" value="$(command 'cat $(var vehicle_dir)/blueboat.urdf')"/>
 
   <!-- Gazebo server (composable) — creates the shared container. -->
   <gz_server world_sdf_file="$(var world)"
@@ -61,7 +60,7 @@
     <composable_node pkg="robot_state_publisher"
                      plugin="robot_state_publisher::RobotStatePublisher"
                      name="robot_state_publisher">
-      <param name="robot_description" value="$(var robot_description)" type="str"/>
+      <param from="$(var vehicle_dir)/robot_description.yaml"/>
       <param name="use_sim_time" value="true" type="bool"/>
     </composable_node>
   </load_composable_node>
@@ -69,7 +68,7 @@
   <!-- ...or a plain node when composition is disabled. -->
   <node pkg="robot_state_publisher" exec="robot_state_publisher"
         name="robot_state_publisher" unless="$(var use_composition)">
-    <param name="robot_description" value="$(var robot_description)"/>
+    <param from="$(var vehicle_dir)/robot_description.yaml"/>
     <param name="use_sim_time" value="true"/>
   </node>
 </launch>
