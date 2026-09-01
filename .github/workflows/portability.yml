@@ -1,0 +1,49 @@
+# Runs the teleop unit tests on macOS and Windows, where the platform
+# branches of joy_map's helper spawn execute natively. ROS 2 comes from
+# RoboStack's conda packages (GitHub runners ship no ROS); the launch and
+# Gazebo suites stay on the Linux build workflow.
+
+name: Portability
+
+on:
+  push:
+    branches: [caguero/portability]
+  workflow_dispatch:
+
+jobs:
+  teleop-unit:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -el {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: ros
+          condarc: |
+            channels:
+              - robostack-staging
+              - conda-forge
+          create-args: >-
+            ros-jazzy-rclpy
+            ros-jazzy-std-msgs
+            ros-jazzy-sensor-msgs
+            ros-jazzy-ament-index-python
+            colcon-common-extensions
+            pytest
+            pyyaml
+            setuptools
+      - name: Build the teleop package
+        run: colcon build --packages-select bluerobotics_teleop --merge-install
+      - name: Run the unit tests
+        run: |
+          export AMENT_PREFIX_PATH="$PWD/install"
+          site=$(ls -d "$PWD"/install/lib/python*/site-packages "$PWD"/install/Lib/site-packages 2>/dev/null | head -1)
+          export PYTHONPATH="$site:$PYTHONPATH"
+          python -m pytest bluerobotics_teleop/test/test_portability.py \
+              bluerobotics_teleop/test/test_configs.py -k "not bridge" -v

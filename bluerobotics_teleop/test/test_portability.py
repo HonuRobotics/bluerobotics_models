@@ -33,11 +33,9 @@ def test_macos_has_no_parent_death_signal(monkeypatch):
     assert kwargs == {'start_new_session': True}
 
 
-def test_windows_uses_a_process_group_and_the_exe_suffix(monkeypatch):
+def test_windows_relies_on_the_exit_cleanup_and_the_exe_suffix(monkeypatch):
     monkeypatch.setattr(sys, 'platform', 'win32')
-    kwargs = joy_map_node.spawn_kwargs()
-    assert 'preexec_fn' not in kwargs and 'start_new_session' not in kwargs
-    assert kwargs['creationflags']
+    assert joy_map_node.spawn_kwargs() == {}
     assert joy_map_node.joy_node_command()[0].endswith('.exe')
 
 

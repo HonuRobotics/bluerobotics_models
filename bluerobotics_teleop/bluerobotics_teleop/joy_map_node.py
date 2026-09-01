@@ -473,18 +473,19 @@ def spawn_kwargs():
     Return the Popen keywords tying the helper's lifetime to ours.
 
     On Linux the kernel delivers SIGTERM to the helper when this process
-    dies, however it dies (PR_SET_PDEATHSIG). macOS has no parent death
-    signal and Windows supports neither process sessions nor pre exec
-    hooks, so there the explicit cleanup on exit is the only reaper.
+    dies, however it dies (PR_SET_PDEATHSIG). No other platform has an
+    equivalent primitive, so there the explicit cleanup on exit is the
+    only reaper. (The hardened alternatives, a Windows Job Object with
+    kill on close or a portable watchdog pipe, are not worth their
+    weight for a walkthrough tool.)
     """
     if sys.platform.startswith('linux'):
         def _die_with_parent():
-            libc = ctypes.CDLL('libc.so.6', use_errno=True)
+            libc = ctypes.CDLL(None, use_errno=True)
             libc.prctl(1, signal.SIGTERM)  # PR_SET_PDEATHSIG
         return {'start_new_session': True, 'preexec_fn': _die_with_parent}
     if sys.platform == 'win32':
-        new_group = getattr(subprocess, 'CREATE_NEW_PROCESS_GROUP', 0x200)
-        return {'creationflags': new_group}
+        return {}  # no parent death tie; the exit cleanup is the reaper
     return {'start_new_session': True}  # macOS and other POSIX
 
 
