@@ -39,11 +39,16 @@ jobs:
             pyyaml
             setuptools
       - name: Build the teleop package
-        run: colcon build --packages-select bluerobotics_teleop --merge-install
+        # An isolated workspace: with the siblings present, colcon would
+        # try to source the unbuilt dependencies' setup files.
+        run: |
+          mkdir -p ci_ws/src
+          cp -r bluerobotics_teleop ci_ws/src/
+          cd ci_ws && colcon build --merge-install
       - name: Run the unit tests
         run: |
-          export AMENT_PREFIX_PATH="$PWD/install"
-          site=$(ls -d "$PWD"/install/lib/python*/site-packages "$PWD"/install/Lib/site-packages 2>/dev/null | head -1)
+          export AMENT_PREFIX_PATH="$PWD/ci_ws/install"
+          site=$(ls -d "$PWD"/ci_ws/install/lib/python*/site-packages "$PWD"/ci_ws/install/Lib/site-packages 2>/dev/null | head -1)
           export PYTHONPATH="$site:$PYTHONPATH"
           python -m pytest bluerobotics_teleop/test/test_portability.py \
               bluerobotics_teleop/test/test_configs.py -k "not bridge" -v
