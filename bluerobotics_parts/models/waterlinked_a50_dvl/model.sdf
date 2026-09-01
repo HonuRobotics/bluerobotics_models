@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
+  <model name="waterlinked_a50_dvl">
+    <link name="waterlinked_a50_dvl_link">
+      <visual name="waterlinked_a50_dvl_visual">
+        <geometry>
+          <mesh>
+            <uri>waterlinked_a50_dvl.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="waterlinked_a50_dvl_collider_cylinder">
+        <pose>-2.2e-05 0.0 0.011188 0.0 -0.0 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.033122</radius>
+            <length>0.02221</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name="waterlinked_a50_dvl_collider_cylinder_001">
+        <pose>0.07245 0.0 0.010832 -0.0 1.570796 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.003503</radius>
+            <length>0.080764</length>
+          </cylinder>
+        </geometry>
+      </collision>
+    </link>
+    <light type="directional" name="Sun">
+      <pose>-0.160163 -0.110226 0.027974 0.0 -0.303211 0.0</pose>
+      <intensity>1.0</intensity>
+      <diffuse>(1.0, 1.0, 1.0, 1.0)</diffuse>
+      <cast_shadows>True</cast_shadows>
+      <specular>1.0, 1.0, 1.0</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.0</linear>
+        <constant>1.0</constant>
+        <quadratic>1.0</quadratic>
+      </attenuation>
+    </light>
+  </model>
+</sdf>
