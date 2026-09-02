@@ -1,6 +1,8 @@
-# teleop_twist_joy mapping, calibrated for the connected pad.
+# Shipped default teleop_twist_joy mapping, shared by every vehicle (a
+# vehicle without a motion, like the boat's sway or heave, zeroes it in
+# its mixer gains). `ros2 run bluerobotics_teleop joy_map` writes a user
+# mapping under $ROS_HOME which the teleop launch prefers over this file.
 # Left stick: surge + yaw. Right stick: sway + heave. RB: deadman.
-# Regenerate with: ros2 run bluerobotics_teleop joy_calibrate --vehicle bluerov2_heavy
 teleop_twist_joy_node:
   ros__parameters:
     axis_linear:

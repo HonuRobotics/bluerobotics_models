@@ -27,6 +27,8 @@ setup(
          ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/launch', glob('launch/*.launch.py')),
+        ('share/' + package_name + '/config/pad',
+         glob('config/pad/*.yaml')),
         ('share/' + package_name + '/config/bluerov2',
          glob('config/bluerov2/*.yaml')),
         ('share/' + package_name + '/config/bluerov2_heavy',
@@ -45,8 +47,8 @@ setup(
         'console_scripts': [
             'twist_to_thrust = '
             'bluerobotics_teleop.twist_to_thrust_node:main',
-            'joy_calibrate = '
-            'bluerobotics_teleop.joy_calibrate_node:main',
+            'joy_map = '
+            'bluerobotics_teleop.joy_map_node:main',
         ],
     },
 )

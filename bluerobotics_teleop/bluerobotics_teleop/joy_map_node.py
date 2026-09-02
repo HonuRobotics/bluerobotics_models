@@ -12,32 +12,55 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Interactive gamepad calibration for the teleop pipeline.
+Interactive gamepad mapping for the teleop pipeline.
 
 A curses walkthrough: capture a no touch baseline, then prompt for each
 control (deadman, motion axes, EPA clicks), detecting buttons vs axes
 against the baseline noise and refusing double assignments. Saving writes
-the two input side configs the teleop launch reads:
+the two input side configs the teleop launch reads, shared by every
+vehicle (a vehicle without a motion zeroes it in its mixer gains):
 
-    config/<vehicle>/joystick.config.yaml   (teleop_twist_joy mapping)
-    config/<vehicle>/twist_to_thrust.yaml   (deadman + EPA input indices)
+    $ROS_HOME/bluerobotics_teleop/pad/joystick.config.yaml
+    $ROS_HOME/bluerobotics_teleop/pad/twist_to_thrust.yaml
 
-The mixer config (thruster topics and gains) is model truth, not user
-preference, and is never touched here. Run with the joystick plugged in:
+The mapping is user state: it lives under $ROS_HOME (default ~/.ros),
+survives rebuilds and needs no permissions from a binary install. The
+launch prefers it over the defaults shipped in the package share; to
+make a mapping the new shipped default, copy the files into the repo's
+bluerobotics_teleop/config/pad/ and commit.
 
-    ros2 run joy joy_node --ros-args -p autorepeat_rate:=20.0 &
-    ros2 run bluerobotics_teleop joy_calibrate --vehicle blueboat
+The per vehicle mixer config (thruster topics and gains) is model truth,
+not user preference, and is never touched here. Run with the joystick
+plugged in:
+
+    ros2 run bluerobotics_teleop joy_map
+
+If nothing is publishing /joy, a joy_node is started for the duration of
+the walkthrough and stopped on exit, however it ends. A
+leftover background joy_node is exactly the thing that used to break the
+next teleop session (two publishers interleaving on /joy, one of them
+autorepeating stale state), so the tool owns its helper's lifetime.
+Running the walkthrough next to a live teleop session still works: its
+joy_node is detected and no second one is started.
 """
 
 import argparse
-import curses
+import ctypes
+try:
+    import curses
+except ImportError:  # Windows ships no curses; the windows-curses wheel does.
+    curses = None
 from dataclasses import dataclass, field
 import os
+import signal
+import subprocess
 import sys
 import threading
+import time
 from typing import Optional
 
-from ament_index_python.packages import get_package_share_directory
+from ament_index_python.packages import get_package_prefix
+from bluerobotics_teleop import pad_paths
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Joy
@@ -45,19 +68,19 @@ import yaml
 
 
 @dataclass
-class CalibrationResult:
+class MappingResult:
     input_type: str   # 'button' or 'axis'
     index: int
     direction: float = 0.0  # +1.0 or -1.0 for axes
 
 
 @dataclass
-class CalibrationStep:
+class MappingStep:
     name: str
     prompt: str
     hint: str
     prefer_button: bool = True
-    result: Optional[CalibrationResult] = None
+    result: Optional[MappingResult] = None
 
 
 @dataclass
@@ -67,11 +90,11 @@ class Baseline:
     noise: list = field(default_factory=list)
 
 
-class JoyCalibrateNode(Node):
+class JoyMapNode(Node):
     """Buffers the latest /joy message for the curses loop."""
 
     def __init__(self) -> None:
-        super().__init__('joy_calibrate')
+        super().__init__('joy_map')
         self.create_subscription(Joy, 'joy', self._joy_cb, 10)
         self._lock = threading.Lock()
         self._latest: Optional[Joy] = None
@@ -90,46 +113,43 @@ class JoyCalibrateNode(Node):
 
 
 COMMON_STEPS = [
-    CalibrationStep(
+    MappingStep(
         'Deadman', 'Press the button for DEADMAN SWITCH',
         'Must be held for any output  [recommended: RB]'),
-    CalibrationStep(
+    MappingStep(
         'Forward', 'Push the axis for FORWARD (surge)',
         'Drives the vehicle along its nose  [recommended: Left stick up]',
         prefer_button=False),
-    CalibrationStep(
+    MappingStep(
         'Yaw', 'Push the axis for YAW LEFT (turn)',
         'Turns the vehicle in place  [recommended: Left stick left]',
         prefer_button=False),
 ]
 
-ROV_STEPS = [
-    CalibrationStep(
+PLANE_STEPS = [
+    MappingStep(
         'Sway', 'Push the axis for SWAY LEFT (strafe)',
         'Translates sideways  [recommended: Right stick left]',
         prefer_button=False),
-    CalibrationStep(
+    MappingStep(
         'Heave', 'Push the axis for HEAVE UP (ascend)',
         'Climbs the water column  [recommended: Right stick up]',
         prefer_button=False),
 ]
 
 EPA_STEPS = [
-    CalibrationStep(
+    MappingStep(
         'EPA+', 'Press the input for THRUST EPA UP',
         'Raise the thrust ceiling by 10%  [recommended: D pad up]'),
-    CalibrationStep(
+    MappingStep(
         'EPA-', 'Press the input for THRUST EPA DOWN',
         'Lower the thrust ceiling by 10%  [recommended: D pad down]'),
 ]
 
 
-def steps_for(vehicle):
-    """Return the calibration walk: common steps + planes it moves in."""
-    steps = list(COMMON_STEPS)
-    if vehicle.startswith('bluerov2'):
-        steps += ROV_STEPS
-    return steps + EPA_STEPS
+def all_steps():
+    """Return the full mapping walk: every function any vehicle uses."""
+    return list(COMMON_STEPS) + PLANE_STEPS + EPA_STEPS
 
 
 def capture_baseline(stdscr, node, steps, n_samples=20, timeout_sec=5.0):
@@ -215,16 +235,16 @@ def detect_input(msg, baseline, step):
 
     if step.prefer_button:
         if len(btn_hits) == 1:
-            return CalibrationResult('button', btn_hits[0])
+            return MappingResult('button', btn_hits[0])
         if len(axis_hits) == 1 and not btn_hits:
             idx, d = axis_hits[0]
-            return CalibrationResult('axis', idx, d)
+            return MappingResult('axis', idx, d)
     else:
         if len(axis_hits) == 1:
             idx, d = axis_hits[0]
-            return CalibrationResult('axis', idx, d)
+            return MappingResult('axis', idx, d)
         if len(btn_hits) == 1 and not axis_hits:
-            return CalibrationResult('button', btn_hits[0])
+            return MappingResult('button', btn_hits[0])
 
     return None
 
@@ -245,7 +265,7 @@ def conflicts_with(steps, result, step_idx):
     return None
 
 
-def calibrate_step(stdscr, node, baseline, steps, step_idx):
+def map_step(stdscr, node, baseline, steps, step_idx):
     step = steps[step_idx]
     stdscr.clear()
     draw_header(stdscr, step.name, step_idx + 1, len(steps))
@@ -309,7 +329,7 @@ def calibrate_step(stdscr, node, baseline, steps, step_idx):
 def show_summary(stdscr, steps, output_dir):
     stdscr.clear()
     h, w = stdscr.getmaxyx()
-    stdscr.addnstr(0, 2, 'CALIBRATION COMPLETE', w - 4, curses.A_BOLD)
+    stdscr.addnstr(0, 2, 'MAPPING COMPLETE', w - 4, curses.A_BOLD)
     stdscr.addnstr(1, 2, '=' * min(40, w - 4), w - 4)
 
     for i, step in enumerate(steps):
@@ -396,7 +416,7 @@ def format_result(result):
 
 def draw_header(stdscr, name, step_num, total):
     h, w = stdscr.getmaxyx()
-    title = 'JOYSTICK CALIBRATION'
+    title = 'JOYSTICK MAPPING'
     step_str = f'Step {step_num}/{total}' if step_num > 0 else 'Baseline'
     pad = max(1, w - len(title) - len(step_str) - 4)
     stdscr.addnstr(0, 2, title + ' ' * pad + step_str, w - 4, curses.A_BOLD)
@@ -424,7 +444,7 @@ def run_curses(stdscr, node, steps, output_dir):
     if baseline is None:
         return
     for i in range(len(steps)):
-        if calibrate_step(stdscr, node, baseline, steps, i) is None:
+        if map_step(stdscr, node, baseline, steps, i) is None:
             return
     if show_summary(stdscr, steps, output_dir):
         paths = save_configs(steps, output_dir)
@@ -440,17 +460,64 @@ def run_curses(stdscr, node, steps, output_dir):
         stdscr.getch()
 
 
+def joy_node_command():
+    """Return the joy_node command line for this platform."""
+    exe = os.path.join(get_package_prefix('joy'), 'lib', 'joy', 'joy_node')
+    if sys.platform == 'win32':
+        exe += '.exe'
+    return [exe, '--ros-args', '-p', 'autorepeat_rate:=20.0']
+
+
+def spawn_kwargs():
+    """
+    Return the Popen keywords tying the helper's lifetime to ours.
+
+    On Linux the kernel delivers SIGTERM to the helper when this process
+    dies, however it dies (PR_SET_PDEATHSIG). No other platform has an
+    equivalent primitive, so there the explicit cleanup on exit is the
+    only reaper. (The hardened alternatives, a Windows Job Object with
+    kill on close or a portable watchdog pipe, are not worth their
+    weight for a walkthrough tool.)
+    """
+    if sys.platform.startswith('linux'):
+        def _die_with_parent():
+            libc = ctypes.CDLL(None, use_errno=True)
+            libc.prctl(1, signal.SIGTERM)  # PR_SET_PDEATHSIG
+        return {'start_new_session': True, 'preexec_fn': _die_with_parent}
+    if sys.platform == 'win32':
+        return {}  # no parent death tie; the exit cleanup is the reaper
+    return {'start_new_session': True}  # macOS and other POSIX
+
+
 def main(args=None):
-    parser = argparse.ArgumentParser(description='Calibrate a gamepad')
-    parser.add_argument('--vehicle', default='bluerov2',
-                        choices=['blueboat', 'bluerov2', 'bluerov2_heavy'])
-    known, ros_args = parser.parse_known_args(
+    if curses is None:
+        sys.exit('joy_map needs the curses module; on Windows install the '
+                 'windows-curses package (python -m pip install '
+                 'windows-curses)')
+    parser = argparse.ArgumentParser(
+        description='Map a gamepad to the teleop functions')
+    _, ros_args = parser.parse_known_args(
         args if args is not None else sys.argv[1:])
 
     rclpy.init(args=ros_args)
-    node = JoyCalibrateNode()
+    node = JoyMapNode()
     executor = rclpy.executors.SingleThreadedExecutor()
     executor.add_node(node)
+
+    # Self-contained input: if nobody is publishing /joy (no teleop session
+    # up), run our own joy_node for the walkthrough and stop it on exit.
+    # autorepeat is required: without it joy_node stays silent while no
+    # control moves and the baseline capture times out. The executable is
+    # spawned directly (no ros2 run wrapper, which does not forward
+    # signals reliably), tied to this process as tightly as the platform
+    # allows (see spawn_kwargs).
+    joy_proc = None
+    time.sleep(0.5)  # let discovery settle before counting publishers
+    if node.count_publishers('joy') == 0:
+        joy_proc = subprocess.Popen(
+            joy_node_command(),
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            **spawn_kwargs())
 
     def _spin():
         try:
@@ -461,20 +528,25 @@ def main(args=None):
     spin_thread = threading.Thread(target=_spin, daemon=True)
     spin_thread.start()
 
-    steps = steps_for(known.vehicle)
-    output_dir = os.path.join(
-        get_package_share_directory('bluerobotics_teleop'),
-        'config', known.vehicle)
+    steps = all_steps()
+    output_dir = str(pad_paths.user_pad_dir())
     try:
         curses.wrapper(
             lambda stdscr: run_curses(stdscr, node, steps, output_dir))
     except KeyboardInterrupt:
         pass
     finally:
+        if joy_proc is not None:
+            try:
+                joy_proc.terminate()
+                joy_proc.wait(timeout=3.0)
+            except (ProcessLookupError, subprocess.TimeoutExpired):
+                joy_proc.kill()
         executor.shutdown()
         spin_thread.join(timeout=2.0)
         node.destroy_node()
         rclpy.try_shutdown()
+    print(f'Pad mapping directory: {output_dir}')
 
 
 if __name__ == '__main__':
