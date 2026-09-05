@@ -3,37 +3,42 @@
 Working document as a part of the new modeling workflow. The intent is to review the background (what is our sources of truth for model file formats and review?) and work throught the suggestions (see `docs/reference/asset-spec.md`) on what to assess for each glTF/GLB file.  
 
 The document has two halves. 
-1. Sections 0 to 6 are the audit proper: the ground rules, what GLB is and what our consumers do with it, the tools that decide each question, then the draft spec item by item, the delivered files measured, and the two artifact reports that came with the draft. Those sections stay about the draft spec and can be read on their own. 
-2. Sections 7 to 9 go the other way, proposing guidelines the audit says are missing rather than judging ones that exist: pinning the authoring tools as part of the project's version stack, reconciling the draft against the guidelines this repo already has, and the topics neither document covers. Section 10 collects everything that needs a decision from the team.
+1. Sections 0 to 6 are the audit proper - % CLAUDE: provide a succinct, laymens terms, description of what and why.
+2. Sections 7 to 9 go the other way, proposing guidelines the audit says are missing rather than judging ones that exist: pinning the authoring tools as part of the project's version stack, reconciling the draft against the guidelines this repo already has, and the topics neither document covers. Section 10 collects everything that needs a decision from the team. % CLAUDE: This reads as AI slop.
 
 ## Context / Starting Point
 
-- [asset-spec.md](asset-spec.md), the draft from Carlos, kept unmodified alongside this document. Superseded by [model-spec.md](model-spec.md), which is where the rules now live. Section 3 audits the original.
+- [asset-spec.md](asset-spec.md), the draft from Carlos, kept unmodified alongside this document. 
 - Two Claude artifacts Carlos linked, the "Parts Library Audit" (the 12 non-chassis parts) and the "BlueBoat Chassis Audit", both dated 2026-09-03 and both measured by a direct GLB parse against the draft spec. They could not be fetched from this session (public, non-member pages), so their text was pasted in and is reproduced verbatim alongside this document as [ASSET_AUDIT_PARTS_LIBRARY.md](ASSET_AUDIT_PARTS_LIBRARY.md) and [ASSET_AUDIT_BLUEBOAT_CHASSIS.md](ASSET_AUDIT_BLUEBOAT_CHASSIS.md); section 6 audits them. A third, the "BlueROV2 Chassis Audit", is referenced by both as a companion and has not been seen.
 - What this repo already decided: `docs/design/parts.md` (mesh conventions), `docs/how-to/add-part.md` (the acceptance steps), the earlier README section "Accepting a new part" (commit `b5daead`, August 2026), and the sandbox findings carried over from the vrx4 branch.
 - The delivered files themselves: 15 `.visual.glb` under `bluerobotics_parts/models/`, all exported by `Khronos glTF Blender I/O v5.1.20` which specifies the Blender add-on (`io_scene_gltf2`), co-maintained by Blender Foundation and Khronos Group.
 - The Gazebo project's own written record on glTF: docs, changelogs, trackers and PMC minutes, surveyed 2026-09-04 and reported in section 1.8.
+% CLAUDE: Add glTF spec and link
+% CLAUDE: Add ROS REP 103 (check number)
 
 ## Main Issues
 
-We (Honu) are new to the details of glTF and how they are rendered in verious tools.   The points below are meant as the highest-level topics that are affecting this workflow.
+The points below are meant as the highest-level topics that are affecting this workflow.
 
-* The [glTF 2.0 specification](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html) covers a larger scope of 3D asset use cases that required by this project.    The spec for glTF assets includes a large variety arrays (e.g., scene, node, camera, animation, skin, etc. ) that are not pertinent to this use case.   (The glTF spec is almost complex enough to be used as an SDF or URDF replacement.  For this project we must be intentional about what subset of functionality is being used so thta we (and our agents) don't naively apply the entire specification.     We started by using glTF as a drop-in replacement for Collada mesh + 1 PNG texture.  Doing so naively was a mistake as the glTF, in its full scope, is not really compartable to Collada .dae mesh plus a single texture.   
+* Incorrect mental model.   The current workflow was based on an incorrect idea that glb assets could be thought of as direct, drop-in replacement for a DAE Collada file referencing a paired PNG texture file.  Consequently, we largely ignored that the [glTF 2.0 specification](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html) covers a much larger scope of 3D asset use cases that required by this project.    The spec for glTF assets includes a large variety arrays (e.g., scene, node, camera, animation, skin, etc. ) that are not pertinent to this use case.   (The glTF spec is almost complex enough to be used as an SDF or URDF replacement.)  For this project we must be intentional about what subset of functionality is being used so thta we (and our agents) don't naively apply the entire specification.  
 * Multiple sources of "truth".  Ryan is mainly looking at Blender, I'm mainly looking at Gazebo (and accidently tried an older version of Gazebo) and Carlos is using Gazebo and other viewers such as F3D, as well as Claude introspection of the file contents against `asset-spec.md`.   We all are "seeing" different rendering behavior and we currently lack an agreed up common source of "truth"
 
 ## 0. Background
 
 ### 0.1 Sources of truth
 
-**Design goal: rest on external standards.** Stated up front because it governs everything below. This workflow is built on published standards owned by other people, and defines project convention only where no standard reaches. The mesh format is glTF 2.0 as Khronos specifies it, including its metallic-roughness material model. The coordinate conventions and units are ROS REP 103. The description formats are URDF and SDF. Conformance is judged by the tool Khronos publishes for the purpose, not by our own reading.
-
-This is a deliberate constraint rather than a default. A project-local convention has to be taught to every modeler, defended in every review and remembered by everyone who touches the pipeline, and it silently diverges from the tools around it. A standard is documented by someone else, understood by people we have not hired yet, and supported by software we did not write. The audit sections that follow are largely the consequence of taking this seriously: much of what the draft spec asserted was project folklore that the standard either already settles or never claimed.
-
-Two obligations come with it. Where we depart from a standard, the departure is explicit, justified and written where the person affected will read it, never left as a silent local habit. And where a standard genuinely says nothing, we say that too, rather than implying an authority that does not exist. Section 1.9 works through the case where both apply.
+Our goal is that our conventions, embodied in the model specification document (model-spec.md), rest on external standards.  We do not want to stray from these specifications and conventions unless absolutely necessary; and where there is a departure from the underlying standards/specifications/conventions we state that explicilty and document it clearly in model-spec.md.   Where a standard genuinely says nothing, we say that too, rather than implying an authority that does not exist. If our conventions are silent on an topic, the default assumption is to be consistent with the underlying standard.  
 
 Three different things get called "correct" in this work, and they disagree with each other. Every finding in this document is measured against one of them and says which.
 
-| | Truth | Defined by | Tool that decides |
+
+% CLAUDE: Refactor this table with rows as follows:
+- Truth
+- Assessment (how is correctness evaluated)
+- How we do it now
+- Proposed method
+% CLAUDE: EOF
+| | Truth | Defined by | Tool that decides | 
 |---|---|---|---|
 | T1 | The format | The [glTF 2.0 specification](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html) (registry revision 2.0.1) and the Khronos extension registry. | The Khronos glTF Validator, the conformance tool Khronos maintains (version 2.0.0-dev.3.10, linux64 release binary). Zero errors means the file is glTF. Evidence tag V. |
 | T2 | The intended appearance | What a conformant renderer shows for the file. Khronos maintains the glTF Sample Viewer as the reference renderer for exactly this question. | The glTF Sample Viewer, in a browser. Not Blender, see below. Evidence tag R. |
