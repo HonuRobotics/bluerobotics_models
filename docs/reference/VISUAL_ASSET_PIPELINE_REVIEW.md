@@ -23,7 +23,11 @@ We (Honu) are new to the details of glTF and how they are rendered in verious to
 
 ### 0.1 Sources of truth
 
+**Design goal: rest on external standards.** Stated up front because it governs everything below. This workflow is built on published standards owned by other people, and defines project convention only where no standard reaches. The mesh format is glTF 2.0 as Khronos specifies it, including its metallic-roughness material model. The coordinate conventions and units are ROS REP 103. The description formats are URDF and SDF. Conformance is judged by the tool Khronos publishes for the purpose, not by our own reading.
 
+This is a deliberate constraint rather than a default. A project-local convention has to be taught to every modeler, defended in every review and remembered by everyone who touches the pipeline, and it silently diverges from the tools around it. A standard is documented by someone else, understood by people we have not hired yet, and supported by software we did not write. The audit sections that follow are largely the consequence of taking this seriously: much of what the draft spec asserted was project folklore that the standard either already settles or never claimed.
+
+Two obligations come with it. Where we depart from a standard, the departure is explicit, justified and written where the person affected will read it, never left as a silent local habit. And where a standard genuinely says nothing, we say that too, rather than implying an authority that does not exist. Section 1.9 works through the case where both apply.
 
 Three different things get called "correct" in this work, and they disagree with each other. Every finding in this document is measured against one of them and says which.
 
@@ -312,6 +316,50 @@ Open items worth watching, all of which would change something in section 1:
 | gz-rendering | 60, Ogre2 transparency | open since 2020 | Transparent-object sorting, the pass our BLEND advice avoids |
 | gz-rendering | 267, negative scale inverts normals | open since 2021 | A mirrored part delivered with negative scale would shade wrong |
 | gazebosim/docs | 308, best practices for 3D designs | open since 2022 | Where a maintainer asked for the supported-format list |
+
+### 1.9 Frames and origins: what glTF fixes, and what it leaves to us
+
+The origin question runs through this whole review, and it is the clearest case of the design goal in section 0.1 meeting its limit. Part of it is settled by the standard and we should simply adopt what the standard says. Part of it the standard declines to address at all, and no amount of reading Khronos documentation will produce an answer. Separating those two parts is what makes a convention writable, teachable and checkable, so it is worth doing carefully rather than by intuition.
+
+**Two questions that sound like one.** They have opposite answers.
+
+1. Do the meshes in a file share a coordinate system? Yes, always, by construction. The standard guarantees it.
+2. Where is that coordinate system's zero, relative to the model? The standard has no opinion whatsoever. This one is ours.
+
+**How the sharing works.** In the specification's own vocabulary, a primitive's `POSITION` accessor holds "Unitless XYZ vertex positions" in the mesh's local space. A mesh carries no transform of its own; it is instantiated by a node through `node.mesh`, and the same mesh may be instantiated by several nodes with different transforms. A node may define a local space transform, either a `matrix` or the TRS properties `translation`, `rotation` and `scale`. Nodes form the node hierarchy, and a node without a parent is a root node, named by the scene.
+
+The composition rule is the part that matters: "The global transformation matrix of a node is the product of the global transformation matrix of its parent node and its own local transformation matrix. When the node has no parent node, its global transformation matrix is identical to its local transformation matrix."
+
+So every vertex in a file reaches one shared space by composing transforms up the tree. That shared space is the common coordinate system, and it exists whether or not anyone thought about it.
+
+**Primitives cannot fragment it.** A primitive carries only `attributes`, `indices`, `material` and `mode`. It has no transform, and neither does a mesh. Only nodes do. The specification gives the reason a mesh is split into primitives directly: "Splitting one mesh into several primitives can be useful to limit the number of indices per draw call or to assign different materials to different parts of the mesh."
+
+This settles a question that would otherwise look alarming. The BlueROV2 chassis is seven primitives, and they share one mesh under one node, so they share one origin by construction. Multi-material geometry cannot break the frame, because there is nowhere to put a per-primitive transform. That part has a material problem and a naming problem. It does not have a frame problem.
+
+**What the standard does not provide.** There is no pivot, no origin declaration, no named frame, no metadata of any kind saying where zero is meant to sit. The word pivot appears once in the entire specification and not in this sense. The origin is simply wherever the composed numbers evaluate to zero. A file cannot express intent about its own origin, so a statement like "the origin belongs at the mounting face" has no representation in glTF and no validator could ever check it.
+
+**Where our origins actually come from.** Upstream of the file, in Blender, two separate things the modeler controls decide it. The object origin determines what the vertex coordinates are measured from. The object's placement in the scene is decomposed by the exporter into the node's TRS properties, with the Y-up conversion applied on the way. Across the library:
+
+| | Files | Consequence |
+|---|---|---|
+| Single root node with no TRS properties, so an identity local transform | 12 | The `POSITION` values are the placement exactly as authored |
+| Single root node carrying a `translation` of about 3 mm | 3, the T200 family | The `POSITION` values are offset by that translation |
+
+Every delivery is a single root node, so global transform equals local transform throughout, and the file's root node space is the part frame.
+
+**Why the convention has to live outside the mesh.** This is the practical conclusion, and it follows directly from the two answers above. Because the format cannot state where the origin belongs and no tool can check it, the rule belongs in the asset spec and in each part's macro comment, and compliance is established by measurement rather than by validation. The measurement is to read the `POSITION` accessor's `min` and `max`, which the specification requires to be present, and compose the node's local transform. One caveat for whoever writes that check: accessor bounds are mesh-local, so a check that reads them alone is wrong for the three files carrying a node translation.
+
+**Where the common frame lives across parts.** Within a file, glTF composes everything into one space. Across parts it does nothing at all, because our parts are separate files. The composition happens in the URDF instead, where the assembly places parts with joints and the attach vector folds each part's origin into its mounting joint. So the division of labor is clean today: glTF owns the frame inside a part, the xacro owns every frame relationship between parts, and each file is one part in one frame.
+
+That division is exactly what a multi-node delivery would blur, by moving some composition out of the xacro and into the mesh file, which is the trade-off sitting underneath the unresolved question in section 10, decision 15.
+
+**What this means for the guidelines.** Three things follow, and they shape what our conventions can usefully say:
+
+- A rule about the origin can only be a statement about measurable geometry, because that is the only form anything downstream can verify. "Centered in plan, zero on the mounting plane" is checkable. "At a sensible mounting point" is not.
+- The rule has to be recorded per part outside the mesh, or a replacement mesh cannot reproduce it, and redelivery becomes a guess. This is the same gap as the missing provenance in section 9.1.
+- The choice costs nothing at load time, whichever way it goes, because the attach vector absorbs any origin. The entire cost is in reproducibility and review, which is precisely why it has drifted this far without breaking anything.
+
+The open decision itself, with what the library measurably does today and the trade-offs between the candidate rules, is in section 1.1 and section 10, decision 2.
 
 ## 2. Verification tooling and criteria
 
