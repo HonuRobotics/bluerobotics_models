@@ -1,19 +1,19 @@
-# Visual mesh specification
+# Visual model specification
 
 Version 0.1, draft. Supersedes the earlier "Visual asset spec" draft, whose original text is preserved in git history at commit `5d808b1`.
 
-This specification states what a delivered visual mesh must be. The reasoning behind each rule, the evidence for it, and the record of what was measured and verified is kept separately in [VISUAL_ASSET_PIPELINE_REVIEW.md](VISUAL_ASSET_PIPELINE_REVIEW.md). Rules live here. Rationale lives there, and in the Implementation Notes below.
+This specification states what a delivered visual model must be. The reasoning behind each rule, the evidence for it, and the record of what was measured and verified is kept separately in [VISUAL_ASSET_PIPELINE_REVIEW.md](VISUAL_ASSET_PIPELINE_REVIEW.md). Rules live here. Rationale lives there, and in the Implementation Notes below.
 
 ## 1. Introduction
 
 ### 1.1 Scope
 
-This specification constrains the visual meshes delivered for the parts library. It does not replace the standards it builds on. It selects a subset of them, and adds project requirements only where those standards are silent.
+This specification constrains the visual models delivered for the parts library. It does not replace the standards it builds on. It selects a subset of them, and adds project requirements only where those standards are silent.
 
 It specifies:
 
 - the file format, and the subset of it that may be used
-- the coordinate system, units and frame of a delivered mesh
+- the coordinate system, units and frame of a delivered model
 - geometry, material, texture and transparency requirements
 - what accompanies a delivery, and how a delivery is checked
 
@@ -43,7 +43,7 @@ A future generalization would keep the former and replace the latter. Contributo
 
 This specification addresses two parties:
 
-- **the modeler**, who authors and delivers a mesh
+- **the modeler**, who authors and delivers a model
 - **the integrator**, who accepts a delivery and maintains the part that uses it
 
 Requirements are imposed only on the audience of the text stating them. Where the audience is not obvious from context, it is named.
@@ -71,19 +71,19 @@ An Undecided block imposes no requirement. It is included rather than omitted so
 The definitions below govern within this specification and supersede any other meaning these terms may carry elsewhere. Terms drawn from glTF keep their glTF meaning and are marked.
 
 part::
-A single physical component: one mesh, geometry only, no joints. The unit this specification delivers.
+A single physical component, geometry only, no joints. The unit this specification delivers.
+
+model::
+The visual geometry delivered for a part: the file `<part>.visual.glb` and its contents. Used in preference to "mesh" throughout, because whether a part is one glTF mesh, one node or several is undecided (section 5.5), and "mesh" would prejudge it.
 
 mesh::
-In this document, the file delivered for a part, `<part>.visual.glb`. Where the glTF meaning is intended, the text says glTF mesh.
-
-glTF mesh::
-As in glTF 2.0: an array of primitives, carrying no transform of its own.
+As in glTF 2.0: an array of primitives, carrying no transform of its own. Used only in that sense.
 
 primitive::
 As in glTF 2.0: the unit of a draw call, holding `attributes`, `indices`, an optional `material` and a `mode`. Carries no transform.
 
 node::
-As in glTF 2.0: an object in the node hierarchy that may carry a local transform and may instantiate a glTF mesh.
+As in glTF 2.0: an object in the node hierarchy that may carry a local transform and may instantiate a mesh.
 
 part frame::
 The coordinate frame in which a part's macro expresses its attach point, slots and frames. Defined by REP 103: x forward, y left, z up.
@@ -100,7 +100,7 @@ The word "asset" is not used in this specification. In 3D work it spans meshes, 
 
 ### 4.1 Files
 
-A delivery MUST include a visual mesh named `<part>.visual.glb`, where `<part>` is the part name.
+A delivery MUST include a visual model named `<part>.visual.glb`, where `<part>` is the part name.
 
 The part name MUST be lowercase snake_case, and MUST match the directory it is delivered into. Naming rules for parts are given in [Parts](../design/parts.md) and are not repeated here.
 
@@ -110,7 +110,7 @@ The part name MUST be lowercase snake_case, and MUST match the directory it is d
 
 ### 4.2 Format
 
-The mesh MUST be glTF 2.0 in the binary container, `.glb`.
+The model MUST be glTF 2.0 in the binary container, `.glb`.
 
 The file MUST validate against the Khronos glTF Validator with zero errors. Validator warnings and infos MUST be reviewed but do not by themselves fail a delivery.
 
@@ -128,7 +128,7 @@ The Blender scene unit scale MUST be 1.0, and object scale MUST be applied befor
 
 ### 5.2 Up axis
 
-The mesh MUST be Y-up, as glTF specifies.
+The model MUST be Y-up, as glTF specifies.
 
 **Implementation Note.** This is not a stylistic preference. Every consumer converts on the assumption that glTF is Y-up. RViz rotates a glTF mesh as it loads, and the part macro applies the matching rotation for Gazebo. A Z-up file renders correctly in one and wrong in the other.
 
@@ -162,7 +162,7 @@ Every primitive MUST provide `POSITION`, `NORMAL` and `TEXCOORD_0`.
 
 Normals MUST be authored, with hard edges where the part has them. A file delivered without normals will have them generated on import, discarding the author's intent.
 
-The mesh SHOULD NOT contain degenerate, zero-area triangles.
+The model SHOULD NOT contain degenerate, zero-area triangles.
 
 `TANGENT` is OPTIONAL and is NOT REQUIRED.
 
@@ -170,7 +170,7 @@ The mesh SHOULD NOT contain degenerate, zero-area triangles.
 
 ### 6.1 UV sets
 
-The mesh MUST have exactly one UV set, `TEXCOORD_0`, with coordinates inside the range 0 to 1.
+The model MUST have exactly one UV set, `TEXCOORD_0`, with coordinates inside the range 0 to 1.
 
 A second UV set MAY be used, and then only to carry a baked ambient occlusion lightmap.
 
@@ -255,7 +255,7 @@ Until that is decided, a delivery MUST record the exporter that produced it, whi
 A delivery conforms when all of the following hold. The first two are the modeler's responsibility, the third and fourth the integrator's.
 
 1. **Valid.** Zero errors from the Khronos glTF Validator.
-2. **Intended.** The mesh renders as the modeler intended in a conformant viewer. The Khronos glTF Sample Viewer is the reference. Blender's viewport is not, because it shows Blender's materials rather than the exported file.
+2. **Intended.** The model renders as the modeler intended in a conformant viewer. The Khronos glTF Sample Viewer is the reference. Blender's viewport is not, because it shows Blender's materials rather than the exported file.
 3. **Compliant.** Every MUST in this specification is satisfied, checked mechanically where possible.
 4. **Usable.** The part renders correctly in Gazebo and loads in RViz.
 
