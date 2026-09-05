@@ -1,0 +1,64 @@
+<?xml version="1.0" ?>
+<sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
+  <model name="newton_sampler_cup_opposite">
+    <link name="newton_sampler_cup_opposite_link">
+      <visual name="newton_sampler_cup_opposite_visual">
+        <geometry>
+          <mesh>
+            <uri>newton_sampler_cup_opposite.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="cup001_collider_cylinder_001">
+        <pose>0.028941 -0.00058 0.09431 -3.141593 1.570796 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.014117</radius>
+            <length>0.044084</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name="cup001_collider_cylinder">
+        <pose>0.004298 -0.00058 0.094053 -3.141593 1.570796 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.058885</radius>
+            <length>0.009412</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name="cup001_collider_box_003">
+        <pose>0.006885 0.000443 0.015514 0.0 -0.0 3.141593</pose>
+        <geometry>
+          <box>
+            <size>0.032426 0.007063 0.010879</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="cup001_collider_box_002">
+        <pose>0.023971 0.000286 0.023411 0.0 -0.917658 3.141593</pose>
+        <geometry>
+          <box>
+            <size>0.011384 0.014647 0.029109</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="cup001_collider_box_001">
+        <pose>0.040372 0.000286 0.045337 0.0 -0.374849 3.141593</pose>
+        <geometry>
+          <box>
+            <size>0.011384 0.014647 0.028339</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="cup001_collider_box">
+        <pose>0.045165 0.000286 0.072131 0.0 -0.0 3.141593</pose>
+        <geometry>
+          <box>
+            <size>0.011384 0.014647 0.028339</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

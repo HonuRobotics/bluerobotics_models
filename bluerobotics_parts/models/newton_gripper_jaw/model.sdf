@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
+  <model name="newton_gripper_jaw">
+    <link name="newton_gripper_jaw_link">
+      <visual name="newton_gripper_jaw_visual">
+        <geometry>
+          <mesh>
+            <uri>newton_gripper_jaw.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="jaw_collider_box">
+        <pose>-0.007902 -0.004375 0.015547 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.036331 0.004846 0.010934</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="jaw_collider_box_001">
+        <pose>-0.007902 0.005449 0.015547 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.036331 0.004846 0.010934</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="jaw_collider_box001_collider_box">
+        <pose>-0.015037 0.000509 0.034342 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.023428 0.014302 0.026736</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="jaw_collider_box001_collider_box_001">
+        <pose>-0.011203 0.000509 0.057703 0.0 0.382774 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.018738 0.014302 0.030619</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="jaw_collider_box001_collider_box_002">
+        <pose>0.001521 0.000509 0.077561 0.0 0.625179 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.013125 0.014302 0.020273</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

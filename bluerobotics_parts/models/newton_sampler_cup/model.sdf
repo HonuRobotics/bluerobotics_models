@@ -1,0 +1,72 @@
+<?xml version="1.0" ?>
+<sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
+  <model name="newton_sampler_cup">
+    <link name="newton_sampler_cup_link">
+      <visual name="newton_sampler_cup_visual">
+        <geometry>
+          <mesh>
+            <uri>newton_sampler_cup.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="cup001_collider_cylinder_001001">
+        <pose>-0.004298 0.00058 0.094053 -0.0 1.570796 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.058885</radius>
+            <length>0.009412</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name="cup001_collider_cylinder_002">
+        <pose>-0.028941 0.00058 0.09431 -0.0 1.570796 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.014117</radius>
+            <length>0.044084</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name="cup001_collider_box_001_002">
+        <pose>-0.045165 0.00058 0.072131 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.011384 0.014647 0.028339</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="cup001_collider_box_001_001">
+        <pose>-0.040372 0.00058 0.045337 0.0 -0.374849 -0.0</pose>
+        <geometry>
+          <box>
+            <size>0.011384 0.014647 0.028339</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="cup001_collider_box_002_001">
+        <pose>-0.023971 0.00058 0.023411 0.0 -0.917658 -0.0</pose>
+        <geometry>
+          <box>
+            <size>0.011384 0.014647 0.029109</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="cup001_collider_box_0031">
+        <pose>-0.006885 -0.005334 0.015514 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.032426 0.004209 0.010879</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="cup001_collider_box_004">
+        <pose>-0.006885 0.00622 0.015514 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.032426 0.004209 0.010879</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

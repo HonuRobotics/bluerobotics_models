@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
+  <model name="newton_gripper_shaft">
+    <link name="newton_gripper_shaft_link">
+      <visual name="newton_gripper_shaft_visual">
+        <geometry>
+          <mesh>
+            <uri>newton_gripper_shaft.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="cylinder001_collider_cylinder">
+        <pose>-4e-06 0.000514 -0.02263 0.0 0.0 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.004784</radius>
+            <length>0.051263</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name="cylinder001_collider_box">
+        <pose>-4e-06 0.000514 0.001972 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.012188 0.024629 0.004149</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="cylinder001_collider_box_001">
+        <pose>-4e-06 -0.009158 0.012087 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.012188 0.003911 0.018168</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="cylinder001_collider_box_002">
+        <pose>-4e-06 0.010329 0.012087 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.012188 0.003911 0.018168</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>
