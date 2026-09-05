@@ -1,0 +1,61 @@
+<?xml version="1.0" ?>
+<sdf xmlns:intrinsic="https://intrinsic.ai/" version="1.9">
+  <model name="omniscan_450fs_imaging">
+    <link name="omniscan_450fs_imaging_link">
+      <visual name="omniscan_450fs_imaging_visual">
+        <geometry>
+          <mesh>
+            <uri>omniscan_450fs_imaging.visual.glb</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="cube_collider_box">
+        <pose>0.004364 0.0 0.004894 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.201226 0.067203 0.010181</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="cube_collider_box_001">
+        <pose>0.004364 0.0 0.032998 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.176246 0.058861 0.047444</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name="cube_collider_cylinder">
+        <pose>-0.064238 0.0 -0.008973 0.0 0.0 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.007967</radius>
+            <length>0.019646</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name="cube_collider_cylinder_001">
+        <pose>-0.064238 0.0 -0.034386 0.0 0.0 0.0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.002777</radius>
+            <length>0.031468</length>
+          </cylinder>
+        </geometry>
+      </collision>
+    </link>
+    <light type="directional" name="Sun">
+      <pose>-0.160163 -0.110226 0.027974 0.0 -0.303211 0.0</pose>
+      <intensity>1.0</intensity>
+      <diffuse>(1.0, 1.0, 1.0, 1.0)</diffuse>
+      <cast_shadows>True</cast_shadows>
+      <specular>1.0, 1.0, 1.0</specular>
+      <attenuation>
+        <range>10</range>
+        <linear>0.0</linear>
+        <constant>1.0</constant>
+        <quadratic>1.0</quadratic>
+      </attenuation>
+    </light>
+  </model>
+</sdf>
