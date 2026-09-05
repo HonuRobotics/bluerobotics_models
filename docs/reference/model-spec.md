@@ -1,6 +1,6 @@
 # Visual model specification
 
-Version 0.1, draft. Supersedes the earlier "Visual asset spec" draft, whose original text is preserved in git history at commit `5d808b1`.
+Version 0.1, draft. Supersedes the earlier "Visual asset spec" draft, which is kept alongside this document as [asset-spec.md](asset-spec.md) and audited in section 3 of the review.
 
 This specification states what a delivered visual model must be. The reasoning behind each rule, the evidence for it, and the record of what was measured and verified is kept separately in [VISUAL_ASSET_PIPELINE_REVIEW.md](VISUAL_ASSET_PIPELINE_REVIEW.md). Rules live here. Rationale lives there, and in the Implementation Notes below.
 

@@ -2,11 +2,13 @@
 
 Working document as a part of the new modeling workflow. The intent is to review the background (what is our sources of truth for model file formats and review?) and work throught the suggestions (see `docs/reference/asset-spec.md`) on what to assess for each glTF/GLB file.  
 
-The document has two halves. Sections 0 to 6 are the audit proper: the ground rules, what GLB is and what our consumers do with it, the tools that decide each question, then the draft spec item by item, the delivered files measured, and the two artifact reports that came with the draft. Those sections stay about the draft spec and can be read on their own. Sections 7 to 9 go the other way, proposing guidelines the audit says are missing rather than judging ones that exist: pinning the authoring tools as part of the project's version stack, reconciling the draft against the guidelines this repo already has, and the topics neither document covers. Section 10 collects everything that needs a decision from the team.
+The document has two halves. 
+1. Sections 0 to 6 are the audit proper: the ground rules, what GLB is and what our consumers do with it, the tools that decide each question, then the draft spec item by item, the delivered files measured, and the two artifact reports that came with the draft. Those sections stay about the draft spec and can be read on their own. 
+2. Sections 7 to 9 go the other way, proposing guidelines the audit says are missing rather than judging ones that exist: pinning the authoring tools as part of the project's version stack, reconciling the draft against the guidelines this repo already has, and the topics neither document covers. Section 10 collects everything that needs a decision from the team.
 
 ## Context / Starting Point
 
-- `docs/reference/asset-spec.md`, the draft from Carlos. Committed unmodified at `5d808b1`, then superseded by [model-spec.md](model-spec.md), which is where the rules now live. Section 3 audits the original.
+- [asset-spec.md](asset-spec.md), the draft from Carlos, kept unmodified alongside this document. Superseded by [model-spec.md](model-spec.md), which is where the rules now live. Section 3 audits the original.
 - Two Claude artifacts Carlos linked, the "Parts Library Audit" (the 12 non-chassis parts) and the "BlueBoat Chassis Audit", both dated 2026-09-03 and both measured by a direct GLB parse against the draft spec. They could not be fetched from this session (public, non-member pages), so their text was pasted in and is reproduced verbatim alongside this document as [ASSET_AUDIT_PARTS_LIBRARY.md](ASSET_AUDIT_PARTS_LIBRARY.md) and [ASSET_AUDIT_BLUEBOAT_CHASSIS.md](ASSET_AUDIT_BLUEBOAT_CHASSIS.md); section 6 audits them. A third, the "BlueROV2 Chassis Audit", is referenced by both as a companion and has not been seen.
 - What this repo already decided: `docs/design/parts.md` (mesh conventions), `docs/how-to/add-part.md` (the acceptance steps), the earlier README section "Accepting a new part" (commit `b5daead`, August 2026), and the sandbox findings carried over from the vrx4 branch.
 - The delivered files themselves: 15 `.visual.glb` under `bluerobotics_parts/models/`, all exported by `Khronos glTF Blender I/O v5.1.20` which specifies the Blender add-on (`io_scene_gltf2`), co-maintained by Blender Foundation and Khronos Group.
@@ -444,7 +446,7 @@ The validator checks structure, accessors, image headers and the material schema
 
 ## 3. Audit of the original draft spec, item by item
 
-This section audits Carlos's draft as delivered, preserved at commit `5d808b1`. It has since been superseded by [model-spec.md](model-spec.md); the findings below are what shaped it.
+This section audits Carlos's draft as delivered, kept unmodified at [asset-spec.md](asset-spec.md). It has since been superseded by [model-spec.md](model-spec.md), and the findings below are what shaped it.
 
 Numbered in document order. Quoted text is Carlos's.
 
