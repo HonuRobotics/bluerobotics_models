@@ -3,8 +3,8 @@
 Working document as a part of the new modeling workflow. The intent is to review the background (what is our sources of truth for model file formats and review?) and work throught the suggestions (see `docs/reference/asset-spec.md`) on what to assess for each glTF/GLB file.  
 
 The document has two halves. 
-1. Sections 0 to 6 are the audit proper - % CLAUDE: provide a succinct, laymens terms, description of what and why.
-2. Sections 7 to 9 go the other way, proposing guidelines the audit says are missing rather than judging ones that exist: pinning the authoring tools as part of the project's version stack, reconciling the draft against the guidelines this repo already has, and the topics neither document covers. Section 10 collects everything that needs a decision from the team. % CLAUDE: This reads as AI slop.
+1. Sections 0 to 6 test what we already believe. They set out what counts as correct, explain how a glTF file is put together and what Gazebo and RViz actually do with one, then check the draft spec and the delivered files against that. Several things we believed turned out to be wrong, and those are the findings.
+2. Sections 7 to 9 propose what is missing: pinning the authoring tools, reconciling the draft with the conventions this repo already documents, and the topics neither of them covers. Section 10 collects every open decision.
 
 ## Context / Starting Point
 
@@ -13,8 +13,8 @@ The document has two halves.
 - What this repo already decided: `docs/design/parts.md` (mesh conventions), `docs/how-to/add-part.md` (the acceptance steps), the earlier README section "Accepting a new part" (commit `b5daead`, August 2026), and the sandbox findings carried over from the vrx4 branch.
 - The delivered files themselves: 15 `.visual.glb` under `bluerobotics_parts/models/`, all exported by `Khronos glTF Blender I/O v5.1.20` which specifies the Blender add-on (`io_scene_gltf2`), co-maintained by Blender Foundation and Khronos Group.
 - The Gazebo project's own written record on glTF: docs, changelogs, trackers and PMC minutes, surveyed 2026-09-04 and reported in section 1.8.
-% CLAUDE: Add glTF spec and link
-% CLAUDE: Add ROS REP 103 (check number)
+- The [glTF 2.0 specification](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html), Khronos, registry revision 2.0.1, with the [extension registry](https://github.com/KhronosGroup/glTF/tree/main/extensions) and the [Khronos glTF Validator](https://github.com/KhronosGroup/glTF-Validator). The normative source for the file format and its material model.
+- [REP 103](https://www.ros.org/reps/rep-0103.html), "Standard Units of Measure and Coordinate Conventions", which fixes meters and, in relation to a body, x forward, y left, z up. The source of the part frame.
 
 ## Main Issues
 
@@ -32,17 +32,12 @@ Our goal is that our conventions, embodied in the model specification document (
 Three different things get called "correct" in this work, and they disagree with each other. Every finding in this document is measured against one of them and says which.
 
 
-% CLAUDE: Refactor this table with rows as follows:
-- Truth
-- Assessment (how is correctness evaluated)
-- How we do it now
-- Proposed method
-% CLAUDE: EOF
-| | Truth | Defined by | Tool that decides | 
+| | T1, the format | T2, the intended appearance | T3, the targets |
 |---|---|---|---|
-| T1 | The format | The [glTF 2.0 specification](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html) (registry revision 2.0.1) and the Khronos extension registry. | The Khronos glTF Validator, the conformance tool Khronos maintains (version 2.0.0-dev.3.10, linux64 release binary). Zero errors means the file is glTF. Evidence tag V. |
-| T2 | The intended appearance | What a conformant renderer shows for the file. Khronos maintains the glTF Sample Viewer as the reference renderer for exactly this question. | The glTF Sample Viewer, in a browser. Not Blender, see below. Evidence tag R. |
-| T3 | The targets | What our two consumers render: Gazebo (gz-sim 10, gz-rendering 10, Ogre-Next 2.3) and RViz (rviz_rendering 15.2). Each implements a subset of T1: Gazebo's subset is tabulated in section 1.4, RViz's in section 1.5. | `glb_probe` for what the loader built (no GPU); the Gazebo parts world and RViz for what it looks like. Evidence tags S and P. |
+| **Truth** | What the [glTF 2.0 specification](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html), registry revision 2.0.1, and the Khronos extension registry say a file is | What a conformant renderer shows for the file, which is the author's intent made visible | What our two consumers render: Gazebo (gz-sim 10, gz-rendering 10, Ogre-Next 2.3) and RViz (rviz_rendering 15.2), each implementing only a subset of T1 (sections 1.4 and 1.5) |
+| **Assessment** | Conformance, and it is binary and mechanical. The file either validates or it does not | Judgment by the person who authored it. Does it look like what they meant | Observation, on the versions we actually ship. Does the part render correctly and load without error |
+| **How we do it now** | Nothing. No conformance check existed before this review, and no delivery had ever been validated | The modeler looks at Blender's viewport, which shows Blender's materials rather than the exported file. Nobody views the delivered file in a reference renderer | Ad hoc. Three people, three sets of tools, one of them an old Gazebo, and no agreed procedure. This is the second Main Issue above |
+| **Proposed method** | The [Khronos glTF Validator](https://github.com/KhronosGroup/glTF-Validator), zero errors, run by the lint on every delivery. Evidence tag V | The modeler opens the exported file in the Khronos glTF Sample Viewer and signs it off before delivery. Blender's viewport does not count. Evidence tag R | `glb_probe` for what the loader built, which needs no GPU, then the parts world in Gazebo and the model in RViz. Evidence tags S and P |
 
 The rules that follow from this:
 
