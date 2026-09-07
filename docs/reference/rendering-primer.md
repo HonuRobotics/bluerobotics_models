@@ -4,7 +4,11 @@ For an engineer who does not work in graphics. It compares the older way a 3D pa
 
 It is deliberately general. Nothing here is specific to this project's parts, tools or conventions; those live in [model-spec.md](model-spec.md) and [VISUAL_ASSET_PIPELINE_REVIEW.md](VISUAL_ASSET_PIPELINE_REVIEW.md).
 
-**Terminology.** This document keeps four words apart that are commonly run together, and never uses "shading model", which is ambiguous between two of them.
+**Terminology.** This document keeps three terms apart that are commonly run together:
+1. reflection model
+2. parameterization 
+3. format
+and never uses "shading model", which is used both for the first of those and for an unrelated renderer technique (2.1.1).
 
 **Status: outline with subsections.** Section headings carry one line on what they do; notes in italic say what a subsection will establish and will be replaced. Plain text under a heading is content already agreed and is kept.
 
@@ -13,7 +17,7 @@ It is deliberately general. Nothing here is specific to this project's parts, to
 Three independent choices, and a classification of the first of them. Most confusion in this area comes from running them together.
 
 ### 1.1 Reflection model: what is computed at a single point on a surface
-*The equation taking an incoming light direction and an outgoing view direction and returning how much light leaves. The formal name for a reflection model is BRDF, bidirectional reflectance distribution function: a function rather than stored data, bidirectional for the two directions it takes, reflectance for the fraction it returns, distribution because the answer varies with direction. A mirror concentrates it into a narrow lobe; matte paint spreads it almost evenly. This document never calls these shading models, since that phrase also names an unrelated renderer setting (2.1).*
+*The equation taking an incoming light direction and an outgoing view direction and returning how much light leaves. The formal name for a reflection model is BRDF, bidirectional reflectance distribution function: a function rather than stored data, bidirectional for the two directions it takes, reflectance for the fraction it returns, distribution because the answer varies with direction. A mirror concentrates it into a narrow lobe; matte paint spreads it almost evenly. This document never calls these shading models, since that phrase also names an unrelated renderer technique (2.1.1).*
 
 Every reflection model belongs to one of the two categories below. A model is physically based if it conserves energy, is reciprocal, and takes parameters standing for measurable quantities. 
 
@@ -25,23 +29,23 @@ Every reflection model belongs to one of the two categories below. A model is ph
 
 (Aside:
 Lambert's membership is the surprise. It predates the physically based movement by decades, and it has no specular term at all, where every other model in this category describes both a diffuse and a specular response. So it reads as old-fashioned and incomplete, but the test is about the maths, not the era: it conserves energy and is reciprocal, so it passes. Whether the rendering community calls it PBR depends on which sense is meant. By the test, it belongs. In everyday usage, "PBR" means a complete material with a specular term, and Lambert on its own is not that. Its actual role is as a component: it supplies the diffuse term inside the microfacet models, including glTF's own material.
-)
 
 ### 1.2 Parameterization: how an author supplies values to the model
 *For physically based reflection models only. Metallic-roughness and specular-glossiness are parameterizations. They take different inputs from the author and compute the same variables the reflection model needs.*
 
-*Why only physically based models have this layer. An empirical model has none because the values the author supplies, diffuse color, specular color, shininess, are the variables that appear in its equation, with nothing in between. A physically based model's equation runs on different variables: the reflectance at normal incidence and the spread of microfacet normals, among others. The author does not supply those directly. Metallic-roughness is the rule for deriving them from base color, metallic and roughness; specular-glossiness derives the same variables from a different set of inputs. That derivation is the parameterization.*
-% CLAUDE: I"m not sure about this.   IT sounds like PBR using one kind of parameterizations (m-r, etc.) and emprical uses another kid of parameterization (diffuse, specular, shininess, etc)   Explain.
+*Every reflection model is driven by values the author supplies, so in the widest sense every model has a parameterization. The distinction is whether anything sits between those values and the equation. For an empirical model, the coefficients in the governing equations of the relection model are set directly.  A physically based model's equation runs on variables that are awkward to author directly, the reflectance at normal incidence and the spread of microfacet normals among them, so in practice they are derived from friendlier inputs. Metallic-roughness derives them from base color, metallic and roughness; specular-glossiness derives the same variables from a different set of inputs. The derivation is what this document calls the parameterization, and it is a choice only on the physically based side, because only there is there more than one.*
 
-*How many there are. Two are used by interchange formats, the pair above. Authoring tools and engines use richer ones, Disney principled, Autodesk Standard Surface and OpenPBR among them, each a superset of metallic-roughness adding layers such as clearcoat and sheen. MaterialX ships all of these as nodes. Section 3 treats the two that matter for interchange and the ancestor they share.* % CLAUDE: How doe these richer ones then get included into the two?   IT sounds liky maybe you are bouding the two by the project (glTF, gazebo, rviz), when we want this document to be more general.   
+*How many there are, and how they relate. Metallic-roughness and specular-glossiness are the two complete parameterizations in wide use. Several richer ones exist, Disney principled, Autodesk Standard Surface and OpenPBR among them, and each is metallic-roughness at its core plus optional layers on top: clearcoat, sheen, transmission, subsurface. They are supersets, not alternatives. When a material moves between tools, the core travels everywhere; each added layer travels only where both sides support it, which is how glTF handles them, as optional extensions over a fixed core. Section 3 treats the two complete ones, their common ancestor, and how the supersets reduce to them.*
 
 ### 1.3 Format: which file carries the result
-*The third independent choice, % CLAUDE: What are the three again?
-and cross-cutting on the other two. A format can carry one reflection model, several, or none, and can support one parameterization or more than one. Compared in section 4.*
+*The third of the three independent choices, after reflection model (1.1) and parameterization (1.2), and cross-cutting on both. A format can carry one reflection model, several, or none, and can support one parameterization or more than one. Compared in section 4.*
 
 ### 1.4 Where glTF's own wording differs from this document's
 *Disclosure of one usage issue. The [glTF specification](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html) says "metallic-roughness material model" for what this document calls a parameterization. "Material model" is a common phrase and a loose one. In this document's terms it means a (reflection model, parameterization) pair, taken together as one package, so glTF's phrase names the microfacet reflection model of 2.2 fed by the metallic-roughness parameterization of 3.2. Wherever the specification says material model, read it as that pair.*
-% CLAUDE: What combinations of this tuple are allowed?  All?
+
+*Not every pair is allowed. A parameterization is written to produce the variables of one particular reflection model, so it only pairs with that model. Metallic-roughness and specular-glossiness both produce the microfacet model's variables, so both pair with Cook-Torrance and neither pairs with Phong or with Lambert on its own. An empirical model pairs only with its own terms. The pairs in actual use are therefore few: the microfacet model with either of the two parameterizations, and each empirical model with itself.*
+
+% CLAUDE: Name the allowable pairs.   If we can't mix and match, then the reflection model and parameterization are not separate degrees of freedom.
 
 ## 2. The reflection models in common use
 
@@ -50,8 +54,7 @@ Each model, in the two categories named in 1.1, treated individually. Each gets 
 ### 2.1 Empirical reflection models
 
 #### 2.1.1 Phong
-*Also the place to dispose of a name collision. "Phong shading" is an interpolation scheme: % CLAUDE: Wait, you can't introduce intrpolation scheme as yet another dimetion of relection model, parameterization and format.   I'm really frustrated that you keep introducing new terms without defining what you mean.  Please, please stop it. 
- it decides where across a triangle the reflection model gets evaluated, per vertex or per pixel, and it is chosen by the renderer, appears in no file format here, and combines freely with any reflection model and any parameterization. It is settled: per-pixel won. The Phong reflection model is the equation treated in this subsection, and the two share only a surname.*
+*One name collision to dispose of. "Phong shading" also names a renderer technique, evaluating the lighting at every pixel of a triangle rather than only at its corners. It has nothing to do with the Phong reflection model, is not a choice an author makes, and is not discussed further in this document. The equation treated in this subsection is the reflection model.*
 
 #### 2.1.2 Blinn-Phong
 
@@ -79,6 +82,7 @@ Only relevant to physically based models, and the layer where two renderers, or 
 ### 3.2 Metallic-roughness
 ### 3.3 Specular-glossiness, and why it was retired
 ### 3.4 Disney principled, the common ancestor of both
+### 3.5 The richer supersets, and how they reduce to the two
 
 ## 4. Which formats carry which
 
