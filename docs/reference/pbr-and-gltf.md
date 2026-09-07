@@ -1,6 +1,6 @@
 # PBR, and why glTF is inseparable from it
 
-Background reading, about five minutes, plus a four minute encoding reference you can skip on a first pass. It explains what physically based rendering is, how it differs from the Collada and image-file models this project used before, and why adopting glTF means adopting PBR whether or not that was the intention. For the rules that follow from all this, see [model-spec.md](model-spec.md). For the evidence behind them, see [VISUAL_ASSET_PIPELINE_REVIEW.md](VISUAL_ASSET_PIPELINE_REVIEW.md).
+Background reading, with a short encoding reference you can skip on a first pass. It explains what physically based rendering is, how it differs from the Collada and image-file models this project used before, and why adopting glTF means adopting PBR whether or not that was the intention. For the rules that follow from all this, see [model-spec.md](model-spec.md). For the evidence behind them, see [VISUAL_ASSET_PIPELINE_REVIEW.md](VISUAL_ASSET_PIPELINE_REVIEW.md).
 
 ## The shift in one sentence
 
@@ -16,19 +16,33 @@ Those parameters are not properties of anything real. A shininess of 32 is not a
 
 - **Lighting gets baked into the texture.** Shadows in crevices, a bright edge along the top of a hull, a suggestion of reflection. All painted in, because the material model could not produce them. Move the light and the asset is wrong in a way no setting can fix.
 - **Every engine interprets the numbers differently.** There is no standard for what a specular color of 0.5 means, so an asset tuned in one tool looks different in the next.
-- **One image was the whole material.** Color was the only channel that mattered, which is why "a mesh and its texture" was a reasonable mental model.
+- **One image was the whole material.** Color was the only property that mattered, which is why "a mesh and its texture" was a reasonable mental model.
 
 That mental model is the first Main Issue in the review, and it is the root of most of what went wrong.
 
 ## What PBR replaces it with
 
-The metallic-roughness model describes a surface with a small set of channels, each corresponding, at least approximately, to something physical.
+The metallic-roughness model describes a surface with six properties, each corresponding, at least approximately, to something physical.
 
-Three words are easy to conflate, and the table below is unreadable without them. glTF defines each precisely. An **image** is "a two dimensional array of pixels encoded as a standardized bitstream", which for us means a PNG or a JPEG. A **sampler** is "an object that controls how image data is sampled", meaning the filtering and wrapping rules. A **texture** is "an object that combines an image and its sampler". A material never points at an image directly; it points at a texture, and the texture points at an image. So the files in a delivery are image files, and what a material references is a texture. % CLAUDE: So what is a "material" - a texture plus something else?
+Three words are easy to conflate, and the table below is unreadable without them. glTF defines each precisely. An **image** is "a two dimensional array of pixels encoded as a standardized bitstream", which for us means a PNG or a JPEG. A **sampler** is "an object that controls how image data is sampled", meaning the filtering and wrapping rules. A **texture** is "an object that combines an image and its sampler". A material never points at an image directly; it points at a texture, and the texture points at an image. A **material** is "a parametrized approximation of visual properties of the real-world object being represented by a mesh primitive", which in practice means a named set of values, some of them plain numbers and some of them references to textures.
 
-A channel's value comes from a texture, from a factor stored as plain numbers in the material, or from both, in which case the factor multiplies the texture. % CLAUDE: Expand - makes no sense.   WTF do you mean by a "channel"  Seems like there is a glTF meaning, but then you also talk about RGBA channels as dimesions of arrays.   This seeems like something you get wrong quite often - overloading technical terms so that they are confusing.  Stop doing that.
+Those nest, and the nesting is the whole structure:
 
-| Channel | What it means | Where its value comes from | Encoding |
+```
+primitive  ->  material  ->  texture  ->  image
+                                     \->  sampler
+```
+
+A primitive names one material. That material holds plain numbers directly, and points at textures for anything that varies across the surface. Each texture combines one image with one sampler. So the files in a delivery are image files, and nothing in a material reaches an image without a texture in between.
+
+One more piece of vocabulary, kept deliberately apart from the last, because running the two together is what made the sentence you are replacing incomprehensible:
+
+- A **property** is one of the material's six inputs: base color, metallic, roughness, normal, occlusion, emissive. This is the specification's own word; it introduces the model as "defined by the following properties".
+- A **channel** is one component of a pixel, the R, G, B or A of an image. Nothing else in this document is called a channel.
+
+Every property takes its value in one of three ways: from a texture, from a factor written as plain numbers in the material, or from both, in which case the factor multiplies what the texture supplies. A property given neither keeps its default. Two properties may share one image by reading different channels of it, which is exactly how metallic and roughness are stored.
+
+| Property | What it means | Where its value comes from | Encoding |
 |---|---|---|---|
 | Base color | The surface's own color, with no lighting in it at all | `baseColorTexture`, whose image has four channels at 8 bits each, and/or `baseColorFactor`, four numbers from 0 to 1 | Image sRGB, factor linear |
 | Metallic | Whether this is metal. In reality nearly binary, so the map is close to a mask | The blue channel of `metallicRoughnessTexture`, and/or `metallicFactor`, one number from 0 to 1 | Linear |
@@ -37,7 +51,7 @@ A channel's value comes from a texture, from a factor stored as plain numbers in
 | Occlusion | How much ambient light reaches into a crevice | The red channel of `occlusionTexture`, 0 fully occluded to 1 unoccluded | Linear |
 | Emissive | Light the surface gives off by itself | `emissiveTexture`, three channels at 8 bits each, and/or `emissiveFactor`, three numbers from 0 to 1 | Image sRGB, factor linear |
 
-Occlusion, roughness and metalness are designed to share one image, packed into its red, green and blue channels, which is why a delivery holds fewer image files than the material has channels. That image may carry more than 8 bits per channel, while base color and emissive must be 8-bit. glTF sets no hard limit on image dimensions, but clients are told to resize images whose sides are not powers of two on hardware that handles them poorly, so powers of two stay the safe choice. Every image in this library already is one.
+Occlusion, roughness and metalness are designed to share one image, packed into its red, green and blue channels, which is why a delivery holds fewer image files than the material has properties. That image may carry more than 8 bits per channel, while base color and emissive must be 8-bit. glTF sets no hard limit on image dimensions, but clients are told to resize images whose sides are not powers of two on hardware that handles them poorly, so powers of two stay the safe choice. Every image in this library already is one.
 
 ### The four terms in that table (reference)
 
