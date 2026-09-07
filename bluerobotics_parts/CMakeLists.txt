@@ -25,14 +25,16 @@ ament_python_install_package(${PROJECT_NAME})
 # Tooling run by a person, never by the build: sdf_to_part.py bootstraps a
 # part macro from a modeler's model.sdf, gltf_to_yup.py fixes a Z-up glTF
 # delivery, parts_check_world.py regenerates worlds/parts_check.sdf, and
-# check_assembly.py is the config check as a CLI, and
-# stamp_model_specs.py writes the specs comment the builds stamp.
+# check_assembly.py is the config check as a CLI,
+# stamp_model_specs.py writes the specs comment the builds stamp, and
+# glb_inventory.py measures the mesh and texture content of a delivery.
 install(PROGRAMS
   scripts/sdf_to_part.py
   scripts/parts_check_world.py
   scripts/gltf_to_yup.py
   scripts/check_assembly.py
   scripts/stamp_model_specs.py
+  scripts/glb_inventory.py
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
