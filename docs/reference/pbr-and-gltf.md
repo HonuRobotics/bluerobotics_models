@@ -1,6 +1,6 @@
 # PBR, and why glTF is inseparable from it
 
-Background reading, about five minutes, plus a three minute encoding reference you can skip on a first pass. It explains what physically based rendering is, how it differs from the Collada and image-file models this project used before, and why adopting glTF means adopting PBR whether or not that was the intention. For the rules that follow from all this, see [model-spec.md](model-spec.md). For the evidence behind them, see [VISUAL_ASSET_PIPELINE_REVIEW.md](VISUAL_ASSET_PIPELINE_REVIEW.md).
+Background reading, about five minutes, plus a four minute encoding reference you can skip on a first pass. It explains what physically based rendering is, how it differs from the Collada and image-file models this project used before, and why adopting glTF means adopting PBR whether or not that was the intention. For the rules that follow from all this, see [model-spec.md](model-spec.md). For the evidence behind them, see [VISUAL_ASSET_PIPELINE_REVIEW.md](VISUAL_ASSET_PIPELINE_REVIEW.md).
 
 ## The shift in one sentence
 
@@ -22,23 +22,28 @@ That mental model is the first Main Issue in the review, and it is the root of m
 
 ## What PBR replaces it with
 
-The metallic-roughness model describes a surface with a small set of channels, each corresponding, at least approximately, to something physical:
+The metallic-roughness model describes a surface with a small set of channels, each corresponding, at least approximately, to something physical.
 
-| Channel | What it means | Data type | Encoding |
+Three words are easy to conflate, and the table below is unreadable without them. glTF defines each precisely. An **image** is "a two dimensional array of pixels encoded as a standardized bitstream", which for us means a PNG or a JPEG. A **sampler** is "an object that controls how image data is sampled", meaning the filtering and wrapping rules. A **texture** is "an object that combines an image and its sampler". A material never points at an image directly; it points at a texture, and the texture points at an image. So the files in a delivery are image files, and what a material references is a texture. % CLAUDE: So what is a "material" - a texture plus something else?
+
+A channel's value comes from a texture, from a factor stored as plain numbers in the material, or from both, in which case the factor multiplies the texture. % CLAUDE: Expand - makes no sense.   WTF do you mean by a "channel"  Seems like there is a glTF meaning, but then you also talk about RGBA channels as dimesions of arrays.   This seeems like something you get wrong quite often - overloading technical terms so that they are confusing.  Stop doing that.
+
+| Channel | What it means | Where its value comes from | Encoding |
 |---|---|---|---|
-| Base color | The surface's own color, with no lighting in it at all | RGBA image at 8 bits per channel, and/or four numbers from 0 to 1 | Texture sRGB, factor linear | % CLAUDE: RGBA image is 4 channels, 8 bits per channel?   Or four constant numbers for RGBA - isn't this the same as a 1x1 RGBA image?  what is a "Texture sRGB"?   Before you said a texture was a sampler plus an image.    Is an image just a multidimentional array?  Any constraints on array dimensions?
-| Metallic | Whether this is metal. In reality nearly binary, so the map is close to a mask | Blue channel of one shared image, and/or one number from 0 to 1 | Linear | % CLAUDE: STill confusing.   So are you saying a single channel from what kind of image?  another texture sRGB.   Be specific and don't be ambiguous.
-| Roughness | How scattered the reflection is. Low is mirror-like, high is matte | Green channel of that same image, and/or one number from 0 to 1 | Linear |
-| Normal | Fine surface detail, faked without adding geometry | RGB image encoding a unit vector (so three channel image/matrix?), tangent spac | Linear |
-| Occlusion | How much ambient light reaches into a crevice | Red channel of an image, 0 fully occluded to 1 unoccluded | Linear |
-| Emissive | Light the surface gives off by itself | RGB image at 8 bits per channel, and/or three numbers from 0 to 1 | sRGB |
+| Base color | The surface's own color, with no lighting in it at all | `baseColorTexture`, whose image has four channels at 8 bits each, and/or `baseColorFactor`, four numbers from 0 to 1 | Image sRGB, factor linear |
+| Metallic | Whether this is metal. In reality nearly binary, so the map is close to a mask | The blue channel of `metallicRoughnessTexture`, and/or `metallicFactor`, one number from 0 to 1 | Linear |
+| Roughness | How scattered the reflection is. Low is mirror-like, high is matte | The green channel of that same `metallicRoughnessTexture`, and/or `roughnessFactor`, one number from 0 to 1 | Linear |
+| Normal | Fine surface detail, faked without adding geometry | `normalTexture`, whose image has three channels holding a vector rather than a color, in tangent space | Linear |
+| Occlusion | How much ambient light reaches into a crevice | The red channel of `occlusionTexture`, 0 fully occluded to 1 unoccluded | Linear |
+| Emissive | Light the surface gives off by itself | `emissiveTexture`, three channels at 8 bits each, and/or `emissiveFactor`, three numbers from 0 to 1 | Image sRGB, factor linear |
 
-Occlusion, roughness and metalness share one image by design, packed into red, green and blue respectively, which is why a delivery has fewer texture % CLAUDE: I think you are conflating image and texture.
-files than it has channels. That image may carry more than 8 bits per channel; base color and emissive must be 8-bit.
+Occlusion, roughness and metalness are designed to share one image, packed into its red, green and blue channels, which is why a delivery holds fewer image files than the material has channels. That image may carry more than 8 bits per channel, while base color and emissive must be 8-bit. glTF sets no hard limit on image dimensions, but clients are told to resize images whose sides are not powers of two on hardware that handles them poorly, so powers of two stay the safe choice. Every image in this library already is one.
 
 ### The four terms in that table (reference)
 
-**Factor.** A number, or a small group of numbers, stored in the material itself rather than in an image, each from 0 to 1. Where both a factor and a texture are given, the factor multiplies the texture, so it acts as a uniform tint or level across the whole material. Where no texture is given the texture is taken to be 1.0, and the factor alone decides the value. This is why `metallicFactor` on its own can make an entire part metal with no texture involved, which is the defect in four of our files.
+**Factor.** A number, or a small group of numbers, stored as plain values in the material itself rather than in an image, each from 0 to 1. Where both a factor and a texture are given, the factor multiplies the texture, so it acts as a uniform tint or level across the whole material. Where no texture is given the texture is taken to be 1.0, and the factor alone decides the value. This is why `metallicFactor` on its own can make an entire part metal with no texture involved, which is the defect in four of our files.
+
+A fair question is whether a factor is just a 1x1 image. It is not, and the difference matters twice over. A factor is decoded by nobody: it is already linear, whereas a base color image is sRGB and must be decoded before it is multiplied in, so the same value in the two places produces different results. And a factor is not a texture, so it does not satisfy a consumer that insists on one. That distinction is exactly why the fix for the RViz crash was to bake a 1x1 white image into the file rather than simply set a factor: RViz needed a base color texture to exist, and a factor would not have done.
 
 **Linear.** The stored number is proportional to the physical quantity, so 0.5 means half. Used for everything the shader computes with: metalness, roughness, occlusion and normals. Averaging two linear values gives a meaningful result, which matters because that is what filtering and mipmapping do.
 
