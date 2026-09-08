@@ -14,7 +14,7 @@ and never uses "shading model", which is used both for the first of those and fo
 
 ## 1. The terms this document keeps apart
 
-Three independent choices, and a classification of the first of them. Most confusion in this area comes from running them together.
+Two independent choices, a classification of the first, and a third choice that is not independent: it opens up only inside one branch of that classification. Most confusion in this area comes from running these together.
 
 ### 1.1 Reflection model: what is computed at a single point on a surface
 *The equation taking an incoming light direction and an outgoing view direction and returning how much light leaves. The formal name for a reflection model is BRDF, bidirectional reflectance distribution function: a function rather than stored data, bidirectional for the two directions it takes, reflectance for the fraction it returns, distribution because the answer varies with direction. A mirror concentrates it into a narrow lobe; matte paint spreads it almost evenly. This document never calls these shading models, since that phrase also names an unrelated renderer technique (2.1.1).*
@@ -33,19 +33,27 @@ Lambert's membership is the surprise. It predates the physically based movement 
 ### 1.2 Parameterization: how an author supplies values to the model
 *For physically based reflection models only. Metallic-roughness and specular-glossiness are parameterizations. They take different inputs from the author and compute the same variables the reflection model needs.*
 
-*Every reflection model is driven by values the author supplies, so in the widest sense every model has a parameterization. The distinction is whether anything sits between those values and the equation. For an empirical model, the coefficients in the governing equations of the relection model are set directly.  A physically based model's equation runs on variables that are awkward to author directly, the reflectance at normal incidence and the spread of microfacet normals among them, so in practice they are derived from friendlier inputs. Metallic-roughness derives them from base color, metallic and roughness; specular-glossiness derives the same variables from a different set of inputs. The derivation is what this document calls the parameterization, and it is a choice only on the physically based side, because only there is there more than one.*
+*Every reflection model is driven by values the author supplies, so in the widest sense every model has a parameterization. The distinction is whether anything sits between those values and the equation. For an empirical model, the coefficients in the governing equations of the reflection model are set directly.  A physically based model's equation runs on variables that are awkward to author directly, the reflectance at normal incidence and the spread of microfacet normals among them, so in practice they are derived from friendlier inputs. Metallic-roughness derives them from base color, metallic and roughness; specular-glossiness derives the same variables from a different set of inputs. The derivation is what this document calls the parameterization. It is a choice only where a reflection model has more than one derivation in use, which today means the microfacet model alone. So it is not a degree of freedom independent of the reflection model. It is a choice that exists inside one branch of the first choice, and for every other reflection model it is already made.*
 
 *How many there are, and how they relate. Metallic-roughness and specular-glossiness are the two complete parameterizations in wide use. Several richer ones exist, Disney principled, Autodesk Standard Surface and OpenPBR among them, and each is metallic-roughness at its core plus optional layers on top: clearcoat, sheen, transmission, subsurface. They are supersets, not alternatives. When a material moves between tools, the core travels everywhere; each added layer travels only where both sides support it, which is how glTF handles them, as optional extensions over a fixed core. Section 3 treats the two complete ones, their common ancestor, and how the supersets reduce to them.*
 
 ### 1.3 Format: which file carries the result
-*The third of the three independent choices, after reflection model (1.1) and parameterization (1.2), and cross-cutting on both. A format can carry one reflection model, several, or none, and can support one parameterization or more than one. Compared in section 4.*
+*The other independent choice, alongside the reflection model, and cross-cutting on it and on parameterization. A format can carry one reflection model, several, or none, and can support one parameterization or more than one. Compared in section 4.*
 
 ### 1.4 Where glTF's own wording differs from this document's
 *Disclosure of one usage issue. The [glTF specification](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html) says "metallic-roughness material model" for what this document calls a parameterization. "Material model" is a common phrase and a loose one. In this document's terms it means a (reflection model, parameterization) pair, taken together as one package, so glTF's phrase names the microfacet reflection model of 2.2 fed by the metallic-roughness parameterization of 3.2. Wherever the specification says material model, read it as that pair.*
 
-*Not every pair is allowed. A parameterization is written to produce the variables of one particular reflection model, so it only pairs with that model. Metallic-roughness and specular-glossiness both produce the microfacet model's variables, so both pair with Cook-Torrance and neither pairs with Phong or with Lambert on its own. An empirical model pairs only with its own terms. The pairs in actual use are therefore few: the microfacet model with either of the two parameterizations, and each empirical model with itself.*
+The allowable pairs, which are few:
 
-% CLAUDE: Name the allowable pairs.   If we can't mix and match, then the reflection model and parameterization are not separate degrees of freedom.
+| Reflection model | Parameterizations that pair with it |
+|---|---|
+| Phong | its own coefficients, and nothing else |
+| Blinn-Phong | its own coefficients, and nothing else |
+| Lambert | its one coefficient, the diffuse reflectance |
+| Oren-Nayar | its two, diffuse reflectance and a roughness |
+| Cook-Torrance, the microfacet model | metallic-roughness, specular-glossiness, and the supersets of 3.5 |
+
+A parameterization is written to produce the variables of one reflection model and pairs with that model only. Only one row has a choice in it. That is the reason the two are not independent degrees of freedom, and why section 1 describes parameterization as a choice inside one branch of the reflection-model choice rather than beside it.
 
 ## 2. The reflection models in common use
 
