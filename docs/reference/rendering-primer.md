@@ -30,7 +30,9 @@ This document uses the term shading model for the pair of a reflection model, th
 *Microfacet, Cook and Torrance 1982, is the family of physically based models built from the picture of a surface as many tiny mirrors.*
 
 #### 1.1.1 Reflection model: what is computed at a single point
-*Reflection model and BRDF, bidirectional reflectance distribution function, are synonymous. Both name a function of two directions, where the light comes from and where the viewer is, returning how much of the light arriving along the first leaves along the second. Marschner and Shirley 18.1.6 defines it by describing the instrument that would measure it: a light in one direction, a detector in the other, one reading per pair of directions.* % CLAUDE: Work in the terms radiometry and photometry from Marschner and Shirley.   Refer to the whole of Chapter 18 - Light.  
+*Reflection model and BRDF, bidirectional reflectance distribution function, are synonymous. Both name a function of two directions, where the light comes from and where the viewer is, returning how much of the light arriving along the first leaves along the second. Marschner and Shirley 18.1.6 defines it by describing the instrument that would measure it: a light in one direction, a detector in the other, one reading per pair of directions.*
+
+*The quantities in that ratio come from radiometry, the physical measurement of light in energy units, which is the subject of Marschner and Shirley chapter 18 and the vocabulary every renderer computes in. Irradiance is power arriving per unit area, radiance is power leaving per unit area per unit solid angle, and a BRDF is one divided by the other. Their chapter 18.3 covers the companion subject, photometry, which reweights each radiometric quantity by how sensitive the eye is to that wavelength, peaking in the green at 555 nanometers. Nothing in this document is photometric: shading is computed radiometrically and the eye enters only at the display, which is what 8.4 is about.*
 
 
 
@@ -44,7 +46,9 @@ BRDF(light direction, view direction)
         irradiance arriving from the light direction
 ```
 
-*Inputs: two directions % CLAUDE: expressed as?, four numbers in all, since each direction is two angles % CLAUDE: azimuth and elevation?. Output: one value per wavelength, in units of inverse steradians. Parameters: the material's own values, 1.1.2, which are constants of the function rather than inputs to it, and which is why changing roughness gives a different function rather than a different answer from the same one.*
+*Inputs: two directions. On paper each is a pair of angles measured against the surface, a polar angle from the normal and an azimuth around it, which Marschner and Shirley write as theta and phi; so four numbers in all. In code each is instead a unit vector of three components, because a shader already holds the normal and the light and view directions as vectors and converting to angles would only cost work. Output: one value per wavelength, in units of inverse steradians. Parameters: the material's own values, 1.1.2, which are constants of the function rather than inputs to it, and which is why changing roughness gives a different function rather than a different answer from the same one.*
+
+*Note that the polar angle is measured from the normal, not up from the surface, so it is a zenith angle rather than an elevation. A direction lying in the surface is 90 degrees, and straight out is zero.*
 
 *Plot that value over every outgoing direction and the shape is called a lobe: narrow and spiked for a mirror, broad and nearly hemispherical for matte paint. The word is used throughout for the shape of a model's response.*
 
