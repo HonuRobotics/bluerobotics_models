@@ -30,7 +30,9 @@ This document uses the term shading model for the pair of a reflection model, th
 *Microfacet, Cook and Torrance 1982, is the family of physically based models built from the picture of a surface as many tiny mirrors.*
 
 #### 1.1.1 Reflection model: what is computed at a single point
-*Reflection model and BRDF, bidirectional reflectance distribution function, are synonymous. Both name a function of two directions, where the light comes from and where the viewer is, returning how much of the light arriving along the first leaves along the second. Marschner and Shirley 18.1.6 defines it by describing the instrument that would measure it: a light in one direction, a detector in the other, one reading per pair of directions.*
+*Reflection model and BRDF, bidirectional reflectance distribution function, are synonymous. Both name a function of two directions, where the light comes from and where the viewer is, returning how much of the light arriving along the first leaves along the second. Marschner and Shirley 18.1.6 defines it by describing the instrument that would measure it: a light in one direction, a detector in the other, one reading per pair of directions.* % CLAUDE: Work in the terms radiometry and photometry from Marschner and Shirley.   Refer to the whole of Chapter 18 - Light.  
+
+
 
 Written out, with the material held fixed:
 
@@ -42,7 +44,7 @@ BRDF(light direction, view direction)
         irradiance arriving from the light direction
 ```
 
-*Inputs: two directions, four numbers in all, since each direction is two angles. Output: one value per wavelength, in units of inverse steradians. Parameters: the material's own values, 1.1.2, which are constants of the function rather than inputs to it, and which is why changing roughness gives a different function rather than a different answer from the same one.*
+*Inputs: two directions % CLAUDE: expressed as?, four numbers in all, since each direction is two angles % CLAUDE: azimuth and elevation?. Output: one value per wavelength, in units of inverse steradians. Parameters: the material's own values, 1.1.2, which are constants of the function rather than inputs to it, and which is why changing roughness gives a different function rather than a different answer from the same one.*
 
 *Plot that value over every outgoing direction and the shape is called a lobe: narrow and spiked for a mirror, broad and nearly hemispherical for matte paint. The word is used throughout for the shape of a model's response.*
 
@@ -104,7 +106,7 @@ The other independent choice. A format can carry one shading model, several, or 
 
 *A format usually names a shading model and says which parameters it stores, but not the equation those parameters feed. COLLADA has a `<phong>` element holding five values and no statement of what to compute from them. Because Phong exists in several variants, two readers that both conform can render the same file differently.* 
 
-*That is the gap glTF 2.0 closes. It is a container and, in Appendix B, a normative definition of exactly one shading model, Cook-Torrance with metallic-roughness, the fifth row of 1.1.3. That matters because the core of a conformant file can express only that one shading model; anything else, constant or a layered superset, arrives as a named extension that a reader is free to ignore. Relying on the name alone would not have been enough, since the literature holds several versions under this name and others like it. This is why glTF appears in section 3 as a source for equations and in section 4 as a format.*
+*That is the gap glTF 2.0 closes. It is a container and, in [Appendix B: BRDF Implementation](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#appendix-b-brdf-implementation), a normative definition of exactly one shading model, Cook-Torrance with metallic-roughness, the fifth row of 1.1.3. That matters because the core of a conformant file can express only that one shading model; anything else, constant or a layered superset, arrives as a named extension to glTF that a reader is free to ignore. Relying on the name alone would not have been enough, since the literature holds several versions under this the name "Cook-Torrance with metallic-roughness" and others like it. This is why glTF appears in section 3 as a source for equations and in section 4 as a format.*
 
 *It does not go so far as to make two implementations equivalent. The specification allows that implementations of the BRDF "MAY vary based on device performance and resource constraints", and calls conformant any implementation that "adheres to the rules for mixing BRDFs". Its own sample renderer is described as using non-physical simplifications that break energy conservation and reciprocity.*
 
@@ -187,7 +189,7 @@ Section 1.2 said what each format can express. This section is about the distanc
 What both ways agree on. A surface is triangles, and each corner carries a position, a normal, at least one pair of texture coordinates, and optionally a tangent and a color.
 
 ### 5.1 Vertices, triangles and indices
-*A triangle is three indices into an array of vertices, so one vertex serves many triangles and is stored once. That indirection is why vertex count and triangle count are not proportional.*
+*A triangle is three indices into an array of vertices, so one vertex serves many triangles and is stored once. That indirection is why vertex count and triangle count are not proportional.* 
 
 ### 5.2 Vertex attributes: position, normal, texture coordinate
 *Includes hard and soft edges, which look like a rendering choice and are geometry. A hard edge exists because two faces do not share vertices, each carrying its own normal. The author controls it, it is stored in the file, and it is why vertex counts exceed corner counts. This is also where the technique word "shading" is disposed of: flat shading and smooth shading, in Eck 4.1.3 and Marschner and Shirley 10.1.3, name whether a vertex carries its face's normal or an averaged one, and have nothing to do with which shading model is evaluated.*
