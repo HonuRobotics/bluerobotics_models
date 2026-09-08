@@ -19,9 +19,7 @@ Textbooks, specifications and engines do not agree on nomenclature. These names 
 | reflection model, BRDF model | Marschner and Shirley ch. 24, pbrt |
 | lighting model, illumination model | Eck, OpenGL-era texts |
 
-This ambiguity can introduce confusion.
-
-This document uses the therm "shading mode" to refer to the pair of a "reflection model", the underlying structure/equations used to describe light reflecting from a 3D primative, and a "parameterization", the method used to expose user parameters to control the behavior of the reflection model.  % CLAUDE: Check that I go this right.  
+This document uses the term shading model for the pair of a reflection model, the equations describing how light reflects at a point on a surface, and a parameterization, the rules mapping user-defined values to variables in the reflection model equations. 
 
 
 ### 1.1 Shading model: the package a renderer evaluates at a point on a surface
@@ -32,10 +30,18 @@ This document uses the therm "shading mode" to refer to the pair of a "reflectio
 *Microfacet, Cook and Torrance 1982, is the family of physically based models built from the picture of a surface as many tiny mirrors.*
 
 #### 1.1.1 Reflection model: what is computed at a single point
-*Reflection model and BRDF (bidirectional reflectance distribution function) are synonymous and both describe  incoming direction and outgoing direction in, fraction of light out. % CLAUDE: rephrase this.  Not sure what the "fraction" is.  
-BRDF is the mathematical name for the class of function, a reflection model a named one. Marschner and Shirley 18.1.6 defines it by describing the instrument that would measure it, a light in one direction and a detector in the other.*
+*Reflection model and BRDF, bidirectional reflectance distribution function, are synonymous. Both name a function of two directions, where the light comes from and where the viewer is, returning how much of the light arriving along the first leaves along the second. % CLAUDE: Define this function in terms of inputs, outputs and parameters.  Maybe try a mathematical expression.
+ Marschner and Shirley 18.1.6 defines it by describing the instrument that would measure it: a light in one direction, a detector in the other, one reading per pair of directions.*
 
-*Plot that fraction over every outgoing direction and the shape you get is called a lobe: narrow and spiked for a mirror, broad and nearly hemispherical for matte paint. The word is used throughout for the shape of a model's response, and a model with more than one lobe, 2.2.4, is one that adds a second such shape on top of the first.* % CLAUDE: So if the lobe is in units of ratio of light out vs light in?   Is it all wavelengths?   How is overall reflectance used if we need to superimpose multiple lobes?
+*Plot that value over every outgoing direction and the shape is called a lobe: narrow and spiked for a mirror, broad and nearly hemispherical for matte paint. The word is used throughout for the shape of a model's response, and a model with more than one lobe,% CLAUDE: mention which shading models (use the proper names) use more than one lobe
+ 2.2.4, adds a second such shape on top of the first.*
+
+*The value is not a bounded ratio. It is a density, light out per unit light in per unit solid angle, so a mirror's lobe spikes far above one while a white matte surface sits flat at one over pi. The bounded quantity is the lobe's integral over all outgoing directions, the share of arriving light that leaves at all, and that is what cannot exceed one. % CLAUDE: Analogous to a probability density function?  Just curious.
+ Marschner and Shirley 18.1.6 calls it the directional hemispherical reflectance; it is the energy conservation half of the test in 1.1.*
+
+*It is per wavelength. A renderer evaluates it three times, once each for red, green and blue, which is why base color is a color while roughness is a single number.* % CLAUDE: Now I'm interested in how that gets represented.  Make sure that is covered somewhere in the doc.
+
+*Lobes add. A model with a diffuse and a specular lobe is their sum, and it is the sum that has to stay within one, which is why the models of 2.2.2 scale the diffuse lobe down by whatever the specular lobe already took.* % CLAUDE: Is this scaling always done with a staight sum, or are there weighting schemes?
 
 *Three acronyms one letter apart, and the letter is the direction the light leaves. A BRDF, R for reflectance, covers light that leaves on the side it arrived from. A BTDF, T for transmittance, covers light that goes through and leaves on the far side. A BSDF, S for scattering, is the two together; Filament states it as a BSDF "composed of two other functions: the BRDF and the BTDF". Anything opaque needs only the BRDF, which is why this document says reflection model throughout. The exception is 2.2.4, where adding transmission makes the model a BSDF.*
 
@@ -78,14 +84,16 @@ The other independent choice. A format can carry one shading model, several, or 
 | STL | none, geometry only |
 | USD | Cook-Torrance with metallic-roughness, and the same reflection model under a specular parameterization |
 | MaterialX | any of them, since it describes shading networks rather than naming a model |
-| SDF | Phong, Blinn-Phong, Cook-Torrance with metallic-roughness, Cook-Torrance with specular-glossiness |
-| URDF | none: one color and one texture filename |
 
 *The names in the right column are the shading model names of 1.1.3. Most formats and most documentation shorten "Cook-Torrance with metallic-roughness" to "metallic-roughness", naming the parameterization and letting it stand for the pair.*
 
 *A format usually names a shading model and says which parameters it stores, but not the equation those parameters feed. COLLADA has a `<phong>` element holding five values and no statement of what to compute from them. Because Phong exists in several variants, two readers that both conform can render the same file differently.* 
 
-*That is the gap glTF 2.0 closes. It is a container and, in Appendix B, a normative definition of exactly one shading model, Cook-Torrance with metallic-roughness, the fifth row of 1.1.3. Pinning it there is not redundant with the literature having defined it once, because the literature holds several versions under each name. This is why glTF appears in section 3 as a source for equations and in section 4 as a format.*  % CLAUDE: This sounds like a pretty great feature that glTF specifies both the shading model and the format/container.   Does the shading model get specified with enough detail so that any implmentation should technically be equivalent?  Seems like a hard thing to achieve.  
+*That is the gap glTF 2.0 closes. It is a container and, in Appendix B, a normative definition of exactly one shading model, Cook-Torrance with metallic-roughness, the fifth row of 1.1.3. This is important because a glTF compliant asset must contain only models with the Cook-Torrance with metallic-roughness shading model - and the implementation of that model is fully specified.   The literature holds several versions under this and similar names, so relying on the name alone is insufficinet.  This is why glTF appears in section 3 as a source for equations and in section 4 as a format.*
+
+*It does not go so far as to make two implementations equivalent. The specification allows that implementations of the BRDF "MAY vary based on device performance and resource constraints", and calls conformant any implementation that "adheres to the rules for mixing BRDFs". Its own sample renderer is described as using non-physical simplifications that break energy conservation and reciprocity.*
+
+*So what is pinned is everything an author controls and two readers must agree on: the parameters, their defaults, their encoding, which channel of which image carries what, and the structure that combines the lobes. What is left open is the numerical choice inside each lobe. Two conformant renderers will not match pixel for pixel, but they will not disagree about what the material is, and that second kind of disagreement is the one that used to happen.*
 
 *Section 4 expands this table and separates what a format can express from what its readers implement.*
 
@@ -114,6 +122,7 @@ Each model in 1.1.3: character, cost, where it fits, what it cannot represent, w
 *Each slot has several published candidates and an implementation picks one per slot, so the combination rather than any single choice is what a given renderer means by the microfacet model. The usual three are Trowbridge-Reitz for D, published in 1975 and renamed GGX by Walter et al. in 2007, which is the name in use everywhere now; Smith for G; and Schlick's approximation for F. Hoffman 2013 puts it that most papers proposing a new microfacet model are best read as proposing a new function for one slot.*
 
 #### 2.2.3 Oren-Nayar, and other physically based diffuse models
+*Lambert's replacement for surfaces rough at the microscopic scale. It keeps a surface bright out to its silhouette instead of falling away, which is why the moon reads as a disc rather than a sphere. Physically based and microfacet, but diffuse only.*
 
 #### 2.2.4 The layered supersets: Disney principled, Standard Surface, OpenPBR
 *They are not extra parameters on one reflection model, which is why they sit here rather than in section 3. Each adds a lobe: a clearcoat is a second specular BRDF evaluated on top of the first, sheen swaps in a different D, transmission adds a transmitted term and so turns the BRDF into a BSDF. Both halves grow together, the reflection model and the parameterization.*
@@ -126,6 +135,7 @@ Each model in 1.1.3: character, cost, where it fits, what it cannot represent, w
 *The two cases where the category of 1.1 and its plausibility test disagree. Blinn-Phong can be normalized so that it conserves energy: an empirical model that passes. And physically based models as shipped often fail it, because real-time renderers approximate for speed. So the category records how a model was derived, and plausibility is a separate question asked of the result.*
 
 ### 2.4 Side by side: cost, and what each cannot represent
+*The figure of 1.1.3 read as a table: what each model computes, roughly what it costs per pixel, and the one thing each cannot do. Lambert has no highlight, Phong has no Fresnel, Cook-Torrance has no cheap path.*
 
 ## 3. Parameterizations
 
@@ -149,71 +159,145 @@ The layer where two tools most often disagree while both claiming PBR.
 
 ## 4. Which formats carry which
 
-### 4.1 Formats that carry geometry
-*The table of 1.2, with what each format's readers actually implement.*
-### 4.2 Formats that reference geometry rather than carrying it % CLAUDE: Remove all this from the entire docuemnt.  This was a question I had and answered.  SDF and URDF are not part of the topic of this document.  
-*SDF and URDF name a mesh file and may override its material.* 
-### 4.3 Expressible, and actually implemented, are different questions
-*SDF names both parameterizations; Gazebo implements one.*
+Section 1.2 said what each format can express. This section is about the distance between that and what its readers do.
+
+### 4.1 What each format can express
+*The table of 1.2 expanded: one row per format, naming the element or block that actually carries the material, and the version of the format it arrived in.*
+
+### 4.2 Expressible and implemented are different questions
+*A format's capability is an upper bound, never a promise. The layered supersets reach glTF as extensions, so a conformant reader may ignore them and fall back to the core. OBJ's physically based additions are unofficial and most readers skip them.  Reading a file tells you what was written, not what will be shown.*
 
 ## 5. The shared substrate: geometry and texture coordinates
 
+What both ways agree on. A surface is triangles, and a triangle's corners carry more than position. % CLAUDE: What else?
+
 ### 5.1 Vertices, triangles and indices
+*A triangle is three indices into an array of vertices, so one vertex serves many triangles and is stored once. That indirection is why vertex count and triangle count are not proportional, and why a count of either on its own says little.* % CLAUDE: I don't need a tale of what not to do.  
+
 ### 5.2 Vertex attributes: position, normal, texture coordinate
-*Hard and soft edges are geometry, not rendering. Flat and smooth shading, the technique words, Eck 4.1.3.*
+*Includes hard and soft edges, which look like a rendering choice and are geometry. A hard edge exists because two faces do not share vertices, each carrying its own normal. The author controls it, it is stored in the file, and it is why vertex counts exceed corner counts. This is also where the technique word "shading" is disposed of: flat shading and smooth shading, in Eck 4.1.3 and Marschner and Shirley 10.1.3, name whether a vertex carries its face's normal or an averaged one, and have nothing to do with which shading model is evaluated.*
+
 ### 5.3 UV coordinates: an address on an image for every vertex
+*Two numbers per vertex naming a spot in an image, carried like any other attribute and independent of where the vertex sits in space. glTF calls the first set TEXCOORD_0 and allows more than one, which is how a model can read its base color and its occlusion from differently arranged images.*
+
 ### 5.4 Unwrapping, and why a curved surface must be cut before it will lie flat
+*No closed curved surface flattens without tearing, so the author chooses where to cut. The cuts are seams, they duplicate vertices, and the pieces between them are the shells that get arranged on the image.*
+
 ### 5.5 Texel density: image resolution measured on the surface rather than in the image
+*Pixels per meter of surface, not pixels per side of the image. It is the number that decides whether a 512 image is generous or starved for a given part, and it is why two parts in one scene can look like they came from different libraries.*
 
 ## 6. What each way asks the author to supply
 
+The two practices end to end, once the vocabulary and the models are in place.
+
 ### 6.1 Under an empirical model: ambient, diffuse, specular, emission, shininess
 *Five; Eck 4.1.1, COLLADA `profile_COMMON`.*
+
 ### 6.2 What those numbers are, and what they are not
-*Tuned per viewpoint, Marschner and Shirley 24.5, against a Fresnel reflectance near 0.04.*
+*Marschner and Shirley 24.5: a Phong specular coefficient "typically must be tuned for viewpoint in static images and tuned for a particular camera sequence for animations," against a Fresnel reflectance confined to roughly 0.03 to 0.06 for real dielectrics.*
+
 ### 6.3 What has to be painted into the single image
+*Everything the model cannot compute: shadow in a crevice, a bright edge along a rim, a suggestion of reflection. Painting them in is not laziness, it is the only place to put them, and it is what fixes the material to one lighting setup.*
+
 ### 6.4 Under metallic-roughness: six properties instead of one image
+*Base color, metallic, roughness, normal, occlusion and emissive. The list is closed and every entry has a default, so a material that says nothing is not neutral, it is white, fully metallic and fully rough.*
+
 ### 6.5 Supplying a value two ways: a constant, an image, or both
+*Each property takes a factor written in the material, a texture, or both, in which case the factor multiplies what the texture supplies. A property given neither keeps its default, and a texture given without a factor is multiplied by one.*
+
 ### 6.6 Base color
+*The surface's own color with no lighting in it at all. A texture here is sRGB and a factor is linear, which is the trap: the same number in the two places does not mean the same thing.*
+
 ### 6.7 Metallic
+*A claim about what the object is made of, not a style dial. Nearly binary in reality, so the map is closer to a mask than a gradient, and a wrong value is not slightly wrong.*
+
 ### 6.8 Roughness
+*How wide the specular lobe is, hence how sharp a reflection the surface returns. Squared before it reaches the equation, 3.1, so the slider is perceptual rather than physical.*
+
 ### 6.9 Normal
+*Fine detail faked by perturbing the normal instead of adding triangles. Stored in tangent space, which is what lets one image be reused across surfaces and survive the object bending.*
+
 ### 6.10 Occlusion
+*How much ambient light reaches into a crevice. The one entry in the list that describes the surroundings rather than the material, and the one a renderer could in principle compute for itself.*
+
 ### 6.11 Emissive
+*Light the surface gives off on its own. Unaffected by every light in the scene, which makes it the only property that still shows when nothing is lit.*
 
 ## 7. The two ways side by side
 
+The comparison itself, once both have been described.
+
 ### 7.1 Level by level
-*Table: shading model, category, parameterization, author values, file element, formats.*
+*Summary table placeholder. Rows: shading model, Blinn-Phong or Lambert against Cook-Torrance with metallic-roughness; category, empirical against physically based; parameters set directly against derived through a parameterization; author-supplied values; the element carrying it in a file, `<phong>` inside `profile_COMMON` against `pbrMetallicRoughness`; formats that can carry it.*
+
 ### 7.2 What each can express, and what it cannot
+*Empirical cannot express a metal whose reflection takes the metal's own color, nor a surface that behaves correctly as the view flattens. Physically based cannot express a look that was never physical, which is occasionally the whole point of reaching for an empirical model.*
+
 ### 7.3 What each requires the author to decide
+*Five coefficients tuned by eye against six properties largely looked up or measured. The second asks for more values and fewer judgment calls, which is a different kind of work rather than more of it.*
+
 ### 7.4 How well each survives being opened in a different tool
+*An empirical material is a set of numbers whose meaning is not written down anywhere the reader can consult. A glTF material is, 1.2. This is the practical argument, and it is the one that decides deliveries.*
+
 ### 7.5 How each behaves under lighting the author did not choose
+*The whole difference in a single test: move the light. A physically based material is still right; an empirical one is wrong in a way no setting recovers, because the lighting it assumed is baked into its numbers and its image.*
+
 ### 7.6 What each costs in data
+*One image against as many as five, partly offset by packing three properties into the channels of a single image, 8.5. Textures dominate the byte count either way.*
 
 ## 8. How the data is stored and encoded
 
+The layer underneath both: how numbers and images become bytes, and the encoding decisions that are invisible until they are wrong.
+
 ### 8.1 Numbers in a buffer: offset, type, count
+*A buffer is an undifferentiated run of bytes. An accessor says where to start reading, what type to read, and how many, and a bufferView sits between them describing the slice. Nothing about meaning lives in the bytes themselves.*
+
 ### 8.2 Vertices and indices, and what a triangle costs in bytes
+*Position, normal and one texture coordinate set is thirty-two bytes a vertex before indices. Worth doing once, because it settles most arguments about triangle budgets by showing where the bytes actually are.*
+
 ### 8.3 Images: PNG and JPEG, and what the container does not record about them
+*The only two encodings the specification requires a reader to support. JPEG is lossy in a way that is invisible on base color and clearly visible on a normal map, where the block artifacts become shading artifacts.*
+
 ### 8.4 Color images and data images: sRGB against linear
+*Base color and emissive are sRGB and must be decoded before any arithmetic; every other map holds data and is already linear. Which rule applies is decided by how the material refers to the image, never by anything inside the image file, and glTF ignores an embedded color profile outright.*
+
 ### 8.5 Packing several quantities into one image
+*Occlusion, roughness and metallic in the red, green and blue channels of one image. Three unrelated quantities in one file, none of them a color, which is why the packed image looks like nothing when opened.*
+
 ### 8.6 Defaults, and what a file leaves unsaid
+*Every field has one and silence is never neutral. A primitive with no material at all gets white, fully metallic, fully rough, which is why an unassigned region shows up as a pale metal patch rather than disappearing.*
 
 ## 9. Reading a glTF file end to end
 
+One complete part in the text form, where the description, the geometry and the images sit in separate files that reference each other.
+
 ### 9.1 The file set: the JSON, the binary buffer, the images beside them
+*Three kinds of file for one part: a `.gltf` holding the structure as JSON, a `.bin` holding the numbers, and the images. Listing them first makes the rest of the section a matter of following names between them.*
+
 ### 9.2 From scene to triangle: the chain of references, read top to bottom
+*scene, node, mesh, primitive, accessor, bufferView, buffer. Each step is an index into the next array, and walking it once end to end is the point of the section. Also where to show what a glTF file holds that has nothing to do with materials.*
+
 ### 9.3 The material, and how it names its images
-*glTF's `material` object: the data holding one shading model's parameters, not the shading model.*
+*Where glTF's `material` object is met: the data object holding one shading model's parameters, as distinct from the shading model itself, section 1. It reaches an image only through a texture, which pairs that image with a sampler.*
+
 ### 9.4 The two containers: a `.gltf` with its files beside it, against a single `.glb`
+*The same content packaged two ways. A `.glb` concatenates the JSON and the binary into one file and embeds the images, which is what a delivery normally is; the text form is what you open when you want to read it.*
 
 ## 10. Glossary
 
+Every term used above, defined in one place for lookup rather than for reading in order.
+
 ### 10.1 The terminology of section 1
+*Shading model with its four synonym families, reflection model, BRDF, BTDF, BSDF, lobe, parameterization, physically plausible, physically based, empirical, microfacet, format, and "shading" as the technique word of 5.2.*
+
 ### 10.2 The texture words
+*Image, sampler, texture, material, property, channel, factor, sRGB, linear, tangent space, texel. The pair most often run together is property and channel, so both are defined against each other.*
+
 ### 10.3 The geometry words
+*Vertex, corner, triangle, index, primitive, mesh, node, attribute, normal, tangent, UV, seam, shell, texel density, hard and soft edge.*
+
 ### 10.4 The storage words
+*Buffer, bufferView, accessor, component type, stride, `.gltf` against `.glb`, embedded against referenced, and the two image encodings.*
 
 ## 11. Further reading
 
