@@ -19,23 +19,28 @@ The field is not consistent about what to call that package. These names all ref
 | reflection model, BRDF model | Marschner and Shirley ch. 24, pbrt |
 | lighting model, illumination model | Eck, OpenGL-era texts |
 
-This document uses `shading model`, the textbook term.  Two of the others are avoided: "material model", because glTF's `material` is a data object holding parameters (9.3); and "Phong shading" on its own, because it also names a per-pixel renderer technique (Marschner and Shirley 8.2.5).
+This document uses shading model, the textbook term, and keeps reflection model for the half of it defined in 1.1.1. Two of the others are avoided: "material model", because glTF's `material` is a data object holding parameters (9.3); and "Phong shading" on its own, because it also names a per-pixel renderer technique (Marschner and Shirley 8.2.5).
 
 ### 1.1 Shading model: the package a renderer evaluates at a point on a surface
 *The unit every renderer and authoring tool works in: a reflection model, 1.1.1, plus a parameterization, 1.1.2.*
 
-*Category: empirical or physically based. The precise test is physically plausible, Lewis 1994: energy conserving and reciprocal. Physically based is looser, built from a physical picture of the surface and constrained to be plausible; parameters are not part of the test, Burley 2012. Microfacet is narrower than either, one family of physically based models, so not a synonym for them.* % CLAUDE: Can we say empirical or physically-based.  Physically-plausable (Lewis 1994) is a subset of physcially-based.   Microfacet is a subset of physically-plausible (ref)?
+*Category: empirical or physically based, according to how the reflection model was derived. Empirical means adjusted until it looked right; physically based means derived from a physical picture of the surface, with energy conservation and reciprocity as design goals.*
+
+* Microfacet, Cook and Torrance 1982, is the family of physically based models built from the picture of a surface as many tiny mirrors.*
 
 #### 1.1.1 Reflection model: what is computed at a single point
 *Reflection model and BRDF name the same thing here. Spell out the acronym, bidirectional reflectance distribution function: incoming direction and outgoing direction in, fraction of light out. BRDF is the mathematical name for the class of function, a reflection model a named one. Marschner and Shirley 18.1.6.*
 
 #### 1.1.2 Parameterization: how an author supplies values to the reflection model
-*The author-facing parameters and the rule mapping them to the reflection model's variables. Empirical reflection models take their coefficients directly; physically based ones derive them from friendlier inputs. Cook-Torrance is the only reflection model with more than one parameterization in use, so it is the only one whose name does not settle the shading model.* % CLAUDE: Are there multiple parameterizations for the same reflection model?  Are there multiple reflection models that use the same parameterization?   Or are they always 1:1?  If it is always 1:1, maybe we don't need separate subsubsections?
+*The author-facing parameters and the rule mapping them to the reflection model's variables. Empirical reflection models take their coefficients directly; physically based ones derive them from friendlier inputs.*
+
+*The two are not one to one, which is why they are named separately. One reflection model can have several parameterizations: Cook-Torrance takes metallic-roughness, specular-glossiness and the supersets, section 3. The reverse does not happen, since a parameterization is written to produce one reflection model's variables. Every other row of 1.1.3 has a single parameterization, so there the two names pick out the same thing.*
 
 #### 1.1.3 The shading models in use
 
 | Shading model | Reflection model | Parameterization | Category |
 |---|---|---|---|
+| Constant, also called unlit | none; the color is returned unchanged | one color | neither: no light enters the computation |
 | Lambert | cosine law | diffuse reflectance | physically based, see 2.2.1 |
 | Phong, Blinn-Phong | cosine-power lobe over Lambert | ambient, diffuse, specular, emission, shininess | empirical |
 | Oren-Nayar | microfacet diffuse | diffuse reflectance, roughness | physically based |
@@ -43,21 +48,24 @@ This document uses `shading model`, the textbook term.  Two of the others are av
 | Specular-glossiness | the same | diffuse color, specular color, glossiness | physically based |
 | Supersets of 3.5 | the same plus layers | the three above plus one per layer | physically based |
 
+*Constant is the minimal case and the one to read first: no lights, no directions, no surface normal, just the color as authored. Everything below it in the table is a way of deciding how much of the light arriving at a point leaves it toward the eye.*
+
+
 ### 1.2 Format: which file carries the result
 
 The other independent choice. A format can carry one shading model, several, or none.
 
 | Format | Shading models it can carry |
 |---|---|
-| glTF 2.0 | metallic-roughness; unlit  % CLAUDE: what does unlit mean? and the supersets by extension % CLAUDE: ? |
-| COLLADA | Lambert, Phong, Blinn-Phong, constant % CLAUDE: Describe a constant shading model above as a simple, minimal example. |
-| OBJ with MTL | Phong family % CLAUDE: Why introduce "family"?  Again adding seeminly unnecessary words to confuse the reader.  Explain.
-; metallic-roughness only by unofficial extension |
+| glTF 2.0 | metallic-roughness in core; constant and the supersets % CLAUDE: supersets of what?
+ by extension |
+| COLLADA | constant, Lambert, Phong, Blinn-Phong |
+| OBJ with MTL | constant, Lambert, Phong; metallic-roughness only by unofficial extension |
 | FBX | Lambert, Phong; physically based only in vendor blocks |
 | STL | none, geometry only |
 | USD | metallic-roughness and a specular workflow in one model |
 | MaterialX | any, since it describes shading networks |
-| SDF | Phong family, metallic-roughness, specular-glossiness |
+| SDF | Phong, Blinn-Phong, metallic-roughness, specular-glossiness |
 | URDF | none: one color and one texture filename |
 
 *Section 4 expands this and separates what a format can express from what its readers implement.*
@@ -67,7 +75,7 @@ The other independent choice. A format can carry one shading model, several, or 
 Each model in 1.1.3: character, cost, where it fits, what it cannot represent, with lobe illustrations. The models are described independently of any file format; where a specification is named it is as a published source for the math.
 
 ### 2.1 Empirical shading models
-#### 2.1.1 Phong % CLAUDE: Should you have "Phone Family"?  See above. 
+#### 2.1.1 Phong
 *Marschner and Shirley 10.2; Eck 4.1.4 for the OpenGL form.*
 #### 2.1.2 Blinn-Phong
 *The half-vector variant and the typical exponent values, Marschner and Shirley 4.5.2.*
@@ -77,12 +85,13 @@ Each model in 1.1.3: character, cost, where it fits, what it cannot represent, w
 *Passes the test and predates the movement; no specular term, so not "PBR" in everyday usage. Its role is the diffuse term inside the microfacet models. Marschner and Shirley 18.1.6.*
 #### 2.2.2 Cook-Torrance, and the microfacet idea
 *Roughness as the width of the microfacet distribution, hence of the lobe.*
-##### The three interchangeable terms inside a microfacet reflection model
-*Distribution, geometry and Fresnel, each with competing choices: GGX % CLAUDE: ?, Smith and Schlick among them. Whoever implements the model fixes one of each . Hoffman 2013.*
+##### The three factors inside a microfacet reflection model
+*Distribution, how the microfacet normals are spread; geometry, how facets shadow one another; Fresnel, how reflectance rises toward grazing angles. Each has competing choices, most often Trowbridge-Reitz, which everyone calls GGX, Smith, and Schlick. Whoever implements the model picks one of each. Hoffman 2013.* % CLAUDE: Don't quite understand this note.
+
 #### 2.2.3 Oren-Nayar, and other physically based diffuse models
 
-### 2.3 Where the boundary is soft
-*Normalized Blinn-Phong conserves energy and crosses the line. Real-time implementations routinely trade plausibility for speed and say so. The category is about how a model was built, not a pass or fail.* % CLAUDE: Very confusing.  Rephrase
+### 2.3 Where the boundary is soft % CLAUDE: What boundary?  It is annoying when you are vague like this.  
+*The two cases where the label and the test disagree. Blinn-Phong can be normalized so that it conserves energy, an empirical model that passes the plausibility test of 1.1. And physically based models as shipped often fail it, because real-time renderers approximate for speed. So the category records how a model was derived, and plausibility is a separate question asked of the result.*
 
 ### 2.4 Side by side: cost, and what each cannot represent
 
@@ -91,15 +100,19 @@ Each model in 1.1.3: character, cost, where it fits, what it cannot represent, w
 The layer where two tools most often disagree while both claiming PBR.
 
 ### 3.1 Why the author's parameters are not the reflection model's variables
-*Roughness is squared before use; specular color at normal incidence is derived from base color and metallic. Burley's five principles.*
+*Roughness is squared before use; specular color at normal incidence is derived from base color and metallic. Burley's five principles.* % CLAUDE: include quote and or ref with page numbers.
+
 ### 3.2 Metallic-roughness
-*Three inputs; the metallic blend of a dielectric and a metal BRDF, glTF Appendix B.*
+*Three inputs; the metallic blend of a dielectric and a metal BRDF, glTF Appendix B.* % CLAUDE: This name is both a shading model and a parameterization?  Seems like we should call this the matallic-roughness parameterization - the parameterization of the material-roughness shading model.  
+
 ### 3.3 Specular-glossiness, its older lineage, and why glTF retired it
-*The specular-color workflow that predates the metallic idea; same reflection model, one more image, impossible combinations expressible. Archived by Khronos.*
+*The specular-color workflow that predates the metallic idea; same reflection model, one more image, impossible combinations expressible. Archived by Khronos.* % CLAUDE: so glTF documents both the shading model and the container?
+
 ### 3.4 Disney principled, where metallic-roughness comes from
 *Burley 2012, cited by glTF Appendix B.*
+
 ### 3.5 The richer supersets, and how they reduce to metallic-roughness
-*Standard Surface, OpenPBR, Blender Principled: the core three plus layers, each layer a glTF extension or nothing.*
+*Standard Surface, OpenPBR, Blender Principled: the core three plus layers, each layer a glTF extension or nothing.*  % CLAUDE: Are you sure these are just parameterizations.  Are the different parameterizations of the same reflection model?  You seem to be mixing our terms again.
 
 ## 4. Which formats carry which
 
