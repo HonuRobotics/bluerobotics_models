@@ -6,7 +6,7 @@ It is deliberately general. Nothing here is specific to this project's parts, to
 
 **Status: outline with subsections.** Section headings carry one line on what they do; notes in italic say what a subsection will establish and will be replaced.
 
-## 1. Two indepedent choices: Shading model and format
+## 1. Two independent choices: shading model and format
 
 Two independent choices: which shading model, and which format. A shading model is a reflection model plus a parameterization.
 
@@ -30,18 +30,33 @@ This document uses the term shading model for the pair of a reflection model, th
 *Microfacet, Cook and Torrance 1982, is the family of physically based models built from the picture of a surface as many tiny mirrors.*
 
 #### 1.1.1 Reflection model: what is computed at a single point
-*Reflection model and BRDF, bidirectional reflectance distribution function, are synonymous. Both name a function of two directions, where the light comes from and where the viewer is, returning how much of the light arriving along the first leaves along the second. % CLAUDE: Define this function in terms of inputs, outputs and parameters.  Maybe try a mathematical expression.
- Marschner and Shirley 18.1.6 defines it by describing the instrument that would measure it: a light in one direction, a detector in the other, one reading per pair of directions.*
+*Reflection model and BRDF, bidirectional reflectance distribution function, are synonymous. Both name a function of two directions, where the light comes from and where the viewer is, returning how much of the light arriving along the first leaves along the second. Marschner and Shirley 18.1.6 defines it by describing the instrument that would measure it: a light in one direction, a detector in the other, one reading per pair of directions.*
 
-*Plot that value over every outgoing direction and the shape is called a lobe: narrow and spiked for a mirror, broad and nearly hemispherical for matte paint. The word is used throughout for the shape of a model's response, and a model with more than one lobe,% CLAUDE: mention which shading models (use the proper names) use more than one lobe
- 2.2.4, adds a second such shape on top of the first.*
+Written out, with the material held fixed:
 
-*The value is not a bounded ratio. It is a density, light out per unit light in per unit solid angle, so a mirror's lobe spikes far above one while a white matte surface sits flat at one over pi. The bounded quantity is the lobe's integral over all outgoing directions, the share of arriving light that leaves at all, and that is what cannot exceed one. % CLAUDE: Analogous to a probability density function?  Just curious.
- Marschner and Shirley 18.1.6 calls it the directional hemispherical reflectance; it is the energy conservation half of the test in 1.1.*
+```
+BRDF(light direction, view direction)
 
-*It is per wavelength. A renderer evaluates it three times, once each for red, green and blue, which is why base color is a color while roughness is a single number.* % CLAUDE: Now I'm interested in how that gets represented.  Make sure that is covered somewhere in the doc.
+        radiance leaving toward the view direction
+   =    ------------------------------------------         units: 1/steradian
+        irradiance arriving from the light direction
+```
 
-*Lobes add. A model with a diffuse and a specular lobe is their sum, and it is the sum that has to stay within one, which is why the models of 2.2.2 scale the diffuse lobe down by whatever the specular lobe already took.* % CLAUDE: Is this scaling always done with a staight sum, or are there weighting schemes?
+*Inputs: two directions, four numbers in all, since each direction is two angles. Output: one value per wavelength, in units of inverse steradians. Parameters: the material's own values, 1.1.2, which are constants of the function rather than inputs to it, and which is why changing roughness gives a different function rather than a different answer from the same one.*
+
+*Plot that value over every outgoing direction and the shape is called a lobe: narrow and spiked for a mirror, broad and nearly hemispherical for matte paint. The word is used throughout for the shape of a model's response.*
+
+*Most models have more than one. Constant has none. Lambert and Oren-Nayar have a single diffuse lobe. Phong and Blinn-Phong have two, a diffuse lobe with a specular one on top, and Cook-Torrance under either parameterization also has two, though its diffuse lobe falls to nothing for a pure metal. The layered supersets of 2.2.4 add one more for every layer.*
+
+*The value is not a bounded ratio. It is a density, light out per unit light in per unit solid angle, so a mirror's lobe spikes far above one while a white matte surface sits flat at one over pi. The bounded quantity is the lobe's integral over all outgoing directions, the share of arriving light that leaves at all, and that is what cannot exceed one. Marschner and Shirley 18.1.6 calls it the directional hemispherical reflectance; it is the energy conservation half of the test in 1.1.*
+
+*The analogy with a probability density holds, and is worth carrying. Both are densities that mean nothing until integrated over a domain. The difference is the total: a probability density integrates to exactly one, while a BRDF's integral is at most one, the shortfall being the light the surface absorbed. Renderers use the analogy literally, sampling the BRDF as though it were a distribution, which Marschner and Shirley 24.2 lists as a requirement for a model to be usable.*
+
+*It is per wavelength. A renderer evaluates it three times, once each for red, green and blue, which is why base color is a color while roughness is a single number. How three numbers come to stand for a whole spectrum, and how those three are encoded once they reach a file, is 8.4.*
+
+*Lobes add. A model with a diffuse and a specular lobe is their sum, and it is the sum that has to stay within one, which is why the models of 2.2.2 scale the diffuse lobe down by whatever the specular lobe already took.*
+
+*Adding is the principle; in practice the terms are weighted, and the weighting is where models differ from one another. glTF layers specular over diffuse with a Fresnel weight, one minus F times the diffuse plus F times the specular, then blends that whole dielectric result against a metal result according to metallic. Marschner and Shirley 24.4 gives an older scheme built to keep the pair reciprocal. Filament spends a section putting back the energy a single-scattering model loses at high roughness. None of these is settled: glTF Appendix B says of its own weighting that it "breaks a fundamental property that a physically based BRDF must fulfill, energy conservation".*
 
 *Three acronyms one letter apart, and the letter is the direction the light leaves. A BRDF, R for reflectance, covers light that leaves on the side it arrived from. A BTDF, T for transmittance, covers light that goes through and leaves on the far side. A BSDF, S for scattering, is the two together; Filament states it as a BSDF "composed of two other functions: the BRDF and the BTDF". Anything opaque needs only the BRDF, which is why this document says reflection model throughout. The exception is 2.2.4, where adding transmission makes the model a BSDF.*
 
@@ -89,7 +104,7 @@ The other independent choice. A format can carry one shading model, several, or 
 
 *A format usually names a shading model and says which parameters it stores, but not the equation those parameters feed. COLLADA has a `<phong>` element holding five values and no statement of what to compute from them. Because Phong exists in several variants, two readers that both conform can render the same file differently.* 
 
-*That is the gap glTF 2.0 closes. It is a container and, in Appendix B, a normative definition of exactly one shading model, Cook-Torrance with metallic-roughness, the fifth row of 1.1.3. This is important because a glTF compliant asset must contain only models with the Cook-Torrance with metallic-roughness shading model - and the implementation of that model is fully specified.   The literature holds several versions under this and similar names, so relying on the name alone is insufficinet.  This is why glTF appears in section 3 as a source for equations and in section 4 as a format.*
+*That is the gap glTF 2.0 closes. It is a container and, in Appendix B, a normative definition of exactly one shading model, Cook-Torrance with metallic-roughness, the fifth row of 1.1.3. That matters because the core of a conformant file can express only that one shading model; anything else, constant or a layered superset, arrives as a named extension that a reader is free to ignore. Relying on the name alone would not have been enough, since the literature holds several versions under this name and others like it. This is why glTF appears in section 3 as a source for equations and in section 4 as a format.*
 
 *It does not go so far as to make two implementations equivalent. The specification allows that implementations of the BRDF "MAY vary based on device performance and resource constraints", and calls conformant any implementation that "adheres to the rules for mixing BRDFs". Its own sample renderer is described as using non-physical simplifications that break energy conservation and reciprocity.*
 
@@ -169,10 +184,10 @@ Section 1.2 said what each format can express. This section is about the distanc
 
 ## 5. The shared substrate: geometry and texture coordinates
 
-What both ways agree on. A surface is triangles, and a triangle's corners carry more than position. % CLAUDE: What else?
+What both ways agree on. A surface is triangles, and each corner carries a position, a normal, at least one pair of texture coordinates, and optionally a tangent and a color.
 
 ### 5.1 Vertices, triangles and indices
-*A triangle is three indices into an array of vertices, so one vertex serves many triangles and is stored once. That indirection is why vertex count and triangle count are not proportional, and why a count of either on its own says little.* % CLAUDE: I don't need a tale of what not to do.  
+*A triangle is three indices into an array of vertices, so one vertex serves many triangles and is stored once. That indirection is why vertex count and triangle count are not proportional.*
 
 ### 5.2 Vertex attributes: position, normal, texture coordinate
 *Includes hard and soft edges, which look like a rendering choice and are geometry. A hard edge exists because two faces do not share vertices, each carrying its own normal. The author controls it, it is stored in the file, and it is why vertex counts exceed corner counts. This is also where the technique word "shading" is disposed of: flat shading and smooth shading, in Eck 4.1.3 and Marschner and Shirley 10.1.3, name whether a vertex carries its face's normal or an averaged one, and have nothing to do with which shading model is evaluated.*
@@ -259,7 +274,7 @@ The layer underneath both: how numbers and images become bytes, and the encoding
 *The only two encodings the specification requires a reader to support. JPEG is lossy in a way that is invisible on base color and clearly visible on a normal map, where the block artifacts become shading artifacts.*
 
 ### 8.4 Color images and data images: sRGB against linear
-*Base color and emissive are sRGB and must be decoded before any arithmetic; every other map holds data and is already linear. Which rule applies is decided by how the material refers to the image, never by anything inside the image file, and glTF ignores an embedded color profile outright.*
+*Three numbers stand in for a spectrum: red, green and blue are point samples, chosen to match human vision rather than to describe the light, which is why two materials can match on screen and differ under a spectrometer. Base color and emissive are sRGB and must be decoded before any arithmetic; every other map holds data and is already linear. Which rule applies is decided by how the material refers to the image, never by anything inside the image file, and glTF ignores an embedded color profile outright.*
 
 ### 8.5 Packing several quantities into one image
 *Occlusion, roughness and metallic in the red, green and blue channels of one image. Three unrelated quantities in one file, none of them a color, which is why the packed image looks like nothing when opened.*

@@ -8,7 +8,13 @@ This specification states what a delivered visual model must be. The reasoning b
 
 ### 1.1 Scope
 
-This specification constrains the visual models delivered for the parts library. It does not replace the standards it builds on. It selects a subset of them, and adds project requirements only where those standards are silent.
+This specification constrains the visual models delivered for the parts library. It does not replace the standards it builds on. It stands in three different relationships to them, and every rule below is one of the three:
+
+- **Narrowing.** Using less than the standard allows, because this project does not need the rest. Most of this document is narrowing.
+- **Adding.** Requiring something the standard does not, because a consumer of ours needs it. These exist because Gazebo and RViz each implement only part of glTF, so a conforming file is not always a usable one. Such rules are marked as target constraints and name the consumer that motivates them.
+- **Departing.** Differing from what the standard says, which is done rarely and never silently. The forward axis in section 5.3 is the only current candidate.
+
+Anything not falling into one of those three is the standard's, and this document does not restate it.
 
 It specifies:
 
@@ -25,11 +31,11 @@ The workflow this specification serves is built on published standards owned by 
 
 | Standard | Role here |
 |---|---|
-| glTF 2.0, Khronos | The mesh format and its material model. Normative except where this specification narrows it |
+| glTF 2.0, Khronos | The mesh format and its material model. Normative except where this specification narrows, adds to, or departs from it, each of which is marked |
 | REP 103, ROS | Coordinate conventions and units for the part frame |
 | BCP 14 | The meaning of the requirement keywords in this document |
 
-Two obligations follow from that design goal, and this document is bound by both. Where this specification departs from a standard, the departure is stated explicitly and the reason given, never left as a silent local habit. Where a standard is silent, this specification says so plainly rather than implying an authority that does not exist.
+Three obligations follow from that design goal, and this document is bound by all of them. Where this specification departs from a standard, the departure is stated explicitly and the reason given, never left as a silent local habit. Where it adds a requirement the standard does not make, the rule says which consumer needs it, so that a reader can tell a limitation of our tools from a property of the format. And where a standard is silent, this specification says so plainly rather than implying an authority that does not exist.
 
 ### 1.3 Project-specific content (Informative)
 

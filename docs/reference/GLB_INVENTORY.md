@@ -6,22 +6,37 @@ The question it answers is what is actually inside the files: how much of each o
 
 ## Glossary
 
-The first four words are used interchangeably in most conversations about textures, which causes confusion. The last four name what the Prims and Mats columns count: primitives and materials, plus the mesh that groups them and the node that places it. They are also the vocabulary of the review's unresolved question about what "one mesh" means, whose four candidate answers are one file, one node, one mesh and one primitive (section 10, decision 15).
+It comes in three groups. The texture words, from image down to UV shell, are used interchangeably in most conversations, which causes confusion; image, texture, map and texel are the ones most often swapped for each other. The geometry words, from node down to material, name what the Prims, Verts, Tris and Mats columns count, and they are also the vocabulary of the review's unresolved question about what "one mesh" means, whose four candidate answers are one file, one node, one mesh and one primitive (section 10, decision 15). The last two, accessor and buffer view, sit below all of them: they are where the numbers themselves finally live.
 
 Everything in a glTF file refers to everything else by integer array index, so where an entry below says one thing points at another, what is in the file is a number: `"material": 0` on a primitive means `materials[0]`, and `"mesh": 0` on a node means `meshes[0]`. There are no names or pointers in these references; the names that do exist are labels, and nothing resolves by them.
 
 - **image** — the encoded PNG or JPEG bytes held in the file, glTF's `images` array. An image has a pixel size and a format and nothing else; it does not know what it will be used for. This is what the Imgs column counts and what Tex KB weighs.
 - **texture** — one image plus one sampler, which is glTF's `textures` array. The sampler says how the image is filtered and wrapped when it is read, so a texture is a way of reading an image, and two textures can share one image and read it differently. "Texture" is also the ordinary English word for the whole subject, and it is used that way below in phrases like texture memory and texture budget.
+- **sampler** — the rules for reading an image, which is the other half of a texture. Four settings: `magFilter` and `minFilter` say what to do when one texel covers more or less than one pixel on screen, and `wrapS` and `wrapT` say what to do when a UV falls outside 0 to 1. All four are stored as OpenGL integer constants, which is why the sampler in the appendix reads `{"magFilter": 9729, "minFilter": 9987, "wrapS": 10497, "wrapT": 10497}`, meaning linear, linear with mipmaps, repeat, repeat. Gazebo reads none of it and always repeats (review section 1.4).
 - **map** — a texture used for a particular purpose in a material: base color map, normal map, metallic-roughness map. This is where the meaning lives, because the purpose is what makes a pixel count adequate or not. The same 512-pixel image is a serviceable base color map and an unusably coarse normal map. glTF defines exactly five purposes and names each material property after what the property holds rather than after the job it does, so `baseColorTexture` is the property holding the texture used for base color, `normalTexture` the one holding the texture used as a normal map, and so on through `metallicRoughnessTexture`, `occlusionTexture` and `emissiveTexture`. Their names end in "Texture" for that reason. They are properties of the material, not textures themselves, and what fills one is a reference to an entry in the `textures` array.
 - **texel** — one pixel of a map, counted where it lands on the surface rather than where it sits in the image. Texels/mm is a property of the map, not of the image, because it depends on the UV layout as much as on the pixel count.
-- **node** — an entry in the scene graph, carrying a transform and optionally pointing at a mesh. Its name is what Gazebo uses to name the submesh.
-- **mesh** — glTF's `meshes` array: a named group of primitives, with no transform of its own. The node that points at it supplies the placement.
-- **primitive** — one draw call's worth of geometry inside a mesh: a set of vertex attributes, an index buffer and at most one material. A part with two materials must have two primitives, because glTF gives no other way to express it.
-- **material** — a block of PBR parameters: the factors, the alpha mode, and the five map properties above. A primitive names at most one material, and all of its triangles are shaded with that one; a primitive naming none renders as white metal.
+- **UV** — the pair of numbers carried on each vertex saying which point of a map that vertex touches, named for the axes u and v so they do not collide with the x, y and z of the model. glTF stores them in the `TEXCOORD_0` attribute, which is the UV0 in the Attributes column. A second set would be `TEXCOORD_1`; no file here has one.
+- **UV layout** — the whole flattening: every triangle of the surface cut apart and laid out in the unit square so each vertex has somewhere to sit. Also called the unwrap. It is what makes texels/mm a property of the part rather than of the image, since the same 512-pixel map stretched over more surface resolves less of it.
+- **UV shell** — one connected island of that layout. A curved part cannot be flattened in one piece, so the surface is cut into several; the space between them is what UV fill counts as unused. Shells may in principle overlap, deliberately reusing one region of the map for several patches of surface, which is the case UV fill cannot see.
+- **node** — one entry in the scene graph: a name, an optional placement, and optionally the index of one mesh. The placement is either `matrix`, sixteen numbers, or up to three separate properties, `translation` (three numbers), `rotation` (four numbers, a quaternion) and `scale` (three numbers). A node with none of them sits at the origin, unrotated, unscaled; twelve of the fifteen files are exactly that. In the appendix the entire node is `{"name": "quad", "mesh": 0}`. Its name is what Gazebo uses to name the submesh.
+- **mesh** — the geometry of one object and nothing else: a name and a list of primitives. It has no placement, no size, no material and no color of its own. Where it sits comes from the node pointing at it; how it looks comes from the material each of its primitives names. In the appendix the whole object is `{"name": "quad", "primitives": [ one primitive ]}`. The reason it is separate from the node at all is that one mesh may be placed several times by several nodes without its geometry being repeated, though no file in this library does that.
+- **primitive** — one draw call's worth of geometry inside a mesh: a set of vertex attributes, an index buffer and at most one material. A part with two materials must have two primitives, because glTF gives no other way to express it. Its `mode` says what the indices describe, and glTF allows seven: POINTS, LINES, LINE_LOOP, LINE_STRIP, TRIANGLES, TRIANGLE_STRIP and TRIANGLE_FAN, with TRIANGLES the default. All 21 primitives in this library are TRIANGLES, and [model-spec.md](model-spec.md) section 6 requires it.
+- **vertex** — one point of the surface with its attributes bundled together: a position, and here a normal and a UV as well. Two triangles meeting at a corner share a vertex only if they agree on every attribute, so a corner where the normal or the UV differs is stored twice. The Verts column is therefore not a count of corners in the shape, and it can run either side of the triangle count: `blueboat_flag` carries 298 vertices for 164 triangles, `t200_thruster` 1,767 for 1,860.
+- **triangle** — three vertices named by three consecutive entries of the index accessor. The Tris column counts them. **Facet** is the same idea in the CAD and STL vocabulary the collision meshes come from. The difference is sharing: an STL has no index list, so every facet carries its own three corners and a corner used by six facets is stored six times, where glTF stores it once and refers to it by index. That does not make STL larger here, since it pays nothing for indices or for a UV: the collision STL in this repo runs 51 bytes per facet against 46 bytes per triangle across the GLB library.
+- **material** — a named set of values saying how a surface is shaded. Exactly three kinds of thing go in it:
+    - **factors**, which are plain numbers written in the material itself: `baseColorFactor`, four numbers for red, green, blue and alpha; `metallicFactor` and `roughnessFactor`, one number each from 0 to 1; `emissiveFactor`, three numbers. Where the matching map is present the factor multiplies it, and where no map is present the factor is the whole value. This is how a part can be fully metallic with no texture involved.
+    - **map properties**, the five listed above, each holding the index of a texture.
+    - **flags**, which are neither: `alphaMode`, one of the strings `OPAQUE`, `MASK` or `BLEND`, saying how the alpha value is used; `alphaCutoff`, a number that matters only when the mode is `MASK`; and `doubleSided`, true or false, saying whether back faces are drawn.
 
-There is no word here for the five material properties taken as a set, and this document does not coin one. They are referred to as the five map types, which is what the columns of the second table are. In particular "slot" is left alone: everywhere else in these docs it means a mounting point a chassis declares for a part, and borrowing it here would put two unrelated meanings in one document set.
+    A primitive names at most one material, by index, and every triangle in that primitive is shaded with it, since a primitive is a set of triangles and cannot be subdivided further. A primitive naming no material renders as white metal. In the appendix the material is a name, one map property and two factors, with all three flags left at their defaults.
+- **accessor** — a typed reading of the bytes a buffer view exposes: what the elements are (`VEC3`), what they are made of (float32), how many there are, and where they begin. Each vertex attribute is one accessor and the index list is another, and the primitive names them by index. An accessor holding POSITION must also carry `min` and `max`, which is why a bounding box can be read out of a file without decoding any geometry at all.
+- **buffer view** — a range of bytes, given as an offset and a length into a buffer, plus an optional stride and a hint naming the GPU binding point the range is destined for. It is untyped; the accessor above supplies the meaning, except for an embedded image, which names a buffer view directly and needs no accessor. The buffer itself is the raw bytes, which in a GLB is the file's BIN chunk, so geometry and images share one blob and the only thing separating them is which views the `images` array claims.
+
+There is no word here for the five material properties taken as a set, and this document does not coin one. They are referred to as the five map types, which is what the columns of the second table are. In particular "slot" is left alone: everywhere else in these docs it means a mounting point a chassis declares for a part, and borrowing it here would put two unrelated meanings in one document set. "Primitive" is the reverse case, a word already carrying two meanings across these documents: the glTF sense defined above, and the box, cylinder and sphere of a collision shape in [parts.md](../design/parts.md). Both are geometry terms, so context does not separate them; this document always means the glTF sense.
 
 So texture and map are not synonyms in general. In these fifteen files they happen to coincide exactly: 33 images, 33 textures, 33 maps, with no image shared between two maps and no texture read two ways. That is a fact about the current library, not a rule, and it is why the Imgs column and the map-type table agree. A redelivery that packed occlusion, roughness and metalness into one image, as [model-spec.md](model-spec.md) section 8 allows, would break the correspondence at once: one image, one texture, two maps.
+
+Every one of these terms appears exactly once in the worked example in the appendix, which is a complete glTF file short enough to read in full.
 
 ## How the numbers were made
 
@@ -176,3 +191,180 @@ The two of them together are 28.8 MB and 208,382 triangles: six times the bytes 
 ## What this inventory does not measure
 
 It reads the file, not the render. It does not decode pixels beyond the image header, so it says nothing about the saturated metalness channels or the constant-color albedos that the review measures in section 4. It does not detect overlapping UV shells, so UV fill is an upper bound on waste. It does not model mipmaps, samplers or the format the driver finally uploads, so decoded MB is a comparable figure rather than a prediction of VRAM. And, as the review says of this whole row, it cannot say what any of these numbers ought to be. Establishing that means measuring load time, memory and frame rate in Gazebo on the hardware we run, with geometry cost separated from texture cost, and that work has not been done.
+
+## Appendix: a minimal file, end to end
+
+The glossary above is easier to hold onto against a file small enough to read whole. `docs/_tools/make_minimal_gltf.py` writes one, in both of glTF's containers: [minimal.gltf](minimal.gltf), the JSON form meant to be read, and [minimal.glb](minimal.glb), the binary form the deliveries use and the only one `glb_inventory.py` reads. The asset is a one meter square in the XY plane facing +Z, with a 2x2 base color texture, and it exercises every term in the glossary exactly once. It is a teaching artifact, not a part: nothing installs it and no world references it.
+
+```json
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "Honu Robotics docs/_tools/make_minimal_gltf.py"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "minimal",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "quad",
+      "mesh": 0
+    }
+  ],
+  "meshes": [
+    {
+      "name": "quad",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "Quad",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.8
+      }
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "images": [
+    {
+      "name": "Albedo-Quad",
+      "mimeType": "image/png",
+      "bufferView": 4
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 4,
+      "type": "VEC3",
+      "min": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max": [
+        1.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 4,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 4,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5123,
+      "count": 6,
+      "type": "SCALAR"
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 48,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 48,
+      "byteLength": 48,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 96,
+      "byteLength": 32,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 128,
+      "byteLength": 12,
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 140,
+      "byteLength": 80
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 220,
+      "uri": "data:application/octet-stream;base64,<220 bytes, elided>"
+    }
+  ]
+}
+```
+
+Read from the top and the chain is the glossary in order. The scene names node 0. The node places mesh 0 and supplies the name Gazebo will use for the submesh. The mesh groups one primitive. The primitive names three attribute accessors, an index accessor, and material 0. The material names texture 0 in its `baseColorTexture` property, which is what makes image 0 a base color map rather than merely an image. The texture pairs sampler 0 with image 0. Every one of those references is an integer.
+
+The accessors say what the numbers are, the buffer views say where they live, and the single buffer holds all of it, geometry and PNG together:
+
+| Buffer view | Bytes | What | Accessor |
+|---|---|---|---|
+| 0 | 0 - 48 | 4 positions, VEC3 float32 | 0, with `min` and `max` |
+| 1 | 48 - 96 | 4 normals, VEC3 float32 | 1 |
+| 2 | 96 - 128 | 4 UVs, VEC2 float32 | 2 |
+| 3 | 128 - 140 | 6 indices, uint16 | 3 |
+| 4 | 140 - 220 | the base color PNG | none; `images[0]` reads it |
+
+Two triangles out of four vertices, in 220 bytes of buffer. The first four views carry a `target` naming the GPU binding point they belong to; the image view carries none, which is the only structural thing separating texture bytes from geometry bytes in the file. That is why splitting Tex KB from Geom KB in the tables above means walking the image list rather than reading a header.
+
+Passing the binary form through `glb_probe`, which loads a mesh exactly as Gazebo does, shows what the loader built from it:
+
+```
+bbox min 0 0 0  max 1 1 0
+submeshes 1  materials 1
+  submesh[0] name='quad' verts 4 tris 2 normals 4 uvsets 1 material 0
+  material[0] diffuse 1 1 1 1 transparency 0 alphaFromTexture 0 threshold 0.5 twoSided 0
+    base color: minimal.glb#*0_Diffuse [2x2]
+    pbr metalness 0 roughness 0.8
+```
+
+Note the submesh is called `quad` after the node, not after the mesh or the material, which is the naming behavior section 1.7 of the review describes, and the reason seven primitives under one node arrive as seven identically named submeshes.

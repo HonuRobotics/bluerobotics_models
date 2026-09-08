@@ -91,9 +91,9 @@ It would be reasonable to assume glTF is a container format that happens to supp
 
 More than that, glTF fixes the *encoding*, not just the concept. Two tools both claiming to support PBR can still disagree about everything that matters. glTF settles it normatively: which channel holds what, with occlusion in red, roughness in green and metalness in blue; which images are color and which are data, with base color and emissive in sRGB and everything else linear; that normal maps are tangent space with the OpenGL convention; that scalar factors multiply their maps; and what every default is when a field is absent.
 
-That is the whole reason a glTF material is portable when a vague agreement to "use PBR" is not.
+A glTF material is therefore portable where a vague agreement to "use PBR" is not.
 
-The practical consequence for this project is the one worth remembering. Choosing glTF was not choosing a new file container for the meshes we already had. It was adopting a different way of describing surfaces, one where the old habits, painting in highlights, tuning a specular value, treating one image as the material, are not merely discouraged but unrepresentable. The parts that were converted without that shift in mind are the ones this review found defects in.
+The practical consequence for this project. Choosing glTF was not choosing a new file container for the meshes we already had. It was adopting a different way of describing surfaces, one where the old habits, painting in highlights, tuning a specular value, treating one image as the material, are not merely discouraged but unrepresentable. The parts that were converted without that shift in mind are the ones this review found defects in.
 
 ## Where to go next
 
