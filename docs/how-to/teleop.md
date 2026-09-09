@@ -9,10 +9,32 @@ Actuators page ([BlueBoat](../vehicles/blueboat/actuators.md),
 [BlueROV2](../vehicles/bluerov2/actuators.md)), so the same launch works
 against the simulation or a bridged real vehicle.
 
+```{mermaid}
+flowchart LR
+  PAD(["gamepad"]) --> JOY["joy_node"]
+  JOY -- "/joy<br/>sensor_msgs/Joy" --> TTJ["teleop_twist_joy_node"]
+  TTJ -- "/cmd_vel<br/>geometry_msgs/Twist, normalized" --> MIX["twist_to_thrust"]
+  JOY -- "/joy<br/>deadman, EPA" --> MIX
+  CFG["per vehicle mixer.yaml<br/>gain matrix, thrust limits"] -.-> MIX
+  MIX -- "one std_msgs/Float64 per thruster<br/>/blueboat/motor_*/thrust<br/>/bluerov2/thruster_*/thrust" --> OUT(["simulation or<br/>bridged vehicle"])
+```
+
 ## Run
 
-Start a simulation, then:
+### BlueBoat
 
+See [BlueBoat running](../vehicles/blueboat/running.md) for simulation and vehicle startup instructions.
+
+
+
+### BlueROV
+
+[Run the simulation](../vehicles/bluerov2/running.md)
+```bash
+ros2 launch bluerov2_gazebo sim.launch.xml
+```
+
+Launch teleop
 ```bash
 ros2 launch bluerobotics_teleop teleop.launch.py vehicle:=bluerov2   # or blueboat
 ```
