@@ -51,6 +51,8 @@ parts: []
 #   fluid_density * volume = total_mass + net_buoyancy
 #
 #   net_buoyancy   net buoyancy as displaced mass, kg. Positive floats up.
+#                  The shipped 0.0 holds depth; a real vehicle is trimmed a
+#                  little positive (0.002 or so) so a dead one surfaces.
 #   cob_offset     "x y z" (m): center of buoyancy, relative to cob_frame.
 #   cob_frame      com (default; preserves righting stiffness across
 #                  configurations) or base_link (pins the CoB like the hull).
@@ -59,7 +61,7 @@ parts: []
 #   footprint      "x y" (m): the box footprint; height is solved. The
 #                  default matches the standard hull; use "0.457 0.575"
 #                  for the heavy chassis.
-buoyancy: {net_buoyancy: 0.002, cob_offset: "0 0 0.046", cob_frame: com, fluid_density: 1025.0, footprint: "0.457 0.338"}
+buoyancy: {net_buoyancy: 0.0, cob_offset: "0 0 0.046", cob_frame: com, fluid_density: 1025.0, footprint: "0.457 0.338"}
 
 # extra_bridge_topics: optional top level list, appended VERBATIM to the
 # generated bridge config in native ros_gz_bridge syntax. Never hand edit
