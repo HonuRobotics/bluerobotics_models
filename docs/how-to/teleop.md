@@ -19,27 +19,21 @@ flowchart LR
   MIX -- "one std_msgs/Float64 per thruster<br/>/blueboat/motor_*/thrust<br/>/bluerov2/thruster_*/thrust" --> OUT(["simulation or<br/>bridged vehicle"])
 ```
 
-## (Optional) Configure gamepad mapping (optional)
+## Configure the gamepad mapping (optional)
 
- The project includes a standalone utility program, written as a ROS node, to interactively configure a gamepad mapping via a curses walkthrough.  The gamepad mapping describes the connection between the gamepad functions (joystick axes, buttons, etc.) to the controllable degrees of freedom of a maritime vessel (surge, sway, heave; yaw). 
+A gamepad mapping ties the pad's controls, stick axes and buttons, to the vessel's controllable degrees of freedom: surge, sway, heave and yaw, plus the deadman button and the thrust ceiling (EPA).
 
-The shipped mapping % CLAUDE: what is the shipped mapping?  link to the file or files  if it is in this repo
-is for a Logitech Gamepad 310 (with back selector switch on 'X') with the following convention:
+The shipped mapping is two files in the package: [joystick.config.yaml](https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/bluerobotics_teleop/config/pad/joystick.config.yaml), which axis and button drive each motion, read by `teleop_twist_joy`; and [twist_to_thrust.yaml](https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/bluerobotics_teleop/config/pad/twist_to_thrust.yaml), the deadman button and the EPA axis, read by the mixer. It follows the SDL game controller layout, so it fits any pad that `joy_enumerate_devices` reports as `Mapped: true`. It was made with a Logitech F310 with the back switch on X, and reads:
+
 - Deadman: RB
-- Surge: Left stick fwd/rev
-- Sway: Right stick left/right
-- Heave: Right stick up/down
-- Yaw: Left stick left/right
+- Surge: left stick forward and back
+- Sway: right stick left and right
+- Heave: right stick up and down
+- Yaw: left stick left and right
 
-The mapping is expressed in the two config files % CLAUDE: link here
-As an alternative to manual editing the files, the standalone `joy_map` utility 
-is an interative curses walkthrough to write these files to user-space (e.g., `~/.ros/...`).
-The utility runs in a terminal screen that
-captures a no touch baseline, then detects each stick and button as you
-move it, refusing double assignments.
+Edit those files by hand, or let `joy_map` write them: an interactive walkthrough in the terminal that captures a no touch baseline, then detects each stick and button as you move it, refusing double assignments.
 
 ```bash
-
 ros2 run bluerobotics_teleop joy_map
 ```
 
@@ -62,28 +56,32 @@ copy the files into the repository at `bluerobotics_teleop/config/pad/`
 and commit. The per vehicle mixer config (thruster topics and gains) is
 model truth and is never touched by the mapping tool.
 
-## Run teleop examples
+## Run
 
 ### BlueBoat
 
-[Run the simulation](../vehicles/blueboat/running.md)
+Start the simulation ([options](../vehicles/blueboat/running.md)):
+
 ```bash
 ros2 launch blueboat_gazebo sim.launch.xml
 ```
 
-Launch teleop
+Launch teleop:
+
 ```bash
 ros2 launch bluerobotics_teleop teleop.launch.py vehicle:=blueboat
 ```
 
-### BlueROV
+### BlueROV2
 
-[Run the simulation](../vehicles/bluerov2/running.md)
+Start the simulation ([options](../vehicles/bluerov2/running.md)):
+
 ```bash
 ros2 launch bluerov2_gazebo sim.launch.xml
 ```
 
-Launch teleop
+Launch teleop:
+
 ```bash
 ros2 launch bluerobotics_teleop teleop.launch.py vehicle:=bluerov2
 ```
@@ -97,18 +95,17 @@ ros2 launch bluerobotics_teleop teleop.launch.py vehicle:=bluerov2
   stepped in 10% increments from the D pad, so full thrust is opt in.
 - **50 Hz republish**: latched commands downstream can never go stale.
 
+## Troubleshooting
 
-
-## Troubleshooting gamepad
-
-Confirm `joy_node` can see the pad at all. 
+Confirm `joy_node` can see the pad at all.
 
 ```bash
 ros2 run joy joy_enumerate_devices
 ```
 
-Which should identify your device, similar to this
-```
+which lists the pad:
+
+```text
 ID : GUID                             : GamePad : Mapped : Joystick Device Name
 -------------------------------------------------------------------------------
  0 : 030005ff6d0400001dc2000014400000 :    true :   true : Logitech F310 Gamepad (XInput)
@@ -126,4 +123,4 @@ Once the pad enumerates, confirm messages are flowing. With teleop running, or `
 ros2 topic echo /joy
 ```
 
-`axes` and `buttons` should change as you move the sticks. A pad that enumerates but publishes nothing is connected, so the problem is downstream: the mapping, the deadman, or the mixer.
+`axes` and `buttons` should change as you move the sticks. If they do, the pad and `joy_node` are fine and any remaining problem is downstream: the mapping, the deadman, or the mixer. If the pad enumerates but `/joy` stays silent, check that your user can read the device; `/dev/input/event*` is normally group `input`.
