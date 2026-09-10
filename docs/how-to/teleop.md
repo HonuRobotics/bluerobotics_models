@@ -23,7 +23,7 @@ flowchart LR
 
 A gamepad mapping ties the pad's controls, stick axes and buttons, to the vessel's controllable degrees of freedom: surge, sway, heave and yaw, plus the deadman button and the thrust ceiling (EPA).
 
-The shipped mapping is two files in the package: [joystick.config.yaml](https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/bluerobotics_teleop/config/pad/joystick.config.yaml), which axis and button drive each motion, read by `teleop_twist_joy`; and [twist_to_thrust.yaml](https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/bluerobotics_teleop/config/pad/twist_to_thrust.yaml), the deadman button and the EPA axis, read by the mixer. It was made with a Logitech F310 with the back switch on X, and reads:
+The shipped mapping is two files in the package: [joystick.config.yaml](https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/bluerobotics_teleop/config/pad/joystick.config.yaml), which axis and button drive each motion, read by `teleop_twist_joy`; and [twist_to_thrust.yaml](https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/bluerobotics_teleop/config/pad/twist_to_thrust.yaml), the deadman button and the EPA axis, read by the `twist_to_thrust` mixer. The current version is from a Logitech F310 with the back switch on X, and reads:
 
 - Deadman: RB
 - Surge: left stick forward and back
