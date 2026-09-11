@@ -176,9 +176,14 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../how-to/teleop.html">Teleoperate with a gamepad</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../how-to/teleop.html#run">Run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/teleop.html#configure-the-gamepad-mapping-optional">Configure the gamepad mapping (optional)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/teleop.html#run">Run</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../how-to/teleop.html#blueboat">BlueBoat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../how-to/teleop.html#bluerov2">BlueROV2</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/teleop.html#safety-behavior">Safety behavior</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../how-to/teleop.html#calibrate-a-different-gamepad">Calibrate a different gamepad</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/teleop.html#troubleshooting">Troubleshooting</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../how-to/verify-sitl.html">Verify the SITL connection</a><ul>
@@ -314,8 +319,7 @@ by the base part:</p>
 positive, so a dead vehicle surfaces on its own. The config declares that
 trim directly instead of asking you to tune volumes:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">net_buoyancy</span></code>: kilograms of lift beyond neutral (positive floats up;
-the default is 0.002, essentially neutral with almost no freeboard).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">net_buoyancy</span></code>: kilograms of lift beyond neutral (positive floats up). The shipped default is 0.0, so the vehicle holds whatever depth it is spawned at; set it a little positive (0.002 is about right) to model a real trim that surfaces a dead vehicle.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">cob_offset</span></code> and <code class="docutils literal notranslate"><span class="pre">cob_frame</span></code>: where the center of buoyancy sits,
 relative to the assembly’s center of mass (<code class="docutils literal notranslate"><span class="pre">com</span></code>) or to <code class="docutils literal notranslate"><span class="pre">base_link</span></code>;
 keeping it above the center of mass is what makes the vehicle passively

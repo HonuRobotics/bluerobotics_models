@@ -18,6 +18,364 @@
       <script src="../_static/documentation_options.js?v=46f74c5b"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: 100%;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}";
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: 100%;\n}\n\n.mermaid-container > pre > svg {\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+let closeModal = () => {};
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+        closeModal();
+    }
+});
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if (false) {
+                                        addZoomToSvgs(d3.selectAll("").select(function() {
+                                            return this.querySelector("svg");
+                                        }));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if (false) {
+        const mermaids_to_add_zoom = 0 === -1 ? mermaids_active.length : 0;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("").select(function() {
+                return this.querySelector("svg");
+            });
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if (!true) return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = "\u26f6";
+        fullscreenBtn.style.opacity = "50%";
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scrollX, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.display = 'block';
+
+                if (false) {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+
+
+const load = async () => {
+    initStyles();
+
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...{"startOnLoad": false},
+                ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...{"startOnLoad": false},
+    ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -176,9 +534,14 @@
 </ul>
 </li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Teleoperate with a gamepad</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#run">Run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configure-the-gamepad-mapping-optional">Configure the gamepad mapping (optional)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run">Run</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#blueboat">BlueBoat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bluerov2">BlueROV2</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#safety-behavior">Safety behavior</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#calibrate-a-different-gamepad">Calibrate a different gamepad</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="verify-sitl.html">Verify the SITL connection</a><ul>
@@ -298,13 +661,71 @@ thrust topics it publishes are the ones documented in each vehicle’s
 Actuators page (<a class="reference internal" href="../vehicles/blueboat/actuators.html"><span class="std std-doc">BlueBoat</span></a>,
 <a class="reference internal" href="../vehicles/bluerov2/actuators.html"><span class="std std-doc">BlueROV2</span></a>), so the same launch works
 against the simulation or a bridged real vehicle.</p>
-<section id="run">
-<h2>Run<a class="headerlink" href="#run" title="Link to this heading"></a></h2>
-<p>Start a simulation, then:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>bluerobotics_teleop<span class="w"> </span>teleop.launch.py<span class="w"> </span>vehicle:<span class="o">=</span>bluerov2<span class="w">   </span><span class="c1"># or blueboat</span>
+<pre  class="mermaid">
+        flowchart LR
+  PAD([&quot;gamepad&quot;]) --&gt; JOY[&quot;joy_node&quot;]
+  JOY -- &quot;/joy&lt;br/&gt;sensor_msgs/Joy&quot; --&gt; TTJ[&quot;teleop_twist_joy_node&quot;]
+  TTJ -- &quot;/cmd_vel&lt;br/&gt;geometry_msgs/Twist, normalized&quot; --&gt; MIX[&quot;twist_to_thrust&quot;]
+  JOY -- &quot;/joy&lt;br/&gt;deadman, EPA&quot; --&gt; MIX
+  CFG[&quot;per vehicle mixer.yaml&lt;br/&gt;gain matrix, thrust limits&quot;] -.-&gt; MIX
+  MIX -- &quot;one std_msgs/Float64 per thruster&lt;br/&gt;/blueboat/motor_*/thrust&lt;br/&gt;/bluerov2/thruster_*/thrust&quot; --&gt; OUT([&quot;simulation or&lt;br/&gt;bridged vehicle&quot;])
+    </pre><section id="configure-the-gamepad-mapping-optional">
+<h2>Configure the gamepad mapping (optional)<a class="headerlink" href="#configure-the-gamepad-mapping-optional" title="Link to this heading"></a></h2>
+<p>A gamepad mapping ties the pad’s controls, stick axes and buttons, to the vessel’s controllable degrees of freedom: surge, sway, heave and yaw, plus the deadman button and the thrust ceiling (EPA).</p>
+<p>The shipped mapping is two files in the package: <a class="reference external" href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/bluerobotics_teleop/config/pad/joystick.config.yaml">joystick.config.yaml</a>, which axis and button drive each motion, read by <code class="docutils literal notranslate"><span class="pre">teleop_twist_joy</span></code>; and <a class="reference external" href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/bluerobotics_teleop/config/pad/twist_to_thrust.yaml">twist_to_thrust.yaml</a>, the deadman button and the EPA control, read by the <code class="docutils literal notranslate"><span class="pre">twist_to_thrust</span></code> mixer. The current version is for a Logitech F310 with the back switch on X and the Mode LED off (lit, it swaps the left stick and the D pad), and follows the ArduSub and QGroundControl layout:</p>
+<ul class="simple">
+<li><p>Deadman: RB</p></li>
+<li><p>Heave: left stick up and down (BlueROV2)</p></li>
+<li><p>Yaw: left stick left and right</p></li>
+<li><p>Surge: right stick up and down</p></li>
+<li><p>Sway: right stick left and right (BlueROV2)</p></li>
+<li><p>EPA: D pad up and down, 10% per click</p></li>
+</ul>
+<p>Edit those files by hand, or let <code class="docutils literal notranslate"><span class="pre">joy_map</span></code> write them: an interactive walkthrough in the terminal that captures a no touch baseline, then detects each stick and button as you move it, refusing double assignments. Map in the state you will drive in; the walkthrough warns when a stick lands on the D pad’s axes.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>run<span class="w"> </span>bluerobotics_teleop<span class="w"> </span>joy_map
 </pre></div>
 </div>
-<p>Left stick: surge and yaw. Right stick (BlueROV2): sway and heave.</p>
+<p>If nothing is publishing <code class="docutils literal notranslate"><span class="pre">/joy</span></code>, the tool starts its own <code class="docutils literal notranslate"><span class="pre">joy_node</span></code>
+(with the autorepeat the baseline capture needs) and stops it on exit,
+however the walkthrough ends, so there is no background node to forget.
+Running the walkthrough next to a live teleop session also works: its <code class="docutils literal notranslate"><span class="pre">joy_node</span></code>
+is detected and reused.</p>
+<p>One walkthrough maps every function (surge, sway, heave, yaw, deadman,
+EPA) for every vehicle at once: the mapping describes the pad, not a
+vehicle, and a vehicle without a motion zeroes it in its mixer gains.</p>
+<p>Saving writes <code class="docutils literal notranslate"><span class="pre">$ROS_HOME/bluerobotics_teleop/pad/</span></code> (default
+<code class="docutils literal notranslate"><span class="pre">~/.ros/...</span></code>): the mapping is user state, so it survives rebuilds and
+works from a binary install. The teleop launch prefers it over the
+defaults shipped with the package and logs which one it loaded; delete
+the directory to fall back. The per vehicle mixer config (thruster
+topics and gains) is model truth and is never touched by the mapping
+tool.</p>
+</section>
+<section id="run">
+<h2>Run<a class="headerlink" href="#run" title="Link to this heading"></a></h2>
+<p>Hold RB to drive. The thrust ceiling starts at 20%, so the vehicle is sluggish until you press D pad up, 10% per click.</p>
+<section id="blueboat">
+<h3>BlueBoat<a class="headerlink" href="#blueboat" title="Link to this heading"></a></h3>
+<p>Start the simulation (<a class="reference internal" href="../vehicles/blueboat/running.html"><span class="std std-doc">options</span></a>):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>blueboat_gazebo<span class="w"> </span>sim.launch.xml
+</pre></div>
+</div>
+<p>Launch teleop:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>bluerobotics_teleop<span class="w"> </span>teleop.launch.py<span class="w"> </span>vehicle:<span class="o">=</span>blueboat
+</pre></div>
+</div>
+</section>
+<section id="bluerov2">
+<h3>BlueROV2<a class="headerlink" href="#bluerov2" title="Link to this heading"></a></h3>
+<p>Start the simulation (<a class="reference internal" href="../vehicles/bluerov2/running.html"><span class="std std-doc">options</span></a>):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>bluerov2_gazebo<span class="w"> </span>sim.launch.xml
+</pre></div>
+</div>
+<p>Launch teleop:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>bluerobotics_teleop<span class="w"> </span>teleop.launch.py<span class="w"> </span>vehicle:<span class="o">=</span>bluerov2
+</pre></div>
+</div>
+</section>
 </section>
 <section id="safety-behavior">
 <h2>Safety behavior<a class="headerlink" href="#safety-behavior" title="Link to this heading"></a></h2>
@@ -317,25 +738,27 @@ stepped in 10% increments from the D pad, so full thrust is opt in.</p></li>
 <li><p><strong>50 Hz republish</strong>: latched commands downstream can never go stale.</p></li>
 </ul>
 </section>
-<section id="calibrate-a-different-gamepad">
-<h2>Calibrate a different gamepad<a class="headerlink" href="#calibrate-a-different-gamepad" title="Link to this heading"></a></h2>
-<p>The shipped mapping matches the pad it was last calibrated with. For a
-different pad, run the calibration walkthrough: a terminal screen that
-captures a no touch baseline, then detects each stick and button as you
-move it, refusing double assignments.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>run<span class="w"> </span>joy<span class="w"> </span>joy_node<span class="w"> </span>--ros-args<span class="w"> </span>-p<span class="w"> </span>autorepeat_rate:<span class="o">=</span><span class="m">20</span>.0<span class="w"> </span><span class="p">&amp;</span>
-ros2<span class="w"> </span>run<span class="w"> </span>bluerobotics_teleop<span class="w"> </span>joy_calibrate<span class="w"> </span>--vehicle<span class="w"> </span>bluerov2<span class="w">   </span><span class="c1"># or blueboat</span>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<p>Confirm <code class="docutils literal notranslate"><span class="pre">joy_node</span></code> can see the pad at all.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>run<span class="w"> </span>joy<span class="w"> </span>joy_enumerate_devices
 </pre></div>
 </div>
-<p>Without autorepeat, <code class="docutils literal notranslate"><span class="pre">joy_node</span></code> stays silent while no control moves and
-the baseline capture times out; the <code class="docutils literal notranslate"><span class="pre">joy_node</span></code> started by
-<code class="docutils literal notranslate"><span class="pre">teleop.launch.py</span></code> already sets it, so calibrating next to a running
-teleop session also works.</p>
-<p>Saving rewrites <code class="docutils literal notranslate"><span class="pre">config/&lt;vehicle&gt;/joystick.config.yaml</span></code> and
-<code class="docutils literal notranslate"><span class="pre">twist_to_thrust.yaml</span></code> in the package’s installed share (with a symlink
-install that is the repository copy: commit it to keep the calibration).
-The mixer config (thruster topics and gains) is model truth and is never
-touched by calibration.</p>
+<p>which lists the pad:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ID : GUID                             : GamePad : Mapped : Joystick Device Name
+-------------------------------------------------------------------------------
+ 0 : 030005ff6d0400001dc2000014400000 :    true :   true : Logitech F310 Gamepad (XInput)
+</pre></div>
+</div>
+<p>If the table is empty, check that the host sees the pad:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ls<span class="w"> </span>/dev/input/by-id/<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>joystick
+</pre></div>
+</div>
+<p>Once the pad enumerates, confirm messages are flowing. With teleop running, or <code class="docutils literal notranslate"><span class="pre">ros2</span> <span class="pre">run</span> <span class="pre">joy</span> <span class="pre">joy_node</span></code> on its own:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/joy
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">axes</span></code> and <code class="docutils literal notranslate"><span class="pre">buttons</span></code> should change as you move the sticks. If they do, the pad and <code class="docutils literal notranslate"><span class="pre">joy_node</span></code> are fine and any remaining problem is downstream: the mapping, the deadman, or the mixer. If the pad enumerates but <code class="docutils literal notranslate"><span class="pre">/joy</span></code> stays silent, check that your user can read the device; <code class="docutils literal notranslate"><span class="pre">/dev/input/event*</span></code> is normally group <code class="docutils literal notranslate"><span class="pre">input</span></code>.</p>
 </section>
 </section>
 
