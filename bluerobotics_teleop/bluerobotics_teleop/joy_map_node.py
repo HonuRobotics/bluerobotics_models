@@ -112,13 +112,15 @@ class JoyMapNode(Node):
             self._latest = None
 
 
+# The recommended layout is ArduSub's (QGroundControl's BlueROV2 default):
+# left stick heave and yaw, right stick surge and sway.
 COMMON_STEPS = [
     MappingStep(
         'Deadman', 'Press the button for DEADMAN SWITCH',
         'Must be held for any output  [recommended: RB]'),
     MappingStep(
         'Forward', 'Push the axis for FORWARD (surge)',
-        'Drives the vehicle along its nose  [recommended: Left stick up]',
+        'Drives the vehicle along its nose  [recommended: Right stick up]',
         prefer_button=False),
     MappingStep(
         'Yaw', 'Push the axis for YAW LEFT (turn)',
@@ -133,7 +135,7 @@ PLANE_STEPS = [
         prefer_button=False),
     MappingStep(
         'Heave', 'Push the axis for HEAVE UP (ascend)',
-        'Climbs the water column  [recommended: Right stick up]',
+        'Climbs the water column  [recommended: Left stick up]',
         prefer_button=False),
 ]
 
@@ -157,9 +159,9 @@ def capture_baseline(stdscr, node, steps, n_samples=20, timeout_sec=5.0):
     draw_header(stdscr, 'Baseline', 0, len(steps))
     h, w = stdscr.getmaxyx()
     stdscr.addnstr(3, 2, 'Before starting, verify your controller:', w - 4)
-    stdscr.addnstr(4, 4, '- Back switch set to X or D (keep consistent)',
+    stdscr.addnstr(4, 4, '- Back switch on X (the shipped mapping assumes it)',
                    w - 6)
-    stdscr.addnstr(5, 4, '- Mode LED off (normal stick/D pad behavior)',
+    stdscr.addnstr(5, 4, '- Mode LED off (lit, it swaps the left stick and D pad)',
                    w - 6)
     stdscr.addnstr(7, 2, 'Press ENTER when ready, or Q to quit.', w - 4)
     stdscr.nodelay(True)
@@ -249,6 +251,20 @@ def detect_input(msg, baseline, step):
     return None
 
 
+def hat_suspect(msg, result, step):
+    """
+    Tell whether a stick step landed on a hat axis, i.e. the D pad.
+
+    joy_node appends each hat as the last two axes, so on any pad with a
+    hat (six axes or more) a stick push that reads on one of the last two
+    axes came from the D pad. On a Logitech F310 that is the Mode LED
+    lit, which swaps the left stick and the D pad: the walkthrough would
+    record the D pad as the stick and the shipped mapping drives from it.
+    """
+    return (not step.prefer_button and result.input_type == 'axis'
+            and len(msg.axes) >= 6 and result.index >= len(msg.axes) - 2)
+
+
 def conflicts_with(steps, result, step_idx):
     """Name of an earlier step already using this input, if any."""
     for i in range(step_idx):
@@ -305,8 +321,13 @@ def map_step(stdscr, node, baseline, steps, step_idx):
                         stdscr.addnstr(
                             6, 2, f'Detected: {desc}' + ' ' * 20,
                             w - 4, curses.A_BOLD)
-                        stdscr.addnstr(
-                            7, 2, 'ENTER to confirm, R to redo', w - 4)
+                        if hat_suspect(msg, result, step):
+                            stdscr.addnstr(
+                                7, 2, f'{desc} is the D pad (Mode LED on?):'
+                                ' ENTER to keep, R to redo', w - 4)
+                        else:
+                            stdscr.addnstr(
+                                7, 2, 'ENTER to confirm, R to redo', w - 4)
                         stdscr.refresh()
 
         key = stdscr.getch()
@@ -315,7 +336,7 @@ def map_step(stdscr, node, baseline, steps, step_idx):
         elif key == ord('r'):
             result = None
             stdscr.addnstr(6, 2, 'Waiting for input...' + ' ' * 30, w - 4)
-            stdscr.addnstr(7, 2, ' ' * 40, w - 4)
+            stdscr.addnstr(7, 2, ' ' * (w - 4), w - 4)
             stdscr.refresh()
         elif key == ord('q'):
             return None
@@ -366,7 +387,7 @@ def save_configs(steps, output_dir):
     deadman = results['Deadman']
     epa_up = results['EPA+']
 
-    axis_linear = {'x': fwd.index if fwd else 1}
+    axis_linear = {'x': fwd.index if fwd else 4}
     scale_linear = {'x': fwd.direction if fwd else 1.0}
     if sway:
         axis_linear['y'] = sway.index
@@ -439,25 +460,18 @@ def draw_keybar(stdscr):
 
 
 def run_curses(stdscr, node, steps, output_dir):
+    """Run the walkthrough; True when a mapping was written to output_dir."""
     curses.curs_set(0)
     baseline = capture_baseline(stdscr, node, steps)
     if baseline is None:
-        return
+        return False
     for i in range(len(steps)):
         if map_step(stdscr, node, baseline, steps, i) is None:
-            return
+            return False
     if show_summary(stdscr, steps, output_dir):
-        paths = save_configs(steps, output_dir)
-        stdscr.clear()
-        h, w = stdscr.getmaxyx()
-        stdscr.addnstr(1, 2, 'Saved!', w - 4, curses.A_BOLD)
-        stdscr.addnstr(3, 2, f'  {paths[0]}', w - 4)
-        stdscr.addnstr(4, 2, f'  {paths[1]}', w - 4)
-        stdscr.addnstr(6, 2, 'Relaunch teleop to use the new config.', w - 4)
-        stdscr.addnstr(8, 2, 'Press any key to exit.', w - 4)
-        stdscr.nodelay(False)
-        stdscr.refresh()
-        stdscr.getch()
+        save_configs(steps, output_dir)  # the exit line reports where
+        return True
+    return False
 
 
 def joy_node_command():
@@ -530,8 +544,9 @@ def main(args=None):
 
     steps = all_steps()
     output_dir = str(pad_paths.user_pad_dir())
+    saved = False
     try:
-        curses.wrapper(
+        saved = curses.wrapper(
             lambda stdscr: run_curses(stdscr, node, steps, output_dir))
     except KeyboardInterrupt:
         pass
@@ -546,7 +561,10 @@ def main(args=None):
         spin_thread.join(timeout=2.0)
         node.destroy_node()
         rclpy.try_shutdown()
-    print(f'Pad mapping directory: {output_dir}')
+    # Quitting without saving leaves the terminal as it was: no output.
+    if saved:
+        print(f'Pad mapping saved to {output_dir}/; relaunch teleop to use '
+              'it (preferred over the shipped defaults)')
 
 
 if __name__ == '__main__':

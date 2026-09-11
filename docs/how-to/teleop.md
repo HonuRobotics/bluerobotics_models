@@ -17,7 +17,10 @@ Start a simulation, then:
 ros2 launch bluerobotics_teleop teleop.launch.py vehicle:=bluerov2   # or blueboat
 ```
 
-Left stick: surge and yaw. Right stick (BlueROV2): sway and heave.
+Left stick: heave (BlueROV2) and yaw. Right stick: surge and sway
+(BlueROV2). This is the ArduSub and QGroundControl layout. The shipped
+mapping is for a Logitech F310 with the back switch on X and the Mode
+LED off; drive in that state.
 
 ## Safety behavior
 
@@ -33,7 +36,10 @@ Left stick: surge and yaw. Right stick (BlueROV2): sway and heave.
 The shipped mapping matches the pad it was last mapped with. For a
 different pad, run the mapping walkthrough: a terminal screen that
 captures a no touch baseline, then detects each stick and button as you
-move it, refusing double assignments.
+move it, refusing double assignments. Map in the state you will drive
+in: on a Logitech F310, back switch on X and Mode LED off (lit, it
+swaps the left stick and the D pad, and the walkthrough warns when a
+stick lands on the D pad's axes).
 
 ```bash
 ros2 run bluerobotics_teleop joy_map
