@@ -102,9 +102,11 @@
 
   <!-- Wrapper: a near-massless sensor link fixed to base_link at `pose`, holding
        the <sensor> block passed in. The accessory's real mass/geometry already
-       live in base_link via the description; at 1e-5 kg a full set of sensors
-       stays orders of magnitude under the default 0.002 kg net_buoyancy, so
-       the wrappers cannot tip the trim negative. -->
+       live in base_link via the description. The 1e-5 kg wrappers are not in
+       the assembled total_mass the displacement is solved from, so at the
+       shipped net_buoyancy of 0.0 the trim is a few 1e-5 kg negative: a
+       fraction of a millinewton, inside the band test_vehicle_neutrally_buoyant
+       allows. -->
   <xacro:macro name="sensor_link" params="name frame *sensor">
     <link name="${name}_sensor">
       <!-- Posed at the part's own frame: the URDF conversion lumps the part

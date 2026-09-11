@@ -178,22 +178,22 @@ def test_camera_renders(sim):
     assert 'width: 1920' in out
 
 
-def test_vehicle_slightly_positively_buoyant(sim):
-    """Submerged, the near-neutral trim rises slowly: the sizing holds in sim."""
+def test_vehicle_neutrally_buoyant(sim):
+    """Submerged, the neutral shipped trim holds depth: the sizing holds in sim."""
     teleport(sim, 0, 0, -3.0)
     wait_sim_seconds(sim, 3)           # let the relocation transient damp out
     t0, z0 = sim_seconds(sim), model_pose(sim)[2]
     wait_sim_seconds(sim, 8)
     t1, z1 = sim_seconds(sim), model_pose(sim)[2]
     rate = (z1 - z0) / (t1 - t0)
-    assert 0.001 < rate < 0.10, (
-        f'rise rate {rate:.4f} m/s outside the near-neutral band '
+    assert abs(rate) < 0.05, (
+        f'drift rate {rate:.4f} m/s outside the neutral band '
         f'(z {z0:.3f} -> {z1:.3f} over {t1 - t0:.1f} sim s)')
 
 
 def test_vertical_thrusters_heave(sim):
     """
-    The vertical pair heaves: commanded up, the climb dwarfs the passive rise.
+    The vertical pair heaves: commanded up, the climb dwarfs any passive drift.
 
     Positive commands push down (both vertical axes point -z), so up is
     negative. The heavy variant's extra pair (7, 8) is not in the playground's

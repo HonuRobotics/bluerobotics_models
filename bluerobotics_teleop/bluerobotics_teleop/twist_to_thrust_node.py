@@ -21,7 +21,9 @@ thruster driven vehicle. Safety behavior:
 - deadman button: releasing it zeroes every thruster immediately;
 - command timeout: a stale /cmd_vel zeroes every thruster;
 - EPA (end point adjustment): the thrust ceiling starts at 20% and is
-  stepped in 10% increments from the D pad, so full thrust is opt in;
+  stepped in 10% increments from the D pad, so full thrust is opt in.
+  The D pad is a hat axis on most pads (axis_epa) and a pair of buttons
+  on some (btn_epa_up, btn_epa_down); either or both may be mapped;
 - 50 Hz republish: latched commands downstream can never go stale.
 """
 
@@ -59,6 +61,26 @@ def step_epa(current, direction, step, minimum=None):
     return current
 
 
+def epa_click(axis, prev_axis, buttons, prev_buttons):
+    """
+    Return the EPA click carried by one /joy message: +1, -1 or 0.
+
+    `axis` and `prev_axis` are the hat axis value now and last time (None
+    when no axis is mapped); a click is the value changing to beyond +-0.5,
+    so a held D pad steps once. `buttons` and `prev_buttons` are (up, down)
+    pressed states, a click being the rising edge of either.
+    """
+    up, down = buttons
+    prev_up, prev_down = prev_buttons
+    if up and not prev_up:
+        return 1.0
+    if down and not prev_down:
+        return -1.0
+    if axis is not None and axis != prev_axis and abs(axis) > 0.5:
+        return 1.0 if axis > 0 else -1.0
+    return 0.0
+
+
 class TwistToThrust(Node):
     """The mixer node; all vehicle specifics come from parameters."""
 
@@ -74,7 +96,9 @@ class TwistToThrust(Node):
         self.declare_parameter('max_thrust_reverse', -40.0)
         self.declare_parameter('cmd_timeout_sec', 0.5)
         self.declare_parameter('btn_deadman', 5)
-        self.declare_parameter('axis_epa', 7)
+        self.declare_parameter('axis_epa', 7)          # -1: no hat axis
+        self.declare_parameter('btn_epa_up', -1)       # -1: no button
+        self.declare_parameter('btn_epa_down', -1)
         self.declare_parameter('epa_initial', 0.2)
         self.declare_parameter('epa_step', 0.1)
 
@@ -93,6 +117,8 @@ class TwistToThrust(Node):
         self.timeout = self.get_parameter('cmd_timeout_sec').value
         self.btn_deadman = self.get_parameter('btn_deadman').value
         self.axis_epa = self.get_parameter('axis_epa').value
+        self.btn_epa_up = self.get_parameter('btn_epa_up').value
+        self.btn_epa_down = self.get_parameter('btn_epa_down').value
         self.epa_pct = self.get_parameter('epa_initial').value
         self.epa_step = self.get_parameter('epa_step').value
 
@@ -105,6 +131,7 @@ class TwistToThrust(Node):
         self.last_twist_time = self.get_clock().now()
         self.deadman_pressed = False
         self.prev_epa_axis = 0.0
+        self.prev_epa_buttons = (False, False)
 
         self.create_timer(0.02, self.timer_cb)
 
@@ -116,12 +143,18 @@ class TwistToThrust(Node):
         if len(msg.buttons) > self.btn_deadman:
             self.deadman_pressed = bool(msg.buttons[self.btn_deadman])
         # EPA clicks on the D pad edge, active regardless of the deadman.
-        if len(msg.axes) > self.axis_epa:
-            value = msg.axes[self.axis_epa]
-            if value != self.prev_epa_axis and abs(value) > 0.5:
-                self.epa_pct = step_epa(self.epa_pct, value, self.epa_step)
-                self.get_logger().info(f'EPA ceiling: {self.epa_pct:.0%}')
-            self.prev_epa_axis = value
+        axis = (msg.axes[self.axis_epa]
+                if 0 <= self.axis_epa < len(msg.axes) else None)
+        buttons = tuple(
+            0 <= b < len(msg.buttons) and bool(msg.buttons[b])
+            for b in (self.btn_epa_up, self.btn_epa_down))
+        click = epa_click(axis, self.prev_epa_axis, buttons,
+                          self.prev_epa_buttons)
+        if click:
+            self.epa_pct = step_epa(self.epa_pct, click, self.epa_step)
+            self.get_logger().info(f'EPA ceiling: {self.epa_pct:.0%}')
+        self.prev_epa_axis = axis
+        self.prev_epa_buttons = buttons
 
     def timer_cb(self):
         age = (self.get_clock().now()

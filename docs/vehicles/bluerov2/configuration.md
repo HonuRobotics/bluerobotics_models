@@ -26,8 +26,7 @@ A real vehicle is trimmed with foam and ballast to float slightly
 positive, so a dead vehicle surfaces on its own. The config declares that
 trim directly instead of asking you to tune volumes:
 
-- `net_buoyancy`: kilograms of lift beyond neutral (positive floats up;
-  the default is 0.002, essentially neutral with almost no freeboard).
+- `net_buoyancy`: kilograms of lift beyond neutral (positive floats up). The shipped default is 0.0, so the vehicle holds whatever depth it is spawned at; set it a little positive (0.002 is about right) to model a real trim that surfaces a dead vehicle.
 - `cob_offset` and `cob_frame`: where the center of buoyancy sits,
   relative to the assembly's center of mass (`com`) or to `base_link`;
   keeping it above the center of mass is what makes the vehicle passively

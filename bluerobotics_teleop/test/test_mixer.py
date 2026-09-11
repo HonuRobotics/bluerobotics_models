@@ -56,3 +56,21 @@ def test_epa_steps_and_saturates():
         pct = step_epa(pct, -1.0, 0.1)
     assert pct == pytest.approx(0.1)   # never reaches zero: EPA is a ceiling
     assert step_epa(pct, 0.0, 0.1) == pct
+
+
+def test_epa_click_from_the_hat_axis_steps_once_per_press():
+    from bluerobotics_teleop.twist_to_thrust_node import epa_click
+    none = (False, False)
+    assert epa_click(1.0, 0.0, none, none) == 1.0       # pressed up
+    assert epa_click(1.0, 1.0, none, none) == 0.0       # still held
+    assert epa_click(0.0, 1.0, none, none) == 0.0       # released
+    assert epa_click(-1.0, 0.0, none, none) == -1.0     # pressed down
+    assert epa_click(None, None, none, none) == 0.0     # no axis mapped
+
+
+def test_epa_click_from_buttons_is_the_rising_edge():
+    from bluerobotics_teleop.twist_to_thrust_node import epa_click
+    assert epa_click(None, None, (True, False), (False, False)) == 1.0
+    assert epa_click(None, None, (True, False), (True, False)) == 0.0
+    assert epa_click(None, None, (False, True), (False, False)) == -1.0
+    assert epa_click(None, None, (False, False), (False, True)) == 0.0

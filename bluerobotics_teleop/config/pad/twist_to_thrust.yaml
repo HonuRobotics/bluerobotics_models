@@ -1,0 +1,13 @@
+# Shipped default input side settings for twist_to_thrust, shared by
+# every vehicle (joy_map writes a user copy under $ROS_HOME which the
+# launch prefers; the per vehicle mixer.yaml is model truth).
+# Same pad state as joystick.config.yaml: RB deadman, D pad up/down EPA.
+twist_to_thrust:
+  ros__parameters:
+    cmd_timeout_sec: 0.5
+    btn_deadman: 5
+    axis_epa: 7          # D pad as a hat axis (up +1, down -1)
+    btn_epa_up: -1       # D pad as buttons instead; -1 when unused
+    btn_epa_down: -1
+    epa_initial: 0.2
+    epa_step: 0.1
