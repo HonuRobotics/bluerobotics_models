@@ -386,6 +386,7 @@ def save_configs(steps, output_dir):
     heave = results.get('Heave')
     deadman = results['Deadman']
     epa_up = results['EPA+']
+    epa_down = results['EPA-']
 
     axis_linear = {'x': fwd.index if fwd else 4}
     scale_linear = {'x': fwd.direction if fwd else 1.0}
@@ -410,13 +411,23 @@ def save_configs(steps, output_dir):
     with open(path_ttj, 'w') as f:
         yaml.dump(ttj, f, default_flow_style=False, sort_keys=False)
 
+    # The D pad is a hat axis on most pads (one axis, up +1, down -1) and
+    # a pair of buttons on some: write whichever the two EPA steps gave,
+    # -1 for the unused form. An axis from either step carries both
+    # directions; a button carries only its own.
+    epa_axes = [r.index for r in (epa_up, epa_down)
+                if r and r.input_type == 'axis']
     ttt = {
         'twist_to_thrust': {'ros__parameters': {
             'cmd_timeout_sec': 0.5,
             'btn_deadman': deadman.index if deadman else 5,
-            'axis_epa':
-                epa_up.index if epa_up and epa_up.input_type == 'axis'
-                else 7,
+            'axis_epa': epa_axes[0] if epa_axes else -1,
+            'btn_epa_up':
+                epa_up.index if epa_up and epa_up.input_type == 'button'
+                else -1,
+            'btn_epa_down':
+                epa_down.index
+                if epa_down and epa_down.input_type == 'button' else -1,
             'epa_initial': 0.2,
             'epa_step': 0.1,
         }}

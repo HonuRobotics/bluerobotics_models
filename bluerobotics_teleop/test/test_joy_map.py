@@ -43,3 +43,37 @@ def test_pads_without_a_hat_are_not_second_guessed():
 
 def test_button_steps_are_not_checked():
     assert not hat_suspect(joy(8), MappingResult('axis', 7, 1.0), DEADMAN)
+
+
+def mapped(steps, results):
+    for step, result in zip(steps, results):
+        step.result = result
+    return steps
+
+
+def saved_input_side(tmp_path, results):
+    from bluerobotics_teleop.joy_map_node import all_steps, save_configs
+    import yaml
+    _, path = save_configs(mapped(all_steps(), results), str(tmp_path))
+    with open(path) as f:
+        return yaml.safe_load(f)['twist_to_thrust']['ros__parameters']
+
+
+STICKS = [MappingResult('button', 5), MappingResult('axis', 4, 1.0),
+          MappingResult('axis', 0, 1.0), MappingResult('axis', 3, 1.0),
+          MappingResult('axis', 1, 1.0)]
+
+
+def test_a_hat_d_pad_is_saved_as_the_epa_axis(tmp_path):
+    """F310: up and down are one axis, so the buttons stay unused."""
+    params = saved_input_side(tmp_path, STICKS + [
+        MappingResult('axis', 7, 1.0), MappingResult('axis', 7, -1.0)])
+    assert params['axis_epa'] == 7
+    assert params['btn_epa_up'] == -1 and params['btn_epa_down'] == -1
+
+
+def test_a_button_d_pad_is_saved_as_the_epa_buttons(tmp_path):
+    params = saved_input_side(tmp_path, STICKS + [
+        MappingResult('button', 11), MappingResult('button', 12)])
+    assert params['axis_epa'] == -1
+    assert params['btn_epa_up'] == 11 and params['btn_epa_down'] == 12
