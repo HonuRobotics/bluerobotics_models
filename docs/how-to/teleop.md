@@ -9,37 +9,30 @@ Actuators page ([BlueBoat](../vehicles/blueboat/actuators.md),
 [BlueROV2](../vehicles/bluerov2/actuators.md)), so the same launch works
 against the simulation or a bridged real vehicle.
 
-## Run
-
-Start a simulation, then:
-
-```bash
-ros2 launch bluerobotics_teleop teleop.launch.py vehicle:=bluerov2   # or blueboat
+```{mermaid}
+flowchart LR
+  PAD(["gamepad"]) --> JOY["joy_node"]
+  JOY -- "/joy<br/>sensor_msgs/Joy" --> TTJ["teleop_twist_joy_node"]
+  TTJ -- "/cmd_vel<br/>geometry_msgs/Twist, normalized" --> MIX["twist_to_thrust"]
+  JOY -- "/joy<br/>deadman, EPA" --> MIX
+  CFG["per vehicle mixer.yaml<br/>gain matrix, thrust limits"] -.-> MIX
+  MIX -- "one std_msgs/Float64 per thruster<br/>/blueboat/motor_*/thrust<br/>/bluerov2/thruster_*/thrust" --> OUT(["simulation or<br/>bridged vehicle"])
 ```
 
-Left stick: heave (BlueROV2) and yaw. Right stick: surge and sway
-(BlueROV2). This is the ArduSub and QGroundControl layout. The shipped
-mapping is for a Logitech F310 with the back switch on X and the Mode
-LED off; drive in that state.
+## Configure the gamepad mapping (optional)
 
-## Safety behavior
+A gamepad mapping ties the pad's controls, stick axes and buttons, to the vessel's controllable degrees of freedom: surge, sway, heave and yaw, plus the deadman button and the thrust ceiling (EPA).
 
-- **Deadman**: holding the deadman button (RB by default) is required for
-  any output; releasing it zeroes every thruster immediately.
-- **Command timeout**: a stale `/cmd_vel` zeroes every thruster.
-- **EPA (end point adjustment)**: the thrust ceiling starts at 20% and is
-  stepped in 10% increments from the D pad, so full thrust is opt in.
-- **50 Hz republish**: latched commands downstream can never go stale.
+The shipped mapping is two files in the package: [joystick.config.yaml](https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/bluerobotics_teleop/config/pad/joystick.config.yaml), which axis and button drive each motion, read by `teleop_twist_joy`; and [twist_to_thrust.yaml](https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/bluerobotics_teleop/config/pad/twist_to_thrust.yaml), the deadman button and the EPA control, read by the `twist_to_thrust` mixer. The current version is for a Logitech F310 with the back switch on X and the Mode LED off (lit, it swaps the left stick and the D pad), and follows the ArduSub and QGroundControl layout:
 
-## Map a different gamepad
+- Deadman: RB
+- Heave: left stick up and down (BlueROV2)
+- Yaw: left stick left and right
+- Surge: right stick up and down
+- Sway: right stick left and right (BlueROV2)
+- EPA: D pad up and down, 10% per click
 
-The shipped mapping matches the pad it was last mapped with. For a
-different pad, run the mapping walkthrough: a terminal screen that
-captures a no touch baseline, then detects each stick and button as you
-move it, refusing double assignments. Map in the state you will drive
-in: on a Logitech F310, back switch on X and Mode LED off (lit, it
-swaps the left stick and the D pad, and the walkthrough warns when a
-stick lands on the D pad's axes).
+Edit those files by hand, or let `joy_map` write them: an interactive walkthrough in the terminal that captures a no touch baseline, then detects each stick and button as you move it, refusing double assignments. Map in the state you will drive in; the walkthrough warns when a stick lands on the D pad's axes.
 
 ```bash
 ros2 run bluerobotics_teleop joy_map
@@ -59,7 +52,77 @@ Saving writes `$ROS_HOME/bluerobotics_teleop/pad/` (default
 `~/.ros/...`): the mapping is user state, so it survives rebuilds and
 works from a binary install. The teleop launch prefers it over the
 defaults shipped with the package and logs which one it loaded; delete
-the directory to fall back. To make a mapping the new shipped default,
-copy the files into the repository at `bluerobotics_teleop/config/pad/`
-and commit. The per vehicle mixer config (thruster topics and gains) is
-model truth and is never touched by the mapping tool.
+the directory to fall back. The per vehicle mixer config (thruster
+topics and gains) is model truth and is never touched by the mapping
+tool.
+
+## Run
+
+Hold RB to drive. The thrust ceiling starts at 20%, so the vehicle is sluggish until you press D pad up, 10% per click.
+
+### BlueBoat
+
+Start the simulation ([options](../vehicles/blueboat/running.md)):
+
+```bash
+ros2 launch blueboat_gazebo sim.launch.xml
+```
+
+Launch teleop:
+
+```bash
+ros2 launch bluerobotics_teleop teleop.launch.py vehicle:=blueboat
+```
+
+### BlueROV2
+
+Start the simulation ([options](../vehicles/bluerov2/running.md)):
+
+```bash
+ros2 launch bluerov2_gazebo sim.launch.xml
+```
+
+Launch teleop:
+
+```bash
+ros2 launch bluerobotics_teleop teleop.launch.py vehicle:=bluerov2
+```
+
+## Safety behavior
+
+- **Deadman**: holding the deadman button (RB by default) is required for
+  any output; releasing it zeroes every thruster immediately.
+- **Command timeout**: a stale `/cmd_vel` zeroes every thruster.
+- **EPA (end point adjustment)**: the thrust ceiling starts at 20% and is
+  stepped in 10% increments from the D pad, so full thrust is opt in.
+- **50 Hz republish**: latched commands downstream can never go stale.
+
+## Troubleshooting
+
+Confirm `joy_node` can see the pad at all.
+
+```bash
+ros2 run joy joy_enumerate_devices
+```
+
+which lists the pad:
+
+```text
+ID : GUID                             : GamePad : Mapped : Joystick Device Name
+-------------------------------------------------------------------------------
+ 0 : 030005ff6d0400001dc2000014400000 :    true :   true : Logitech F310 Gamepad (XInput)
+```
+
+If the table is empty, check that the host sees the pad:
+
+```bash
+ls /dev/input/by-id/ | grep -i joystick
+```
+
+Once the pad enumerates, confirm messages are flowing. With teleop running, or `ros2 run joy joy_node` on its own:
+
+```bash
+ros2 topic echo /joy
+```
+
+`axes` and `buttons` should change as you move the sticks. If they do, the pad and `joy_node` are fine and any remaining problem is downstream: the mapping, the deadman, or the mixer. If the pad enumerates but `/joy` stays silent, check that your user can read the device; `/dev/input/event*` is normally group `input`.

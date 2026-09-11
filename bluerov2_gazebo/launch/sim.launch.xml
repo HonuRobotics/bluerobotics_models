@@ -30,7 +30,7 @@
        description="Vehicle vehicle config, expanded at launch."/>
   <arg name="name" default="bluerov2"
        description="Model name to spawn as; the world's buoyancy enable expects bluerov2."/>
-  <arg name="z" default="0.5" description="Spawn height (m); the vehicle drops in and settles."/>
+  <arg name="z" default="-2.5" description="Spawn z (m); the default is mid water in the 5 m pool, where the neutral shipped trim holds depth."/>
 
   <!-- Every artifact of this configuration, generated now from config_file. -->
   <let name="vehicle_dir"
