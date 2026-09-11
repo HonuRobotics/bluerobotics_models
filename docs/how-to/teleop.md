@@ -51,10 +51,9 @@ Saving writes `$ROS_HOME/bluerobotics_teleop/pad/` (default
 `~/.ros/...`): the mapping is user state, so it survives rebuilds and
 works from a binary install. The teleop launch prefers it over the
 defaults shipped with the package and logs which one it loaded; delete
-the directory to fall back. To make a mapping the new shipped default,
-copy the files into the repository at `bluerobotics_teleop/config/pad/`
-and commit. The per vehicle mixer config (thruster topics and gains) is
-model truth and is never touched by the mapping tool.
+the directory to fall back. The per vehicle mixer config (thruster
+topics and gains) is model truth and is never touched by the mapping
+tool.
 
 ## Run
 
