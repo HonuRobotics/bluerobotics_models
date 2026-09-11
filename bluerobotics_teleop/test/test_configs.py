@@ -92,6 +92,14 @@ def test_pad_deadman_agrees_between_the_two_files():
     assert ttj['enable_button'] == ttt['btn_deadman']
 
 
+def test_pad_epa_axis_is_not_a_motion_axis():
+    """The EPA clicks cannot share an axis with surge, sway, heave or yaw."""
+    ttj = pad_params('joystick.config.yaml', 'teleop_twist_joy_node')
+    ttt = pad_params('twist_to_thrust.yaml', 'twist_to_thrust')
+    motion = set(ttj['axis_linear'].values()) | {ttj['axis_angular']['yaw']}
+    assert ttt['axis_epa'] not in motion
+
+
 def test_no_per_vehicle_pad_configs_remain():
     """Pad truth lives only in config/pad; vehicles keep the mixer alone."""
     for vehicle in ('bluerov2', 'bluerov2_heavy', 'blueboat'):
