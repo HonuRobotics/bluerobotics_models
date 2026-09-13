@@ -90,7 +90,7 @@ def test_custom_config_flows_to_every_artifact(tmp_path):
     topics = {e['ros_topic_name'] for e in bridge}
     assert '/bluerov2/camera/image' not in topics
     assert '/bluerov2/dvl/velocity' in topics
-    assert '/bluerov2/thruster_1/thrust' in topics
+    assert '/bluerov2/thruster_1/cmd' in topics
 
 
 def test_drivetrain_follows_the_config(tmp_path):
@@ -106,8 +106,8 @@ def test_drivetrain_follows_the_config(tmp_path):
     assert len(joints) == 5 and 'thruster_5_joint' not in joints
     topics = {e['ros_topic_name'] for e in
               yaml.safe_load((out / 'ros_gz_bridge.yaml').read_text())}
-    assert '/bluerov2/thruster_5/thrust' not in topics
-    assert '/bluerov2/thruster_6/thrust' in topics
+    assert '/bluerov2/thruster_5/cmd' not in topics
+    assert '/bluerov2/thruster_6/cmd' in topics
 
 
 def test_heavy_variant_flows_to_the_model(tmp_path):

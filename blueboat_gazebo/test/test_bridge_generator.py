@@ -44,15 +44,15 @@ def test_only_clock_and_joint_states_without_parts():
 def test_propellers_bridge_their_thrust_command():
     """Each propeller instance gets a ROS_TO_GZ thrust topic named after it."""
     entries = entries_for({}, PROPS)
-    assert set(entries) == ALWAYS | {'/blueboat/motor_port/thrust', '/blueboat/motor_stbd/thrust'}
-    port = entries['/blueboat/motor_port/thrust']
+    assert set(entries) == ALWAYS | {'/blueboat/motor_port/cmd', '/blueboat/motor_stbd/cmd'}
+    port = entries['/blueboat/motor_port/cmd']
     assert port['direction'] == 'ROS_TO_GZ'
     assert port['ros_type_name'] == 'std_msgs/msg/Float64'
     # Same name on the gz side: model.sdf.xacro gives the Thruster this <topic>.
-    assert port['gz_topic_name'] == '/blueboat/motor_port/thrust'
+    assert port['gz_topic_name'] == '/blueboat/motor_port/cmd'
     # A renamed or swapped propeller follows its instance name.
     entries = entries_for({}, [('t200_prop_ccw', 'left')])
-    assert '/blueboat/left/thrust' in entries
+    assert '/blueboat/left/cmd' in entries
 
 
 def test_ping_topics_from_the_manifest():
@@ -78,7 +78,7 @@ def test_topic_override_precedence():
     entries = entries_for(cfg, [('ping_singlebeam', 'ping')] + PROPS)
     ping = entries['/sensors/ping/range']
     assert ping['gz_topic_name'] == '/boat_a/ping_raw/range'
-    assert '/boat_a/motor_port/thrust' in entries
+    assert '/boat_a/motor_port/cmd' in entries
     # A renamed occupant is matched by its name, not the slot.
     cfg = {'parts': [{'slot': 'ping', 'of': 'ping_mount', 'type': 'ping_singlebeam',
                       'name': 'sonar', 'topic': 'echo'}]}

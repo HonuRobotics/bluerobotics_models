@@ -102,21 +102,21 @@ def test_model_generation_follows_config():
     root, text = gen_model(FULL_CONFIG)
     assert 'xacro:' not in text and 'xmlns:xacro' not in text
     assert 'assembly_part' not in text and 'assembly_slot' not in text
-    thrusters = plugins(root, 'gz-sim-thruster-system')
+    thrusters = plugins(root, 'gz-maritime-thruster-system')
     assert len(thrusters) == 8  # heavy
     # one controller per claw joint: gripper jaws + sampler cups
     assert len(plugins(root, 'gz-sim-joint-position-controller-system')) == 4
     by_type = {s.get('type') for s in root.iter('sensor')}
     assert by_type == {'camera', 'rgbd_camera', 'gpu_lidar', 'custom'}
     root, _ = gen_model(default_config())
-    assert len(plugins(root, 'gz-sim-thruster-system')) == 6
+    assert len(plugins(root, 'gz-maritime-thruster-system')) == 6
     assert {s.get('type') for s in root.iter('sensor')} == {'camera'}
 
 
 def test_thrusters_follow_the_propeller_parts():
     """One Thruster per propeller, on its joint, with balanced coefficients."""
     root, _ = gen_model(default_config())
-    thrusters = plugins(root, 'gz-sim-thruster-system')
+    thrusters = plugins(root, 'gz-maritime-thruster-system')
     coeffs = {t.find('joint_name').text: float(t.find('thrust_coefficient').text)
               for t in thrusters}
     assert set(coeffs) == {f'thruster_{n}_joint' for n in range(1, 7)}
@@ -218,7 +218,7 @@ def sdf_gz_topics(root):
         topics.add(info.text)
     for plugin in plugins(root, 'gz-sim-joint-position-controller-system'):
         topics.add(plugin.find('topic').text)
-    for plugin in plugins(root, 'gz-sim-thruster-system'):
+    for plugin in plugins(root, 'gz-maritime-thruster-system'):
         topics.add(plugin.find('topic').text)
     for plugin in plugins(root, 'gz-sim-joint-state-publisher-system'):
         topics.add(plugin.find('topic').text)
