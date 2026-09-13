@@ -96,7 +96,7 @@ def teleport(env, x, y, z):
 
 def latch_thrusters(env, mapping, period=0.3):
     """
-    Hold thrust commands (N) by republishing them until released.
+    Hold normalized thrust commands [-1, 1] by republishing them until released.
 
     `gz topic -p` publishes once per invocation, and a single shot can lose
     the transport discovery race under load: a total loss parks the vehicle
@@ -107,7 +107,7 @@ def latch_thrusters(env, mapping, period=0.3):
     """
     procs = []
     for n, value in mapping.items():
-        topic = f'/bluerov2/thruster_{n}/thrust'
+        topic = f'/bluerov2/thruster_{n}/cmd'
         loop = (f'while true; do gz topic -t {topic} -m gz.msgs.Double '
                 f'-p "data: {value}"; sleep {period}; done')
         procs.append(subprocess.Popen(
@@ -151,8 +151,8 @@ def test_model_loaded(sim):
 
 def test_interfaces_advertised(sim):
     """Thruster commands and sensor topics are advertised."""
-    needed = ('/bluerov2/thruster_1/thrust',
-              '/bluerov2/thruster_6/thrust',
+    needed = ('/bluerov2/thruster_1/cmd',
+              '/bluerov2/thruster_6/cmd',
               f'/world/{WORLD_NAME}/clock')
     poll_until(
         lambda: all(t in gz(sim, 'topic', '-l')[1] for t in needed), 30,
@@ -202,7 +202,9 @@ def test_vertical_thrusters_heave(sim):
     teleport(sim, 0, 0, -3.0)
     wait_sim_seconds(sim, 3)
     t0, z0 = sim_seconds(sim), model_pose(sim)[2]
-    procs = latch_thrusters(sim, {5: -20.0, 6: -20.0})
+    # -0.498: ~-20 N against min_thrust_cmd -40.2, the value this test used
+    # before the interface went normalized. Reverse scales on its own limit.
+    procs = latch_thrusters(sim, {5: -0.498, 6: -0.498})
     try:
         wait_sim_seconds(sim, 6)
         t1, z1 = sim_seconds(sim), model_pose(sim)[2]
@@ -228,7 +230,8 @@ def test_forward_thrust_mix_surges(sim):
     # 5 N per thruster: the run must FIT IN THE POOL (walls at +/-12.55 m).
     # At 10 N the steady ~1 m/s over both windows reaches the wall and
     # the vehicle slides along it, reading as crab.
-    procs = latch_thrusters(sim, {1: -5.0, 2: -5.0, 3: 5.0, 4: 5.0})
+    # ~-5 N and +5 N, each scaled on its own limit (-40.2 astern, 51.5 ahead).
+    procs = latch_thrusters(sim, {1: -0.124, 2: -0.124, 3: 0.097, 4: 0.097})
     try:
         wait_sim_seconds(sim, 6)      # onset transient: spin damps, speed builds
         t1 = sim_seconds(sim)

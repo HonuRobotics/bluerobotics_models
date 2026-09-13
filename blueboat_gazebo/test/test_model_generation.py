@@ -117,7 +117,7 @@ def test_model_generation_follows_config():
     # placed T200 props of the full config.
     props = [n for t, n in urdf_instances(FULL_CONFIG) if t.endswith(('_prop_ccw', '_prop_cw'))]
     assert len(props) == 4
-    assert {t.find('joint_name').text for t in plugins(root, 'gz-sim-thruster-system')} == \
+    assert {t.find('joint_name').text for t in plugins(root, 'gz-maritime-thruster-system')} == \
         {f'{n}_joint' for n in props}
     assert len(plugins(root, 'gz-sim-hydrodynamics-system')) == 1
     sensors = list(root.iter('sensor'))
@@ -125,30 +125,30 @@ def test_model_generation_follows_config():
     assert len(sensors) == 1  # only the Ping2 emits a sensor
     empty_root, _ = xacro(MODEL_XACRO, NO_SENSOR_CONFIG)
     assert not list(empty_root.iter('sensor')), 'emptying the Ping slot removes the sensor'
-    assert len(plugins(empty_root, 'gz-sim-thruster-system')) == 2
+    assert len(plugins(empty_root, 'gz-maritime-thruster-system')) == 2
 
 
 def test_thrusters_follow_the_propeller_parts():
     """One Thruster per propeller instance, on its joint, with the part's drive data."""
     root, _ = xacro(MODEL_XACRO, DEFAULT_CONFIG)
     thrusters = {t.find('joint_name').text: t
-                 for t in plugins(root, 'gz-sim-thruster-system')}
+                 for t in plugins(root, 'gz-maritime-thruster-system')}
     assert set(thrusters) == {'motor_port_joint', 'motor_stbd_joint'}
     port, stbd = thrusters['motor_port_joint'], thrusters['motor_stbd_joint']
     # Counter rotating pair: opposite coefficient signs; same limits.
     assert float(port.find('thrust_coefficient').text) == \
         -float(stbd.find('thrust_coefficient').text)
     assert float(port.find('max_thrust_cmd').text) > 0 > float(port.find('min_thrust_cmd').text)
-    assert port.find('topic').text == 'blueboat/motor_port/thrust'
+    assert port.find('topic').text == 'blueboat/motor_port/cmd'
     # Empty a motor slot and rename the other: the plugins follow.
     cfg = yaml.safe_dump(yaml.safe_load(DEFAULT_CONFIG) | {'parts': [
         {'slot': 'motor_port', 'type': 'none'},
         {'slot': 'motor_stbd', 'type': 't200_prop_cw', 'name': 'right', 'topic': 'r'}]},
         sort_keys=False)
     root, _ = xacro(MODEL_XACRO, cfg)
-    thrusters = plugins(root, 'gz-sim-thruster-system')
+    thrusters = plugins(root, 'gz-maritime-thruster-system')
     assert [t.find('joint_name').text for t in thrusters] == ['right_joint']
-    assert thrusters[0].find('topic').text == 'r/thrust'
+    assert thrusters[0].find('topic').text == 'r/cmd'
 
 
 def test_default_config_has_the_ping_sensor():
@@ -299,7 +299,7 @@ def test_plugin_references_survive_lumping():
 def sdf_gz_topics(root):
     """Collect the gz-side topics the model's sensors and Thruster plugins declare."""
     topics = {sensor.find('topic').text for sensor in root.iter('sensor')}
-    topics |= {t.find('topic').text for t in plugins(root, 'gz-sim-thruster-system')}
+    topics |= {t.find('topic').text for t in plugins(root, 'gz-maritime-thruster-system')}
     return {t if t.startswith('/') else '/' + t for t in topics}
 
 

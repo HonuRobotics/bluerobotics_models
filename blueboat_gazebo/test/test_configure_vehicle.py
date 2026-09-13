@@ -84,7 +84,7 @@ def test_custom_config_flows_to_every_artifact(tmp_path):
     bridge = yaml.safe_load((out / 'ros_gz_bridge.yaml').read_text())
     topics = {e['ros_topic_name'] for e in bridge}
     assert '/blueboat/ping/range' not in topics
-    assert '/blueboat/motor_port/thrust' in topics
+    assert '/blueboat/motor_port/cmd' in topics
 
 
 def test_drivetrain_follows_the_config(tmp_path):
@@ -98,11 +98,11 @@ def test_drivetrain_follows_the_config(tmp_path):
     model = ET.parse(out / 'model.sdf').getroot()
     thrusters = [p for p in model.iter('plugin') if p.get('name').endswith('Thruster')]
     assert [t.find('joint_name').text for t in thrusters] == ['right_joint']
-    assert thrusters[0].find('topic').text == 'blueboat/right/thrust'
+    assert thrusters[0].find('topic').text == 'blueboat/right/cmd'
     topics = {e['ros_topic_name'] for e in
               yaml.safe_load((out / 'ros_gz_bridge.yaml').read_text())}
-    assert '/blueboat/right/thrust' in topics
-    assert not any(t.endswith('motor_port/thrust') for t in topics)
+    assert '/blueboat/right/cmd' in topics
+    assert not any(t.endswith('motor_port/cmd') for t in topics)
 
 
 def test_base_name_flows_to_the_model(tmp_path):

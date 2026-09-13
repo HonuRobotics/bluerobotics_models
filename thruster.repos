@@ -1,0 +1,20 @@
+# Sources CI needs that are not released and so cannot be resolved by rosdep.
+#
+# gz_thruster lives in gz-maritime and provides gz-maritime-thruster-system,
+# the thruster plugin both vehicle models name by filename. It is a runtime
+# dependency: gz-sim loads it from GZ_SIM_SYSTEM_PLUGIN_PATH, nothing links
+# against it. But the launch tests spawn a vehicle and assert its thruster
+# topics are advertised, so without the plugin they fail.
+#
+# Only gz_thruster is copied into the workspace (see .github/workflows/ci.yml).
+# Importing the whole repository would pull in gz_waves_provider_fft, whose
+# ehukai dependency has no rosdep key either.
+#
+# TEMPORARY. When the normalized command mode reaches gz-sim upstream, the
+# models go back to naming gz-sim-thruster-system and this file is deleted.
+repositories:
+  gz-maritime:
+    type: git
+    url: https://github.com/HonuRobotics/gz-maritime.git
+    # TODO: switch to lyrical once HonuRobotics/gz-maritime#18 merges.
+    version: bsb/thruster-normalized-command

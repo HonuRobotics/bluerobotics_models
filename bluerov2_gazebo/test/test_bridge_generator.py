@@ -44,12 +44,12 @@ def test_only_clock_and_joint_states_without_parts():
 def test_propellers_bridge_their_thrust_command():
     """Each propeller instance gets a ROS_TO_GZ thrust topic named after it."""
     entries = entries_for({}, PROPS)
-    assert set(entries) == ALWAYS | {'/bluerov2/thruster_1/thrust', '/bluerov2/thruster_3/thrust'}
-    one = entries['/bluerov2/thruster_1/thrust']
+    assert set(entries) == ALWAYS | {'/bluerov2/thruster_1/cmd', '/bluerov2/thruster_3/cmd'}
+    one = entries['/bluerov2/thruster_1/cmd']
     assert one['direction'] == 'ROS_TO_GZ'
     assert one['ros_type_name'] == 'std_msgs/msg/Float64'
     # Same name on the gz side: model.sdf.xacro gives the Thruster this <topic>.
-    assert one['gz_topic_name'] == '/bluerov2/thruster_1/thrust'
+    assert one['gz_topic_name'] == '/bluerov2/thruster_1/cmd'
 
 
 def test_sensor_and_claw_parts_bridge_their_topics():
@@ -83,7 +83,7 @@ def test_topic_override_precedence():
     entries = entries_for(cfg, [('explorehd_camera', 'camera')] + PROPS)
     cam = entries['/sensors/cam/image']
     assert cam['gz_topic_name'] == '/rov_a/cam_raw/image'
-    assert '/rov_a/thruster_1/thrust' in entries
+    assert '/rov_a/thruster_1/cmd' in entries
     # A renamed occupant is matched by its name, not the slot.
     cfg = {'parts': [{'slot': 'camera', 'type': 'explorehd_camera',
                       'name': 'cam', 'topic': 'eye'}]}
