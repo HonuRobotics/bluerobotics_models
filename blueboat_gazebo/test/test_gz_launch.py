@@ -93,7 +93,10 @@ def teleport(env, x, y, z):
 
 def command_motors(env, mapping, repeats=6):
     """
-    Latch thrust commands (N), publishing every topic in parallel each round.
+    Latch thrust commands, publishing every topic in parallel each round.
+
+    Commands are normalized to [-1, 1], not newtons: the thruster scales them
+    onto the limits the model declares.
 
     Parallel publication matters: commands latch, so staggered onset applies a
     differential wrench and yaws the boat off its heading. Rounds repeat
@@ -101,7 +104,7 @@ def command_motors(env, mapping, repeats=6):
     """
     for _ in range(repeats):
         procs = [(side, subprocess.Popen(
-            ['gz', 'topic', '-t', f'/blueboat/motor_{side}/thrust',
+            ['gz', 'topic', '-t', f'/blueboat/motor_{side}/cmd',
              '-m', 'gz.msgs.Double', '-p', f'data: {value}'],
             env=env, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
             text=True)) for side, value in mapping.items()]
@@ -130,10 +133,10 @@ def test_model_loaded(sim):
 
 def test_interfaces_advertised(sim):
     """Motor commands, speed feedback and the world clock are advertised."""
-    needed = ('/blueboat/motor_port/thrust',
-              '/blueboat/motor_stbd/thrust',
-              '/blueboat/motor_port/thrust/ang_vel',
-              '/blueboat/motor_stbd/thrust/ang_vel',
+    needed = ('/blueboat/motor_port/cmd',
+              '/blueboat/motor_stbd/cmd',
+              '/blueboat/motor_port/cmd/ang_vel',
+              '/blueboat/motor_stbd/cmd/ang_vel',
               f'/world/{WORLD_NAME}/clock')
     poll_until(
         lambda: all(t in gz(sim, 'topic', '-l')[1] for t in needed), 30,
@@ -187,8 +190,10 @@ def test_forward_thrust_surges(sim):
     """
     teleport(sim, 0, 0, 0.0)
     wait_sim_seconds(sim, 3)
-    # 5 N per motor: the run must fit in the pool (walls at +/-12.55 m).
-    command_motors(sim, {'port': 5.0, 'stbd': 5.0})
+    # 0.097 of full command each: ~5 N against max_thrust_cmd 51.5, which is
+    # what this test used before the interface went normalized. The run has to
+    # fit in the pool (walls at +/-12.55 m).
+    command_motors(sim, {'port': 0.097, 'stbd': 0.097})
     wait_sim_seconds(sim, 6)          # onset transient: spin damps, speed builds
     t1 = sim_seconds(sim)
     x1, y1, _, _, _, yaw1 = model_pose(sim)
