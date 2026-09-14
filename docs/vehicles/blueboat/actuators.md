@@ -22,16 +22,20 @@ topics is bridged to ROS and named after its motor:
 
 | ROS Topic | Description | Message type |
 |---|---|---|
-| `/blueboat/motor_port/thrust` | Thrust command in newtons, clamped to the propeller's limits | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
-| `/blueboat/motor_stbd/thrust` | Thrust command in newtons, clamped to the propeller's limits | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
+| `/blueboat/motor_port/cmd` | Normalized thrust command in [-1, 1]: +1 full ahead, -1 full astern, 0 stop | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
+| `/blueboat/motor_stbd/cmd` | Normalized thrust command in [-1, 1]: +1 full ahead, -1 full astern, 0 stop | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
 
-Equal thrust drives ahead; differential thrust yaws (more starboard
-thrust turns to port and vice versa). To manually send thruster commands
-via ROS:
+The command is a fraction of the propeller's own limits, which the model
+takes from the part's drive table - 51.5 N ahead and -40.2 N astern for a
+T200 at 16 V. The two directions scale independently, so +0.5 and -0.5 are
+equal command and unequal force. Values outside [-1, 1] are clamped.
+
+Equal command drives ahead; differential command yaws (more starboard
+turns to port and vice versa). To manually send thruster commands via ROS:
 
 ```bash
-ros2 topic pub /blueboat/motor_port/thrust std_msgs/msg/Float64 "data: 20.0" -1 &
-ros2 topic pub /blueboat/motor_stbd/thrust std_msgs/msg/Float64 "data: 20.0" -1 &
+ros2 topic pub /blueboat/motor_port/cmd std_msgs/msg/Float64 "data: 0.4" -1 &
+ros2 topic pub /blueboat/motor_stbd/cmd std_msgs/msg/Float64 "data: 0.4" -1 &
 wait
 ```
 
@@ -57,15 +61,15 @@ under the same names), plus a speed feedback per motor:
 
 | gz Topic | Description | Message type |
 |---|---|---|
-| `/blueboat/motor_<side>/thrust` | Thrust command in newtons | `gz.msgs.Double` |
-| `/blueboat/motor_<side>/thrust/ang_vel` | Propeller speed feedback (rad/s) | `gz.msgs.Double` |
+| `/blueboat/motor_<side>/cmd` | Normalized thrust command in [-1, 1] | `gz.msgs.Double` |
+| `/blueboat/motor_<side>/cmd/ang_vel` | Propeller speed feedback (rad/s) | `gz.msgs.Double` |
 
 ```bash
-gz topic -t /blueboat/motor_port/thrust -m gz.msgs.Double -p 'data: 10.0' &
-gz topic -t /blueboat/motor_stbd/thrust -m gz.msgs.Double -p 'data: 10.0' &
+gz topic -t /blueboat/motor_port/cmd -m gz.msgs.Double -p 'data: 0.2' &
+gz topic -t /blueboat/motor_stbd/cmd -m gz.msgs.Double -p 'data: 0.2' &
 wait
 ```
 
 Topic bases follow `/<namespace>/<instance>/...`: fit a different
-propeller, rename it or leave a motor slot empty and the thrust topics
+propeller, rename it or leave a motor slot empty and the command topics
 follow the fitted parts.
