@@ -15,8 +15,8 @@ flowchart LR
   JOY -- "/joy<br/>sensor_msgs/Joy" --> TTJ["teleop_twist_joy_node"]
   TTJ -- "/cmd_vel<br/>geometry_msgs/Twist, normalized" --> MIX["twist_to_thrust"]
   JOY -- "/joy<br/>deadman, EPA" --> MIX
-  CFG["per vehicle mixer.yaml<br/>gain matrix, thrust limits"] -.-> MIX
-  MIX -- "one std_msgs/Float64 per thruster<br/>/blueboat/motor_*/thrust<br/>/bluerov2/thruster_*/thrust" --> OUT(["simulation or<br/>bridged vehicle"])
+  CFG["per vehicle mixer.yaml<br/>gain matrix, command envelope"] -.-> MIX
+  MIX -- "one std_msgs/Float64 per thruster<br/>/blueboat/motor_*/cmd<br/>/bluerov2/thruster_*/cmd" --> OUT(["simulation or<br/>bridged vehicle"])
 ```
 
 ## Configure the gamepad mapping (optional)

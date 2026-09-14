@@ -78,14 +78,14 @@ Several parameters still act in `MANUAL`, which is the other half of why it is n
 To see what the autopilot is actually commanding while you move the sticks, echo the same topics:
 
 ```bash
-gz topic -e -t /blueboat/motor_port/thrust
-gz topic -e -t /blueboat/motor_stbd/thrust
+gz topic -e -t /blueboat/motor_port/cmd
+gz topic -e -t /blueboat/motor_stbd/cmd
 ```
 
 Equal positive numbers for throttle alone, equal and opposite for steering alone. 
 ## What this does not check
 
-Magnitudes. The simulated thruster maps a command symmetrically about stop, and a T200 is not symmetric — it makes roughly 51.5 N ahead against 40.2 N astern. Speeds and accelerations are therefore not meaningful yet, and a boat that reaches the wrong speed at full throttle is expected rather than a defect.
+Magnitudes. The thruster scales each direction on its own limit, so the T200's asymmetry — roughly 51.5 N ahead against 40.2 N astern — is represented. The hull is not: the hydrodynamic damping coefficients are placeholders awaiting identification. Speeds and accelerations are therefore not meaningful yet, and a boat that reaches the wrong speed at full throttle is expected rather than a defect.
 
 ## The parameter files are not optional
 
