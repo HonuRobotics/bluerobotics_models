@@ -376,3 +376,10 @@ def test_installed_artifacts_match_shipped_config():
         assert part.get('name') in links, f'{part.get("name")} missing from shipped URDF'
     assert any(p.get('type') == 'ping_singlebeam' for p in urdf.findall('assembly_part')), \
         'the shipped default must carry the Ping'
+
+
+def test_model_name_follows_the_topic_namespace():
+    """The composed model is named after the config's topic_namespace."""
+    root, _ = xacro(MODEL_XACRO, DEFAULT_CONFIG.replace(
+        'topic_namespace: blueboat', 'topic_namespace: boat_a'))
+    assert root.find('model').get('name') == 'boat_a'
