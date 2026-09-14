@@ -25,7 +25,7 @@ base: {type: blueboat_chassis, name: base_link}
 # type: an accepted part type, or none to leave it empty). An entry without
 # slot: is a free placement: type, name, xyz/rpy relative to parent (default
 # base_link). Optional per part topic overrides for sensor and propeller
-# parts (bases; the per part suffix such as /range or /thrust is appended):
+# parts (bases; the per part suffix such as /range or /cmd is appended):
 #   topic:     base for BOTH the Gazebo and ROS sides
 #   gz_topic:  Gazebo side base   (overrides `topic`)
 #   ros_topic: ROS side base      (overrides `topic`)

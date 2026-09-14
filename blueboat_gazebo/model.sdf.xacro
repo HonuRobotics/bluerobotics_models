@@ -36,7 +36,7 @@
   <xacro:property name="ardupilot" value="${'$(arg ardupilot)'.lower() == 'true'}"/>
 
   <!-- Topic namespace: every part topic is /<topic_namespace>/<part name>/...
-       on both sides (a propeller's /thrust, the Ping's /range). Per part,
+       on both sides (a propeller's /cmd, the Ping's /range). Per part,
        `gz_topic` / `topic` override the gz side base; the bridge config is
        generated from the same yaml, so gz and ROS sides stay in sync. -->
   <xacro:property name="topic_ns" value="${cfg.get('topic_namespace', 'blueboat')}"/>
