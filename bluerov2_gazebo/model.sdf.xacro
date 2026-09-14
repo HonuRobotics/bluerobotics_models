@@ -287,7 +287,12 @@
          fluid_density * volume = total_mass + net_buoyancy
        with the box centroid on the declared CoB (cob_offset from the CoM
        or from the root link). total_mass / com come from the assembled
-       URDF via generate_model.py. Fixed jointed: physics sees one body. -->
+       URDF via generate_model.py. Fixed jointed: physics sees one body.
+       The box is also marked gz:buoyancy="true": a world whose buoyancy
+       system reads marked collisions (gz-sim 229ec07e, carried by
+       gz-maritime's gz_buoyancy) floats this link by it under whatever
+       name the ROV is spawned, with no <enable> list. Gazebo's stock
+       system ignores the attribute, so the worlds here are unchanged. -->
     <xacro:property name="buoyancy_cfg" value="${cfg.get('buoyancy') or dict()}"/>
     <xacro:if value="${'$(arg total_mass)' == '' or '$(arg com)' == ''}">
       <xacro:assembly_fail message="model.sdf.xacro needs total_mass and com args; generate it with generate_model.py (the build and configure_vehicle.py do)"/>
@@ -317,7 +322,7 @@
           <iyy>1e-8</iyy><iyz>0</iyz><izz>1e-8</izz>
         </inertia>
       </inertial>
-      <collision name="displacement">
+      <collision name="displacement" gz:buoyancy="true">
         <pose>${cob_target[0]} ${cob_target[1]} ${cob_target[2]} 0 0 0</pose>
         <geometry>
           <box><size>${footprint[0]} ${footprint[1]} ${box_height}</size></box>

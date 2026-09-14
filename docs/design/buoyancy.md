@@ -51,6 +51,21 @@ hold for the configured vehicle and the parts' own collisions stay pure
 contact geometry. The same pattern as the BlueBoat's pontoons, with the
 box solved instead of declared.
 
+(marked-for-any-world)=
+
+## Marked for any world
+
+The displacement collisions of both vehicles carry `gz:buoyancy="true"`.
+Gazebo's buoyancy system gained a marked-collision mode
+([gz-sim 229ec07e](https://github.com/gazebosim/gz-sim/commit/229ec07e673b6317fec57af50fd652bcd9bde0ed),
+carried by [gz-maritime](https://github.com/HonuRobotics/gz-maritime)'s
+`gz_buoyancy` until a release ships it): a link with marked collisions
+floats by those alone, under whatever name its model was spawned, in a
+world that names no vehicle. The stock system ignores the attribute, so
+the worlds here keep their `<enable>` lists and behave exactly as before;
+on gz-maritime's open water the same generated model floats with no world
+edit.
+
 ## Constraints
 
 - URDF cannot express `<fluid_added_mass>`; added mass stays out of the

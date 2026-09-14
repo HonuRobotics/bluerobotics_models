@@ -164,6 +164,11 @@ def test_buoyancy_displacement_realizes_the_declaration():
     offset = [float(v) for v in str(declared['cob_offset']).split()]
     for i in range(3):
         assert centroid[i] == pytest.approx(com[i] + offset[i], abs=1e-4)
+    # The box is the model's only marked collision, so a world whose buoyancy
+    # reads marks (gz-maritime's) floats exactly it, under any spawn name.
+    marked = [c for c in root.iter('collision')
+              if c.get('{http://gazebosim.org/schema}buoyancy') == 'true']
+    assert [c.get('name') for c in marked] == ['displacement']
     # The worlds enable buoyancy on exactly this link.
     for world in ('bluerov2_water.sdf', 'bluerov2_pool.sdf',
                   'bluerov2_playground.sdf'):
