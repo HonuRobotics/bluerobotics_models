@@ -46,7 +46,7 @@ side never held a coordinate.
 
 `generate_bridge_config.py` reads the fitted instances from the URDF's
 `<assembly_part>` manifest and emits one bridge entry per topic of each
-part type that has topics (`PART_TOPICS`: a propeller's `/thrust` command,
+part type that has topics (`PART_TOPICS`: a propeller's `/cmd` command,
 the Ping's `/range`), plus `/clock` and `/joint_states`; per instance topic
 overrides come from the config entry that fitted it. Nothing about the
 drivetrain is hardcoded and no topic bakes the model name. The model's
@@ -76,6 +76,6 @@ launch.
 | geometry, inertia, joints | the URDF (merge included) |
 | `hull_displacement` link | box pontoons from the config; `<enable>blueboat::hull_displacement</enable>` in the world |
 | `gz-sim-hydrodynamics-system` | placeholder USV damping coefficients, to be identified |
-| `gz-sim-thruster-system`, one per propeller | on `<name>_joint`, limits and diameter from the part's `drive` table (T200 16 V placeholders today), counter rotating |
+| `gz-maritime-thruster-system`, one per propeller | on `<name>_joint`, normalized command scaled onto the limits and diameter from the part's `drive` table (T200 16 V placeholders today), counter rotating |
 | `gz-sim-joint-state-publisher-system` | `/<ns>/joint_states`, bridged for RViz |
 | `gpu_lidar` "ping" | the Ping2 as a one ray downward range sensor at `ping_beam` |
