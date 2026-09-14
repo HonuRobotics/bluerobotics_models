@@ -94,6 +94,14 @@ def teleport(env, x, y, z):
     assert code == 0 and 'true' in out, f'set_pose failed:\n{out}\n{err}'
 
 
+# T200 thrust limits at 16 V, as the propeller parts declare them in
+# bluerobotics_parts and the model passes to max_thrust_cmd / min_thrust_cmd.
+# Commands below are normalized, so they are written as a force over its
+# limit rather than as a bare number that would drift if a limit changed.
+MAX_THRUST = 51.5
+MIN_THRUST = -40.2
+
+
 def latch_thrusters(env, mapping, period=0.3):
     """
     Hold normalized thrust commands [-1, 1] by republishing them until released.
@@ -202,9 +210,10 @@ def test_vertical_thrusters_heave(sim):
     teleport(sim, 0, 0, -3.0)
     wait_sim_seconds(sim, 3)
     t0, z0 = sim_seconds(sim), model_pose(sim)[2]
-    # -0.498: ~-20 N against min_thrust_cmd -40.2, the value this test used
-    # before the interface went normalized. Reverse scales on its own limit.
-    procs = latch_thrusters(sim, {5: -0.498, 6: -0.498})
+    # ~-20 N, the value this test used before the interface went normalized.
+    # Astern scales on its own limit, which is the smaller of the two.
+    up = -20.0 / -MIN_THRUST
+    procs = latch_thrusters(sim, {5: up, 6: up})
     try:
         wait_sim_seconds(sim, 6)
         t1, z1 = sim_seconds(sim), model_pose(sim)[2]
@@ -230,8 +239,9 @@ def test_forward_thrust_mix_surges(sim):
     # 5 N per thruster: the run must FIT IN THE POOL (walls at +/-12.55 m).
     # At 10 N the steady ~1 m/s over both windows reaches the wall and
     # the vehicle slides along it, reading as crab.
-    # ~-5 N and +5 N, each scaled on its own limit (-40.2 astern, 51.5 ahead).
-    procs = latch_thrusters(sim, {1: -0.124, 2: -0.124, 3: 0.097, 4: 0.097})
+    # ~-5 N and +5 N, each against its own limit.
+    astern, ahead = -5.0 / -MIN_THRUST, 5.0 / MAX_THRUST
+    procs = latch_thrusters(sim, {1: astern, 2: astern, 3: ahead, 4: ahead})
     try:
         wait_sim_seconds(sim, 6)      # onset transient: spin damps, speed builds
         t1 = sim_seconds(sim)

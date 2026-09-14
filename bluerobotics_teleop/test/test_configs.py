@@ -28,6 +28,26 @@ def mixer_params(vehicle):
         return yaml.safe_load(f)['twist_to_thrust']['ros__parameters']
 
 
+@pytest.mark.parametrize('vehicle', ['bluerov2', 'bluerov2_heavy', 'blueboat'])
+def test_mixer_speaks_the_normalized_interface(vehicle):
+    """
+    Every mixer commands a normalized value, and declares a unity envelope.
+
+    This covers bluerov2_heavy, which has no Gazebo package of its own and so
+    cannot be checked against a generated bridge config below. Its topics went
+    stale precisely because nothing asserted this.
+
+    The envelope being 1.0 is the point rather than a formality: the thrust
+    limits belong to the model now, and a mixer carrying newtons again would
+    mean two copies of them free to drift apart.
+    """
+    params = mixer_params(vehicle)
+    for topic in params['thruster_topics']:
+        assert topic.endswith('/cmd'), (vehicle, topic)
+    assert params['max_thrust_forward'] == 1.0, vehicle
+    assert params['max_thrust_reverse'] == -1.0, vehicle
+
+
 @pytest.mark.parametrize('vehicle,gazebo_pkg', [
     ('bluerov2', 'bluerov2_gazebo'),
     ('blueboat', 'blueboat_gazebo'),
