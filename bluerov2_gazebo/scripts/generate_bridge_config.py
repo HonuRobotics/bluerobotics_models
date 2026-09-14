@@ -42,7 +42,7 @@ import yaml
 THRUST = ('cmd', 'std_msgs/msg/Float64', 'gz.msgs.Double', 'ROS_TO_GZ')
 CMD_POS = ('cmd_pos', 'std_msgs/msg/Float64', 'gz.msgs.Double', 'ROS_TO_GZ')
 PART_TOPICS = {
-    # Propellers: thrust command in newtons to the Thruster on their joint.
+    # Propellers: normalized command to the Thruster on their joint.
     't200_prop_ccw': [THRUST],
     't200_prop_cw': [THRUST],
     # Sensors.

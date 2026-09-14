@@ -91,6 +91,14 @@ def teleport(env, x, y, z):
     assert code == 0 and 'true' in out, f'set_pose failed:\n{out}\n{err}'
 
 
+# T200 thrust limits at 16 V, as the propeller parts declare them in
+# bluerobotics_parts and the model passes to max_thrust_cmd / min_thrust_cmd.
+# Commands below are normalized, so they are written as a force over its
+# limit rather than as a bare number that would drift if a limit changed.
+MAX_THRUST = 51.5
+MIN_THRUST = -40.2
+
+
 def command_motors(env, mapping, repeats=6):
     """
     Latch thrust commands, publishing every topic in parallel each round.
@@ -190,10 +198,11 @@ def test_forward_thrust_surges(sim):
     """
     teleport(sim, 0, 0, 0.0)
     wait_sim_seconds(sim, 3)
-    # 0.097 of full command each: ~5 N against max_thrust_cmd 51.5, which is
-    # what this test used before the interface went normalized. The run has to
-    # fit in the pool (walls at +/-12.55 m).
-    command_motors(sim, {'port': 0.097, 'stbd': 0.097})
+    # ~5 N per motor, the value this test used before the interface went
+    # normalized, expressed against the limit the model declares. The run has
+    # to fit in the pool (walls at +/-12.55 m).
+    ahead = 5.0 / MAX_THRUST
+    command_motors(sim, {'port': ahead, 'stbd': ahead})
     wait_sim_seconds(sim, 6)          # onset transient: spin damps, speed builds
     t1 = sim_seconds(sim)
     x1, y1, _, _, _, yaw1 = model_pose(sim)
