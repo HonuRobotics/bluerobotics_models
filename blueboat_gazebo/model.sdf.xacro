@@ -206,7 +206,10 @@
     </joint>
   </xacro:macro>
 
-  <model name="blueboat">
+  <!-- Named after the instance (the config's topic_namespace, or the name option):
+       the model name, the topic namespace and, in the launch, the ROS
+       namespace are one name. A spawn may still rename it. -->
+  <model name="${topic_ns}">
     <include merge="true">
       <uri>$(arg urdf_uri)</uri>
     </include>

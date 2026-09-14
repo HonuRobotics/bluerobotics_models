@@ -258,3 +258,10 @@ def test_world_fluid_density_matches_the_description():
         text = (GZ_SHARE / 'worlds' / world).read_text()
         density = float(text.split('<default_density>')[1].split('<')[0])
         assert density == pytest.approx(float(declared['fluid_density'])), world
+
+
+def test_model_name_follows_the_topic_namespace():
+    """The composed model is named after the config's topic_namespace."""
+    root, _ = gen_model(FULL_CONFIG.replace(
+        'topic_namespace: bluerov2', 'topic_namespace: rov_a'))
+    assert root.find('model').get('name') == 'rov_a'

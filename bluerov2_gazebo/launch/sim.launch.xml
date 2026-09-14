@@ -29,12 +29,18 @@
        default="$(find-pkg-share bluerov2_description)/config/bluerov2.yaml"
        description="Vehicle vehicle config, expanded at launch."/>
   <arg name="name" default="bluerov2"
-       description="Model name to spawn as; the world's buoyancy enable expects bluerov2."/>
+       description="Instance name: the Gazebo model name and the topic namespace (/&lt;name&gt;/...). Give each copy of the vehicle in one world its own."/>
+  <arg name="x" default="0" description="Spawn position x (m)."/>
+  <arg name="y" default="0" description="Spawn position y (m)."/>
   <arg name="z" default="-2.5" description="Spawn z (m); the default is mid water in the 5 m pool, where the neutral shipped trim holds depth."/>
+  <arg name="roll" default="0" description="Spawn roll (rad)."/>
+  <arg name="pitch" default="0" description="Spawn pitch (rad)."/>
+  <arg name="yaw" default="0" description="Spawn heading (rad)."/>
 
-  <!-- Every artifact of this configuration, generated now from config_file. -->
+  <!-- Every artifact of this instance, generated now from config_file and
+       name. -->
   <let name="vehicle_dir"
-       value="$(command '$(find-pkg-prefix bluerov2_gazebo)/lib/bluerov2_gazebo/configure_vehicle.py --config $(var config_file) --cache')"/>
+       value="$(command '$(find-pkg-prefix bluerov2_gazebo)/lib/bluerov2_gazebo/configure_vehicle.py --config $(var config_file) --name $(var name) --cache')"/>
 
   <!-- Gazebo server (composable) — creates the shared container. -->
   <gz_server world_sdf_file="$(var world)"
@@ -47,7 +53,9 @@
 
   <!-- The vehicle, spawned from the generated model into the (only) world. -->
   <node pkg="ros_gz_sim" exec="create" name="spawn_bluerov2" output="screen"
-        args="-name $(var name) -z $(var z) -file $(var vehicle_dir)/model.sdf"/>
+        args="-name $(var name) -file $(var vehicle_dir)/model.sdf
+              -x $(var x) -y $(var y) -z $(var z)
+              -R $(var roll) -P $(var pitch) -Y $(var yaw)"/>
 
   <!-- ros_gz bridge (composable) — joins the container; bridges the clock. -->
   <ros_gz_bridge bridge_name="ros_gz_bridge"
