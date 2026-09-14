@@ -92,8 +92,10 @@ class TwistToThrust(Node):
         self.declare_parameter('gains_linear_y', [0.0])
         self.declare_parameter('gains_linear_z', [0.0])
         self.declare_parameter('gains_angular_z', [0.0])
-        self.declare_parameter('max_thrust_forward', 50.0)
-        self.declare_parameter('max_thrust_reverse', -40.0)
+        # Unity: the thrusters take a normalized command, so the envelope
+        # is the command range itself. The T200 limits live in the model.
+        self.declare_parameter('max_thrust_forward', 1.0)
+        self.declare_parameter('max_thrust_reverse', -1.0)
         self.declare_parameter('cmd_timeout_sec', 0.5)
         self.declare_parameter('btn_deadman', 5)
         self.declare_parameter('axis_epa', 7)          # -1: no hat axis

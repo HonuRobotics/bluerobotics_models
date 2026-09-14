@@ -54,8 +54,8 @@
   <!-- A propeller part drives its mounting joint: one Thruster plugin per
        propeller instance, with the limits the part declares in its `drive`
        table (the T200 endpoints). ccw props take +coeff, cw props -coeff so
-       the reaction torques balance. Thrust commands (N) on
-       <topic_base>/thrust, speed feedback on <topic_base>/thrust/ang_vel:
+       the reaction torques balance. Normalized commands on
+       <topic_base>/cmd, speed feedback on <topic_base>/cmd/ang_vel:
        the plugin prefixes a custom <topic> with its <namespace> (the model
        name unless given), so the namespace is emptied and the topic follows
        the config like every other part topic, not the spawn name. -->
