@@ -1,10 +1,12 @@
 # Verify the SITL connection (ROV)
 
-Confirm that ArduSub in SITL is driving the simulated BlueROV2, and that each stick moves the vehicle along the axis it names. Setup for ArduPilot itself is in [ArduPilot SITL setup](../getting-started/ardupilot_setup.md); this page assumes it is done, `./waf sub` has been built and the Iris smoke test passed.
+Confirm that ArduSub in SITL is driving the simulated BlueROV2 (standard configuration, not "heavy") in `MANUAL` mode, which means surge, yaw, sway and heave commands are provided via RC channels and ArduSub maps from commands in the body frame to individual thruster commands.  
 
-The BlueBoat equivalent is [Verify the SITL connection](verify-sitl.md). The boat has two thrusters and one meaningful question — does it go the right way round. The ROV has six and four axes, so the checks here are per axis instead.
+## Prereqs
 
-Two shells. Both need the colcon workspace and then the ArduPilot environment, in that order: `setup-ardupilot.sh` appends to `GZ_SIM_RESOURCE_PATH`, so the workspace has to be on it first or the vehicle's meshes will not resolve.
+* Setup for ArduPilot itself is in [ArduPilot SITL setup](../getting-started/ardupilot_setup.md). This page assumes it is done and that `./waf sub` has been built.
+* The workspace is built and sourced: `colcon build --merge-install` from the workspace root, then `source install/setup.bash`. See [Installation](../getting-started/installation.md).
+* The steps below were run in the [drydock](https://github.com/HonuRobotics/drydock) container, started with `drydock run maritime`. They work on a host set up per [Requirements](../getting-started/requirements.md) too; only the prerequisites differ.
 
 First, the simulation:
 
@@ -13,6 +15,8 @@ source ~/maritime_ws/install/setup.bash
 source ~/maritime_ws/thirdparty/setup-ardupilot.sh
 gz sim -v4 -r $(ros2 pkg prefix --share bluerov2_gazebo)/worlds/bluerov2_sitl.sdf
 ```
+If successful, you should see Gazebo sim start with the ROV spawned in a simple underwater environemnt. 
+
 
 Then the autopilot:
 
@@ -25,6 +29,16 @@ sim_vehicle.py -v ArduSub -f gazebo-bluerov2 --model JSON --console -w \
   --add-param-file=$(ros2 pkg prefix --share bluerov2_gazebo)/params/bluerov2_sitl.params
 ```
 
+```{note}
+Gazebo prints `ArduPilot controller has reset` once shortly after SITL
+connects and then roughly once a minute. It is expected and nothing is
+reset: `ardupilot_gazebo` keeps ArduPilot's 32-bit frame counter in a
+`uint16_t`, so it wraps about every 66 seconds at 1000 Hz and the plugin
+reads the wrap as a restart. The fix is open upstream as
+[ardupilot_gazebo#174](https://github.com/ArduPilot/ardupilot_gazebo/pull/174);
+see the troubleshooting notes in [ArduPilot SITL setup](../getting-started/ardupilot_setup.md).
+```
+
 ## The checks
 
 One axis at a time. At the MAVProxy prompt:
@@ -34,6 +48,8 @@ mode manual
 arm throttle
 rc 6 1600
 ```
+
+`rc <channel> <microseconds>` overrides one RC input. Channel 6 is surge, and the channel spans 1100 to 1900 about a 1500 neutral, so 1600 is a quarter of full stick ahead. In `MANUAL` that quarter passes through the mixer unscaled, so each of the four horizontal thrusters ends up at about a quarter of full command - roughly 13 N of the T200's 51.5 N, before the 45 degree vectoring takes its cosine. Full stick is 1900, and `rc 6 1500` returns to neutral.
 
 The channels are not the ones you might guess, and ArduPilot's own parameter documentation is stale on this point — the comments in `AP_RCMapper.cpp` say forward is "normally channel 5" and lateral "channel 6", while the code defaults are 6 and 7. The code is what runs:
 
