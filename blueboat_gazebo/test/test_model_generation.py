@@ -85,13 +85,13 @@ NO_SENSOR_CONFIG = yaml.safe_dump(
     sort_keys=False)
 
 
-def xacro(top_file, config_text):
+def xacro(top_file, config_text, *extra_args):
     """Run xacro with a temp config; return the parsed XML root and text."""
     with tempfile.NamedTemporaryFile('w', suffix='.yaml', delete=False) as f:
         f.write(config_text)
         config_path = f.name
     out = subprocess.run(
-        ['xacro', str(top_file), f'config_file:={config_path}'],
+        ['xacro', str(top_file), f'config_file:={config_path}', *extra_args],
         check=True, capture_output=True, text=True, timeout=120)
     return ET.fromstring(out.stdout), out.stdout
 
@@ -383,3 +383,26 @@ def test_model_name_follows_the_topic_namespace():
     root, _ = xacro(MODEL_XACRO, DEFAULT_CONFIG.replace(
         'topic_namespace: blueboat', 'topic_namespace: boat_a'))
     assert root.find('model').get('name') == 'boat_a'
+
+
+def test_ardupilot_channels_command_the_thrusters_topics():
+    """
+    The SITL variant's servo channels command exactly what the Thrusters hear.
+
+    A motor's topic override, relative or absolute, reaches the Thruster and
+    the ArduPilot control block alike; otherwise ArduRover would command a
+    topic nobody listens on.
+    """
+    cfg = DEFAULT_CONFIG.replace('parts: []', (
+        'parts:\n'
+        '  - {slot: motor_stbd, type: t200_prop_cw, gz_topic: /fleet/stbd}\n'
+        '  - {slot: motor_port, type: t200_prop_ccw, topic: left}\n'))
+    root, _ = xacro(MODEL_XACRO, cfg, 'ardupilot:=true')
+    thrusters = {t.find('joint_name').text: t.find('topic').text
+                 for t in plugins(root, 'gz-sim-thruster-system')}
+    controls = {c.find('jointName').text: c.find('cmd_topic').text
+                for c in root.iter('control')}
+    assert controls == {'motor_stbd_joint': '/fleet/stbd/thrust',
+                        'motor_port_joint': '/blueboat/left/thrust'}
+    for joint, topic in controls.items():
+        assert topic == '/' + thrusters[joint].lstrip('/')

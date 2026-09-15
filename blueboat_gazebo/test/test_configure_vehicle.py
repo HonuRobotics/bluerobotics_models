@@ -223,3 +223,13 @@ def test_two_instances_from_one_config_share_no_topic(tmp_path):
     a, b = topics.values()
     assert a and b and not (a & b), a & b
     assert all(t.startswith('/boat_a/') for t in a), a
+
+
+def test_rejects_a_name_that_is_not_a_ros_name(tmp_path):
+    """A name that cannot be a topic prefix or a namespace is refused up front."""
+    for bad in ('boat-b', '2boats', 'fleet/boat_b', ''):
+        out = subprocess.run([str(TOOL), '--config', str(DEFAULT_CONFIG), '--name', bad,
+                              '--out-dir', str(tmp_path / 'v')],
+                             capture_output=True, text=True, timeout=180)
+        assert out.returncode != 0, bad
+        assert 'invalid instance name' in out.stderr, bad
