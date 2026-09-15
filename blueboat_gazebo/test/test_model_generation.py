@@ -202,6 +202,20 @@ def test_hull_displacement_is_its_own_enabled_link():
         assert '<enable>blueboat</enable>' not in text, f'{world}: must not enable the whole model'
 
 
+def test_pontoons_are_marked_as_buoyancy_geometry():
+    """
+    Every pontoon carries gz:buoyancy="true", and nothing else does.
+
+    A world whose buoyancy reads marked collisions (gz-maritime's) then
+    floats the boat under any spawn name with no <enable> list; the stock
+    system ignores the attribute, so the worlds here still enable the link.
+    """
+    root, _ = xacro(MODEL_XACRO, DEFAULT_CONFIG)
+    marked = [c.get('name') for c in root.iter('collision')
+              if c.get('{http://gazebosim.org/schema}buoyancy') == 'true']
+    assert sorted(marked) == sorted(name for name, *_ in pontoon_boxes(root))
+
+
 def test_pontoons_tile_and_float_the_boat():
     """Segmented pontoons mirror across y, tile, and give positive reserve buoyancy."""
     root, _ = xacro(MODEL_XACRO, DEFAULT_CONFIG)
