@@ -16,5 +16,4 @@ repositories:
   gz-maritime:
     type: git
     url: https://github.com/HonuRobotics/gz-maritime.git
-    # TODO: switch to lyrical once HonuRobotics/gz-maritime#18 merges.
-    version: bsb/thruster-normalized-command
+    version: lyrical
