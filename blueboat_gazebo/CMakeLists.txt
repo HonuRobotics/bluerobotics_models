@@ -61,7 +61,7 @@ install(FILES ${gazebo_urdf} DESTINATION share/${PROJECT_NAME}/models/blueboat)
 # The ArduPilot flavoured model: the SAME model.sdf.xacro expanded with
 # ardupilot:=true, which adds an IMU sensor and the ArduPilotPlugin. A second
 # model rather than a wrapper because <include merge="true"> does not nest and
-# the composed model already merge-includes its URDF; see SITL_DESIGN.md.
+# the composed model already merge-includes its URDF; see docs/specs/SITL_SPEC_CONTEXT.md.
 #
 # Must come after find_program(XACRO_EXECUTABLE) and the vehicle_config set()
 # above: CMake evaluates in order, and an empty XACRO_EXECUTABLE turns the
