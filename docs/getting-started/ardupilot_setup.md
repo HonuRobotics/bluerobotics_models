@@ -165,7 +165,7 @@ AP_GZ=$HOME/maritime_ws/thirdparty/ardupilot_gazebo
 [ "$VIRTUAL_ENV" = "$AP/venv-ardupilot" ] || . "$AP/venv-ardupilot/bin/activate"
 
 export GZ_VERSION=jetty
-export GZ_SIM_SYSTEM_PLUGIN_PATH=$AP_GZ/build
+export GZ_SIM_SYSTEM_PLUGIN_PATH=$AP_GZ/build${GZ_SIM_SYSTEM_PLUGIN_PATH:+:$GZ_SIM_SYSTEM_PLUGIN_PATH}
 export GZ_SIM_RESOURCE_PATH=$AP_GZ/models:$AP_GZ/worlds${GZ_SIM_RESOURCE_PATH:+:$GZ_SIM_RESOURCE_PATH}
 export SDF_PATH=$GZ_SIM_RESOURCE_PATH
 
@@ -184,7 +184,10 @@ Then, in every shell doing SITL work:
 source ~/maritime_ws/thirdparty/setup-ardupilot.sh
 ```
 
-Both path variables append to whatever is already set rather than replacing it. That matters as soon as this is combined with a sourced colcon workspace: the vehicle packages put their own model directories on `GZ_SIM_RESOURCE_PATH` through environment hooks, and overwriting it leaves every mesh in the boat unresolvable.
+All three path variables append to whatever is already set rather than replacing it, and that matters as soon as this is combined with a sourced colcon workspace, because the workspace has already put its own entries on two of them:
+
+- `GZ_SIM_RESOURCE_PATH` carries the vehicle packages' model directories. Overwrite it and every mesh in the vehicle is unresolvable.
+- `GZ_SIM_SYSTEM_PLUGIN_PATH` carries `gz_thruster`, the forked thruster plugin both vehicles name. Overwrite it and the symptom is much less obvious than a missing mesh: `ArduPilotPlugin` still loads, because it lives in `ardupilot_gazebo/build`, so the autopilot connects, arms, and publishes commands on every thruster topic — while the thrusters themselves never configure and the vehicle sits there. `gz topic -e` shows a healthy stream of commands going nowhere.
 
 `SDF_PATH` duplicates `GZ_SIM_RESOURCE_PATH` on purpose. They are read by different things, and setting only one produces errors that look like malformed SDF rather than a missing path.
 
@@ -260,6 +263,10 @@ nobody here has modified.
 **`PreArm: Motors: Check frame class and type`** — the frame's parameters were never applied. Add the `--add-param-file` arguments above; `-w` alone does not help, because there are no defaults for it to reload. Setting `FRAME_CLASS 1` and `FRAME_TYPE 1` by hand and rebooting also arms the Iris, but leaves the frame's other defaults missing.
 
 **The vehicle arms but does not move** — usually the frame argument. The frame passed to `sim_vehicle.py` has to match the model's `<control>` channel wiring, and `--model JSON` has to be present or SITL uses its own internal physics and ignores Gazebo entirely.
+
+**The vehicle arms, the thruster topics carry commands, and still nothing moves** — the thruster plugin is not loaded. Check that `GZ_SIM_SYSTEM_PLUGIN_PATH` still contains the workspace's `install/lib` after sourcing this script; if it holds only `ardupilot_gazebo/build`, the script is overwriting it rather than appending, and `gz-maritime-thruster-system` cannot be found. Commands keep flowing because `ArduPilotPlugin` publishes them regardless of whether anything is listening.
+
+**`[warning] [ArduPilotPlugin.cc] ArduPilot controller has reset`**, once at startup and then roughly once a minute — expected, and not a problem with your setup. It is an upstream bug in `ardupilot_gazebo`: the plugin keeps ArduPilot's 32-bit frame counter in a `uint16_t`, so the counter wraps about every 66 seconds at 1000 Hz and the plugin reads the wrap as SITL having restarted. The startup one has a different cause, an initial frame count of -1, and is equally harmless. The fix is a one-word change to the variable's type, open upstream as [ardupilot_gazebo#174](https://github.com/ArduPilot/ardupilot_gazebo/pull/174); nothing in the simulation is reset when the message appears.
 
 ## Reference
 
