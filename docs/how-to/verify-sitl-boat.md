@@ -1,6 +1,6 @@
-# Verify the SITL connection (Boat)
+# Walkthrough: Verify the SITL connection (Boat)
 
-Confirm that ArduRover in SITL is driving the simulated BlueBoat in `MANUAL` mode, which means throttle and steering commands are provided via RC channels and ArduRover mixes them into the two thruster commands.
+Confirm that ArduRover in SITL is driving the simulated BlueBoat in `MANUAL` mode, which means throttle and steering commands are provided via RC channels and ArduRover mixes them into the two thruster commands. (BlueBoat is diff drive, not propeller/rudder.)
 
 ## Prereqs
 
@@ -48,35 +48,30 @@ Throttle ahead...
 ```
 mode manual
 arm throttle
-rc 3 1700
+rc 3 1600
 ```
 
 `rc <channel> <microseconds>` overrides one RC input. Channel 3 is throttle and channel 1 is steering, which are ArduRover's ordinary assignments - none of ArduSub's channel remapping applies to the boat. Both span 1100 to 1900; 1500 is neutral.
 
 Send `rc all 1500` between checks.
 
-Directions are in the vehicle's own frame, [REP 103](https://www.ros.org/reps/rep-0103.html): x forward, y left, z up. "Turns to starboard" and "negative yaw" describe the same motion.
-
 | Command | Axis | Expected |
 |---|---|---|
-| `rc 3 1700` | surge | drives straight ahead, both thrusters equal |
-| `rc 3 1300` | surge | drives astern |
-| `rc 1 1700` | yaw | spins to starboard on the spot, clockwise seen from above |
-| `rc 1 1300` | yaw | spins to port, mirroring the line above |
+| `rc 3 1600` | surge | drives straight ahead, both thrusters equal |
+| `rc 3 1400` | surge | drives astern |
+| `rc 1 1600` | yaw | spins to starboard on the spot, clockwise seen from above |
+| `rc 1 1400` | yaw | spins to port, mirroring the line above |
 | `rc all 1500` | — | stops |
 
-```{important}
-The check passes when each RC channel, commanded on its own, produces the
-motion named above and no other. Work through every row: which channel
-carries which axis, and which way positive points, are conventions rather
-than standards, and they have to agree between the simulation and ArduRover
-for the boat to answer the stick it is given. Nothing errors when they
-disagree - the boat arms, drives, and does the wrong thing.
-```
 
-Two failures are worth naming because they look alike from the helm. Turning on the spot when you asked for throttle means one thruster is reversed. Spinning the wrong way when you asked for steering means the port and starboard channels are swapped. And if the two steering directions do not mirror each other, the thrusters are not scaled alike.
+The check passes when each RC channel, commanded on its own, produces the motion described above.
 
-Unlike the ROV, the commands here are a half of full stick rather than a few percent, and the boat still responds more briskly than a real one would. Nothing has been tuned yet: the hull's hydrodynamic damping coefficients have never been identified. That is a later phase of the plan and out of scope here - this page is only checking that the wiring is correct.
+The sign convention on yaw can be confusing, because two body frames meet here and they disagree.
+
+* ArduPilot uses x forward, y **right**, z down - FRD, as in MAVLink's [`MAV_FRAME_BODY_FRD`](https://mavlink.io/en/messages/common.html#MAV_FRAME_BODY_FRD), and stated in the source at `AP_AHRS.h` ("in result, x is forward, y is right"). Positive yaw is a turn to starboard.
+* ROS uses x forward, y **left**, z up - FLU, per [REP 103](https://www.ros.org/reps/rep-0103.html). Positive yaw is a turn to port.
+
+So `rc 1 1600` is a positive yaw command in ArduPilot and shows up as a *negative* yaw rate in ROS conventions. 
 
 ## Background
 
