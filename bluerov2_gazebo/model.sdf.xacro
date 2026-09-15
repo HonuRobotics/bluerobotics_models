@@ -36,8 +36,9 @@
 
   <!-- Topic namespace: every part topic is /<topic_namespace>/<part name>/...
        on both sides (a camera's /image, a claw's /cmd_pos). Per part,
-       `gz_topic` / `topic` override the gz side base; the bridge config is
-       generated from the same yaml, so gz and ROS sides stay in sync. -->
+       `gz_topic` / `topic` override the gz side base, under the namespace
+       unless they start with a slash; the bridge config is generated from
+       the same yaml, so gz and ROS sides stay in sync. -->
   <xacro:property name="topic_ns" value="${cfg.get('topic_namespace', 'bluerov2')}"/>
   <!-- The root link the assembly names (the config's base.name). -->
   <xacro:property name="base_name" value="${cfg['base'].get('name', 'base_link')}"/>
@@ -240,8 +241,9 @@
        hoc slots are URDF frames; nothing to emit. -->
   <xacro:macro name="gz_part" params="ptype name parent xyz rpy collision joint axis info">
     <xacro:part_entry name="${name}"/>
+    <xacro:property name="topic_override" value="${entry.get('gz_topic', entry.get('topic', name))}"/>
     <xacro:property name="topic_base"
-                    value="${entry.get('gz_topic', entry.get('topic', topic_ns + '/' + name))}"/>
+                    value="${topic_override if topic_override.startswith('/') else topic_ns + '/' + topic_override}"/>
     <!-- A propeller on a fixed joint (a spare, say) is lumped away and
          drives nothing. -->
     <xacro:if value="${'drive' in info and joint != 'fixed'}">

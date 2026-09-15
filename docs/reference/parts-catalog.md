@@ -97,7 +97,7 @@ A **slot entry** in `parts` (has `slot`):
 | `joint` | joint type for the occupant (default: the slot's, else `continuous` for a propeller, else `fixed`) |
 | `axis` | joint axis override (default: the part's own spin axis) |
 | `collision` | `false` to fit the part without its contact geometry |
-| `topic`, `gz_topic`, `ros_topic`, `bridge` | parts with topics (propellers, sensors): topic base for both sides / one side, native bridge keys merged into the entry |
+| `topic`, `gz_topic`, `ros_topic`, `bridge` | parts with topics (propellers, sensors): topic base for both sides / one side, under the namespace unless it starts with a slash; native bridge keys merged into the entry |
 
 A **free placement** (no `slot`):
 

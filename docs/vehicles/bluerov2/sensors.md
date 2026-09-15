@@ -49,6 +49,7 @@ live with the [actuators](actuators.md).
 Topic bases follow `/<namespace>/<instance>/...`: empty a slot and its
 topics disappear, rename the instance and they follow, and per part
 `topic` / `gz_topic` / `ros_topic` overrides in the config rename the
-base. Sensor messages carry the part's own link as `frame_id`, which TF
+base under the namespace (one starting with a slash is used as given).
+Sensor messages carry the part's own link as `frame_id`, which TF
 resolves; cameras deliberately use the body frame (x forward), not a
 REP 145 optical frame.

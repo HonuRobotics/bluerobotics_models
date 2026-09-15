@@ -148,7 +148,7 @@ def test_thrusters_follow_the_propeller_parts():
     root, _ = xacro(MODEL_XACRO, cfg)
     thrusters = plugins(root, 'gz-sim-thruster-system')
     assert [t.find('joint_name').text for t in thrusters] == ['right_joint']
-    assert thrusters[0].find('topic').text == 'r/thrust'
+    assert thrusters[0].find('topic').text == 'blueboat/r/thrust'
 
 
 def test_default_config_has_the_ping_sensor():

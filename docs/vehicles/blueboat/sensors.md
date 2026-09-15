@@ -32,6 +32,7 @@ ros2 topic echo /blueboat/ping/range --once
 Topic bases follow `/<namespace>/<instance>/...`: empty a slot and its
 topics disappear, rename the instance and they follow, and per part
 `topic` / `gz_topic` / `ros_topic` overrides in the config rename the
-base. Sensor messages carry a frame the part declares as `frame_id`
+base under the namespace (one starting with a slash is used as given).
+Sensor messages carry a frame the part declares as `frame_id`
 (`ping_beam`, the transducer face), carried in TF. Rendered sensors need
 a GPU (headless EGL works).
