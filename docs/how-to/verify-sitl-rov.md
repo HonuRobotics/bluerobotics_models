@@ -8,8 +8,16 @@ Confirm that ArduSub in SITL is driving the simulated BlueROV2 (standard configu
 * The workspace is built and sourced: `colcon build --merge-install` from the workspace root, then `source install/setup.bash`. See [Installation](../getting-started/installation.md).
 * The steps below were run in the [drydock](https://github.com/HonuRobotics/drydock) container, started with `drydock run maritime`. They work on a host set up per [Requirements](../getting-started/requirements.md) too; only the prerequisites differ.
 
-First, the simulation:
+### First, the simulation:
 
+Don't forget to rebuild if there are changes in src...
+```bash
+cd ~/maritme_ws/
+colcon build --merge-install
+```
+
+Start the ROV sim
+ 
 ```bash
 source ~/maritime_ws/install/setup.bash
 source ~/maritime_ws/thirdparty/setup-ardupilot.sh
@@ -31,42 +39,56 @@ sim_vehicle.py -v ArduSub -f gazebo-bluerov2 --model JSON --console -w \
 
 ```{note}
 Gazebo prints `ArduPilot controller has reset` once shortly after SITL
-connects and then roughly once a minute. It is expected and nothing is
-reset: `ardupilot_gazebo` keeps ArduPilot's 32-bit frame counter in a
-`uint16_t`, so it wraps about every 66 seconds at 1000 Hz and the plugin
-reads the wrap as a restart. The fix is open upstream as
-[ardupilot_gazebo#174](https://github.com/ArduPilot/ardupilot_gazebo/pull/174);
-see the troubleshooting notes in [ArduPilot SITL setup](../getting-started/ardupilot_setup.md).
+connects and then roughly once a minute.  This is annoying, but not of concern. (The fix is open upstream as
+[ardupilot_gazebo#174](https://github.com/ArduPilot/ardupilot_gazebo/pull/174).)
+See troubleshooting notes in [ArduPilot SITL setup](../getting-started/ardupilot_setup.md).
 ```
 
 ## The checks
 
-One axis at a time. At the MAVProxy prompt:
+One axis at a time. At the MAVProxy prompt (this SITL terminal):
 
 ```
 mode manual
 arm throttle
-rc 6 1600
+rc 5 1600
 ```
 
-`rc <channel> <microseconds>` overrides one RC input. Channel 6 is surge, and the channel spans 1100 to 1900 about a 1500 neutral, so 1600 is a quarter of full stick ahead. In `MANUAL` that quarter passes through the mixer unscaled, so each of the four horizontal thrusters ends up at about a quarter of full command - roughly 13 N of the T200's 51.5 N, before the 45 degree vectoring takes its cosine. Full stick is 1900, and `rc 6 1500` returns to neutral.
+`rc <channel> <microseconds>` overrides one RC input. Channel 5 is surge, and the channel spans 1100 to 1900 about a 1500 neutral, so 1600 is a quarter of full stick ahead. In `MANUAL` that quarter passes through the mixer unscaled, so each of the four horizontal thrusters ends up at about a quarter of full command. Full stick is 1900, and `rc 5 1500` returns to neutral.
 
-The channels are not the ones you might guess, and ArduPilot's own parameter documentation is stale on this point — the comments in `AP_RCMapper.cpp` say forward is "normally channel 5" and lateral "channel 6", while the code defaults are 6 and 7. The code is what runs:
+Send `rc all 1500` between checks. Overrides latch, so one left set on another channel makes the next check look cross-coupled.
+
+The channels are not the ones a multirotor uses, and not the generic ArduPilot defaults either. `ArduSub/Parameters.h` overrides them for Sub: roll and pitch are swapped, and forward and lateral each move down one. So the mapping the vehicle actually answers is:
+
+| RCMAP | Channel | Axis |
+|---|---|---|
+| `RCMAP_PITCH` | 1 | pitch |
+| `RCMAP_ROLL` | 2 | roll |
+| `RCMAP_THROTTLE` | 3 | heave |
+| `RCMAP_YAW` | 4 | yaw |
+| `RCMAP_FORWARD` | 5 | surge |
+| `RCMAP_LATERAL` | 6 | sway |
+
+`param show RCMAP*` confirms it on any running vehicle, and is worth doing once rather than trusting this table. The generic defaults in `AP_RCMapper.cpp` say 6 and 7 for forward and lateral; those apply to other vehicles, and Sub's override is what runs here.
+
+Directions below are in the vehicle's own frame, [REP 103](https://www.ros.org/reps/rep-0103.html): x forward, y left, z up. "Turns to starboard" and "negative yaw" describe the same motion.
 
 | Command | Axis | Expected | If not |
 |---|---|---|---|
-| `rc 6 1600` | surge | moves ahead, holds heading and depth | yawing means the four horizontals are not mixing evenly; sinking or rising means a vertical is being driven |
-| `rc 6 1400` | surge | moves astern | |
-| `rc 7 1600` | sway | crabs to starboard, nose stays put | a turn instead of a crab means two horizontals are swapped |
-| `rc 4 1600` | yaw | turns to starboard on the spot | translating instead of turning means the diagonal pairs are wrong |
+| `rc 5 1600` | surge | moves ahead, holds heading and depth | yawing means the four horizontals are not mixing evenly; sinking or rising means a vertical is being driven |
+| `rc 5 1400` | surge | moves astern | |
+| `rc 6 1600` | sway | crabs to starboard (its own right, -y), nose stays put | a turn instead of a crab means two horizontals are swapped |
+| `rc 4 1600` | yaw | turns to starboard, clockwise seen from above | translating instead of turning means the diagonal pairs are wrong |
 | `rc 3 1600` | heave | rises | sinking means both verticals are reversed; rolling means one of them is |
 | `rc 3 1400` | heave | sinks | |
+| `rc 2 1600` | roll | rolls, the two verticals driven differentially | no roll means they are not opposed; a heave instead means they are not differential |
+| `rc 1 1600` | pitch | nothing, and that is correct | see below |
 | `rc all 1500` | — | stops | |
 | `rc clear` | — | releases the overrides | |
 
 Each stick should produce its own axis and nothing else. A cross-coupled response means the thruster allocation is wrong; a reversed one means a thruster or a channel is.
 
-`rc 1` and `rc 2` are roll and pitch. They do nothing on this vehicle and that is correct: the standard BlueROV2 has two vertical thrusters, enough for heave and roll, and ArduSub's `Vectored` frame mixes no pitch at all. The Heavy, with four verticals, is the variant that has the authority — it is not modelled yet.
+Pitch is the one axis that does nothing, and that is correct rather than a fault. ArduSub's `Vectored` frame gives every motor a pitch factor of zero: two vertical thrusters on a common axis cannot produce a pitching moment the mixer can use. Roll they can, by opposing each other, which is why `rc 2` moves the vehicle and `rc 1` does not. The Heavy, with four verticals, is the variant with pitch authority, and it is not modelled yet ([#61](https://github.com/HonuRobotics/bluerobotics_models/issues/61)).
 
 ## What the autopilot is doing with those commands
 
