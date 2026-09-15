@@ -112,16 +112,23 @@
   </xacro:macro>
 
   <!-- One ArduPilotPlugin <control> block: a servo channel mapped onto a
-       thruster's command topic. -->
-  <xacro:macro name="ardupilot_control" params="channel joint topic">
+       motor's command topic, which is the topic that motor's Thruster
+       listens on: the part's gz_topic / topic override under the namespace,
+       or as given when it starts with a slash, exactly as gz_part resolves
+       it. -->
+  <xacro:macro name="ardupilot_control" params="channel motor">
+    <xacro:part_entry name="${motor}"/>
+    <xacro:property name="motor_override" value="${entry.get('gz_topic', entry.get('topic', motor))}"/>
+    <xacro:property name="motor_topic"
+                    value="${motor_override if motor_override.startswith('/') else '/' + topic_ns + '/' + motor_override}"/>
     <control channel="${channel}">
-      <jointName>${joint}</jointName>
+      <jointName>${motor}_joint</jointName>
       <servo_min>1100</servo_min>
       <servo_max>1900</servo_max>
       <offset>-0.5</offset>
       <multiplier>2</multiplier>
       <type>COMMAND</type>
-      <cmd_topic>${topic}</cmd_topic>
+      <cmd_topic>${motor_topic}/cmd</cmd_topic>
     </control>
   </xacro:macro>
 
@@ -311,10 +318,8 @@
           the servo band converted to a normalized command. The thruster owns
           the newtons, including the asymmetry between ahead and astern.
         -->
-        <xacro:ardupilot_control channel="0" joint="motor_stbd_joint"
-                                 topic="/${topic_ns}/motor_stbd/cmd"/>
-        <xacro:ardupilot_control channel="2" joint="motor_port_joint"
-                                 topic="/${topic_ns}/motor_port/cmd"/>
+        <xacro:ardupilot_control channel="0" motor="motor_stbd"/>
+        <xacro:ardupilot_control channel="2" motor="motor_port"/>
       </plugin>
 
     </xacro:if>

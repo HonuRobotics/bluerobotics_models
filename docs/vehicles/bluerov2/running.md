@@ -18,7 +18,7 @@ the [configuration page](configuration.md) lists the slots and
 | Argument | Default | Meaning |
 |---|---|---|
 | `config_file` | the shipped config | Vehicle config, expanded at launch. |
-| `name` | `bluerov2` | Instance name: the Gazebo model name and the topic namespace (`/<name>/...`). Give each copy of the vehicle in one world its own; see [Several vehicles](../../how-to/namespaces.md). |
+| `name` | `bluerov2` | Instance name: the Gazebo model name and the topic namespace (`/<name>/...`); letters, digits and underscores. The worlds here float only the default name; see [Several vehicles](../../how-to/namespaces.md). |
 | `x`, `y`, `z` | `0`, `0`, the pool default | Spawn position (m); the default is mid water in the pool. |
 | `roll`, `pitch`, `yaw` | `0` | Spawn orientation (rad). |
 | `world` | the pool world | Vehicle free world SDF to spawn into. |

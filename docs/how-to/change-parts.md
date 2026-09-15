@@ -48,7 +48,8 @@ parts:
 gives `/blueboat/sonar/range` on both sides (the namespace follows the
 instance name, so a boat spawned as `boat_b` gets `/boat_b/sonar/range`);
 `gz_topic` / `ros_topic` set one side only, a base starting with a slash is
-used as given, `bridge: {...}` passes native ros_gz_bridge keys through.
+used as given (`topic: /sonar` gives `/sonar/range`, whatever the instance),
+`bridge: {...}` passes native ros_gz_bridge keys through.
 
 ## Add a part somewhere specific
 
