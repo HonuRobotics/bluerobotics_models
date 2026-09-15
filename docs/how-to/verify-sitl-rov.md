@@ -70,7 +70,7 @@ The channel mapping is different from the usual ArduPilot one - of course it is.
 
 `param show RCMAP*` confirms.
 
-Directions below are in the vehicle's own frame, [REP 103](https://www.ros.org/reps/rep-0103.html): x forward, y left, z up. "Turns to starboard" and "negative yaw" describe the same motion.
+Directions below are in the vehicle's own frame, [REP 103](https://www.ros.org/reps/rep-0103.html): x forward, y left, z up.
 
 | Command | Axis | Expected |
 |---|---|---|
@@ -86,14 +86,40 @@ Directions below are in the vehicle's own frame, [REP 103](https://www.ros.org/r
 
 ```{important}
 The check passes when each RC channel, commanded on its own, produces the
-motion describe above.
+motion described above.
 ```
+
+The sign convention can be confusing, because two coordinate conventions do not agree:
+
+* ArduPilot uses x forward, y **right**, z down - FRD, as in MAVLink's [`MAV_FRAME_BODY_FRD`](https://mavlink.io/en/messages/common.html#MAV_FRAME_BODY_FRD). 
+* ROS uses x forward, y **left**, z up - FLU, per [REP 103](https://www.ros.org/reps/rep-0103.html).
+
+They differ by a 180 degree roll about x, so not every axis flips. [Which axes agree](#which-axes-agree) works through all six.
+
 
 The commands are deliberately tiny. 1510 about 2.5% of full stick and it is  enough to see the vehicle move. This is because the actuators and vehicle dynamics have not been tuned yet.  That will happen later in the spec.  
 
 ## Background
 
 The walkthrough ends here. What follows explains how a stick position (RC channel) becomes thrust.  It is worth reading if a check above did not do what it should, or if you are changing the model, the frame or the parameter file and need to know which layer owns what.  Also helpful for agents to read and share.  This is the background the we needed to (re)learn during developing this walkthrough.  
+
+(which-axes-agree)=
+### Which axes agree
+
+FLU to FRD is a 180 degree rotation about x, so a translation (x, y, z) maps to (x, -y, -z) and an angular velocity (p, q, r) to (p, -q, -r). Per axis:
+
+| Axis | ArduPilot vs ROS | Why |
+|---|---|---|
+| surge | same sign | x is unchanged by the rotation |
+| sway | opposite | y flips: ArduPilot's +y is starboard, ROS's is port |
+| heave | *reads* the same | z flips, but see below |
+| roll | same sign | x is the rotation axis |
+| pitch | opposite | q negates |
+| yaw | opposite | r negates |
+
+Heave is the one to watch, because it agrees by construction rather than by frame. ArduSub's throttle stick is defined positive up, and `AP_Motors6DOF` gives the verticals a throttle factor of -1, which turns stick-up into a motor output that pushes the vehicle up. The stick therefore matches ROS even though ArduPilot's z axis points the other way. Read the axis and the stick as two different things and this stops being surprising.
+
+That accounts for every row in the checks table: surge, heave and roll agree with ROS conventions, while yaw and sway are opposite. A result that breaks the pattern means the mapping is wrong, not the convention.
 
 ### What the autopilot is doing with those commands
 
