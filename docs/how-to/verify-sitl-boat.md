@@ -1,4 +1,4 @@
-# Verify the SITL connection
+# Verify the SITL connection (Boat)
 
 This walkthrough is to confirm that ArduRover in SITL is driving the simulated BlueBoat correctly. 
 

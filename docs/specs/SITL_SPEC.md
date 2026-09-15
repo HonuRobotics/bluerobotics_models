@@ -64,7 +64,7 @@ Both vehicles are in scope up to and including phase 5. Phases 0 to 2 were BlueB
 
 **Objective:** have the BlueBoat moving under ArduRover, on the newtons interface exactly as it stood, so the plumbing and the channel mapping are proven without waiting on phase 2. `MANUAL` only, so that no low-level stabilization has to be configured to get a result. Includes a documentation walkthrough complete enough that a PR reviewer can exercise the whole path end to end.
 
-*Verified by* the walkthrough in [Verify the SITL connection](../how-to/verify-sitl.md), by hand. `mode manual`, `arm throttle`, then `rc` overrides at the MAVProxy prompt, each with a stated expectation and a stated meaning if it fails:
+*Verified by* the walkthrough in [Verify the SITL connection (Boat)](../how-to/verify-sitl-boat.md), by hand. `mode manual`, `arm throttle`, then `rc` overrides at the MAVProxy prompt, each with a stated expectation and a stated meaning if it fails:
 
 ### Phase 2 — Normalized command mode on the thruster
 
@@ -115,7 +115,7 @@ Some comments in the source now name the wrong phase:
 
 Use the ArduSub configuration from BlueRobotics so that Ardu config matches the ROV.  This is also a good check that the way we've modelled the ROV is consistent with the Ardu config - which it should be.  
 
-*To be verified by* a walkthrough written alongside the work, in the shape of [Verify the SITL connection](../how-to/verify-sitl.md) but per axis: in `MANUAL`, arm, then command surge, sway, heave and yaw one at a time and confirm each produces that motion and no other. A cross-coupled response means the allocation is wrong; a reversed one means a thruster or a channel is. Magnitudes are not trusted yet, exactly as in phase 1.
+*To be verified by* a walkthrough written alongside the work, in the shape of [Verify the SITL connection (Boat)](../how-to/verify-sitl-boat.md) but per axis: in `MANUAL`, arm, then command surge, sway, heave and yaw one at a time and confirm each produces that motion and no other. A cross-coupled response means the allocation is wrong; a reversed one means a thruster or a channel is. Magnitudes are not trusted yet, exactly as in phase 1.
 
 
 
