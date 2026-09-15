@@ -1,3 +1,7 @@
+---
+orphan: true
+---
+
 # SITL integration for the BlueBoat: a roadmap
 
 Proposed 2026-08-28, for comment before any of it is built.  
