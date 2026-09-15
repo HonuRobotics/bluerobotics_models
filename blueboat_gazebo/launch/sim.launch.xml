@@ -28,7 +28,7 @@
        default="$(find-pkg-share blueboat_description)/config/blueboat.yaml"
        description="Vehicle vehicle config, expanded at launch."/>
   <arg name="name" default="blueboat"
-       description="Instance name: the Gazebo model name and the topic namespace (/&lt;name&gt;/...). Give each copy of the vehicle in one world its own."/>
+       description="Instance name: the Gazebo model name and the topic namespace (/&lt;name&gt;/...); letters, digits and underscores. The worlds here float only blueboat::hull_displacement by name, so another name floats only in a world that lists it or reads the displacement marks (see docs how-to/namespaces)."/>
   <arg name="x" default="0" description="Spawn position x (m)."/>
   <arg name="y" default="0" description="Spawn position y (m)."/>
   <arg name="z" default="0.05" description="Spawn height (m); the default sits at the waterline."/>
@@ -51,7 +51,7 @@
   <executable cmd="gz sim -g" output="screen" if="$(var gui)"/>
 
   <!-- The vehicle, spawned from the generated model into the (only) world. -->
-  <node pkg="ros_gz_sim" exec="create" name="spawn_blueboat" output="screen"
+  <node pkg="ros_gz_sim" exec="create" name="spawn_$(var name)" output="screen"
         args="-name $(var name) -file $(var vehicle_dir)/model.sdf
               -x $(var x) -y $(var y) -z $(var z)
               -R $(var roll) -P $(var pitch) -Y $(var yaw)"/>

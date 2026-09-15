@@ -28,11 +28,16 @@ ros2 run blueboat_gazebo configure_vehicle.py --config my_vehicle.yaml --out-dir
 
 writes `blueboat.urdf`, `blueboat.gazebo.urdf` (the copy the model merges,
 glTF visuals pre-rotated for Gazebo), `model.sdf`, `model.config` and
-`ros_gz_bridge.yaml`, plus `vehicle.yaml`, the config as used. Add `--name <name>` to generate an instance under another name (model name and topic namespace at once).
+`ros_gz_bridge.yaml`, plus `vehicle.yaml`, the config as used. Add
+`--name <name>` to generate an instance under another name (model name and
+topic namespace at once).
 The directory is a Gazebo model: with `~/my_models` prepended to
 `GZ_SIM_RESOURCE_PATH` it is `model://blueboat`, shadowing the installed
 default, so a world can `<include>` it, or spawn it with
 `ros2 run ros_gz_sim create -world <world> -file ~/my_models/blueboat/model.sdf -name blueboat -z 0.05`.
+The `model://` name is the directory's name, so an instance generated with
+`--name boat_b` belongs in a directory called `boat_b` (`~/my_models/boat_b`)
+to be `model://boat_b`.
 Start the bridge on the generated config
 (`ros2 run ros_gz_bridge parameter_bridge --ros-args -p config_file:=$HOME/my_models/blueboat/ros_gz_bridge.yaml`)
 and `robot_state_publisher` on the generated URDF. The three files come from

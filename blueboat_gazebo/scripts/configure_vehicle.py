@@ -42,6 +42,7 @@ import argparse
 import hashlib
 import os
 import pathlib
+import re
 import subprocess
 import sys
 
@@ -61,14 +62,23 @@ MODEL_CONFIG = """\
 """
 
 
+# An instance name is a Gazebo model name, a topic prefix and, later, a ROS
+# namespace and a TF prefix at once, so it is held to the strictest of those.
+NAME = re.compile(r'^[A-Za-z][A-Za-z0-9_]*$')
+
+
 def derive(config, name=None):
     """
     Return the effective config text.
 
     `config` with topic_namespace set to `name` when one is given. Everything
     the generators read comes from this text, so the model name, the plugin
-    topics and the bridge agree.
+    topics and the bridge agree. It is re-serialized, so the comments of the
+    given file do not carry over into vehicle.yaml; the values do.
     """
+    if name is not None and not NAME.match(name):
+        sys.exit(f'invalid instance name {name!r}: letters, digits and '
+                 'underscores, starting with a letter')
     cfg = yaml.safe_load(pathlib.Path(config).read_text()) or {}
     if name:
         cfg['topic_namespace'] = name

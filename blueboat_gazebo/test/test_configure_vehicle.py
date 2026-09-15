@@ -194,3 +194,13 @@ def test_name_gives_each_instance_its_own_cache_directory():
         # Without --name the config's own namespace names the instance, as before.
         model = ET.parse(Path(default) / 'model.sdf').getroot().find('model')
         assert model.get('name') == 'blueboat'
+
+
+def test_rejects_a_name_that_is_not_a_ros_name(tmp_path):
+    """A name that cannot be a topic prefix or a namespace is refused up front."""
+    for bad in ('boat-b', '2boats', 'fleet/boat_b', ''):
+        out = subprocess.run([str(TOOL), '--config', str(DEFAULT_CONFIG), '--name', bad,
+                              '--out-dir', str(tmp_path / 'v')],
+                             capture_output=True, text=True, timeout=180)
+        assert out.returncode != 0, bad
+        assert 'invalid instance name' in out.stderr, bad
