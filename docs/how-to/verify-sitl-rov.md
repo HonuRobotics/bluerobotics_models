@@ -1,0 +1,166 @@
+# Verify the SITL connection (ROV)
+
+Confirm that ArduSub in SITL is driving the simulated BlueROV2 (standard configuration, not "heavy") in `MANUAL` mode, which means surge, yaw, sway and heave commands are provided via RC channels and ArduSub maps from commands in the body frame to individual thruster commands.  
+
+## Prereqs
+
+* Setup for ArduPilot itself is in [ArduPilot SITL setup](../getting-started/ardupilot_setup.md). 
+* The workspace is built and sourced. See [Installation](../getting-started/installation.md).
+* The steps below were run in the [drydock](https://github.com/HonuRobotics/drydock) container, started with `drydock run maritime`. They should work on a host set up per [Requirements](../getting-started/requirements.md) as well.  Currently untested. 
+
+## Two shells: sim and autopilot
+
+### The simulation
+
+Start the ROV sim
+ 
+```bash
+source ~/maritime_ws/install/setup.bash
+source ~/maritime_ws/thirdparty/setup-ardupilot.sh
+gz sim -v4 -r $(ros2 pkg prefix --share bluerov2_gazebo)/worlds/bluerov2_sitl.sdf
+```
+
+If successful, you should see Gazebo sim start with the ROV spawned in a simple underwater environment. 
+
+
+### The autopilot (SITL)
+
+```bash
+source ~/maritime_ws/install/setup.bash
+source ~/maritime_ws/thirdparty/setup-ardupilot.sh
+AP=$HOME/maritime_ws/thirdparty/ardupilot/Tools/autotest
+sim_vehicle.py -v ArduSub -f gazebo-bluerov2 --model JSON --console -w \
+  --add-param-file=$AP/default_params/sub.parm \
+  --add-param-file=$(ros2 pkg prefix --share bluerov2_gazebo)/params/bluerov2_sitl.params
+```
+
+```{note}
+Gazebo prints `ArduPilot controller has reset` once shortly after SITL
+connects and then roughly once a minute.  This is annoying, but not of concern. (The fix is open upstream as
+[ardupilot_gazebo#174](https://github.com/ArduPilot/ardupilot_gazebo/pull/174).)
+See troubleshooting notes in [ArduPilot SITL setup](../getting-started/ardupilot_setup.md).
+```
+
+## Verification
+
+One axis at a time, at the MAVProxy prompt in the autopilot shell. 
+
+Forward surge... 
+```
+mode manual
+arm throttle
+rc 5 1510
+```
+
+`rc <channel> <microseconds>` overrides one RC input. Channel 5 is surge, and the channel spans 1100 to 1900; 1500 is neutral.
+
+Send `rc all 1500` between checks. 
+
+The channel mapping is different from the usual ArduPilot one - of course it is.
+`ArduSub/Parameters.h` overrides it for Sub.
+
+| RCMAP | Channel | Axis |
+|---|---|---|
+| `RCMAP_PITCH` | 1 | pitch |
+| `RCMAP_ROLL` | 2 | roll |
+| `RCMAP_THROTTLE` | 3 | heave |
+| `RCMAP_YAW` | 4 | yaw |
+| `RCMAP_FORWARD` | 5 | surge |
+| `RCMAP_LATERAL` | 6 | sway |
+
+`param show RCMAP*` confirms.
+
+Directions below are in the vehicle's own frame, [REP 103](https://www.ros.org/reps/rep-0103.html): x forward, y left, z up.
+
+| Command | Axis | Expected |
+|---|---|---|
+| `rc 5 1510` | surge | moves ahead, holds heading and depth |
+| `rc 5 1490` | surge | moves astern |
+| `rc 6 1510` | sway | crabs to starboard (its own right, -y), nose stays put |
+| `rc 4 1510` | yaw | turns to starboard, clockwise seen from above |
+| `rc 3 1510` | heave | rises |
+| `rc 3 1490` | heave | sinks |
+| `rc 1 1510` | pitch | no motion, and that is correct - see below |
+| `rc all 1500` | — | stops |
+
+
+```{important}
+The check passes when each RC channel, commanded on its own, produces the
+motion described above.
+```
+
+The sign convention can be confusing, because two coordinate conventions do not agree:
+
+* ArduPilot uses x forward, y **right**, z down - FRD, as in MAVLink's [`MAV_FRAME_BODY_FRD`](https://mavlink.io/en/messages/common.html#MAV_FRAME_BODY_FRD). 
+* ROS uses x forward, y **left**, z up - FLU, per [REP 103](https://www.ros.org/reps/rep-0103.html).
+
+They differ by a 180 degree roll about x, so not every axis flips. [Which axes agree](#which-axes-agree) works through all six.
+
+
+The commands are deliberately tiny. 1510 about 2.5% of full stick and it is  enough to see the vehicle move. This is because the actuators and vehicle dynamics have not been tuned yet.  That will happen later in the spec.  
+
+## Background
+
+The walkthrough ends here. What follows explains how a stick position (RC channel) becomes thrust.  It is worth reading if a check above did not do what it should, or if you are changing the model, the frame or the parameter file and need to know which layer owns what.  Also helpful for agents to read and share.  This is the background the we needed to (re)learn during developing this walkthrough.  
+
+(which-axes-agree)=
+### Which axes agree
+
+FLU to FRD is a 180 degree rotation about x, so a translation (x, y, z) maps to (x, -y, -z) and an angular velocity (p, q, r) to (p, -q, -r). Per axis:
+
+| Axis | ArduPilot vs ROS | Why |
+|---|---|---|
+| surge | same sign | x is unchanged by the rotation |
+| sway | opposite | y flips: ArduPilot's +y is starboard, ROS's is port |
+| heave | *reads* the same | z flips, but see below |
+| roll | same sign | x is the rotation axis |
+| pitch | opposite | q negates |
+| yaw | opposite | r negates |
+
+Heave is the one to watch, because it agrees by construction rather than by frame. ArduSub's throttle stick is defined positive up, and `AP_Motors6DOF` gives the verticals a throttle factor of -1, which turns stick-up into a motor output that pushes the vehicle up. The stick therefore matches ROS even though ArduPilot's z axis points the other way. Read the axis and the stick as two different things and this stops being surprising.
+
+That accounts for every row in the checks table: surge, heave and roll agree with ROS conventions, while yaw and sway are opposite. A result that breaks the pattern means the mapping is wrong, not the convention.
+
+### What the autopilot is doing with those commands
+
+`MANUAL` on a sub is closer to passthrough than the boat's `MANUAL` is, but it is still a mix. `ModeManual::run()` takes the six normalized stick inputs and hands them straight to the motor mixer without any attitude loop:
+
+```cpp
+motors.set_forward(channel_forward->norm_input());
+motors.set_lateral(channel_lateral->norm_input());
+motors.set_throttle((channel_throttle->norm_input() + 1.0f) / 2.0f);
+motors.set_yaw(channel_yaw->norm_input() * g.acro_yaw_p / ACRO_YAW_P);
+```
+
+`AP_Motors6DOF` then combines them with the per-motor factors its `FRAME_CONFIG` selects. For `FRAME_CONFIG 1` (Vectored), motors 1 to 4 are the horizontals and carry surge, sway and yaw; motors 5 and 6 are the verticals and carry heave and roll. Each motor's output is converted to PWM around a 1500 neutral — not around the minimum, which is why a disarmed ROV sits still rather than diving.
+
+From there it is the same path as the boat: PWM over UDP to `ArduPilotPlugin`, whose `<control>` blocks map 1100–1900 onto [-1, 1] and publish that on each thruster's command topic. The thruster owns the newtons.
+
+To see what the autopilot is actually commanding while you move the sticks:
+
+```bash
+gz topic -e -t /bluerov2/thruster_1/cmd
+gz topic -e -t /bluerov2/thruster_5/cmd
+```
+
+Values are normalized, so anything outside [-1, 1] is a bug in the mapping rather than an aggressive command. Thruster 1 is a horizontal and should respond to surge, sway and yaw; thruster 5 is a vertical and should respond only to heave and roll.
+
+### Which thruster is which
+
+The channel a thruster answers to is not configured anywhere — ArduSub maps its own motors onto outputs SERVO1 to SERVO6 from `FRAME_CONFIG`, and the model numbers its `<control>` blocks to match. That correspondence is a claim about where each thruster sits, and `bluerov2_gazebo/test/test_ardusub_frame.py` asserts it against the factors in ArduSub's own `AP_Motors6DOF.cpp`. If a slot ever moves, that test fails rather than the vehicle quietly answering the wrong stick.
+
+### What this does not check
+
+Magnitudes. The thruster limits are the T200 placeholders carried since before the interface was normalized, and the hull's hydrodynamic coefficients have never been identified, so speeds and accelerations are not meaningful yet. An ROV that reaches the wrong speed at full stick is expected rather than a defect. Phase 4 of the [SITL spec](../specs/SITL_SPEC.md) is where that gets settled.
+
+Depth also comes for free here rather than from a sensor: the JSON protocol carries no pressure field, and ArduSub synthesizes depth from the position the plugin already reports.
+
+### The parameter files are not optional
+
+Both `--add-param-file` arguments are required, for the same reason as on the boat: recent ArduPilot resolves frame defaults from the SITL binary's embedded `vehicleinfo.json` keyed by `--model`, and with `--model JSON` nothing matches, so no frame defaults are applied at all.
+
+Order matters, and so does what is left out:
+
+- `sub.parm` first. It supplies the SITL side — fake accelerometer calibration so pre-arm passes, the joystick button map, the position controller gains.
+- `bluerov2_sitl.params` last, so the vehicle's own frame and outputs win.
+- Not `sub-6dof.parm`. It sets `FRAME_CONFIG 2` for the Heavy, which expects eight thrusters; this vehicle has six, and motors 7 and 8 would be mixed into nothing.

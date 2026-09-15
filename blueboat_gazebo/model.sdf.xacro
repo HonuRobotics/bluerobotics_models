@@ -31,7 +31,7 @@
        generated; true adds an IMU and the ArduPilotPlugin, so ArduRover can
        drive the boat instead of ROS 2 topics. Two models come out of this one
        source: model://blueboat and model://blueboat_with_ardupilot. See
-       docs how-to/verify-sitl. -->
+       docs how-to/verify-sitl-boat. -->
   <xacro:arg name="ardupilot" default="false"/>
   <xacro:property name="ardupilot" value="${'$(arg ardupilot)'.lower() == 'true'}"/>
 
