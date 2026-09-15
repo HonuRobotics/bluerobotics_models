@@ -360,14 +360,18 @@ topics is bridged to ROS and indexed by number, starting at 1:</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/bluerov2/thruster_&lt;n&gt;/thrust</span></code></p></td>
-<td><p>Thrust command in newtons, clamped to the propeller’s limits</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/bluerov2/thruster_&lt;n&gt;/cmd</span></code></p></td>
+<td><p>Normalized thrust command in [-1, 1]: +1 full ahead, -1 full astern, 0 stop</p></td>
 <td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html">std_msgs/msg/Float64</a></p></td>
 </tr>
 </tbody>
 </table>
+<p>The command is a fraction of the propeller’s own limits, which the model
+takes from the part’s drive table - 51.5 N ahead and -40.2 N astern for a
+T200 at 16 V. The two directions scale independently, so +0.5 and -0.5 are
+equal command and unequal force. Values outside [-1, 1] are clamped.</p>
 <p>To manually send a thruster command via ROS:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>topic<span class="w"> </span>pub<span class="w"> </span>/bluerov2/thruster_1/thrust<span class="w"> </span>std_msgs/msg/Float64<span class="w"> </span><span class="s2">"data: -10.0"</span><span class="w"> </span>-1
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>topic<span class="w"> </span>pub<span class="w"> </span>/bluerov2/thruster_1/cmd<span class="w"> </span>std_msgs/msg/Float64<span class="w"> </span><span class="s2">"data: -0.2"</span><span class="w"> </span>-1
 </pre></div>
 </div>
 <p>The layout follows ArduSub’s
@@ -475,11 +479,11 @@ under the same names), plus a speed feedback per thruster:</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/bluerov2/thruster_&lt;n&gt;/thrust</span></code></p></td>
-<td><p>Thrust command in newtons</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/bluerov2/thruster_&lt;n&gt;/cmd</span></code></p></td>
+<td><p>Normalized thrust command in [-1, 1]</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">gz.msgs.Double</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/bluerov2/thruster_&lt;n&gt;/thrust/ang_vel</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/bluerov2/thruster_&lt;n&gt;/cmd/ang_vel</span></code></p></td>
 <td><p>Propeller speed feedback (rad/s)</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">gz.msgs.Double</span></code></p></td>
 </tr>
@@ -490,11 +494,11 @@ under the same names), plus a speed feedback per thruster:</p>
 </tbody>
 </table>
 <p>Command the mix <strong>together</strong> (<code class="docutils literal notranslate"><span class="pre">&amp;</span></code> + <code class="docutils literal notranslate"><span class="pre">wait</span></code> publishes in parallel):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># surge forward at ~28 N</span>
-gz<span class="w"> </span>topic<span class="w"> </span>-t<span class="w"> </span>/bluerov2/thruster_1/thrust<span class="w"> </span>-m<span class="w"> </span>gz.msgs.Double<span class="w"> </span>-p<span class="w"> </span><span class="s1">'data: -10.0'</span><span class="w"> </span><span class="p">&amp;</span>
-gz<span class="w"> </span>topic<span class="w"> </span>-t<span class="w"> </span>/bluerov2/thruster_2/thrust<span class="w"> </span>-m<span class="w"> </span>gz.msgs.Double<span class="w"> </span>-p<span class="w"> </span><span class="s1">'data: -10.0'</span><span class="w"> </span><span class="p">&amp;</span>
-gz<span class="w"> </span>topic<span class="w"> </span>-t<span class="w"> </span>/bluerov2/thruster_3/thrust<span class="w"> </span>-m<span class="w"> </span>gz.msgs.Double<span class="w"> </span>-p<span class="w"> </span><span class="s1">'data: 10.0'</span><span class="w"> </span><span class="p">&amp;</span>
-gz<span class="w"> </span>topic<span class="w"> </span>-t<span class="w"> </span>/bluerov2/thruster_4/thrust<span class="w"> </span>-m<span class="w"> </span>gz.msgs.Double<span class="w"> </span>-p<span class="w"> </span><span class="s1">'data: 10.0'</span><span class="w"> </span><span class="p">&amp;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># surge forward at 20 percent command on the four horizontals</span>
+gz<span class="w"> </span>topic<span class="w"> </span>-t<span class="w"> </span>/bluerov2/thruster_1/cmd<span class="w"> </span>-m<span class="w"> </span>gz.msgs.Double<span class="w"> </span>-p<span class="w"> </span><span class="s1">'data: -0.2'</span><span class="w"> </span><span class="p">&amp;</span>
+gz<span class="w"> </span>topic<span class="w"> </span>-t<span class="w"> </span>/bluerov2/thruster_2/cmd<span class="w"> </span>-m<span class="w"> </span>gz.msgs.Double<span class="w"> </span>-p<span class="w"> </span><span class="s1">'data: -0.2'</span><span class="w"> </span><span class="p">&amp;</span>
+gz<span class="w"> </span>topic<span class="w"> </span>-t<span class="w"> </span>/bluerov2/thruster_3/cmd<span class="w"> </span>-m<span class="w"> </span>gz.msgs.Double<span class="w"> </span>-p<span class="w"> </span><span class="s1">'data: 0.2'</span><span class="w"> </span><span class="p">&amp;</span>
+gz<span class="w"> </span>topic<span class="w"> </span>-t<span class="w"> </span>/bluerov2/thruster_4/cmd<span class="w"> </span>-m<span class="w"> </span>gz.msgs.Double<span class="w"> </span>-p<span class="w"> </span><span class="s1">'data: 0.2'</span><span class="w"> </span><span class="p">&amp;</span>
 <span class="nb">wait</span>
 </pre></div>
 </div>

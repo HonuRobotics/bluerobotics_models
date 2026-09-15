@@ -340,7 +340,7 @@ side never held a coordinate.</p>
 <h2>The bridge agrees by construction<a class="headerlink" href="#the-bridge-agrees-by-construction" title="Link to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">generate_bridge_config.py</span></code> reads the fitted instances from the URDF’s
 <code class="docutils literal notranslate"><span class="pre">&lt;assembly_part&gt;</span></code> manifest and emits one bridge entry per topic of each
-part type that has topics (<code class="docutils literal notranslate"><span class="pre">PART_TOPICS</span></code>: a propeller’s <code class="docutils literal notranslate"><span class="pre">/thrust</span></code> command,
+part type that has topics (<code class="docutils literal notranslate"><span class="pre">PART_TOPICS</span></code>: a propeller’s <code class="docutils literal notranslate"><span class="pre">/cmd</span></code> command,
 the Ping’s <code class="docutils literal notranslate"><span class="pre">/range</span></code>), plus <code class="docutils literal notranslate"><span class="pre">/clock</span></code> and <code class="docutils literal notranslate"><span class="pre">/joint_states</span></code>; per instance topic
 overrides come from the config entry that fitted it. Nothing about the
 drivetrain is hardcoded and no topic bakes the model name. The model’s
@@ -381,8 +381,8 @@ launch.</p>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gz-sim-hydrodynamics-system</span></code></p></td>
 <td><p>placeholder USV damping coefficients, to be identified</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gz-sim-thruster-system</span></code>, one per propeller</p></td>
-<td><p>on <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;_joint</span></code>, limits and diameter from the part’s <code class="docutils literal notranslate"><span class="pre">drive</span></code> table (T200 16 V placeholders today), counter rotating</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gz-maritime-thruster-system</span></code>, one per propeller</p></td>
+<td><p>on <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;_joint</span></code>, normalized command scaled onto the limits and diameter from the part’s <code class="docutils literal notranslate"><span class="pre">drive</span></code> table (T200 16 V placeholders today), counter rotating</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gz-sim-joint-state-publisher-system</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">/&lt;ns&gt;/joint_states</span></code>, bridged for RViz</p></td>

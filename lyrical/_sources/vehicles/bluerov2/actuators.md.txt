@@ -31,12 +31,17 @@ topics is bridged to ROS and indexed by number, starting at 1:
 
 | ROS Topic | Description | Message type |
 |---|---|---|
-| `/bluerov2/thruster_<n>/thrust` | Thrust command in newtons, clamped to the propeller's limits | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
+| `/bluerov2/thruster_<n>/cmd` | Normalized thrust command in [-1, 1]: +1 full ahead, -1 full astern, 0 stop | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
+
+The command is a fraction of the propeller's own limits, which the model
+takes from the part's drive table - 51.5 N ahead and -40.2 N astern for a
+T200 at 16 V. The two directions scale independently, so +0.5 and -0.5 are
+equal command and unequal force. Values outside [-1, 1] are clamped.
 
 To manually send a thruster command via ROS:
 
 ```bash
-ros2 topic pub /bluerov2/thruster_1/thrust std_msgs/msg/Float64 "data: -10.0" -1
+ros2 topic pub /bluerov2/thruster_1/cmd std_msgs/msg/Float64 "data: -0.2" -1
 ```
 
 The layout follows ArduSub's
@@ -83,17 +88,17 @@ under the same names), plus a speed feedback per thruster:
 
 | gz Topic | Description | Message type |
 |---|---|---|
-| `/bluerov2/thruster_<n>/thrust` | Thrust command in newtons | `gz.msgs.Double` |
-| `/bluerov2/thruster_<n>/thrust/ang_vel` | Propeller speed feedback (rad/s) | `gz.msgs.Double` |
+| `/bluerov2/thruster_<n>/cmd` | Normalized thrust command in [-1, 1] | `gz.msgs.Double` |
+| `/bluerov2/thruster_<n>/cmd/ang_vel` | Propeller speed feedback (rad/s) | `gz.msgs.Double` |
 | `/bluerov2/gripper/cmd_pos` | Jaw angle command | `gz.msgs.Double` |
 
 Command the mix **together** (`&` + `wait` publishes in parallel):
 
 ```bash
-# surge forward at ~28 N
-gz topic -t /bluerov2/thruster_1/thrust -m gz.msgs.Double -p 'data: -10.0' &
-gz topic -t /bluerov2/thruster_2/thrust -m gz.msgs.Double -p 'data: -10.0' &
-gz topic -t /bluerov2/thruster_3/thrust -m gz.msgs.Double -p 'data: 10.0' &
-gz topic -t /bluerov2/thruster_4/thrust -m gz.msgs.Double -p 'data: 10.0' &
+# surge forward at 20 percent command on the four horizontals
+gz topic -t /bluerov2/thruster_1/cmd -m gz.msgs.Double -p 'data: -0.2' &
+gz topic -t /bluerov2/thruster_2/cmd -m gz.msgs.Double -p 'data: -0.2' &
+gz topic -t /bluerov2/thruster_3/cmd -m gz.msgs.Double -p 'data: 0.2' &
+gz topic -t /bluerov2/thruster_4/cmd -m gz.msgs.Double -p 'data: 0.2' &
 wait
 ```

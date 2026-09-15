@@ -667,8 +667,8 @@ against the simulation or a bridged real vehicle.</p>
   JOY -- &quot;/joy&lt;br/&gt;sensor_msgs/Joy&quot; --&gt; TTJ[&quot;teleop_twist_joy_node&quot;]
   TTJ -- &quot;/cmd_vel&lt;br/&gt;geometry_msgs/Twist, normalized&quot; --&gt; MIX[&quot;twist_to_thrust&quot;]
   JOY -- &quot;/joy&lt;br/&gt;deadman, EPA&quot; --&gt; MIX
-  CFG[&quot;per vehicle mixer.yaml&lt;br/&gt;gain matrix, thrust limits&quot;] -.-&gt; MIX
-  MIX -- &quot;one std_msgs/Float64 per thruster&lt;br/&gt;/blueboat/motor_*/thrust&lt;br/&gt;/bluerov2/thruster_*/thrust&quot; --&gt; OUT([&quot;simulation or&lt;br/&gt;bridged vehicle&quot;])
+  CFG[&quot;per vehicle mixer.yaml&lt;br/&gt;gain matrix, command envelope&quot;] -.-&gt; MIX
+  MIX -- &quot;one std_msgs/Float64 per thruster&lt;br/&gt;/blueboat/motor_*/cmd&lt;br/&gt;/bluerov2/thruster_*/cmd&quot; --&gt; OUT([&quot;simulation or&lt;br/&gt;bridged vehicle&quot;])
     </pre><section id="configure-the-gamepad-mapping-optional">
 <h2>Configure the gamepad mapping (optional)<a class="headerlink" href="#configure-the-gamepad-mapping-optional" title="Link to this heading"></a></h2>
 <p>A gamepad mapping ties the pad’s controls, stick axes and buttons, to the vessel’s controllable degrees of freedom: surge, sway, heave and yaw, plus the deadman button and the thrust ceiling (EPA).</p>

@@ -308,8 +308,8 @@ configuration was involved.</p>
 <p>In a second terminal (also sourced), watch the echosounder and spin the
 propellers:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/blueboat/ping/range<span class="w"> </span>--once
-ros2<span class="w"> </span>topic<span class="w"> </span>pub<span class="w"> </span>/blueboat/motor_port/thrust<span class="w"> </span>std_msgs/msg/Float64<span class="w"> </span><span class="s2">"data: 10.0"</span><span class="w"> </span>-1<span class="w"> </span><span class="p">&amp;</span>
-ros2<span class="w"> </span>topic<span class="w"> </span>pub<span class="w"> </span>/blueboat/motor_stbd/thrust<span class="w"> </span>std_msgs/msg/Float64<span class="w"> </span><span class="s2">"data: 10.0"</span><span class="w"> </span>-1<span class="w"> </span><span class="p">&amp;</span>
+ros2<span class="w"> </span>topic<span class="w"> </span>pub<span class="w"> </span>/blueboat/motor_port/cmd<span class="w"> </span>std_msgs/msg/Float64<span class="w"> </span><span class="s2">"data: 0.2"</span><span class="w"> </span>-1<span class="w"> </span><span class="p">&amp;</span>
+ros2<span class="w"> </span>topic<span class="w"> </span>pub<span class="w"> </span>/blueboat/motor_stbd/cmd<span class="w"> </span>std_msgs/msg/Float64<span class="w"> </span><span class="s2">"data: 0.2"</span><span class="w"> </span>-1<span class="w"> </span><span class="p">&amp;</span>
 <span class="nb">wait</span>
 </pre></div>
 </div>

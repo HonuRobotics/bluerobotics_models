@@ -18,8 +18,8 @@ propellers:
 
 ```bash
 ros2 topic echo /blueboat/ping/range --once
-ros2 topic pub /blueboat/motor_port/thrust std_msgs/msg/Float64 "data: 10.0" -1 &
-ros2 topic pub /blueboat/motor_stbd/thrust std_msgs/msg/Float64 "data: 10.0" -1 &
+ros2 topic pub /blueboat/motor_port/cmd std_msgs/msg/Float64 "data: 0.2" -1 &
+ros2 topic pub /blueboat/motor_stbd/cmd std_msgs/msg/Float64 "data: 0.2" -1 &
 wait
 ```
 

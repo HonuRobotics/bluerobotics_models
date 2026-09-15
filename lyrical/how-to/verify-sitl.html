@@ -375,15 +375,15 @@ sim_vehicle.py<span class="w"> </span>-v<span class="w"> </span>Rover<span class
 <p><strong>4. Outputs to thrust.</strong> On the real boat those PWM values go down a wire to an ESC. In simulation they go over UDP to <code class="docutils literal notranslate"><span class="pre">ArduPilotPlugin</span></code>, whose <code class="docutils literal notranslate"><span class="pre">&lt;control&gt;</span></code> block maps 1100–1900 onto ±1 and scales to newtons — so the plugin is standing in for the ESC and the propeller together. Port ≈ +40 N, starboard 0 N.</p>
 <p>Several parameters still act in <code class="docutils literal notranslate"><span class="pre">MANUAL</span></code>, which is the other half of why it is not passthrough: <code class="docutils literal notranslate"><span class="pre">MOT_THR_MIN</span></code>/<code class="docutils literal notranslate"><span class="pre">MAX</span></code> clip the demand, <code class="docutils literal notranslate"><span class="pre">MOT_SLEWRATE</span></code> rate-limits it, <code class="docutils literal notranslate"><span class="pre">MOT_STR_THR_MIX</span></code> decides who gives way when steering and throttle together would saturate an output, and <code class="docutils literal notranslate"><span class="pre">MOT_THST_ASYM</span></code> scales <em>negative</em> outputs up to compensate for a thruster that pushes harder ahead than astern.</p>
 <p>To see what the autopilot is actually commanding while you move the sticks, echo the same topics:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gz<span class="w"> </span>topic<span class="w"> </span>-e<span class="w"> </span>-t<span class="w"> </span>/blueboat/motor_port/thrust
-gz<span class="w"> </span>topic<span class="w"> </span>-e<span class="w"> </span>-t<span class="w"> </span>/blueboat/motor_stbd/thrust
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gz<span class="w"> </span>topic<span class="w"> </span>-e<span class="w"> </span>-t<span class="w"> </span>/blueboat/motor_port/cmd
+gz<span class="w"> </span>topic<span class="w"> </span>-e<span class="w"> </span>-t<span class="w"> </span>/blueboat/motor_stbd/cmd
 </pre></div>
 </div>
 <p>Equal positive numbers for throttle alone, equal and opposite for steering alone.</p>
 </section>
 <section id="what-this-does-not-check">
 <h2>What this does not check<a class="headerlink" href="#what-this-does-not-check" title="Link to this heading"></a></h2>
-<p>Magnitudes. The simulated thruster maps a command symmetrically about stop, and a T200 is not symmetric — it makes roughly 51.5 N ahead against 40.2 N astern. Speeds and accelerations are therefore not meaningful yet, and a boat that reaches the wrong speed at full throttle is expected rather than a defect.</p>
+<p>Magnitudes. The thruster scales each direction on its own limit, so the T200’s asymmetry — roughly 51.5 N ahead against 40.2 N astern — is represented. The hull is not: the hydrodynamic damping coefficients are placeholders awaiting identification. Speeds and accelerations are therefore not meaningful yet, and a boat that reaches the wrong speed at full throttle is expected rather than a defect.</p>
 </section>
 <section id="the-parameter-files-are-not-optional">
 <h2>The parameter files are not optional<a class="headerlink" href="#the-parameter-files-are-not-optional" title="Link to this heading"></a></h2>
