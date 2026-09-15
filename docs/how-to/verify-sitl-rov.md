@@ -8,11 +8,15 @@ Confirm that ArduSub in SITL is driving the simulated BlueROV2 (standard configu
 * The workspace is built and sourced: `colcon build --merge-install` from the workspace root, then `source install/setup.bash`. See [Installation](../getting-started/installation.md).
 * The steps below were run in the [drydock](https://github.com/HonuRobotics/drydock) container, started with `drydock run maritime`. They work on a host set up per [Requirements](../getting-started/requirements.md) too; only the prerequisites differ.
 
-### First, the simulation:
+## Start the two shells
+
+Both need the colcon workspace sourced and then the ArduPilot environment, in that order: `setup-ardupilot.sh` appends to the Gazebo paths, so the workspace has to be on them first.
+
+### The simulation
 
 Don't forget to rebuild if there are changes in src...
 ```bash
-cd ~/maritme_ws/
+cd ~/maritime_ws/
 colcon build --merge-install
 ```
 
@@ -23,10 +27,23 @@ source ~/maritime_ws/install/setup.bash
 source ~/maritime_ws/thirdparty/setup-ardupilot.sh
 gz sim -v4 -r $(ros2 pkg prefix --share bluerov2_gazebo)/worlds/bluerov2_sitl.sdf
 ```
-If successful, you should see Gazebo sim start with the ROV spawned in a simple underwater environemnt. 
+
+```{tip}
+If you had a shell open before sourcing, check the environment before
+launching:
+
+    echo $GZ_SIM_SYSTEM_PLUGIN_PATH
+
+It must contain the workspace's `install/lib` as well as
+`ardupilot_gazebo/build`. With only the latter, `ArduPilotPlugin` loads and
+the thruster plugin does not: the vehicle arms, the command topics carry
+traffic, and nothing moves. Open a fresh shell rather than re-sourcing.
+```
+
+If successful, you should see Gazebo sim start with the ROV spawned in a simple underwater environment. 
 
 
-Then the autopilot:
+### The autopilot
 
 ```bash
 source ~/maritime_ws/install/setup.bash
@@ -46,7 +63,7 @@ See troubleshooting notes in [ArduPilot SITL setup](../getting-started/ardupilot
 
 ## The checks
 
-One axis at a time. At the MAVProxy prompt (this SITL terminal):
+One axis at a time, at the MAVProxy prompt in the autopilot shell. Arm first; a disarmed vehicle holds every output at neutral and looks exactly like a broken mapping.
 
 ```
 mode manual
@@ -116,7 +133,7 @@ Values are normalized, so anything outside [-1, 1] is a bug in the mapping rathe
 
 ## Which thruster is which
 
-The channel a thruster answers to is not configured anywhere — ArduSub assigns Motor1 to Motor6 to SERVO1 to SERVO6 itself, from `FRAME_CONFIG`, and the model numbers its `<control>` blocks to match. That correspondence is a claim about where each thruster sits, and `bluerov2_gazebo/test/test_ardusub_frame.py` asserts it against the factors in ArduSub's own `AP_Motors6DOF.cpp`. If a slot ever moves, that test fails rather than the vehicle quietly answering the wrong stick.
+The channel a thruster answers to is not configured anywhere — ArduSub maps its own motors onto outputs SERVO1 to SERVO6 from `FRAME_CONFIG`, and the model numbers its `<control>` blocks to match. That correspondence is a claim about where each thruster sits, and `bluerov2_gazebo/test/test_ardusub_frame.py` asserts it against the factors in ArduSub's own `AP_Motors6DOF.cpp`. If a slot ever moves, that test fails rather than the vehicle quietly answering the wrong stick.
 
 ## What this does not check
 
