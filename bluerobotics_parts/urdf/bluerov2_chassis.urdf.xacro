@@ -34,7 +34,14 @@
 
   <!-- Body slots: +x faces the propeller, so the motor bulk trails away
        from the prop plane (downward pointing verticals: motor below,
-       inside the chassis; only the duct ring shows at the foam). -->
+       inside the chassis; only the duct ring shows at the foam).
+
+       The imu frame is where the flight controller senses attitude. Declared
+       as a frame rather than a part because nothing about its mass or
+       appearance matters, but simulation and TF have to agree on where it is.
+       The position is a placeholder at the chassis origin: the real offset
+       inside the enclosure has not been measured, and the lever arm only
+       starts to matter once accelerations are compared against a real ROV. -->
   <xacro:macro name="bluerov2_chassis_info">
     <xacro:property name="part_info" scope="parent" value="${dict(
         attach='0 0 0',
@@ -59,6 +66,7 @@
             thruster_body_6=dict(xyz='0.015 0.109 0.05', rpy='0 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
         ),
         frames=dict(
+            imu=dict(xyz='0 0 0', rpy='0 0 0'),
         ))}"/>
   </xacro:macro>
 
