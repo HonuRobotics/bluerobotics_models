@@ -31,6 +31,16 @@ sim_vehicle.py -v Rover -f rover-skid --model JSON --console -w \
   --add-param-file=$(ros2 pkg prefix --share blueboat_gazebo)/params/blueboat_sitl.params
 ```
 
+```{note}
+Gazebo prints `ArduPilot controller has reset` once shortly after SITL
+connects and then roughly once a minute. It is expected and nothing is
+reset: `ardupilot_gazebo` keeps ArduPilot's 32-bit frame counter in a
+`uint16_t`, so it wraps about every 66 seconds at 1000 Hz and the plugin
+reads the wrap as a restart. The fix is open upstream as
+[ardupilot_gazebo#174](https://github.com/ArduPilot/ardupilot_gazebo/pull/174);
+see the troubleshooting notes in [ArduPilot SITL setup](../getting-started/ardupilot_setup.md).
+```
+
 ### Verify that the boat drives in the correct directions and polarity.  
 
 At the MAVProxy prompt, drive the USV forward (surge):
