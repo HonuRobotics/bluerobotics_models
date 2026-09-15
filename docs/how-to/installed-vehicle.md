@@ -28,7 +28,7 @@ ros2 run blueboat_gazebo configure_vehicle.py --config my_vehicle.yaml --out-dir
 
 writes `blueboat.urdf`, `blueboat.gazebo.urdf` (the copy the model merges,
 glTF visuals pre-rotated for Gazebo), `model.sdf`, `model.config` and
-`ros_gz_bridge.yaml`.
+`ros_gz_bridge.yaml`, plus `vehicle.yaml`, the config as used. Add `--name <name>` to generate an instance under another name (model name and topic namespace at once).
 The directory is a Gazebo model: with `~/my_models` prepended to
 `GZ_SIM_RESOURCE_PATH` it is `model://blueboat`, shadowing the installed
 default, so a world can `<include>` it, or spawn it with

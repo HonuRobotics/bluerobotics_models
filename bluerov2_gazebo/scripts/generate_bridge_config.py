@@ -16,13 +16,15 @@
 Generate the ros_gz bridge config from the vehicle parts config.
 
 Run at build time (see CMakeLists.txt) and at launch (configure_vehicle.py):
-emits /clock, /joint_states and one entry per topic of each part in the
+emits /clock, /<topic_namespace>/joint_states and one entry per topic of each part in the
 assembly that has topics (a propeller's thrust command, a sensor's output).
 The parts come from the generated URDF's <assembly_part> manifest (the
 resolved configuration, defaults included); topic bases follow
 /<topic_namespace>/<part name>, overridable per part in the vehicle config
 with `topic` (both sides), `gz_topic` (Gazebo side) and `ros_topic` (ROS
-side). This is the single point that must agree with the <topic>s
+side). An override stays under the namespace, so several instances of
+one config never share a topic; one that starts with a slash is used as
+given. This is the single point that must agree with the <topic>s
 model.sdf.xacro gives the plugins; both derive from the same resolution, so
 they cannot drift. The config is also checked against the manifest here
 (bluerobotics_parts.assembly.check), so a config that names a slot or an
@@ -77,6 +79,11 @@ def absolute(topic):
     return topic if topic.startswith('/') else '/' + topic
 
 
+def under(ns, base):
+    """Return `base` under namespace `ns`, or as given when it starts with a slash."""
+    return base if base.startswith('/') else f'{ns}/{base}'
+
+
 def overrides_for(cfg, name):
     """
     Return the config entry that fitted instance `name`, or {}.
@@ -107,7 +114,7 @@ def bridge_entries(cfg, instances):
     # Propeller joint states from the JointStatePublisher plugin, for
     # robot_state_publisher / RViz prop animation.
     entries.append({
-        'ros_topic_name': '/joint_states',
+        'ros_topic_name': absolute(f'{ns}/joint_states'),
         'gz_topic_name': absolute(f'{ns}/joint_states'),
         'ros_type_name': 'sensor_msgs/msg/JointState',
         'gz_type_name': 'gz.msgs.Model',
@@ -115,9 +122,8 @@ def bridge_entries(cfg, instances):
     })
     for ptype, name in instances:
         part = overrides_for(cfg, name)
-        default_base = f'{ns}/{name}'
-        gz_base = part.get('gz_topic', part.get('topic', default_base))
-        ros_base = part.get('ros_topic', part.get('topic', default_base))
+        gz_base = under(ns, part.get('gz_topic', part.get('topic', name)))
+        ros_base = under(ns, part.get('ros_topic', part.get('topic', name)))
         for suffix, ros_type, gz_type, direction in PART_TOPICS.get(ptype, []):
             entry = {
                 'ros_topic_name': absolute(f'{ros_base}/{suffix}'),

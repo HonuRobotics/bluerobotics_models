@@ -28,12 +28,18 @@
        default="$(find-pkg-share blueboat_description)/config/blueboat.yaml"
        description="Vehicle vehicle config, expanded at launch."/>
   <arg name="name" default="blueboat"
-       description="Model name to spawn as; the world's buoyancy and the bridge expect blueboat."/>
+       description="Instance name: the Gazebo model name and the topic namespace (/&lt;name&gt;/...). Give each copy of the vehicle in one world its own."/>
+  <arg name="x" default="0" description="Spawn position x (m)."/>
+  <arg name="y" default="0" description="Spawn position y (m)."/>
   <arg name="z" default="0.05" description="Spawn height (m); the default sits at the waterline."/>
+  <arg name="roll" default="0" description="Spawn roll (rad)."/>
+  <arg name="pitch" default="0" description="Spawn pitch (rad)."/>
+  <arg name="yaw" default="0" description="Spawn heading (rad)."/>
 
-  <!-- Every artifact of this configuration, generated now from config_file. -->
+  <!-- Every artifact of this instance, generated now from config_file and
+       name. -->
   <let name="vehicle_dir"
-       value="$(command '$(find-pkg-prefix blueboat_gazebo)/lib/blueboat_gazebo/configure_vehicle.py --config $(var config_file) --cache')"/>
+       value="$(command '$(find-pkg-prefix blueboat_gazebo)/lib/blueboat_gazebo/configure_vehicle.py --config $(var config_file) --name $(var name) --cache')"/>
 
   <!-- Gazebo server (composable) — creates the shared container. -->
   <gz_server world_sdf_file="$(var world)"
@@ -46,7 +52,9 @@
 
   <!-- The vehicle, spawned from the generated model into the (only) world. -->
   <node pkg="ros_gz_sim" exec="create" name="spawn_blueboat" output="screen"
-        args="-name $(var name) -z $(var z) -file $(var vehicle_dir)/model.sdf"/>
+        args="-name $(var name) -file $(var vehicle_dir)/model.sdf
+              -x $(var x) -y $(var y) -z $(var z)
+              -R $(var roll) -P $(var pitch) -Y $(var yaw)"/>
 
   <!-- ros_gz bridge (composable) — joins the container; bridges the clock. -->
   <ros_gz_bridge bridge_name="ros_gz_bridge"
@@ -55,13 +63,18 @@
                  create_own_container="false"
                  use_composition="$(var use_composition)"/>
 
-  <!-- robot_state_publisher: composable node in the container when composing... -->
+  <!-- robot_state_publisher, reading the instance's joint states and
+       prefixing every TF frame with the instance name, so its frames match
+       the frame ids the sensors publish: a composable node in the container
+       when composing... -->
   <load_composable_node target="ros_gz_container" if="$(var use_composition)">
     <composable_node pkg="robot_state_publisher"
                      plugin="robot_state_publisher::RobotStatePublisher"
                      name="robot_state_publisher">
       <param from="$(var vehicle_dir)/robot_description.yaml"/>
+      <param name="frame_prefix" value="$(var name)/" type="str"/>
       <param name="use_sim_time" value="true" type="bool"/>
+      <remap from="joint_states" to="/$(var name)/joint_states"/>
     </composable_node>
   </load_composable_node>
 
@@ -69,6 +82,8 @@
   <node pkg="robot_state_publisher" exec="robot_state_publisher"
         name="robot_state_publisher" unless="$(var use_composition)">
     <param from="$(var vehicle_dir)/robot_description.yaml"/>
+    <param name="frame_prefix" value="$(var name)/"/>
     <param name="use_sim_time" value="true"/>
+    <remap from="joint_states" to="/$(var name)/joint_states"/>
   </node>
 </launch>
