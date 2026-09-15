@@ -17,6 +17,7 @@ ament_environment_hooks("hooks/resource_paths.sh.in")
 
 install(DIRECTORY
   launch
+  params
   DESTINATION share/${PROJECT_NAME})
 
 # The pool worlds are expanded from one template so the vehicle free world
@@ -39,6 +40,7 @@ add_custom_target(${PROJECT_NAME}_worlds ALL
   DEPENDS ${pool_world} ${playground_world})
 install(FILES
   worlds/bluerov2_water.sdf
+  worlds/bluerov2_sitl.sdf
   ${pool_world}
   ${playground_world}
   DESTINATION share/${PROJECT_NAME}/worlds)
@@ -107,6 +109,31 @@ add_custom_command(
 add_custom_target(${PROJECT_NAME}_model_specs ALL DEPENDS ${stamped_sdf})
 install(FILES ${stamped_sdf} model.config
   DESTINATION share/${PROJECT_NAME}/models/bluerov2)
+
+# The ArduPilot flavoured model: the SAME model.sdf.xacro expanded with
+# ardupilot:=true, which adds an IMU sensor and the ArduPilotPlugin. A second
+# model rather than a wrapper because <include merge="true"> does not nest and
+# the composed model already merge-includes its URDF; see
+# docs/specs/SITL_SPEC_CONTEXT.md.
+#
+# It goes through generate_model.py like the default one, because the buoyancy
+# solve needs the assembled mass properties either way. Not stamped: the specs
+# comment describes the vehicle, and this is the same vehicle.
+set(ap_sdf ${CMAKE_CURRENT_BINARY_DIR}/ardupilot/model.sdf)
+add_custom_command(
+  OUTPUT ${ap_sdf}
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/ardupilot
+  COMMAND Python3::Interpreter
+          ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_model.py --ardupilot
+          ${vehicle_config} ${desc_urdf}
+          ${CMAKE_CURRENT_SOURCE_DIR}/model.sdf.xacro ${ap_sdf}
+  DEPENDS ${vehicle_config} ${desc_urdf}
+          ${CMAKE_CURRENT_SOURCE_DIR}/model.sdf.xacro
+          ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_model.py
+  COMMENT "Expanding model.sdf.xacro with ardupilot:=true")
+add_custom_target(${PROJECT_NAME}_ardupilot_model ALL DEPENDS ${ap_sdf})
+install(FILES ${ap_sdf} models/bluerov2_with_ardupilot/model.config
+  DESTINATION share/${PROJECT_NAME}/models/bluerov2_with_ardupilot)
 install(FILES model.sdf.xacro DESTINATION share/${PROJECT_NAME})
 install(PROGRAMS
   scripts/generate_bridge_config.py

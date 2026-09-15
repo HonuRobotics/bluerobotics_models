@@ -34,6 +34,14 @@
   <xacro:arg name="total_mass" default=""/>
   <xacro:arg name="com" default=""/>
 
+  <!-- ArduPilot SITL. False generates the model this repository has always
+       generated; true adds an IMU and the ArduPilotPlugin, so ArduSub can
+       drive the ROV instead of ROS 2 topics. Two models come out of this one
+       source: model://bluerov2 and model://bluerov2_with_ardupilot. See
+       docs how-to/verify-sitl-rov. -->
+  <xacro:arg name="ardupilot" default="false"/>
+  <xacro:property name="ardupilot" value="${'$(arg ardupilot)'.lower() == 'true'}"/>
+
   <!-- Topic namespace: every part topic is /<topic_namespace>/<part name>/...
        on both sides (a camera's /image, a claw's /cmd_pos). Per part,
        `gz_topic` / `topic` override the gz side base, under the namespace
@@ -242,6 +250,52 @@
     </xacro:sensor_link>
   </xacro:macro>
 
+  <!-- One ArduPilotPlugin <control> block: a servo channel mapped onto a
+       thruster's command topic.
+
+       cmd = multiplier * (clamp((pwm - min)/(max - min)) + offset), so
+       offset -0.5 puts stop at mid-stick and multiplier 2 spans [-1, 1].
+       That is the whole of it: no thrust limits, no vehicle physics, just
+       the servo band converted to a normalized command. The thruster owns
+       the newtons, including the asymmetry between ahead and astern.
+
+       ArduSub parks disarmed motors at 1500 rather than at MIN, which this
+       mapping turns into a zero command. -->
+  <xacro:macro name="ardupilot_control" params="channel joint topic">
+    <control channel="${channel}">
+      <jointName>${joint}</jointName>
+      <servo_min>1100</servo_min>
+      <servo_max>1900</servo_max>
+      <offset>-0.5</offset>
+      <multiplier>2</multiplier>
+      <type>COMMAND</type>
+      <cmd_topic>${topic}</cmd_topic>
+    </control>
+  </xacro:macro>
+
+  <!-- A second pass of the assembly dispatcher, inside the plugin element:
+       one <control> per propeller instance, emitted by the same iteration
+       that emits the Thrusters so the command topic cannot drift between
+       them - both come from `topic_base`.
+
+       The channel is the thruster's own number minus one, and that is a
+       claim about geometry rather than a choice. ArduSub assigns
+       SERVO1..6 to Motor1..6 automatically from FRAME_CONFIG, and our
+       thruster_N slots sit where ArduSub's Vectored frame expects Motor N
+       (AP_Motors6DOF.cpp, SUB_FRAME_VECTORED). test_ardusub_frame.py
+       asserts that correspondence; if a slot moves, it fails there rather
+       than as a vehicle that swims sideways. -->
+  <xacro:macro name="ap_control" params="ptype name parent xyz rpy collision joint axis info">
+    <xacro:if value="${'drive' in info and joint != 'fixed'}">
+      <xacro:part_entry name="${name}"/>
+      <xacro:property name="topic_base"
+                      value="${entry.get('gz_topic', entry.get('topic', topic_ns + '/' + name))}"/>
+      <xacro:ardupilot_control channel="${int(name.split('_')[-1]) - 1}"
+                               joint="${name}_joint"
+                               topic="/${topic_base}/cmd"/>
+    </xacro:if>
+  </xacro:macro>
+
   <!-- Emitters for the assembly dispatcher. Per resolved part instance: a
        propeller (a part with a `drive` table) gets a Thruster on its joint,
        the sensor types get their <sensor>, the claws their controllers;
@@ -394,5 +448,54 @@
     <xacro:assemble base="${cfg['base']}" parts="${cfg.get('parts') or []}"
                     slots="${cfg.get('slots') or []}" emit="gz_part" emit_slot="gz_no_slot"
                     manifest="false"/>
+
+    <!-- ===================== ArduPilot SITL =====================
+         Only when ardupilot:=true. Everything above is unchanged, so the
+         default model and the ROS 2 path are untouched. -->
+    <xacro:if value="${ardupilot}">
+
+      <!-- Attitude source for ArduPilotPlugin, at the chassis's imu frame.
+           The frame is declared by the part, so it exists in the URDF and
+           therefore in TF; this hangs the Gazebo sensor on it, exactly as the
+           sonar does for the Ping360's beam frame. -->
+      <xacro:sensor_link name="imu" frame="${base_name}_imu">
+        <sensor name="imu_sensor" type="imu">
+          <always_on>1</always_on>
+          <update_rate>1000</update_rate>
+        </sensor>
+      </xacro:sensor_link>
+
+      <plugin name="ArduPilotPlugin" filename="ArduPilotPlugin">
+        <fdm_addr>127.0.0.1</fdm_addr>
+        <fdm_port_in>9002</fdm_port_in>
+        <connectionTimeoutMaxCount>5</connectionTimeoutMaxCount>
+        <lock_step>1</lock_step>
+
+        <!-- base_link is x forward, y left, z up (docs reference/frames), and
+             ArduPilot wants x forward, y right, z down: roll 180. The world
+             transform is the usual Gazebo-ENU to NED. Both are the standard
+             values because this model follows the ordinary convention - the
+             bow is at +X and the propeller joints are on axis 1 0 0. -->
+        <modelXYZToAirplaneXForwardZDown degrees="true">0 0 0 180 0 0</modelXYZToAirplaneXForwardZDown>
+        <gazeboXYZToNED degrees="true">0 0 0 180 0 90</gazeboXYZToNED>
+
+        <imuName>imu_sensor::imu_sensor</imuName>
+
+        <!--
+          Depth needs no sensor here. The JSON protocol carries no pressure
+          field at all (SIM_JSON.h, the sensor keytable), and ArduSub does
+          not want one: AP_Baro_SITL uses BARO_TYPE_WATER and synthesizes
+          pressure from the altitude this plugin already reports.
+
+          The <control> blocks are emitted below rather than written out,
+          one per propeller the assembly resolved, so a different loadout
+          gets correct blocks with no edit here.
+        -->
+        <xacro:assemble base="${cfg['base']}" parts="${cfg.get('parts') or []}"
+                        slots="${cfg.get('slots') or []}" emit="ap_control"
+                        emit_slot="gz_no_slot" manifest="false"/>
+      </plugin>
+
+    </xacro:if>
   </model>
 </sdf>

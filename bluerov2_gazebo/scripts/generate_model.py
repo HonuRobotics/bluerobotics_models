@@ -21,7 +21,12 @@ URDF itself; this wrapper computes total mass and center of mass with
 bluerobotics_parts.assembly and passes them, plus the URDF uri to merge,
 to model.sdf.xacro. Used by the build and by configure_vehicle.py.
 
-Usage: generate_model.py <config.yaml> <vehicle.urdf> <model.sdf.xacro> <out.sdf> [urdf_uri]
+With --ardupilot the model gains an IMU and the ArduPilotPlugin, so ArduSub
+can drive it; that is a second artifact from the same source, not a variant
+of the default one.
+
+Usage: generate_model.py [--ardupilot] <config.yaml> <vehicle.urdf>
+                         <model.sdf.xacro> <out.sdf> [urdf_uri]
 """
 
 import subprocess
@@ -33,15 +38,18 @@ from bluerobotics_parts import assembly
 
 def main():
     """Compute mass properties and expand the model xacro (see module doc)."""
-    if len(sys.argv) not in (5, 6):
+    argv = [a for a in sys.argv[1:] if a != '--ardupilot']
+    ardupilot = len(argv) != len(sys.argv) - 1
+    if len(argv) not in (4, 5):
         sys.exit(__doc__)
-    config, urdf, model_xacro, out = sys.argv[1:5]
-    uri = sys.argv[5] if len(sys.argv) == 6 else 'model://bluerov2/bluerov2.urdf'
+    config, urdf, model_xacro, out = argv[:4]
+    uri = argv[4] if len(argv) == 5 else 'model://bluerov2/bluerov2.urdf'
     total, com = assembly.mass_properties(ET.parse(urdf).getroot())
-    run = subprocess.run(
-        ['xacro', model_xacro, f'config_file:={config}', f'urdf_uri:={uri}',
-         f'total_mass:={total}', f'com:={com[0]} {com[1]} {com[2]}'],
-        capture_output=True, text=True)
+    args = ['xacro', model_xacro, f'config_file:={config}', f'urdf_uri:={uri}',
+            f'total_mass:={total}', f'com:={com[0]} {com[1]} {com[2]}']
+    if ardupilot:
+        args.append('ardupilot:=true')
+    run = subprocess.run(args, capture_output=True, text=True)
     if run.returncode != 0:
         sys.exit(f'model generation failed ({run.returncode}):\n{run.stderr}')
     with open(out, 'w') as f:
