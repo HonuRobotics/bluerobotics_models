@@ -91,9 +91,10 @@
        down per <tilt>; tune each accessory's rpy for the intended view.
 
        FRAMES. Every sensor pins <frame_id> to a link the DESCRIPTION defines,
-       because that is the only name TF carries: robot_state_publisher publishes
-       the URDF's links, while the ${name}_sensor wrapper links below exist only
-       here. Left unset, gz derives the id from the SDF ('bluerov2/camera_sensor/
+       under the instance name (robot_state_publisher prefixes every frame of
+       an instance with it), because that is the only name TF carries:
+       robot_state_publisher publishes the URDF's links, while the
+       ${name}_sensor wrapper links below exist only here. Left unset, gz derives the id from the SDF ('bluerov2/camera_sensor/
        camera'), which is in neither the URDF nor TF, so a consumer doing
        lookup_transform(base_link, msg.header.frame_id) simply fails.
 
@@ -142,7 +143,7 @@
     <xacro:sensor_link name="${name}" frame="${frame}">
       <sensor name="${name}" type="camera">
         <!-- Body frame; see the FRAMES note above on the optical convention. -->
-        <frame_id>${name}</frame_id>
+        <frame_id>${topic_ns}/${name}</frame_id>
         <topic>${topic_base}/image</topic>
         <update_rate>20</update_rate>
         <always_on>1</always_on>
@@ -165,7 +166,7 @@
   <xacro:macro name="rgbd_sensor" params="name frame topic_base">
     <xacro:sensor_link name="${name}" frame="${frame}">
       <sensor name="${name}" type="rgbd_camera">
-        <frame_id>${name}</frame_id>
+        <frame_id>${topic_ns}/${name}</frame_id>
         <topic>${topic_base}</topic>
         <update_rate>15</update_rate>
         <always_on>1</always_on>
@@ -185,7 +186,7 @@
   <xacro:macro name="ping360_sensor" params="name frame topic_base">
     <xacro:sensor_link name="${name}" frame="${frame}">
       <sensor name="${name}" type="gpu_lidar">
-        <frame_id>${name}</frame_id>
+        <frame_id>${topic_ns}/${name}</frame_id>
         <topic>${topic_base}/scan</topic>
         <update_rate>10</update_rate>
         <always_on>1</always_on>
@@ -213,7 +214,7 @@
   <xacro:macro name="dvl_sensor" params="name frame topic_base">
     <xacro:sensor_link name="${name}" frame="${frame}">
       <sensor name="${name}" type="custom" gz:type="dvl">
-        <frame_id>${name}</frame_id>
+        <frame_id>${topic_ns}/${name}</frame_id>
         <topic>${topic_base}/velocity</topic>
         <update_rate>8</update_rate>
         <always_on>1</always_on>

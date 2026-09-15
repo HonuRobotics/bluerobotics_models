@@ -16,7 +16,7 @@
 Generate the ros_gz bridge config from the vehicle parts config.
 
 Run at build time (see CMakeLists.txt) and at launch (configure_vehicle.py):
-emits /clock, /joint_states and one entry per topic of each part in the
+emits /clock, /<topic_namespace>/joint_states and one entry per topic of each part in the
 assembly that has topics (a propeller's thrust command, a sensor's output).
 The parts come from the generated URDF's <assembly_part> manifest (the
 resolved configuration, defaults included); topic bases follow
@@ -98,7 +98,7 @@ def bridge_entries(cfg, instances):
     # Propeller joint states from the JointStatePublisher plugin, for
     # robot_state_publisher / RViz prop animation.
     entries.append({
-        'ros_topic_name': '/joint_states',
+        'ros_topic_name': absolute(f'{ns}/joint_states'),
         'gz_topic_name': absolute(f'{ns}/joint_states'),
         'ros_type_name': 'sensor_msgs/msg/JointState',
         'gz_type_name': 'gz.msgs.Model',

@@ -43,8 +43,11 @@ Two things about a renamed instance to keep in mind:
   (`<enable>blueboat::hull_displacement</enable>`), so a second name needs a
   second `<enable>` line in the world, or a world that floats the vehicle by
   the displacement boxes it marks (see the gz-maritime worlds).
-- The bridge's `/joint_states` and `/clock`, and the node names, are not
-  yet under the instance name; two instances share them for now.
+- Joint states are bridged as `/<name>/joint_states`, and every TF frame
+  and sensor `frame_id` carries `<name>/` in front, so two instances have
+  separate TF trees. Only `/clock` and the node names of this repository's
+  own launch stay shared; gz-maritime's spawn launch runs the nodes in the
+  instance namespace and bridges the clock once.
 
 ## Several simulations
 

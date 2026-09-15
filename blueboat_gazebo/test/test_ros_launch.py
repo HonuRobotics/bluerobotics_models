@@ -72,10 +72,18 @@ def test_robot_description_published(sim):
 
 
 def test_joint_states_flow(sim):
-    """Motor joint states cross the bridge, so RViz can animate the props."""
-    code, out, err = ros(sim, 'topic', 'echo', '/joint_states', '--once',
+    """Motor joint states cross the bridge under the instance name, for RViz."""
+    code, out, err = ros(sim, 'topic', 'echo', '/blueboat/joint_states', '--once',
                          timeout=30)
     assert code == 0 and 'motor_port_joint' in out, f'no joint states\n{err}'
+
+
+def test_tf_frames_carry_the_instance_name(sim):
+    """robot_state_publisher prefixes every frame, matching the sensors' frame ids."""
+    code, out, err = ros(sim, 'topic', 'echo', '/tf_static', '--once',
+                         '--qos-durability', 'transient_local',
+                         '--qos-reliability', 'reliable', timeout=30)
+    assert code == 0 and 'blueboat/ping_beam' in out, f'no prefixed frames\n{err}'
 
 
 def test_thruster_and_ping_topics_bridged(sim):

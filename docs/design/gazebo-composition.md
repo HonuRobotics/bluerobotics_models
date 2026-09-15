@@ -28,7 +28,8 @@ so the names survive even though the bodies do not.
 
 Each sensor is a massless link posed `relative_to` the frame its part
 declares for its sensing origin (`ping_beam`), with `frame_id` set to that
-frame so the messages name something TF carries. Each propeller (a part
+frame under the instance name (`blueboat/ping_beam`), which is the name
+TF carries once `robot_state_publisher` prefixes the frames. Each propeller (a part
 whose `part_info` carries a `drive` table: diameter, thrust limits, sense
 of rotation) gets a Thruster plugin on its mounting joint, with the
 coefficient sign set by the rotation so a counter rotating pair cancels its
@@ -47,7 +48,7 @@ side never held a coordinate.
 `generate_bridge_config.py` reads the fitted instances from the URDF's
 `<assembly_part>` manifest and emits one bridge entry per topic of each
 part type that has topics (`PART_TOPICS`: a propeller's `/cmd` command,
-the Ping's `/range`), plus `/clock` and `/joint_states`; per instance topic
+the Ping's `/range`), plus `/clock` and `/<ns>/joint_states`; per instance topic
 overrides come from the config entry that fitted it. Nothing about the
 drivetrain is hardcoded and no topic bakes the model name. The model's
 plugin and sensor topics and the bridge's topics therefore derive from the

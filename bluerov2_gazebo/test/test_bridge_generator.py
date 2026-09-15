@@ -26,7 +26,7 @@ _spec = importlib.util.spec_from_file_location('bridge_gen', _SCRIPT)
 bridge_gen = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(bridge_gen)
 
-ALWAYS = {'/clock', '/joint_states'}
+ALWAYS = {'/clock', '/bluerov2/joint_states'}
 PROPS = [('t200_prop_ccw', 'thruster_1'), ('t200_prop_cw', 'thruster_3')]
 
 
@@ -37,7 +37,7 @@ def entries_for(cfg, instances):
 
 
 def test_only_clock_and_joint_states_without_parts():
-    """Nothing is hardcoded: with no parts only /clock and /joint_states remain."""
+    """Nothing is hardcoded: with no parts only /clock and the joint states remain."""
     assert set(entries_for({}, [])) == ALWAYS
 
 

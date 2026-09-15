@@ -187,18 +187,20 @@ def test_plugin_references_survive_lumping():
 
 
 def test_sensor_frame_ids_resolve_in_tf():
-    """Every sensor's <frame_id> names a frame TF actually carries."""
-    sdf_root, _ = gen_model(FULL_CONFIG)
-    urdf_root, _, _, _ = urdf_for(FULL_CONFIG)
+    """Every sensor's <frame_id> names a frame TF carries for the instance."""
+    config = FULL_CONFIG.replace('topic_namespace: bluerov2', 'topic_namespace: rov_a')
+    sdf_root, _ = gen_model(config)
+    urdf_root, _, _, _ = urdf_for(config)
     urdf_links = {li.get('name') for li in urdf_root.findall('link')}
     sensors = list(sdf_root.iter('sensor'))
     assert sensors
     for sensor in sensors:
         frame = sensor.find('frame_id')
         assert frame is not None, f'{sensor.get("name")} sets no <frame_id>'
-        assert frame.text in urdf_links, (
+        prefix, _, link = frame.text.partition('/')
+        assert prefix == 'rov_a' and link in urdf_links, (
             f'sensor {sensor.get("name")} publishes frame_id {frame.text!r}, '
-            f'which robot_state_publisher never puts in TF')
+            f'which robot_state_publisher never puts in TF for instance rov_a')
 
 
 RGBD_SUFFIXES = ('image', 'depth_image', 'points', 'camera_info')

@@ -133,8 +133,9 @@
         <!-- Pin frame_id to the part's beam frame: a URDF link, so TF
              carries it (robot_state_publisher publishes the URDF links; the
              ${name}_sensor wrapper exists only here, and gz's derived id is
-             in neither). -->
-        <frame_id>${frame}</frame_id>
+             in neither), under the instance name, which is the prefix
+             robot_state_publisher puts on every frame of this instance. -->
+        <frame_id>${topic_ns}/${frame}</frame_id>
         <topic>${topic_base}/range</topic>
         <update_rate>10</update_rate>
         <always_on>1</always_on>
