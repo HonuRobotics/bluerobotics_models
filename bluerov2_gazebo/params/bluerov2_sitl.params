@@ -1,0 +1,61 @@
+# BlueROV2 parameters for ArduSub SITL.
+#
+# Derived from Blue Robotics' published configuration:
+#
+#   bluerobotics/Blueos-Parameter-Repository
+#   params/ardupilot/ArduSub/4.7/navigator/Standard BlueROV2.params
+#
+# That file is four %include lines plus the auxiliary output assignments; the
+# values that describe the vehicle come from what it includes:
+#
+#   ArduSub/4.7/base.params      frame-independent: outputs 1-6, EKF sources
+#   ArduSub/4.7/standard.params  the standard (6 thruster) vehicle: FRAME_CONFIG
+#
+# This file carries the subset that describes the *vehicle* - frame, motor
+# outputs, the attitude gains the standard vehicle ships - and leaves out the
+# board, the peripherals and the accessories, which in simulation are either
+# absent or supplied by ArduPilot's own SITL defaults. Every value below is
+# the shipped one unless a DELTA comment says otherwise.
+#
+# Load it AFTER ArduPilot's own sub defaults, which supply the SITL side
+# (fake accelerometer calibration so pre-arm passes, joystick button map,
+# position controller gains). Last file wins:
+#
+#   sim_vehicle.py -v ArduSub -f gazebo-bluerov2 --model JSON --console -w \
+#     --add-param-file=$AP/default_params/sub.parm \
+#     --add-param-file=<this file>
+#
+# Do not add sub-6dof.parm. It sets FRAME_CONFIG 2 for the Heavy, which
+# expects eight thrusters; this vehicle has six.
+
+# ---- Frame ----------------------------------------------------------------
+# 1 = Vectored: four horizontal thrusters at 45 degrees for surge, sway and
+# yaw, two verticals for heave and roll. This is what makes ArduSub assign
+# the motor outputs below, and what our thruster_1..6 slot geometry matches.
+FRAME_CONFIG     1
+
+# ---- Motor outputs --------------------------------------------------------
+# 33..38 are Motor1..Motor6. ArduSub derives exactly this assignment from
+# FRAME_CONFIG on its own, so these are redundant - they are here because
+# Blue Robotics ship them ("first 6 motors always match" in base.params) and
+# this file is meant to be readable against theirs.
+SERVO1_FUNCTION  33
+SERVO2_FUNCTION  34
+SERVO3_FUNCTION  35
+SERVO4_FUNCTION  36
+SERVO5_FUNCTION  37
+SERVO6_FUNCTION  38
+
+# ---- Attitude control -----------------------------------------------------
+# Shipped verbatim. Roll angle P is zero on the standard vehicle: with only
+# two verticals it has little roll authority, and Blue Robotics do not close
+# a loop around it. The Heavy, with four, is the variant that does.
+ATC_ANG_RLL_P    0.0
+ATC_ANGLE_MAX    45
+ATC_INPUT_TC     0.1
+
+# ---- Navigation sources ---------------------------------------------------
+# No horizontal position source: an ROV underwater has no GNSS, and this
+# vehicle carries no DVL or acoustic positioning. Shipped value, and the
+# reason waypoint navigation is out of scope for the ROV (see the SITL spec).
+EK3_SRC1_POSXY   0
