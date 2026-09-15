@@ -15,6 +15,7 @@ add-sensor-part
 own-world
 teleop
 verify-sitl
+verify-sitl-rov
 namespaces
 faq
 ```
