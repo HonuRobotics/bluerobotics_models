@@ -19,8 +19,10 @@ written next to them as `vehicle.yaml`), so the model name, the plugin
 topics and the bridge cannot disagree. `x`, `y`, `z`, `roll`, `pitch` and
 `yaw` place the instance.
 
-Per sensor part, `topic`, `gz_topic` and `ros_topic` in the config still
-override the base name under the namespace.
+Per part, `topic`, `gz_topic` and `ros_topic` in the config still override
+the base name, and the override goes under the instance name too, so two
+instances of one config never share a topic. An override that starts with
+a slash is used as given and is then shared by every instance.
 
 Two things about a renamed instance to keep in mind:
 

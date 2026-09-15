@@ -71,10 +71,15 @@ def test_geometry_only_parts_produce_nothing():
 
 
 def test_topic_override_precedence():
-    """Gz_topic/ros_topic > topic > /<namespace>/<name>, matched by instance."""
+    """
+    Gz_topic/ros_topic > topic > <name>, matched by instance, under the namespace.
+
+    An override stays under /<namespace>/ so instances of one config never
+    share a topic; one starting with a slash is used as given.
+    """
     cfg = {'topic_namespace': 'boat_a', 'parts': [
         {'slot': 'ping', 'of': 'ping_mount', 'type': 'ping_singlebeam',
-         'gz_topic': 'boat_a/ping_raw', 'ros_topic': '/sensors/ping'}]}
+         'gz_topic': 'ping_raw', 'ros_topic': '/sensors/ping'}]}
     entries = entries_for(cfg, [('ping_singlebeam', 'ping')] + PROPS)
     ping = entries['/sensors/ping/range']
     assert ping['gz_topic_name'] == '/boat_a/ping_raw/range'
@@ -82,7 +87,7 @@ def test_topic_override_precedence():
     # A renamed occupant is matched by its name, not the slot.
     cfg = {'parts': [{'slot': 'ping', 'of': 'ping_mount', 'type': 'ping_singlebeam',
                       'name': 'sonar', 'topic': 'echo'}]}
-    assert '/echo/range' in entries_for(cfg, [('ping_singlebeam', 'sonar')])
+    assert '/blueboat/echo/range' in entries_for(cfg, [('ping_singlebeam', 'sonar')])
 
 
 def test_extra_bridge_topics_verbatim():

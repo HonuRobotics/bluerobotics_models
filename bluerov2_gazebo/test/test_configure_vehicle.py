@@ -196,3 +196,31 @@ def test_name_gives_each_instance_its_own_cache_directory():
         # Without --name the config's own namespace names the instance, as before.
         model = ET.parse(Path(default) / 'model.sdf').getroot().find('model')
         assert model.get('name') == 'bluerov2'
+
+
+def test_two_instances_from_one_config_share_no_topic(tmp_path):
+    """
+    Two names from one config, topic overrides included, share no topic.
+
+    A relative override goes under the instance namespace on both sides, so
+    a command for one instance never reaches the other; only the fixed
+    /clock and /joint_states remain shared.
+    """
+    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
+    cfg['parts'] = [{'slot': 'camera', 'type': 'explorehd_camera', 'topic': 'eye'}]
+    config = tmp_path / 'custom.yaml'
+    config.write_text(yaml.safe_dump(cfg, sort_keys=False))
+    topics = {}
+    for name in ('rov_a', 'rov_b'):
+        out = subprocess.run([str(TOOL), '--config', str(config), '--name', name,
+                              '--out-dir', str(tmp_path / name)],
+                             capture_output=True, text=True, timeout=180)
+        assert out.returncode == 0, out.stderr
+        model = ET.parse(tmp_path / name / 'model.sdf').getroot()
+        mine = {'/' + t.text.lstrip('/') for t in model.iter('topic')}
+        for entry in yaml.safe_load((tmp_path / name / 'ros_gz_bridge.yaml').read_text()):
+            mine |= {entry['gz_topic_name'], entry['ros_topic_name']}
+        topics[name] = mine - {'/clock', '/joint_states'}
+    a, b = topics.values()
+    assert a and b and not (a & b), a & b
+    assert all(t.startswith('/rov_a/') for t in a), a
