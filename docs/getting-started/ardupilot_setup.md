@@ -217,4 +217,4 @@ the `PATH` one. Set both explicitly in the environment script instead.
 
 Building `rover` alone is enough for the BlueBoat, and `sub` for the BlueROV2. `./waf copter` as well if you want the Iris smoke test below.
 
-The two vehicles differ only in what you hand `sim_vehicle.py`; the walkthroughs are [Verify the SITL connection](../how-to/verify-sitl.md) for the BlueBoat and [Verify the SITL connection (ROV)](../how-to/verify-sitl-rov.md) for the BlueROV2.
+The two vehicles differ only in what you hand `sim_vehicle.py`; the walkthroughs are [Verify the SITL connection (Boat)](../how-to/verify-sitl-boat.md) for the BlueBoat and [Verify the SITL connection (ROV)](../how-to/verify-sitl-rov.md) for the BlueROV2.
