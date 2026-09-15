@@ -165,7 +165,7 @@ def test_sensors_follow_their_part_frame():
     assert len(sensor_links) == 1
     assert sensor_links[0].find('pose').get('relative_to') == 'ping_beam'
     sensor = next(root.iter('sensor'))
-    assert sensor.find('frame_id').text == 'ping_beam'
+    assert sensor.find('frame_id').text == 'blueboat/ping_beam'
 
 
 HULL = yaml.safe_load(DEFAULT_CONFIG)['hull_displacement']
@@ -344,12 +344,14 @@ def test_sensor_frame_ids_resolve_in_tf():
     """
     Every sensor's <frame_id> names a frame TF actually carries.
 
-    TF comes from the URDF via robot_state_publisher; gz's derived SDF scoped
-    ids and the ${name}_sensor wrapper links are in neither, so an unset
-    frame_id yields messages no lookup_transform can resolve.
+    TF comes from the URDF via robot_state_publisher, which prefixes every
+    frame with the instance name; gz's derived SDF scoped ids and the
+    ${name}_sensor wrapper links are in neither, so an unset frame_id
+    yields messages no lookup_transform can resolve.
     """
-    sdf_root, _ = xacro(MODEL_XACRO, FULL_CONFIG)
-    urdf_root, _ = xacro(URDF_XACRO, FULL_CONFIG)
+    config = full_config_text('topic_namespace: boat_a\n')
+    sdf_root, _ = xacro(MODEL_XACRO, config)
+    urdf_root, _ = xacro(URDF_XACRO, config)
     urdf_links = {li.get('name') for li in urdf_root.findall('link')}
     sensors = list(sdf_root.iter('sensor'))
     assert sensors
@@ -357,9 +359,10 @@ def test_sensor_frame_ids_resolve_in_tf():
         frame = sensor.find('frame_id')
         assert frame is not None, (
             f'sensor {sensor.get("name")} sets no <frame_id>')
-        assert frame.text in urdf_links, (
+        prefix, _, link = frame.text.partition('/')
+        assert prefix == 'boat_a' and link in urdf_links, (
             f'sensor {sensor.get("name")} publishes frame_id {frame.text!r}, '
-            f'which robot_state_publisher never puts in TF')
+            f'which robot_state_publisher never puts in TF for instance boat_a')
 
 
 def test_installed_artifacts_match_shipped_config():

@@ -51,5 +51,7 @@ Starts `robot_state_publisher`, `joint_state_publisher_gui` (sliders to
 spin the propellers) and RViz with the packaged config, showing the model
 and its frames (parts, slots, the Ping `beam`). It takes the same
 `config_file:=` argument, and the xacro is expanded at launch time, so a
-custom config needs no rebuild. Running next to `sim.launch.xml`,
-`/joint_states` arrives over the bridge and RViz animates the propellers.
+custom config needs no rebuild. In a simulation the frames carry the instance name (`blueboat/base_link`)
+and joint states arrive as `/blueboat/joint_states`, so RViz next to
+`sim.launch.xml` needs its fixed frame, its RobotModel TF prefix and its
+joint states pointed at the instance.

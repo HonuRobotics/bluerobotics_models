@@ -202,7 +202,7 @@ def test_two_instances_from_one_config_share_no_topic(tmp_path):
 
     A relative override goes under the instance namespace on both sides, so
     a command for one instance never reaches the other; only the fixed
-    /clock and /joint_states remain shared.
+    /clock remains shared.
     """
     cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
     cfg['parts'] = [{'slot': 'ping', 'of': 'ping_mount', 'type': 'ping_singlebeam',
@@ -219,7 +219,7 @@ def test_two_instances_from_one_config_share_no_topic(tmp_path):
         mine = {'/' + t.text.lstrip('/') for t in model.iter('topic')}
         for entry in yaml.safe_load((tmp_path / name / 'ros_gz_bridge.yaml').read_text()):
             mine |= {entry['gz_topic_name'], entry['ros_topic_name']}
-        topics[name] = mine - {'/clock', '/joint_states'}
+        topics[name] = mine - {'/clock'}
     a, b = topics.values()
     assert a and b and not (a & b), a & b
     assert all(t.startswith('/boat_a/') for t in a), a
