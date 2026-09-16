@@ -54,8 +54,6 @@ contact geometry. The box itself never collides (`collide_bitmask`
 `0x00`). The same pattern as the BlueBoat's pontoons, with the box solved
 instead of declared.
 
-(marked-for-any-world)=
-
 ## Marked for any world
 
 The displacement collisions of both vehicles carry `gz:buoyancy="true"`.

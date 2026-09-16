@@ -23,17 +23,17 @@ starboard hull.
 
 | ROS Topic | Description | Message type |
 |---|---|---|
-| `/blueboat/ping/range` | Range to the seabed; bridged lazily, the Gazebo subscription starts with the first ROS subscriber | [sensor_msgs/msg/LaserScan](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/LaserScan.html) |
+| `/<name>/ping/range` | Range to the seabed; bridged lazily, the Gazebo subscription starts with the first ROS subscriber | [sensor_msgs/msg/LaserScan](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/LaserScan.html) |
 
 ```bash
 ros2 topic echo /blueboat/ping/range --once
 ```
 
-Topic bases follow `/<namespace>/<instance>/...`: empty a slot and its
-topics disappear, rename the instance and they follow, and per part
-`topic` / `gz_topic` / `ros_topic` overrides in the config rename the
-base under the namespace (one starting with a slash is used as given).
-Sensor messages carry a frame the part declares as `frame_id`
-(`ping_beam`, the transducer face), under the instance name
-(`blueboat/ping_beam`), which is how TF carries it. Rendered sensors need
-a GPU (headless EGL works).
+`<name>` is the instance name, `blueboat` for the default instance, or
+whatever the boat was spawned as ([Several vehicles](../../how-to/namespaces.md)).
+A part topic follows the part's own name (`ping` above), so a part renamed
+or removed in the config moves or drops its topics
+([Configuration](configuration.md)). Sensor messages carry a frame the
+part declares as `frame_id` (`ping_beam`, the transducer face), under the
+instance name (`<name>/ping_beam`), which is how TF carries it. Rendered
+sensors need a GPU (headless EGL works).

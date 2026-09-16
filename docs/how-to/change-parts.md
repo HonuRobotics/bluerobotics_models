@@ -2,7 +2,7 @@
 
 Recipes for the vehicle config. The concepts (slots, defaults, free
 placement) are explained in [Configuring the BlueBoat](../vehicles/blueboat/configuration.md);
-the full key list is in {ref}`Configuration keys <configuration-keys>`.
+the full key list is in [Configuration keys](../reference/parts-catalog.md#configuration-keys).
 
 Start from a copy of the shipped config:
 

@@ -27,11 +27,14 @@ Thruster numbering, top view.
 ```
 
 Each thruster plugin subscribes to a gz transport topic. Each of those gz
-topics is bridged to ROS and indexed by number, starting at 1:
+topics is bridged to ROS and indexed by number, starting at 1, under the
+instance name, `<name>`: `bluerov2` for the default instance, which the
+commands below use, or whatever the vehicle was spawned as
+([Several vehicles](../../how-to/namespaces.md)).
 
 | ROS Topic | Description | Message type |
 |---|---|---|
-| `/bluerov2/thruster_<n>/cmd` | Normalized thrust command in [-1, 1]: +1 full ahead, -1 full astern, 0 stop | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
+| `/<name>/thruster_<n>/cmd` | Normalized thrust command in [-1, 1]: +1 full ahead, -1 full astern, 0 stop | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
 
 The command is a fraction of the propeller's own limits, which the model
 takes from the part's drive table - 51.5 N ahead and -40.2 N astern for a
@@ -75,7 +78,7 @@ thrusters.
 
 | ROS Topic | Description | Message type |
 |---|---|---|
-| `/bluerov2/gripper/cmd_pos` | Jaw angle command, 0 rad closed to 0.6 rad open | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
+| `/<name>/gripper/cmd_pos` | Jaw angle command, 0 rad closed to 0.6 rad open | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
 
 
 To drive with a gamepad instead, a ready mixer for either vehicle is in
@@ -88,9 +91,9 @@ under the same names), plus a speed feedback per thruster:
 
 | gz Topic | Description | Message type |
 |---|---|---|
-| `/bluerov2/thruster_<n>/cmd` | Normalized thrust command in [-1, 1] | `gz.msgs.Double` |
-| `/bluerov2/thruster_<n>/cmd/ang_vel` | Propeller speed feedback (rad/s) | `gz.msgs.Double` |
-| `/bluerov2/gripper/cmd_pos` | Jaw angle command | `gz.msgs.Double` |
+| `/<name>/thruster_<n>/cmd` | Normalized thrust command in [-1, 1] | `gz.msgs.Double` |
+| `/<name>/thruster_<n>/cmd/ang_vel` | Propeller speed feedback (rad/s) | `gz.msgs.Double` |
+| `/<name>/gripper/cmd_pos` | Jaw angle command | `gz.msgs.Double` |
 
 Command the mix **together** (`&` + `wait` publishes in parallel):
 

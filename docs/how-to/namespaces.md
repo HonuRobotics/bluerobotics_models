@@ -4,16 +4,18 @@
 
 Every instance of a vehicle goes by one name, which is at once its Gazebo
 model name and its topic namespace (`/<name>/...` for every sensor and
-thruster topic, on both the Gazebo and the ROS side). By default the name is
-the config's `topic_namespace` (`blueboat` or `bluerov2`). A name is letters,
+thruster topic, on both the Gazebo and the ROS side). A name is letters,
 digits and underscores, starting with a letter, because it also has to be a
 valid ROS name; the generator refuses anything else.
 
-`name:=` on the sim launch is passed to `configure_vehicle.py --name`, which
-applies it to the config before generating the artifacts (the config actually
-used is written next to them as `vehicle.yaml`), so the model name, the
-plugin topics and the bridge cannot disagree. `x`, `y`, `z`, `roll`, `pitch`
-and `yaw` place the instance:
+The launch argument is the name. `sim.launch.xml` always passes `name:=`,
+`blueboat` or `bluerov2` by default, to `configure_vehicle.py --name`, which
+applies it to the config before generating the artifacts (the config
+actually used is written next to them as `vehicle.yaml`), so the model
+name, the plugin topics and the bridge cannot disagree. A `topic_namespace`
+in a custom config is therefore overridden by the launch; it only names the
+instance when the generator runs without `--name`. `x`, `y`, `z`, `roll`,
+`pitch` and `yaw` place the instance:
 
 ```bash
 ros2 launch blueboat_gazebo sim.launch.xml name:=boat_b x:=4 yaw:=1.57
