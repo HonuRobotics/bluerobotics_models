@@ -79,6 +79,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../vehicles/index.html">Vehicles</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../vehicles/blueboat/index.html">BlueBoat</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/running.html">Running the simulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/running.html#launch-arguments">Launch arguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/running.html#choosing-the-world">Choosing the world</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/running.html#in-rviz">In RViz</a></li>
 </ul>
@@ -110,6 +111,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../vehicles/bluerov2/index.html">BlueROV2</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/running.html">Running the simulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/running.html#launch-arguments">Launch arguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/running.html#choosing-the-world">Choosing the world</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/running.html#in-rviz">In RViz</a></li>
 </ul>
@@ -193,7 +195,15 @@
 <li class="toctree-l3"><a class="reference internal" href="verify-sitl.html#the-parameter-files-are-not-optional">The parameter files are not optional</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="namespaces.html">Topic namespaces and several simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="namespaces.html">Several vehicles and several simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="namespaces.html#one-name-per-instance">One name per instance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="namespaces.html#topic-overrides-under-the-name">Topic overrides under the name</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="namespaces.html#a-second-instance-in-the-same-world">A second instance in the same world</a></li>
+<li class="toctree-l3"><a class="reference internal" href="namespaces.html#several-simulations">Several simulations</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="faq.html">Troubleshooting / FAQ</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="faq.html#xacro-fails-with-assembly-error">xacro fails with “ASSEMBLY ERROR: …”</a></li>
 <li class="toctree-l3"><a class="reference internal" href="faq.html#the-boat-appears-rolled-90-degrees-in-rviz-parts-detached">The boat appears rolled 90 degrees in RViz, parts detached</a></li>
@@ -335,8 +345,11 @@ entry, no frame.</p>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="nv">ping</span><span class="p p-Indicator">,</span><span class="nt"> of</span><span class="p">:</span><span class="w"> </span><span class="nv">ping_mount</span><span class="p p-Indicator">,</span><span class="nt"> type</span><span class="p">:</span><span class="w"> </span><span class="nv">ping_singlebeam</span><span class="p p-Indicator">,</span><span class="nt"> topic</span><span class="p">:</span><span class="w"> </span><span class="nv">sonar</span><span class="p p-Indicator">}</span>
 </pre></div>
 </div>
-<p>gives <code class="docutils literal notranslate"><span class="pre">/blueboat/sonar/range</span></code> on both sides; <code class="docutils literal notranslate"><span class="pre">gz_topic</span></code> / <code class="docutils literal notranslate"><span class="pre">ros_topic</span></code> set one
-side only, <code class="docutils literal notranslate"><span class="pre">bridge:</span> <span class="pre">{...}</span></code> passes native ros_gz_bridge keys through.</p>
+<p>gives <code class="docutils literal notranslate"><span class="pre">/blueboat/sonar/range</span></code> on both sides (the namespace follows the
+instance name, so a boat spawned as <code class="docutils literal notranslate"><span class="pre">boat_b</span></code> gets <code class="docutils literal notranslate"><span class="pre">/boat_b/sonar/range</span></code>);
+<code class="docutils literal notranslate"><span class="pre">gz_topic</span></code> / <code class="docutils literal notranslate"><span class="pre">ros_topic</span></code> set one side only, a base starting with a slash is
+used as given (<code class="docutils literal notranslate"><span class="pre">topic:</span> <span class="pre">/sonar</span></code> gives <code class="docutils literal notranslate"><span class="pre">/sonar/range</span></code>, whatever the instance),
+<code class="docutils literal notranslate"><span class="pre">bridge:</span> <span class="pre">{...}</span></code> passes native ros_gz_bridge keys through.</p>
 </section>
 <section id="add-a-part-somewhere-specific">
 <h2>Add a part somewhere specific<a class="headerlink" href="#add-a-part-somewhere-specific" title="Link to this heading"></a></h2>

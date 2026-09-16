@@ -15,6 +15,18 @@ To run a custom vehicle instead, pass its config with `config_file:=`;
 the [configuration page](configuration.md) lists the slots and
 [Change the fitted parts](../../how-to/change-parts.md) walks through writing one.
 
+## Launch arguments
+
+| Argument | Default | Meaning |
+|---|---|---|
+| `config_file` | the shipped config | Vehicle config, expanded at launch. |
+| `name` | `blueboat` | Instance name: the Gazebo model name and the topic namespace (`/<name>/...`); letters, digits and underscores. The worlds here float only the default name; see [Several vehicles](../../how-to/namespaces.md). |
+| `x`, `y`, `z` | `0`, `0`, the water default | Spawn position (m); the default sits at the waterline. |
+| `roll`, `pitch`, `yaw` | `0` | Spawn orientation (rad). |
+| `world` | the water world | Vehicle free world SDF to spawn into. |
+| `gui` | `true` | Launch the Gazebo GUI. |
+| `use_composition` | `true` | Run the server, the bridge and `robot_state_publisher` in one process. |
+
 ## Choosing the world
 
 By default the boat is spawned into the open water world
@@ -39,5 +51,7 @@ Starts `robot_state_publisher`, `joint_state_publisher_gui` (sliders to
 spin the propellers) and RViz with the packaged config, showing the model
 and its frames (parts, slots, the Ping `beam`). It takes the same
 `config_file:=` argument, and the xacro is expanded at launch time, so a
-custom config needs no rebuild. Running next to `sim.launch.xml`,
-`/joint_states` arrives over the bridge and RViz animates the propellers.
+custom config needs no rebuild. In a simulation the frames carry the instance name (`blueboat/base_link`)
+and joint states arrive as `/blueboat/joint_states`, so RViz next to
+`sim.launch.xml` needs its fixed frame, its RobotModel TF prefix and its
+joint states pointed at the instance.

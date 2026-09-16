@@ -79,6 +79,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Vehicles</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">BlueBoat</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="running.html">Running the simulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="running.html#launch-arguments">Launch arguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="running.html#choosing-the-world">Choosing the world</a></li>
 <li class="toctree-l4"><a class="reference internal" href="running.html#in-rviz">In RViz</a></li>
 </ul>
@@ -110,6 +111,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../bluerov2/index.html">BlueROV2</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../bluerov2/running.html">Running the simulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../bluerov2/running.html#launch-arguments">Launch arguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../bluerov2/running.html#choosing-the-world">Choosing the world</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../bluerov2/running.html#in-rviz">In RViz</a></li>
 </ul>
@@ -193,7 +195,15 @@
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/verify-sitl.html#the-parameter-files-are-not-optional">The parameter files are not optional</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../how-to/namespaces.html">Topic namespaces and several simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../how-to/namespaces.html">Several vehicles and several simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/namespaces.html#one-name-per-instance">One name per instance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../how-to/namespaces.html#topic-overrides-under-the-name">Topic overrides under the name</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/namespaces.html#a-second-instance-in-the-same-world">A second instance in the same world</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/namespaces.html#several-simulations">Several simulations</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../how-to/faq.html">Troubleshooting / FAQ</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/faq.html#xacro-fails-with-assembly-error">xacro fails with “ASSEMBLY ERROR: …”</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/faq.html#the-boat-appears-rolled-90-degrees-in-rviz-parts-detached">The boat appears rolled 90 degrees in RViz, parts detached</a></li>
@@ -349,8 +359,10 @@ starboard hull.</p>
 <p>Topic bases follow <code class="docutils literal notranslate"><span class="pre">/&lt;namespace&gt;/&lt;instance&gt;/...</span></code>: empty a slot and its
 topics disappear, rename the instance and they follow, and per part
 <code class="docutils literal notranslate"><span class="pre">topic</span></code> / <code class="docutils literal notranslate"><span class="pre">gz_topic</span></code> / <code class="docutils literal notranslate"><span class="pre">ros_topic</span></code> overrides in the config rename the
-base. Sensor messages carry a frame the part declares as <code class="docutils literal notranslate"><span class="pre">frame_id</span></code>
-(<code class="docutils literal notranslate"><span class="pre">ping_beam</span></code>, the transducer face), carried in TF. Rendered sensors need
+base under the namespace (one starting with a slash is used as given).
+Sensor messages carry a frame the part declares as <code class="docutils literal notranslate"><span class="pre">frame_id</span></code>
+(<code class="docutils literal notranslate"><span class="pre">ping_beam</span></code>, the transducer face), under the instance name
+(<code class="docutils literal notranslate"><span class="pre">blueboat/ping_beam</span></code>), which is how TF carries it. Rendered sensors need
 a GPU (headless EGL works).</p>
 </section>
 </section>

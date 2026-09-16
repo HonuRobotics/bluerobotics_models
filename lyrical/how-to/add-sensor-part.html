@@ -79,6 +79,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../vehicles/index.html">Vehicles</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../vehicles/blueboat/index.html">BlueBoat</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/running.html">Running the simulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/running.html#launch-arguments">Launch arguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/running.html#choosing-the-world">Choosing the world</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/running.html#in-rviz">In RViz</a></li>
 </ul>
@@ -110,6 +111,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../vehicles/bluerov2/index.html">BlueROV2</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/running.html">Running the simulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/running.html#launch-arguments">Launch arguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/running.html#choosing-the-world">Choosing the world</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/running.html#in-rviz">In RViz</a></li>
 </ul>
@@ -193,7 +195,15 @@
 <li class="toctree-l3"><a class="reference internal" href="verify-sitl.html#the-parameter-files-are-not-optional">The parameter files are not optional</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="namespaces.html">Topic namespaces and several simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="namespaces.html">Several vehicles and several simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="namespaces.html#one-name-per-instance">One name per instance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="namespaces.html#topic-overrides-under-the-name">Topic overrides under the name</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="namespaces.html#a-second-instance-in-the-same-world">A second instance in the same world</a></li>
+<li class="toctree-l3"><a class="reference internal" href="namespaces.html#several-simulations">Several simulations</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="faq.html">Troubleshooting / FAQ</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="faq.html#xacro-fails-with-assembly-error">xacro fails with “ASSEMBLY ERROR: …”</a></li>
 <li class="toctree-l3"><a class="reference internal" href="faq.html#the-boat-appears-rolled-90-degrees-in-rviz-parts-detached">The boat appears rolled 90 degrees in RViz, parts detached</a></li>
@@ -307,7 +317,7 @@ declares <code class="docutils literal notranslate"><span class="pre">beam</span
 <code class="docutils literal notranslate"><span class="pre">gz_part</span></code> emitter has one branch per sensor type (and one for any part
 with a <code class="docutils literal notranslate"><span class="pre">drive</span></code> table, the propellers). Add one for yours: a <code class="docutils literal notranslate"><span class="pre">&lt;sensor&gt;</span></code>
 block on a massless link posed <code class="docutils literal notranslate"><span class="pre">relative_to=&quot;${name}_&lt;frame&gt;&quot;</span></code>, with
-<code class="docutils literal notranslate"><span class="pre">&lt;frame_id&gt;</span></code> set to that frame and the topic from <code class="docutils literal notranslate"><span class="pre">topic_base</span></code> (the Ping
+<code class="docutils literal notranslate"><span class="pre">&lt;frame_id&gt;</span></code> set to that frame under the instance name and the topic from <code class="docutils literal notranslate"><span class="pre">topic_base</span></code> (the Ping
 branch is the template; <code class="docutils literal notranslate"><span class="pre">info</span></code> is the part’s <code class="docutils literal notranslate"><span class="pre">part_info</span></code> if you need its
 frames or other metadata). The emitter runs inside the same assembly
 resolution that built the URDF, so it fires for every instance of the
@@ -319,7 +329,7 @@ from the URDF manifest, so again no per vehicle edit.</p></li>
 <li><p><strong>Fit it</strong>: in a slot (add the type to the slot’s <code class="docutils literal notranslate"><span class="pre">accepts</span></code>, make it the
 <code class="docutils literal notranslate"><span class="pre">default</span></code> if it should come standard) or free placed.</p></li>
 </ol>
-<p>The tests guard the contract: every sensor’s <code class="docutils literal notranslate"><span class="pre">frame_id</span></code> must be a TF frame,
+<p>The tests guard the contract: every sensor’s <code class="docutils literal notranslate"><span class="pre">frame_id</span></code> must be a TF frame of the instance,
 every sensor’s frame must survive URDF to SDF conversion, and the Gazebo
 topics must equal the bridge’s, for the default, a full catalog and a
 renamed instance config. Run <code class="docutils literal notranslate"><span class="pre">colcon</span> <span class="pre">test</span> <span class="pre">--packages-select</span> <span class="pre">blueboat_gazebo</span></code>.</p>
