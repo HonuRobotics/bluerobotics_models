@@ -85,13 +85,13 @@ NO_SENSOR_CONFIG = yaml.safe_dump(
     sort_keys=False)
 
 
-def xacro(top_file, config_text):
+def xacro(top_file, config_text, *extra_args):
     """Run xacro with a temp config; return the parsed XML root and text."""
     with tempfile.NamedTemporaryFile('w', suffix='.yaml', delete=False) as f:
         f.write(config_text)
         config_path = f.name
     out = subprocess.run(
-        ['xacro', str(top_file), f'config_file:={config_path}'],
+        ['xacro', str(top_file), f'config_file:={config_path}', *extra_args],
         check=True, capture_output=True, text=True, timeout=120)
     return ET.fromstring(out.stdout), out.stdout
 
@@ -148,7 +148,7 @@ def test_thrusters_follow_the_propeller_parts():
     root, _ = xacro(MODEL_XACRO, cfg)
     thrusters = plugins(root, 'gz-maritime-thruster-system')
     assert [t.find('joint_name').text for t in thrusters] == ['right_joint']
-    assert thrusters[0].find('topic').text == 'r/cmd'
+    assert thrusters[0].find('topic').text == 'blueboat/r/cmd'
 
 
 def test_default_config_has_the_ping_sensor():
@@ -165,7 +165,7 @@ def test_sensors_follow_their_part_frame():
     assert len(sensor_links) == 1
     assert sensor_links[0].find('pose').get('relative_to') == 'ping_beam'
     sensor = next(root.iter('sensor'))
-    assert sensor.find('frame_id').text == 'ping_beam'
+    assert sensor.find('frame_id').text == 'blueboat/ping_beam'
 
 
 HULL = yaml.safe_load(DEFAULT_CONFIG)['hull_displacement']
@@ -367,12 +367,14 @@ def test_sensor_frame_ids_resolve_in_tf():
     """
     Every sensor's <frame_id> names a frame TF actually carries.
 
-    TF comes from the URDF via robot_state_publisher; gz's derived SDF scoped
-    ids and the ${name}_sensor wrapper links are in neither, so an unset
-    frame_id yields messages no lookup_transform can resolve.
+    TF comes from the URDF via robot_state_publisher, which prefixes every
+    frame with the instance name; gz's derived SDF scoped ids and the
+    ${name}_sensor wrapper links are in neither, so an unset frame_id
+    yields messages no lookup_transform can resolve.
     """
-    sdf_root, _ = xacro(MODEL_XACRO, FULL_CONFIG)
-    urdf_root, _ = xacro(URDF_XACRO, FULL_CONFIG)
+    config = full_config_text('topic_namespace: boat_a\n')
+    sdf_root, _ = xacro(MODEL_XACRO, config)
+    urdf_root, _ = xacro(URDF_XACRO, config)
     urdf_links = {li.get('name') for li in urdf_root.findall('link')}
     sensors = list(sdf_root.iter('sensor'))
     assert sensors
@@ -380,9 +382,10 @@ def test_sensor_frame_ids_resolve_in_tf():
         frame = sensor.find('frame_id')
         assert frame is not None, (
             f'sensor {sensor.get("name")} sets no <frame_id>')
-        assert frame.text in urdf_links, (
+        prefix, _, link = frame.text.partition('/')
+        assert prefix == 'boat_a' and link in urdf_links, (
             f'sensor {sensor.get("name")} publishes frame_id {frame.text!r}, '
-            f'which robot_state_publisher never puts in TF')
+            f'which robot_state_publisher never puts in TF for instance boat_a')
 
 
 def test_installed_artifacts_match_shipped_config():
@@ -399,3 +402,33 @@ def test_installed_artifacts_match_shipped_config():
         assert part.get('name') in links, f'{part.get("name")} missing from shipped URDF'
     assert any(p.get('type') == 'ping_singlebeam' for p in urdf.findall('assembly_part')), \
         'the shipped default must carry the Ping'
+
+
+def test_model_name_follows_the_topic_namespace():
+    """The composed model is named after the config's topic_namespace."""
+    root, _ = xacro(MODEL_XACRO, DEFAULT_CONFIG.replace(
+        'topic_namespace: blueboat', 'topic_namespace: boat_a'))
+    assert root.find('model').get('name') == 'boat_a'
+
+
+def test_ardupilot_channels_command_the_thrusters_topics():
+    """
+    The SITL variant's servo channels command exactly what the Thrusters hear.
+
+    A motor's topic override, relative or absolute, reaches the Thruster and
+    the ArduPilot control block alike; otherwise ArduRover would command a
+    topic nobody listens on.
+    """
+    cfg = DEFAULT_CONFIG.replace('parts: []', (
+        'parts:\n'
+        '  - {slot: motor_stbd, type: t200_prop_cw, gz_topic: /fleet/stbd}\n'
+        '  - {slot: motor_port, type: t200_prop_ccw, topic: left}\n'))
+    root, _ = xacro(MODEL_XACRO, cfg, 'ardupilot:=true')
+    thrusters = {t.find('joint_name').text: t.find('topic').text
+                 for t in plugins(root, 'gz-maritime-thruster-system')}
+    controls = {c.find('jointName').text: c.find('cmd_topic').text
+                for c in root.iter('control')}
+    assert controls == {'motor_stbd_joint': '/fleet/stbd/cmd',
+                        'motor_port_joint': '/blueboat/left/cmd'}
+    for joint, topic in controls.items():
+        assert topic == '/' + thrusters[joint].lstrip('/')

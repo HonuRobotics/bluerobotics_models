@@ -27,6 +27,8 @@ base: {type: bluerov2_chassis, name: base_link}
 #   topic:     base for BOTH the Gazebo and ROS sides
 #   gz_topic:  Gazebo side base   (overrides `topic`)
 #   ros_topic: ROS side base      (overrides `topic`)
+#   A base goes under /<topic_namespace>/ unless it starts with a slash,
+#   which is then used as given (and shared by every instance).
 #   bridge:    dict of NATIVE ros_gz_bridge keys merged into that part's
 #              generated bridge entries
 parts: []

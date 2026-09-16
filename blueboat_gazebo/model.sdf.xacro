@@ -37,8 +37,9 @@
 
   <!-- Topic namespace: every part topic is /<topic_namespace>/<part name>/...
        on both sides (a propeller's /cmd, the Ping's /range). Per part,
-       `gz_topic` / `topic` override the gz side base; the bridge config is
-       generated from the same yaml, so gz and ROS sides stay in sync. -->
+       `gz_topic` / `topic` override the gz side base, under the namespace
+       unless they start with a slash; the bridge config is generated from
+       the same yaml, so gz and ROS sides stay in sync. -->
   <xacro:property name="topic_ns" value="${cfg.get('topic_namespace', 'blueboat')}"/>
   <!-- The root link the assembly names (the config's base.name). -->
   <xacro:property name="base_name" value="${cfg['base'].get('name', 'base_link')}"/>
@@ -111,16 +112,23 @@
   </xacro:macro>
 
   <!-- One ArduPilotPlugin <control> block: a servo channel mapped onto a
-       thruster's command topic. -->
-  <xacro:macro name="ardupilot_control" params="channel joint topic">
+       motor's command topic, which is the topic that motor's Thruster
+       listens on: the part's gz_topic / topic override under the namespace,
+       or as given when it starts with a slash, exactly as gz_part resolves
+       it. -->
+  <xacro:macro name="ardupilot_control" params="channel motor">
+    <xacro:part_entry name="${motor}"/>
+    <xacro:property name="motor_override" value="${entry.get('gz_topic', entry.get('topic', motor))}"/>
+    <xacro:property name="motor_topic"
+                    value="${motor_override if motor_override.startswith('/') else '/' + topic_ns + '/' + motor_override}"/>
     <control channel="${channel}">
-      <jointName>${joint}</jointName>
+      <jointName>${motor}_joint</jointName>
       <servo_min>1100</servo_min>
       <servo_max>1900</servo_max>
       <offset>-0.5</offset>
       <multiplier>2</multiplier>
       <type>COMMAND</type>
-      <cmd_topic>${topic}</cmd_topic>
+      <cmd_topic>${motor_topic}/cmd</cmd_topic>
     </control>
   </xacro:macro>
 
@@ -132,8 +140,9 @@
         <!-- Pin frame_id to the part's beam frame: a URDF link, so TF
              carries it (robot_state_publisher publishes the URDF links; the
              ${name}_sensor wrapper exists only here, and gz's derived id is
-             in neither). -->
-        <frame_id>${frame}</frame_id>
+             in neither), under the instance name, which is the prefix
+             robot_state_publisher puts on every frame of this instance. -->
+        <frame_id>${topic_ns}/${frame}</frame_id>
         <topic>${topic_base}/range</topic>
         <update_rate>10</update_rate>
         <always_on>1</always_on>
@@ -159,8 +168,9 @@
        to emit. -->
   <xacro:macro name="gz_part" params="ptype name parent xyz rpy collision joint axis info">
     <xacro:part_entry name="${name}"/>
+    <xacro:property name="topic_override" value="${entry.get('gz_topic', entry.get('topic', name))}"/>
     <xacro:property name="topic_base"
-                    value="${entry.get('gz_topic', entry.get('topic', topic_ns + '/' + name))}"/>
+                    value="${topic_override if topic_override.startswith('/') else topic_ns + '/' + topic_override}"/>
     <!-- A propeller on a fixed joint (a spare, say) is lumped away and
          drives nothing. -->
     <xacro:if value="${'drive' in info and joint != 'fixed'}">
@@ -223,7 +233,10 @@
     </joint>
   </xacro:macro>
 
-  <model name="blueboat">
+  <!-- Named after the instance (the config's topic_namespace, or the name option):
+       the model name, the topic namespace and, in the launch, the ROS
+       namespace are one name. A spawn may still rename it. -->
+  <model name="${topic_ns}">
     <include merge="true">
       <uri>$(arg urdf_uri)</uri>
     </include>
@@ -314,10 +327,8 @@
           the servo band converted to a normalized command. The thruster owns
           the newtons, including the asymmetry between ahead and astern.
         -->
-        <xacro:ardupilot_control channel="0" joint="motor_stbd_joint"
-                                 topic="/${topic_ns}/motor_stbd/cmd"/>
-        <xacro:ardupilot_control channel="2" joint="motor_port_joint"
-                                 topic="/${topic_ns}/motor_port/cmd"/>
+        <xacro:ardupilot_control channel="0" motor="motor_stbd"/>
+        <xacro:ardupilot_control channel="2" motor="motor_port"/>
       </plugin>
 
     </xacro:if>

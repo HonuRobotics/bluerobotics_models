@@ -149,3 +149,87 @@ def test_cache_mode_prints_only_the_directory():
         again = subprocess.run([str(TOOL), '--config', str(DEFAULT_CONFIG), '--cache'],
                                capture_output=True, text=True, timeout=180, env=env)
         assert again.stdout == out.stdout
+
+
+def test_name_flows_to_every_artifact(tmp_path):
+    """--name renames the instance everywhere at once: model, topics, bridge."""
+    out = subprocess.run([str(TOOL), '--config', str(DEFAULT_CONFIG), '--name', 'boat_b',
+                          '--out-dir', str(tmp_path / 'v')],
+                         capture_output=True, text=True, timeout=180)
+    assert out.returncode == 0, out.stderr
+    out_dir = tmp_path / 'v'
+    # The config that was used, with the name applied, sits next to the artifacts.
+    used = yaml.safe_load((out_dir / 'vehicle.yaml').read_text())
+    assert used['topic_namespace'] == 'boat_b'
+    # The model is named after the instance...
+    model = ET.parse(out_dir / 'model.sdf').getroot().find('model')
+    assert model.get('name') == 'boat_b'
+    assert ET.parse(out_dir / 'model.config').getroot().find('name').text == 'boat_b'
+    # ...and so is every topic its plugins and sensors use.
+    topics = [t.text for t in model.iter('topic')]
+    assert topics and all(t.startswith('boat_b/') for t in topics), topics
+    # The bridge agrees, so gz and ROS sides stay in sync.
+    bridge = yaml.safe_load((out_dir / 'ros_gz_bridge.yaml').read_text())
+    gz_topics = {e['gz_topic_name'] for e in bridge}
+    assert any(t.startswith('/boat_b/motor_port/') for t in gz_topics), gz_topics
+    assert not any(t.startswith('/blueboat/') for t in gz_topics), gz_topics
+
+
+def test_name_gives_each_instance_its_own_cache_directory():
+    """Two names from one config never share a directory; one name always does."""
+    with tempfile.TemporaryDirectory() as ros_home:
+        env = dict(os.environ, ROS_HOME=ros_home)
+
+        def cache(*extra):
+            out = subprocess.run([str(TOOL), '--config', str(DEFAULT_CONFIG), '--cache', *extra],
+                                 capture_output=True, text=True, timeout=180, env=env)
+            assert out.returncode == 0, out.stderr
+            return out.stdout
+
+        default = cache()
+        a = cache('--name', 'boat_a')
+        b = cache('--name', 'boat_b')
+        assert len({default, a, b}) == 3
+        assert cache('--name', 'boat_a') == a
+        # Without --name the config's own namespace names the instance, as before.
+        model = ET.parse(Path(default) / 'model.sdf').getroot().find('model')
+        assert model.get('name') == 'blueboat'
+
+
+def test_two_instances_from_one_config_share_no_topic(tmp_path):
+    """
+    Two names from one config, topic overrides included, share no topic.
+
+    A relative override goes under the instance namespace on both sides, so
+    a command for one instance never reaches the other; only the fixed
+    /clock remains shared.
+    """
+    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
+    cfg['parts'] = [{'slot': 'ping', 'of': 'ping_mount', 'type': 'ping_singlebeam',
+                     'topic': 'sonar'}]
+    config = tmp_path / 'custom.yaml'
+    config.write_text(yaml.safe_dump(cfg, sort_keys=False))
+    topics = {}
+    for name in ('boat_a', 'boat_b'):
+        out = subprocess.run([str(TOOL), '--config', str(config), '--name', name,
+                              '--out-dir', str(tmp_path / name)],
+                             capture_output=True, text=True, timeout=180)
+        assert out.returncode == 0, out.stderr
+        model = ET.parse(tmp_path / name / 'model.sdf').getroot()
+        mine = {'/' + t.text.lstrip('/') for t in model.iter('topic')}
+        for entry in yaml.safe_load((tmp_path / name / 'ros_gz_bridge.yaml').read_text()):
+            mine |= {entry['gz_topic_name'], entry['ros_topic_name']}
+        topics[name] = mine - {'/clock'}
+    a, b = topics.values()
+    assert a and b and not (a & b), a & b
+    assert all(t.startswith('/boat_a/') for t in a), a
+
+
+def test_rejects_a_name_that_is_not_a_ros_name(tmp_path):
+    """A name that cannot be a topic prefix or a namespace is refused up front."""
+    for bad in ('boat-b', '2boats', 'fleet/boat_b', ''):
+        out = subprocess.run([str(TOOL), '--config', str(DEFAULT_CONFIG), '--name', bad,
+                              '--out-dir', str(tmp_path / 'v')],
+                             capture_output=True, text=True, timeout=180)
+        assert out.returncode != 0, bad
+        assert 'invalid instance name' in out.stderr, bad
