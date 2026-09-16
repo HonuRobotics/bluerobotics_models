@@ -73,6 +73,6 @@ gz topic -t /blueboat/motor_stbd/cmd -m gz.msgs.Double -p 'data: 0.2' &
 wait
 ```
 
-Topic bases follow `/<namespace>/<instance>/...`: fit a different
-propeller, rename it or leave a motor slot empty and the command topics
-follow the fitted parts.
+A command topic follows the part's own name: fit a different propeller,
+rename it or leave a motor slot empty and the topics follow the fitted
+parts ([Configuration](configuration.md)).

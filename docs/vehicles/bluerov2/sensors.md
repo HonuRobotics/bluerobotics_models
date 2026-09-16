@@ -46,10 +46,11 @@ live with the [actuators](actuators.md).
 |---|---|---|
 | `/<name>/dvl/velocity` | Bottom track velocity | [marine_acoustic_msgs/msg/Dvl](https://github.com/apl-ocean-engineering/hydrographic_msgs/blob/main/marine_acoustic_msgs/msg/Dvl.msg) |
 
-Topic bases follow `/<namespace>/<instance>/...`: empty a slot and its
-topics disappear, rename the instance and they follow, and per part
-`topic` / `gz_topic` / `ros_topic` overrides in the config rename the
-base under the namespace (one starting with a slash is used as given).
-Sensor messages carry the part's own link as `frame_id`, under the
-instance name (`bluerov2/camera`), which is how TF carries it; cameras deliberately use the body frame (x forward), not a
-REP 145 optical frame.
+`<name>` is the instance name, `bluerov2` for the default instance, or
+whatever the vehicle was spawned as ([Several vehicles](../../how-to/namespaces.md)).
+A part topic follows the part's own name (`camera` above), so a part
+renamed or removed in the config moves or drops its topics
+([Configuration](configuration.md)). Sensor messages carry the part's own
+link as `frame_id`, under the instance name (`<name>/camera`), which is
+how TF carries it; cameras deliberately use the body frame (x forward),
+not a REP 145 optical frame.

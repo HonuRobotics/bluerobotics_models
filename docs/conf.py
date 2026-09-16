@@ -17,4 +17,8 @@ copyright = 'Honu Robotics'  # noqa: A001 Sphinx requires this name
 author = 'Honu Robotics'
 
 extensions = ['sphinx_honu']
+
+# Anchors for headings down to ###, so a page can link to a section
+# (`page.md#section-title`) in a way GitHub renders too.
+myst_heading_anchors = 3
 honu_github = ('HonuRobotics', 'bluerobotics_models')

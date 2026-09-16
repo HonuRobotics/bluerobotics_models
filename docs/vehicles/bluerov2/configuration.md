@@ -56,6 +56,6 @@ config entry each. The fitted options and their topics live in
 
 Slot entries, free placements, ad hoc slots and topic overrides follow
 the same schema as the BlueBoat
-({ref}`Configuration keys <configuration-keys>`); the instance key is
+([Configuration keys](../../reference/parts-catalog.md#configuration-keys)); the instance key is
 `of:`, not `on:`. Mistakes fail the build or the launch with a message
 naming the problem.

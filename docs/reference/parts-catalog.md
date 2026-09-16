@@ -68,7 +68,6 @@ after the slot by default.
 `thruster_8` and `thruster_body_1` … `thruster_body_8` and keeps the same
 accessory slots.
 
-(configuration-keys)=
 ## Configuration keys
 
 The vehicle config (`<vehicle>_description/config/<vehicle>.yaml`, or any
@@ -77,7 +76,7 @@ for both vehicles:
 
 | Key | Required | Meaning |
 |---|---|---|
-| `topic_namespace` | no (the vehicle name) | prefix of every part topic: `/<ns>/<name>/...` |
+| `topic_namespace` | no (the vehicle name) | prefix of every part topic: `/<name>/<name>/...` |
 | `base` | yes | the root part: `{type, name (default base_link), collision (default true)}` |
 | `parts` | no (`[]`) | slot entries and free placements, see below |
 | `slots` | no | ad hoc slots: `{of (instance, default base_link), name, xyz, rpy (default "0 0 0"), accepts (list, optional), default (type or none), joint}` |
