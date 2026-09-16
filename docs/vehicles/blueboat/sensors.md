@@ -23,7 +23,7 @@ starboard hull.
 
 | ROS Topic | Description | Message type |
 |---|---|---|
-| `/blueboat/ping/range` | Range to the seabed; bridged lazily, the Gazebo subscription starts with the first ROS subscriber | [sensor_msgs/msg/LaserScan](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/LaserScan.html) |
+| `/<name>/ping/range` | Range to the seabed; bridged lazily, the Gazebo subscription starts with the first ROS subscriber | [sensor_msgs/msg/LaserScan](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/LaserScan.html) |
 
 ```bash
 ros2 topic echo /blueboat/ping/range --once
