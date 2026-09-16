@@ -180,16 +180,25 @@
        its own, not lumped, so buoyancy never has to look at the parts'
        collision geometry (the modeler's hull cylinders, hatch boxes, prop
        hubs). Segmented so each box responds to its own local depth and a
-       pitched waterplane restores properly. The boxes also give contact.
-       Fixed jointed to the root link: physics sees one rigid body. -->
+       pitched waterplane restores properly. The boxes never collide
+       (collide_bitmask 0x00): they displace only, and contact stays with
+       the chassis collisions, which the boxes overlap.
+       Fixed jointed to the root link: physics sees one rigid body.
+
+       Each box is also marked gz:buoyancy="true": a world whose buoyancy
+       system reads marked collisions (gz-sim 229ec07e, carried by
+       gz-maritime's gz_buoyancy) floats this link by them under whatever
+       name the boat is spawned, with no <enable> list. Gazebo's stock
+       system ignores the attribute, so the worlds here are unchanged. -->
   <xacro:macro name="pontoon" params="hull side y n i:=0">
     <xacro:if value="${i != n}">
       <xacro:property name="seg_len" value="${hull['length'] / n}"/>
-      <collision name="pontoon_${side}_${i}">
+      <collision name="pontoon_${side}_${i}" gz:buoyancy="true">
         <pose>${hull['x'] - hull['length']/2.0 + seg_len*(i + 0.5)} ${y} ${hull['z']} 0 0 0</pose>
         <geometry>
           <box><size>${seg_len} ${hull['width']} ${hull['height']}</size></box>
         </geometry>
+        <surface><contact><collide_bitmask>0x00</collide_bitmask></contact></surface>
       </collision>
       <xacro:pontoon hull="${hull}" side="${side}" y="${y}" n="${n}" i="${i + 1}"/>
     </xacro:if>

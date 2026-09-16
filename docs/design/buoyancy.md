@@ -25,10 +25,12 @@ segments (`length`, `width`, `height`, `x`, `y`, `z`, `segments`). The Gazebo
 composition places them on a dedicated `hull_displacement` link, fixed to
 `base_link`, and the worlds enable graded buoyancy **on that link only**
 (`<enable>blueboat::hull_displacement</enable>`). Buoyancy is evaluated per
-link, so the parts' own collisions (the hull cylinders, hatch
-boxes, the prop hubs) stay what they are, contact geometry, and never
-displace; the chassis keeps them on. The URDF carries no displacement
-geometry at all: displacement is a simulator concern. Segmenting matters:
+link, so the parts' own collisions (the hull cylinders, hatch boxes, the
+prop hubs) stay what they are, contact geometry, and never displace; the
+chassis keeps them on. The pontoons in turn never collide
+(`collide_bitmask` `0x00`), so overlapping that geometry costs no
+contacts. The URDF carries no displacement geometry at all: displacement
+is a simulator concern. Segmenting matters:
 each short box responds to its own local depth, so a pitched or rolled
 waterplane restores correctly, where a single long box keys off its center
 and barely restores. The boat self settles to a draft of roughly
@@ -48,8 +50,24 @@ generation computes the assembled total mass and center of mass from the
 URDF and solves an analytic box on a dedicated `buoyancy_displacement`
 link, the only link the worlds enable buoyancy on, so both declarations
 hold for the configured vehicle and the parts' own collisions stay pure
-contact geometry. The same pattern as the BlueBoat's pontoons, with the
-box solved instead of declared.
+contact geometry. The box itself never collides (`collide_bitmask`
+`0x00`). The same pattern as the BlueBoat's pontoons, with the box solved
+instead of declared.
+
+(marked-for-any-world)=
+
+## Marked for any world
+
+The displacement collisions of both vehicles carry `gz:buoyancy="true"`.
+Gazebo's buoyancy system gained a marked-collision mode
+([gz-sim 229ec07e](https://github.com/gazebosim/gz-sim/commit/229ec07e673b6317fec57af50fd652bcd9bde0ed),
+carried by [gz-maritime](https://github.com/HonuRobotics/gz-maritime)'s
+`gz_buoyancy` until a release ships it): a link with marked collisions
+floats by those alone, under whatever name its model was spawned, in a
+world that names no vehicle. The stock system ignores the attribute, so
+the worlds here keep their `<enable>` lists and behave exactly as before;
+on gz-maritime's open water the same generated model floats with no world
+edit.
 
 ## Constraints
 
@@ -57,6 +75,8 @@ box solved instead of declared.
   description (the Gazebo hydrodynamics plugin is where it would go).
 - Graded buoyancy accepts only box and sphere collisions; both vehicles
   therefore realize displacement as boxes on a dedicated enabled link,
-  separate from the parts' contact geometry.
+  separate from the parts' contact geometry. Displacement has to be
+  expressed as collisions, so the boxes carry a zero `collide_bitmask` to
+  keep them out of contact.
 - Sensors need their own links for TF frames, which the parts' frames
   provide.
