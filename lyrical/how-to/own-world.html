@@ -243,6 +243,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../design/buoyancy.html">Buoyancy: all up round mass and displacement</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../design/buoyancy.html#usv-hull-displacement">USV: hull displacement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../design/buoyancy.html#uuv-declared-trim-bluerov2">UUV: declared trim (BlueROV2)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/buoyancy.html#marked-for-any-world">Marked for any world</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../design/buoyancy.html#constraints">Constraints</a></li>
 </ul>
 </li>
@@ -307,6 +308,9 @@ vehicle’s water world, which holds both plugin blocks
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span><span class="k">$(</span>ros2<span class="w"> </span>pkg<span class="w"> </span>prefix<span class="w"> </span>--share<span class="w"> </span>blueboat_gazebo<span class="k">)</span>/worlds/blueboat_water.sdf<span class="w"> </span>my_world.sdf
 </pre></div>
 </div>
+<p>A world running gz-maritime’s buoyancy system needs no <code class="docutils literal notranslate"><span class="pre">&lt;enable&gt;</span></code> entry:
+the displacement collisions are marked, so the vehicle floats under any
+spawn name (<a class="reference internal" href="../design/buoyancy.html#marked-for-any-world"><span class="std std-ref">Marked for any world</span></a>).</p>
 <section id="include-the-default-model">
 <h2>Include the default model<a class="headerlink" href="#include-the-default-model" title="Link to this heading"></a></h2>
 <p>Sourcing the workspace puts the package’s models directory on
