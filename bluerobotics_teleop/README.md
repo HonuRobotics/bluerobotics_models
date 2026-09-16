@@ -6,7 +6,11 @@ walkthrough for new gamepads.
 
 ```bash
 ros2 launch bluerobotics_teleop teleop.launch.py vehicle:=bluerov2   # or blueboat
+ros2 launch bluerobotics_teleop teleop.launch.py vehicle:=blueboat name:=boat_b   # a named instance
 ```
+
+The stack binds to one vehicle instance, `<name>`, and runs under `/<name>`;
+the default is the vehicle's own name.
 
 Documentation:
 [Teleoperate with a gamepad](https://honurobotics.github.io/bluerobotics_models/lyrical/how-to/teleop.html).

@@ -16,6 +16,7 @@
 from pathlib import Path
 
 from ament_index_python.packages import get_package_share_directory
+from bluerobotics_teleop.instance import default_name, node_params, under
 import pytest
 import yaml
 
@@ -44,6 +45,8 @@ def test_mixer_speaks_the_normalized_interface(vehicle):
     params = mixer_params(vehicle)
     for topic in params['thruster_topics']:
         assert topic.endswith('/cmd'), (vehicle, topic)
+        assert not topic.startswith('/'), (
+            vehicle, topic, 'relative: the launch namespace names the instance')
     assert params['max_thrust_forward'] == 1.0, vehicle
     assert params['max_thrust_reverse'] == -1.0, vehicle
 
@@ -54,12 +57,16 @@ def test_mixer_speaks_the_normalized_interface(vehicle):
 ])
 def test_mixer_topics_exist_in_the_bridge(vehicle, gazebo_pkg):
     """
-    Every mixer output is a ROS_TO_GZ thruster topic the bridge carries.
+    Every mixer output, under the default name, is a thruster topic the bridge carries.
 
     Both vehicles command their thrusters with a normalized value on `/cmd`,
-    not a force on `/thrust`; the newtons live in the model.
+    not a force on `/thrust`; the newtons live in the model. The installed
+    bridge config is generated for the vehicle's default name, which is the
+    namespace the teleop launch binds to by default.
     """
     params = mixer_params(vehicle)
+    params['thruster_topics'] = [under(default_name(vehicle), topic)
+                                 for topic in params['thruster_topics']]
     bridge_yaml = (Path(get_package_share_directory(gazebo_pkg))
                    / 'config' / 'ros_gz_bridge.yaml')
     with open(bridge_yaml) as f:
@@ -145,3 +152,26 @@ def test_pad_resolution_prefers_the_user_mapping(tmp_path, monkeypatch):
     assert pad_paths.resolve_pad_file('joystick.config.yaml') == str(user)
     assert pad_paths.resolve_pad_file('twist_to_thrust.yaml') == str(
         TELEOP / 'config' / 'pad' / 'twist_to_thrust.yaml')
+
+
+def test_default_names_are_the_sim_launch_names():
+    """Without name:=, teleop binds to the instance the vehicle's own launch spawns."""
+    assert default_name('blueboat') == 'blueboat'
+    assert default_name('bluerov2') == 'bluerov2'
+    assert default_name('bluerov2_heavy') == 'bluerov2'
+    with pytest.raises(KeyError):
+        default_name('wamv')
+
+
+def test_under_puts_a_relative_topic_in_the_instance():
+    assert under('boat_b', 'motor_port/cmd') == '/boat_b/motor_port/cmd'
+    assert under('boat_b', '/motor_port/cmd') == '/boat_b/motor_port/cmd'
+
+
+def test_node_params_reads_the_bare_node_key():
+    """The launch hands a file's values to the node, whatever its namespace."""
+    params = node_params(TELEOP / 'config' / 'blueboat' / 'mixer.yaml', 'twist_to_thrust')
+    assert params['thruster_topics'] == ['motor_port/cmd', 'motor_stbd/cmd']
+    params = node_params(TELEOP / 'config' / 'pad' / 'joystick.config.yaml',
+                         'teleop_twist_joy_node')
+    assert params['enable_button'] == 5
