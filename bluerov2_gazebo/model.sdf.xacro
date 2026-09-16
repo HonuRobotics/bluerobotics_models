@@ -292,7 +292,9 @@
        system reads marked collisions (gz-sim 229ec07e, carried by
        gz-maritime's gz_buoyancy) floats this link by it under whatever
        name the ROV is spawned, with no <enable> list. Gazebo's stock
-       system ignores the attribute, so the worlds here are unchanged. -->
+       system ignores the attribute, so the worlds here are unchanged. The
+       box never collides (collide_bitmask 0x00): it displaces only, and
+       contact stays with the parts' collisions, which it overlaps. -->
     <xacro:property name="buoyancy_cfg" value="${cfg.get('buoyancy') or dict()}"/>
     <xacro:if value="${'$(arg total_mass)' == '' or '$(arg com)' == ''}">
       <xacro:assembly_fail message="model.sdf.xacro needs total_mass and com args; generate it with generate_model.py (the build and configure_vehicle.py do)"/>
@@ -327,6 +329,7 @@
         <geometry>
           <box><size>${footprint[0]} ${footprint[1]} ${box_height}</size></box>
         </geometry>
+        <surface><contact><collide_bitmask>0x00</collide_bitmask></contact></surface>
       </collision>
     </link>
     <joint name="buoyancy_displacement_joint" type="fixed">

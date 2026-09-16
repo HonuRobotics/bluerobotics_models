@@ -169,6 +169,10 @@ def test_buoyancy_displacement_realizes_the_declaration():
     marked = [c for c in root.iter('collision')
               if c.get('{http://gazebosim.org/schema}buoyancy') == 'true']
     assert [c.get('name') for c in marked] == ['displacement']
+    # It displaces only: a zero collide_bitmask keeps it out of contact,
+    # which stays with the parts' collisions it overlaps.
+    bitmask = link.find('.//collision/surface/contact/collide_bitmask')
+    assert bitmask is not None and int(bitmask.text, 16) == 0
     # The worlds enable buoyancy on exactly this link.
     for world in ('bluerov2_water.sdf', 'bluerov2_pool.sdf',
                   'bluerov2_playground.sdf'):
