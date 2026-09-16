@@ -347,7 +347,7 @@ starboard hull.</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/blueboat/ping/range</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/ping/range</span></code></p></td>
 <td><p>Range to the seabed; bridged lazily, the Gazebo subscription starts with the first ROS subscriber</p></td>
 <td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/LaserScan.html">sensor_msgs/msg/LaserScan</a></p></td>
 </tr>
@@ -356,14 +356,14 @@ starboard hull.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/blueboat/ping/range<span class="w"> </span>--once
 </pre></div>
 </div>
-<p>Topic bases follow <code class="docutils literal notranslate"><span class="pre">/&lt;namespace&gt;/&lt;instance&gt;/...</span></code>: empty a slot and its
-topics disappear, rename the instance and they follow, and per part
-<code class="docutils literal notranslate"><span class="pre">topic</span></code> / <code class="docutils literal notranslate"><span class="pre">gz_topic</span></code> / <code class="docutils literal notranslate"><span class="pre">ros_topic</span></code> overrides in the config rename the
-base under the namespace (one starting with a slash is used as given).
-Sensor messages carry a frame the part declares as <code class="docutils literal notranslate"><span class="pre">frame_id</span></code>
-(<code class="docutils literal notranslate"><span class="pre">ping_beam</span></code>, the transducer face), under the instance name
-(<code class="docutils literal notranslate"><span class="pre">blueboat/ping_beam</span></code>), which is how TF carries it. Rendered sensors need
-a GPU (headless EGL works).</p>
+<p><code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code> is the instance name, <code class="docutils literal notranslate"><span class="pre">blueboat</span></code> for the default instance, or
+whatever the boat was spawned as (<a class="reference internal" href="../../how-to/namespaces.html"><span class="std std-doc">Several vehicles</span></a>).
+A part topic follows the part’s own name (<code class="docutils literal notranslate"><span class="pre">ping</span></code> above), so a part renamed
+or removed in the config moves or drops its topics
+(<a class="reference internal" href="configuration.html"><span class="std std-doc">Configuration</span></a>). Sensor messages carry a frame the
+part declares as <code class="docutils literal notranslate"><span class="pre">frame_id</span></code> (<code class="docutils literal notranslate"><span class="pre">ping_beam</span></code>, the transducer face), under the
+instance name (<code class="docutils literal notranslate"><span class="pre">&lt;name&gt;/ping_beam</span></code>), which is how TF carries it. Rendered
+sensors need a GPU (headless EGL works).</p>
 </section>
 </section>
 </section>

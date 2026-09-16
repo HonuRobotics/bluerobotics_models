@@ -22,34 +22,35 @@ live with the [actuators](actuators.md).
 
 | ROS Topic | Description | Message type |
 |---|---|---|
-| `/bluerov2/camera/image` | Camera image | [sensor_msgs/msg/Image](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Image.html) |
-| `/bluerov2/camera/camera_info` | Camera intrinsics | [sensor_msgs/msg/CameraInfo](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/CameraInfo.html) |
+| `/<name>/camera/image` | Camera image | [sensor_msgs/msg/Image](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Image.html) |
+| `/<name>/camera/camera_info` | Camera intrinsics | [sensor_msgs/msg/CameraInfo](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/CameraInfo.html) |
 
 ### Stereo camera
 
 | ROS Topic | Description | Message type |
 |---|---|---|
-| `/bluerov2/stereo/image` | RGB image | [sensor_msgs/msg/Image](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Image.html) |
-| `/bluerov2/stereo/depth_image` | Depth image | [sensor_msgs/msg/Image](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Image.html) |
-| `/bluerov2/stereo/points` | Point cloud | [sensor_msgs/msg/PointCloud2](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/PointCloud2.html) |
-| `/bluerov2/stereo/camera_info` | Camera intrinsics | [sensor_msgs/msg/CameraInfo](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/CameraInfo.html) |
+| `/<name>/stereo/image` | RGB image | [sensor_msgs/msg/Image](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Image.html) |
+| `/<name>/stereo/depth_image` | Depth image | [sensor_msgs/msg/Image](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Image.html) |
+| `/<name>/stereo/points` | Point cloud | [sensor_msgs/msg/PointCloud2](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/PointCloud2.html) |
+| `/<name>/stereo/camera_info` | Camera intrinsics | [sensor_msgs/msg/CameraInfo](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/CameraInfo.html) |
 
 ### Scanning sonar
 
 | ROS Topic | Description | Message type |
 |---|---|---|
-| `/bluerov2/sonar/scan` | Horizontal range scan (modelled as a planar gpu_lidar; no acoustics) | [sensor_msgs/msg/LaserScan](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/LaserScan.html) |
+| `/<name>/sonar/scan` | Horizontal range scan (modelled as a planar gpu_lidar; no acoustics) | [sensor_msgs/msg/LaserScan](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/LaserScan.html) |
 
 ### DVL
 
 | ROS Topic | Description | Message type |
 |---|---|---|
-| `/bluerov2/dvl/velocity` | Bottom track velocity | [marine_acoustic_msgs/msg/Dvl](https://github.com/apl-ocean-engineering/hydrographic_msgs/blob/main/marine_acoustic_msgs/msg/Dvl.msg) |
+| `/<name>/dvl/velocity` | Bottom track velocity | [marine_acoustic_msgs/msg/Dvl](https://github.com/apl-ocean-engineering/hydrographic_msgs/blob/main/marine_acoustic_msgs/msg/Dvl.msg) |
 
-Topic bases follow `/<namespace>/<instance>/...`: empty a slot and its
-topics disappear, rename the instance and they follow, and per part
-`topic` / `gz_topic` / `ros_topic` overrides in the config rename the
-base under the namespace (one starting with a slash is used as given).
-Sensor messages carry the part's own link as `frame_id`, under the
-instance name (`bluerov2/camera`), which is how TF carries it; cameras deliberately use the body frame (x forward), not a
-REP 145 optical frame.
+`<name>` is the instance name, `bluerov2` for the default instance, or
+whatever the vehicle was spawned as ([Several vehicles](../../how-to/namespaces.md)).
+A part topic follows the part's own name (`camera` above), so a part
+renamed or removed in the config moves or drops its topics
+([Configuration](configuration.md)). Sensor messages carry the part's own
+link as `frame_id`, under the instance name (`<name>/camera`), which is
+how TF carries it; cameras deliberately use the body frame (x forward),
+not a REP 145 optical frame.

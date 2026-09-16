@@ -310,15 +310,17 @@
 <h2>One name per instance<a class="headerlink" href="#one-name-per-instance" title="Link to this heading"></a></h2>
 <p>Every instance of a vehicle goes by one name, which is at once its Gazebo
 model name and its topic namespace (<code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/...</span></code> for every sensor and
-thruster topic, on both the Gazebo and the ROS side). By default the name is
-the config’s <code class="docutils literal notranslate"><span class="pre">topic_namespace</span></code> (<code class="docutils literal notranslate"><span class="pre">blueboat</span></code> or <code class="docutils literal notranslate"><span class="pre">bluerov2</span></code>). A name is letters,
+thruster topic, on both the Gazebo and the ROS side). A name is letters,
 digits and underscores, starting with a letter, because it also has to be a
 valid ROS name; the generator refuses anything else.</p>
-<p><code class="docutils literal notranslate"><span class="pre">name:=</span></code> on the sim launch is passed to <code class="docutils literal notranslate"><span class="pre">configure_vehicle.py</span> <span class="pre">--name</span></code>, which
-applies it to the config before generating the artifacts (the config actually
-used is written next to them as <code class="docutils literal notranslate"><span class="pre">vehicle.yaml</span></code>), so the model name, the
-plugin topics and the bridge cannot disagree. <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">z</span></code>, <code class="docutils literal notranslate"><span class="pre">roll</span></code>, <code class="docutils literal notranslate"><span class="pre">pitch</span></code>
-and <code class="docutils literal notranslate"><span class="pre">yaw</span></code> place the instance:</p>
+<p>The launch argument is the name. <code class="docutils literal notranslate"><span class="pre">sim.launch.xml</span></code> always passes <code class="docutils literal notranslate"><span class="pre">name:=</span></code>,
+<code class="docutils literal notranslate"><span class="pre">blueboat</span></code> or <code class="docutils literal notranslate"><span class="pre">bluerov2</span></code> by default, to <code class="docutils literal notranslate"><span class="pre">configure_vehicle.py</span> <span class="pre">--name</span></code>, which
+applies it to the config before generating the artifacts (the config
+actually used is written next to them as <code class="docutils literal notranslate"><span class="pre">vehicle.yaml</span></code>), so the model
+name, the plugin topics and the bridge cannot disagree. A <code class="docutils literal notranslate"><span class="pre">topic_namespace</span></code>
+in a custom config is therefore overridden by the launch; it only names the
+instance when the generator runs without <code class="docutils literal notranslate"><span class="pre">--name</span></code>. <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">z</span></code>, <code class="docutils literal notranslate"><span class="pre">roll</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pitch</span></code> and <code class="docutils literal notranslate"><span class="pre">yaw</span></code> place the instance:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>blueboat_gazebo<span class="w"> </span>sim.launch.xml<span class="w"> </span>name:<span class="o">=</span>boat_b<span class="w"> </span>x:<span class="o">=</span><span class="m">4</span><span class="w"> </span>yaw:<span class="o">=</span><span class="m">1</span>.57
 </pre></div>
 </div>

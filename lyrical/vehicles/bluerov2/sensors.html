@@ -359,11 +359,11 @@ live with the <a class="reference internal" href="actuators.html"><span class="s
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/bluerov2/camera/image</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/camera/image</span></code></p></td>
 <td><p>Camera image</p></td>
 <td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Image.html">sensor_msgs/msg/Image</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/bluerov2/camera/camera_info</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/camera/camera_info</span></code></p></td>
 <td><p>Camera intrinsics</p></td>
 <td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/CameraInfo.html">sensor_msgs/msg/CameraInfo</a></p></td>
 </tr>
@@ -380,19 +380,19 @@ live with the <a class="reference internal" href="actuators.html"><span class="s
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/bluerov2/stereo/image</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/stereo/image</span></code></p></td>
 <td><p>RGB image</p></td>
 <td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Image.html">sensor_msgs/msg/Image</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/bluerov2/stereo/depth_image</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/stereo/depth_image</span></code></p></td>
 <td><p>Depth image</p></td>
 <td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Image.html">sensor_msgs/msg/Image</a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/bluerov2/stereo/points</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/stereo/points</span></code></p></td>
 <td><p>Point cloud</p></td>
 <td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/PointCloud2.html">sensor_msgs/msg/PointCloud2</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/bluerov2/stereo/camera_info</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/stereo/camera_info</span></code></p></td>
 <td><p>Camera intrinsics</p></td>
 <td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/CameraInfo.html">sensor_msgs/msg/CameraInfo</a></p></td>
 </tr>
@@ -409,7 +409,7 @@ live with the <a class="reference internal" href="actuators.html"><span class="s
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/bluerov2/sonar/scan</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/sonar/scan</span></code></p></td>
 <td><p>Horizontal range scan (modelled as a planar gpu_lidar; no acoustics)</p></td>
 <td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/LaserScan.html">sensor_msgs/msg/LaserScan</a></p></td>
 </tr>
@@ -426,19 +426,20 @@ live with the <a class="reference internal" href="actuators.html"><span class="s
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/bluerov2/dvl/velocity</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/dvl/velocity</span></code></p></td>
 <td><p>Bottom track velocity</p></td>
 <td><p><a class="reference external" href="https://github.com/apl-ocean-engineering/hydrographic_msgs/blob/main/marine_acoustic_msgs/msg/Dvl.msg">marine_acoustic_msgs/msg/Dvl</a></p></td>
 </tr>
 </tbody>
 </table>
-<p>Topic bases follow <code class="docutils literal notranslate"><span class="pre">/&lt;namespace&gt;/&lt;instance&gt;/...</span></code>: empty a slot and its
-topics disappear, rename the instance and they follow, and per part
-<code class="docutils literal notranslate"><span class="pre">topic</span></code> / <code class="docutils literal notranslate"><span class="pre">gz_topic</span></code> / <code class="docutils literal notranslate"><span class="pre">ros_topic</span></code> overrides in the config rename the
-base under the namespace (one starting with a slash is used as given).
-Sensor messages carry the part’s own link as <code class="docutils literal notranslate"><span class="pre">frame_id</span></code>, under the
-instance name (<code class="docutils literal notranslate"><span class="pre">bluerov2/camera</span></code>), which is how TF carries it; cameras deliberately use the body frame (x forward), not a
-REP 145 optical frame.</p>
+<p><code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code> is the instance name, <code class="docutils literal notranslate"><span class="pre">bluerov2</span></code> for the default instance, or
+whatever the vehicle was spawned as (<a class="reference internal" href="../../how-to/namespaces.html"><span class="std std-doc">Several vehicles</span></a>).
+A part topic follows the part’s own name (<code class="docutils literal notranslate"><span class="pre">camera</span></code> above), so a part
+renamed or removed in the config moves or drops its topics
+(<a class="reference internal" href="configuration.html"><span class="std std-doc">Configuration</span></a>). Sensor messages carry the part’s own
+link as <code class="docutils literal notranslate"><span class="pre">frame_id</span></code>, under the instance name (<code class="docutils literal notranslate"><span class="pre">&lt;name&gt;/camera</span></code>), which is
+how TF carries it; cameras deliberately use the body frame (x forward),
+not a REP 145 optical frame.</p>
 </section>
 </section>
 </section>

@@ -341,7 +341,10 @@ following the <a class="reference internal" href="../../how-to/add-part.html"><s
 <section id="thrusters">
 <h3>Thrusters<a class="headerlink" href="#thrusters" title="Link to this heading"></a></h3>
 <p>Each thruster plugin subscribes to a gz transport topic. Each of those gz
-topics is bridged to ROS and named after its motor:</p>
+topics is bridged to ROS and named after its motor, under the instance
+name, <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code>: <code class="docutils literal notranslate"><span class="pre">blueboat</span></code> for the default instance, which the commands
+below use, or whatever the boat was spawned as
+(<a class="reference internal" href="../../how-to/namespaces.html"><span class="std std-doc">Several vehicles</span></a>).</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>ROS Topic</p></th>
@@ -350,11 +353,11 @@ topics is bridged to ROS and named after its motor:</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/blueboat/motor_port/cmd</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/motor_port/cmd</span></code></p></td>
 <td><p>Normalized thrust command in [-1, 1]: +1 full ahead, -1 full astern, 0 stop</p></td>
 <td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html">std_msgs/msg/Float64</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/blueboat/motor_stbd/cmd</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/motor_stbd/cmd</span></code></p></td>
 <td><p>Normalized thrust command in [-1, 1]: +1 full ahead, -1 full astern, 0 stop</p></td>
 <td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html">std_msgs/msg/Float64</a></p></td>
 </tr>
@@ -396,11 +399,11 @@ under the same names), plus a speed feedback per motor:</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/blueboat/motor_&lt;side&gt;/cmd</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/motor_&lt;side&gt;/cmd</span></code></p></td>
 <td><p>Normalized thrust command in [-1, 1]</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">gz.msgs.Double</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/blueboat/motor_&lt;side&gt;/cmd/ang_vel</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/motor_&lt;side&gt;/cmd/ang_vel</span></code></p></td>
 <td><p>Propeller speed feedback (rad/s)</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">gz.msgs.Double</span></code></p></td>
 </tr>
@@ -411,9 +414,9 @@ gz<span class="w"> </span>topic<span class="w"> </span>-t<span class="w"> </span
 <span class="nb">wait</span>
 </pre></div>
 </div>
-<p>Topic bases follow <code class="docutils literal notranslate"><span class="pre">/&lt;namespace&gt;/&lt;instance&gt;/...</span></code>: fit a different
-propeller, rename it or leave a motor slot empty and the command topics
-follow the fitted parts.</p>
+<p>A command topic follows the part’s own name: fit a different propeller,
+rename it or leave a motor slot empty and the topics follow the fitted
+parts (<a class="reference internal" href="configuration.html"><span class="std std-doc">Configuration</span></a>).</p>
 </section>
 </section>
 

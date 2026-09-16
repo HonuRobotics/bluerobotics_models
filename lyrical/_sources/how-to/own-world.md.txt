@@ -16,7 +16,7 @@ cp $(ros2 pkg prefix --share blueboat_gazebo)/worlds/blueboat_water.sdf my_world
 
 A world running gz-maritime's buoyancy system needs no `<enable>` entry:
 the displacement collisions are marked, so the vehicle floats under any
-spawn name ({ref}`Marked for any world <marked-for-any-world>`).
+spawn name ([Marked for any world](../design/buoyancy.md#marked-for-any-world)).
 
 ## Include the default model
 
