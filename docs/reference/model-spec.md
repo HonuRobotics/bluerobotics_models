@@ -25,7 +25,7 @@ It specifies:
 - geometry, material, texture and transparency requirements
 - what accompanies a delivery, and how a delivery is checked
 
-It does not specify collision geometry, mass properties, inertia, joints, slots or anything else expressed in a part's macro. Those are defined by the part contract in [Parts](../design/parts.md).
+It does not specify collision geometry, mass properties, inertia, joints, slots or anything else expressed in a part's macro, beyond requiring in section 4.1 that a delivery carries the collision file. Those are defined by the part contract in [Parts](../design/parts.md).
 
 ### 1.2 Relationship to external standards
 
@@ -50,7 +50,9 @@ This specification is written for the Blue Robotics parts library, but most of i
 
 A future generalization would keep the former and replace the latter. Contributors should resist mixing the two.
 
-> **Discuss.** Where the mesh conventions come to rest between this document and [Parts](../design/parts.md). Either this specification absorbs the mesh conventions from Parts and that file points here, or Parts stays authoritative for conventions and this document covers only what a modeler needs. Both work. Both documents stating the rules independently, which is the situation today, does not, and Parts rule 2 on the origin already disagrees with what the library does. Tracked as review decision 11.
+> **Decided.** This specification, with the modeling workflow it serves, subsumes the mesh conventions in [Parts](../design/parts.md). Parts keeps the part contract, the macro, slots and frames, and points here for everything about the delivered model. Until that edit lands the two still overlap, and where they disagree this document governs; Parts rule 2 on the origin is the known case. Tracked as review decision 11.
+
+> **Open.** Whether a modeler may deliver a compound object, a whole vehicle rather than a single part, as one glTF file with its components as separate nodes, so that the xacro, URDF and SDF assembly can be built from what the file already states. The alternative, and what the library does today, is one part per model with the assembly expressed only in the macro. Settling it needs two things: whether any of the assembly can be driven from node structure that the macro does not already state better, and the node question in section 5.5, of which a compound delivery is the larger case. It would also bring `assembly`, defined in section 3 as out of scope, partly into scope. Not yet on the review's decision list.
 
 ## 2. Document conventions
 
@@ -74,7 +76,7 @@ References to external documents are normative if this specification uses those 
 Some text is purely informative, giving background or explaining why a rule exists. A section whose title is suffixed "(Informative)" contains only informative language. All Notes, Implementation Notes and Examples are informative. Everything not so marked is normative.
 
 ### 2.4 Decision status
-% CLAUDE: Make it clear that the plan is to clear the decided, discuss and as many open items as possible before we run the first pilot of the workflow. We may leave some items open as we don't have time and budget to be exhaustive. 
+
 Where this specification states a requirement in normative language, the team has decided it. Three kinds of block mark everything else, so that the state of every question is visible in the text rather than discoverable only by asking:
 
 > **Decided.** A decision taken after the first draft, with the reason in one or two sentences and where the evidence is. The rule it produced appears as normative text next to it. The block exists so a reader can see what changed and why. 
@@ -82,6 +84,8 @@ Where this specification states a requirement in normative language, the team ha
 > **Discuss.** A proposal is on the table and states the rule as it would read, but the team has not agreed to it. Until it does, the proposed rule imposes no requirement. Tracked as review decision N.
 
 > **Open.** No proposal yet. The block names what has to be settled and, where known, what would settle it. Tracked as review decision N.
+
+The plan is to settle every Discuss item and as many Open items as possible before the first pilot of the modeling workflow, so that a modeler in the pilot works to a document whose rules are agreed. Some Open items will stay open through the pilot, because settling them all is beyond the time and budget available, and the pilot itself is expected to inform them. An item left open is a known gap, not an oversight.
 
 A delivery cannot fail to conform on a point marked Discuss or Open. Where an interim instruction is needed while a question is open, it is stated in normative language outside the block and marked as interim.
 
@@ -106,6 +110,9 @@ As in glTF 2.0: the unit of a draw call, holding `attributes`, `indices`, an opt
 node::
 As in glTF 2.0: an object in the node hierarchy that may carry a local transform and may instantiate a mesh.
 
+submesh::
+Not a glTF term. The unit Gazebo's loader produces from a file: one submesh per primitive, named after the node that instantiates the primitive's mesh. It is neither a node arrangement nor a second mesh, and a single mesh of four primitives becomes four submeshes. Section 6.3 states what follows from that.
+
 scene::
 As in glTF 2.0: a list of root nodes. A file may hold several scenes and names one as default; a file with none is a library of entities that a viewer cannot show.
 
@@ -128,9 +135,11 @@ A delivery MUST include a visual model named `<part>.visual.glb`, where `<part>`
 
 The part name MUST be lowercase snake_case, and MUST match the directory it is delivered into. Naming rules for parts are given in [Parts](../design/parts.md) and are not repeated here.
 
-> **Open.** Whether a delivery also includes collision geometry from the modeler, as an SDF of primitive shapes as the current pipeline expects, or as a simplified STL as the earlier draft proposed, and whether the modeler still delivers `model.sdf` at all or only the GLB plus a filled-in datasheet row. Nothing settles this yet; the community pattern is hand-placed primitive colliders beside a single visual, which is also what the existing parts do. Tracked as review decisions 1 and 3.  % CLAUDE: For now it is decided.   Modeler will provide model.sdf with collisions as SDF primatives.   Then open an issue to extend this to other collisions representations, i.e, meshes.
+A delivery MUST also include a `model.sdf` for the part in which collision geometry is expressed as SDF primitive shapes: box, cylinder or sphere. The content of that file, and the collision conventions it must follow, are defined by [Parts](../design/parts.md) and [Add a part](../how-to/add-part.md); `sdf_to_part.py` bootstraps the part macro from it.
 
-> **Discuss.** Whether a delivery carries a manifest recording the source of the geometry, the source of its dimensions and the texture provenance. Proposed: yes, because it is cheap and answers questions the audit could not. Archiving the Blender source file is a separate and heavier commitment, storage, licensing of purchased textures and an implied ability to re-export, and is not proposed. Tracked as review decision 12.
+At this time, this document assumes the modeler provides `model.sdf` with collisions as SDF primitives.  Extending the rule to other collision representations, mesh collision in particular, is tracked as a repository issue, "Collision delivery: extend beyond SDF primitives to mesh collision". 
+
+> **Discuss.** Whether a delivery carries a manifest recording the source of the geometry, the source of its dimensions and the texture provenance. Proposed: yes, because it is cheap and answers questions the audit could not. Archiving the Blender source file is a separate and heavier commitment, storage, licensing of purchased textures and an implied ability to re-export, and is not proposed. Tracked as review decision 12. 
 
 > **Discuss.** Whether every part must cite a published dimensional figure, and what to do for parts where none exists. Proposed: yes where one exists, because it is the one check that would have caught a defect the earlier audits missed. Tracked as review decision 13.
 
@@ -138,9 +147,14 @@ The part name MUST be lowercase snake_case, and MUST match the directory it is d
 
 The model MUST be glTF 2.0 in the binary container, `.glb`. The `.gltf` form, with geometry in a side `.bin` and images as separate files, MUST NOT be delivered.
 
-> **Decided.** `.glb` over `.gltf`, 2026-09-16. `.gltf` is ruled out on this stack rather than on its merits, and the merits are real: its images version independently in git, which matters because textures are 59 percent of every byte we store, and a model's contents are legible without a tool. What rules it out is a defect in the version we run. gz-common 7.3.0 decides whether to apply the glTF root rotation by comparing an already-lowercased file extension against the literal `"glTF"`, which never matches, so a `.gltf` file loses that rotation while a `.glb` keeps it. A `.gltf` delivery would load into Gazebo mis-oriented and report nothing. Gazebo additionally decodes external textures eagerly when the mesh loads. Both have upstream fixes that the pinned container does not yet carry, so this is worth revisiting when the container moves rather than settled forever. Fuel holds 53 GLB models against a single `.gltf`, and that one is broken. Evidence in section 1.8 of [VISUAL_ASSET_PIPELINE_REVIEW.md](VISUAL_ASSET_PIPELINE_REVIEW.md).
+**Implementation Note.** Why the binary container, in order of weight:
 
-**Implementation Note.** The inspectability that `.gltf` would give is already available from the container: `glb_inventory.py` reports per-image size, format and texel density, and `glb_probe` reports what the loader built.
+- gz-common 7.3.0 drops the glTF root rotation for a `.gltf` file and keeps it for a `.glb`, because it compares an already-lowercased extension against the literal `"glTF"`. A `.gltf` delivery would load into Gazebo mis-oriented and report nothing.
+- Gazebo decodes external textures eagerly when the mesh loads.
+- One artifact cannot arrive incomplete. A directory of six files can, and the acceptance tooling reads a `.glb` with no search path at all.
+- The legibility `.gltf` would give is already available from the container: `glb_inventory.py` reports per-image size, format and texel density, and `glb_probe` reports what the loader built.
+
+What the rule gives up: with `.gltf` the images version independently in git, which matters because textures are 59 percent of every byte stored, so re-exporting geometry to change one map is waste. Both defects above have upstream fixes that the pinned container does not yet carry, so this is worth revisiting when the container moves. Evidence in section 1.8 of [VISUAL_ASSET_PIPELINE_REVIEW.md](VISUAL_ASSET_PIPELINE_REVIEW.md).
 
 The file MUST validate against the Khronos glTF Validator with zero errors. Validator warnings and infos MUST be reviewed but do not by themselves fail a delivery.
 
@@ -150,7 +164,11 @@ The file MUST validate against the Khronos glTF Validator with zero errors. Vali
 
 ### 4.3 Asset header
 
-> **Discuss.** Proposed: `asset.version` MUST be `"2.0"`, and `asset.minVersion` MUST be absent. The second half is the more useful half, because a stray `minVersion` from a future exporter is a load failure in a consumer that would otherwise have been fine. Neither 1.0 nor a future 2.x is admitted until its behavior in our consumers is understood. Not yet on the review's decision list.
+`asset.version` MUST be `"2.0"`.
+
+`asset.minVersion` MUST NOT be present.
+
+**Implementation Note.** The second rule is the one that earns its place: a stray `minVersion` written by some future exporter is a hard load failure in a consumer that would otherwise have been fine. There is no glTF 2.1 and none is planned. The Khronos registry carries 2.0 only, currently revision 2.0.1, and states that every update to it is a backwards-compatible patch; new capability arrives as extensions rather than as minor versions.
 
 ## 5. Coordinate system, units and frame
 
@@ -188,6 +206,10 @@ Interim rule. Until this is decided, modelers SHOULD continue to author in the p
 
 ### 5.5 Scenes and nodes
 
+The delivered file MUST contain exactly one scene, and that scene MUST list only the root node.
+
+**Implementation Note.** A file with no scene is a library of entities that a viewer cannot show, and a file with several leaves which one renders to the client. Neither is wanted here. Several current deliveries carry leftover empty scenes and `bluerov2_chassis` carries two, which this rule catches.
+
 The delivered file MUST contain exactly one root node, and that node MUST NOT carry a `rotation` or a `matrix` transform. Transforms MUST be applied in Blender before export.
 
 A `translation` on the root node is permitted and is applied by both consumers.
@@ -196,9 +218,7 @@ The root node MUST be named `<part>`, with no Blender numeric suffix such as `.0
 
 **Implementation Note.** The prohibition on rotation and matrix nodes is a tooling constraint, not a format one. glTF permits them and both consumers honor them. The project's `gltf_to_yup.py` refuses to convert a file containing them, because it does not conjugate rotations.
 
-> **Discuss.** Proposed: the file MUST contain exactly one scene, and that scene MUST list only the root node. Fourteen of fifteen delivered files are one scene; the BlueROV2 chassis has two, and six files carry empty leftover scenes from the Blender file. Exactly one is checkable and is what every viewer assumes, whereas a file with no scene renders nothing in the modeler's own check and cannot be produced by the Blender exporter. Treating a file as a scene-less library of entities is only useful if something else composes it, which is the assembled-delivery question below. Not yet on the review's decision list.
-
-> **Open.** Whether a part may be delivered as more than one node, and what "one mesh" in [Parts](../design/parts.md) means when a part carries several primitives. Facts already established: a part with more than one material must have more than one primitive, so a one-primitive rule is a ban on multi-material parts; every primitive under one node becomes a Gazebo submesh carrying that node's name, so an SDF `<submesh>` cannot tell them apart; and an SDF `<material>` collapses every primitive to one material. What remains is whether any part needs submesh selection from SDF, whether the rule should be stated on nodes rather than meshes, and what Parts should say once settled. Tracked as review decision 15.
+> **Open.** Whether a part may be delivered as more than one node, and what "one mesh" in [Parts](../design/parts.md) means when a part carries several primitives. Facts already established: a part with more than one material must have more than one primitive, so a one-primitive rule is a ban on multi-material parts; every primitive under one node becomes a Gazebo submesh carrying that node's name, so an SDF `<submesh>` cannot tell them apart; and an SDF `<material>` collapses every primitive to one material. What remains is whether any part needs submesh selection from SDF, whether the rule should be stated on nodes rather than meshes, and what Parts should say once settled. The mechanism behind those facts, and the proposal to rule submesh selection out, are in section 6.3. Tracked as review decision 15.
 
 ## 6. Geometry
 
@@ -229,6 +249,16 @@ A second UV set MAY be used, and then only to carry a baked ambient occlusion li
 > **Discuss.** The triangle budget per part. The earlier draft proposed about 25,000; the current library ranges from 164 to 21,776. A single number is not defensible until each part states how much detail its role warrants, so the proposal is to record a visual requirement per part as one of a few named tiers, for example functional for the vehicles and the parts fitted to them, accessory for sensors and brackets, and scenery for items seen at distance, and then to set a triangle and texture budget per tier. Tracked as review decisions 5 and 18.
 
 **Implementation Note.** Neither consumer imposes a triangle limit. Texture memory dominates the cost, not geometry.
+
+### 6.3 Primitives and submeshes
+
+**Implementation Note.** "Submesh" is a Gazebo word rather than a glTF one, and the mismatch is what makes it hard to picture. It is not a node arrangement and not a second mesh. Gazebo's loader walks the node hierarchy and emits one submesh for every primitive it meets, naming each after the node that instantiated that primitive's mesh, never after the mesh or the material. One node holding one mesh of four primitives therefore arrives as four submeshes all bearing that node's name, and two nodes arrive as the sum of their primitives, each batch carrying its own node's name. The submesh count is the primitive count; the names come from the nodes. The loader probe in section 2.1 of the review prints that list, and is the only way to see it without a renderer.
+
+**Implementation Note.** A part has more than one primitive when it has more than one material, and in practice only then, because a primitive holds at most one `material` and glTF offers no other way to put two materials on one mesh. The specification gives one further reason, to limit the number of indices per draw call, which does not arise at these part sizes. So the primitive count of a well-formed part is its material count, and section 7 already requires every primitive to have a material.
+
+**Implementation Note.** What follows from that. SDF can select one submesh from a file with `<mesh><submesh><name>`, and Gazebo resolves the name by returning the first submesh that matches it and then stopping. Primitives sharing a node are therefore indistinguishable: such a selection takes the first and drops the rest, with no error and no warning. Naming submeshes after their node rather than after themselves is a known upstream defect, `gz-common` pull request 659, open and unfinished since December 2024, so the collision cannot be designed around by naming things more carefully at this end. The neighboring override is in section 7: an SDF `<material>` replaces the material on every primitive with one, so per-primitive materials survive only while nothing declares one.
+
+> **Discuss.** Whether this specification constrains primitives and rules out submesh selection. Proposed, as two rules: a primitive MUST exist only to carry a material distinct from its siblings, so that the primitive count equals the material count and nothing is split for any other reason; and a delivery MUST be usable as one whole mesh, with neither the part macro nor any world depending on `<mesh><submesh>` to select part of one. Both are free today, since nothing in the library splits a primitive gratuitously and nothing uses submesh selection, and together they keep the upstream naming defect permanently outside this project. The alternative, making selection work, needs one primitive per node and a naming rule for each, which is the multiple-node question in section 5.5. Not yet on the review's decision list.
 
 ## 7. Materials
 
@@ -341,19 +371,18 @@ Every Decided, Discuss and Open block in this document, in order:
 
 | Section | Question | Status | Decision |
 |---|---|---|---|
-| 1.3 | Where mesh conventions rest between this document and Parts | Discuss | 11 |
-| 4.1 | Collision geometry and `model.sdf` in a delivery | Open | 1, 3 |
+| 1.3 | This document subsumes the mesh conventions in Parts | Decided | 11 |
+| 1.3 | Compound object delivered as one glTF assembly | Open | none yet |
+| 4.1 | Collision geometry and `model.sdf` in a delivery | Decided | 1, 3 |
 | 4.1 | Delivery manifest; Blender source archival | Discuss | 12 |
 | 4.1 | Cited dimensional source per part | Discuss | 13 |
-| 4.2 | `.glb` container, `.gltf` prohibited | Decided | 16, in part |
 | 4.2 | Textures embedded or external | Open | 16 |
-| 4.3 | `asset.version` 2.0, no `minVersion` | Discuss | none yet |
 | 5.2 | Stating the RViz distribution floor | Discuss | none yet |
 | 5.3 | Forward axis +X | Discuss | 2 |
 | 5.4 | Origin placement | Discuss | 2 |
-| 5.5 | Exactly one scene | Discuss | none yet |
 | 5.5 | Multiple nodes, and what "one mesh" means | Open | 15 |
 | 6.2 | Triangle budget, by visual requirement tier | Discuss | 5, 18 |
+| 6.3 | Primitive count, and ruling out submesh selection | Discuss | none yet |
 | 7 | PBR-in-SDF workspace rule for GLB parts | Discuss | none yet |
 | 8 | Base color format and per-map size caps | Discuss | 4 |
 | 9 | Uniform translucency and use of BLEND | Discuss | 6 |
