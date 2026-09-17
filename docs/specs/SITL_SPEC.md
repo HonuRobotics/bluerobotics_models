@@ -285,6 +285,8 @@ The Holybro X500 and any other UAV is out of scope for this plan. It is a differ
 
 PX4 is community supported and deliberately not designed out. The normalized command is what a PX4 actuator output produces too, so the interface fits; we keep the design open to it and do not test it.
 
+Packaging: this set of features all too new and too unstable to dedicated cycles to packaging (and debugging packaging) at this point. Also, It is not overt in our SOW that we have to do anything specific. Since we are over budget and behind schedule, it seems like being conservative with scope is the way.
+
 ## Open questions
 
 - What we compare the closed-loop behavior in phases 4 to 6 *against*. "Similar to the hardware vessel" needs a source: logs from a real BlueBoat or BlueROV2, or published performance figures. Without one, the judgement has nothing to be a judgement about, and this is the dependency most likely to block that phase.
