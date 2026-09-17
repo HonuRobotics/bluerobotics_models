@@ -4,13 +4,15 @@
 # integration tests; sway and yaw follow from the vectored 45 degree layout.
 twist_to_thrust:
   ros__parameters:
+    # Relative to the instance: the teleop launch runs the mixer in the
+    # /<name> namespace, so these resolve to /<name>/motor_port/cmd and so on.
     thruster_topics:
-      - /bluerov2/thruster_1/cmd
-      - /bluerov2/thruster_2/cmd
-      - /bluerov2/thruster_3/cmd
-      - /bluerov2/thruster_4/cmd
-      - /bluerov2/thruster_5/cmd
-      - /bluerov2/thruster_6/cmd
+      - thruster_1/cmd
+      - thruster_2/cmd
+      - thruster_3/cmd
+      - thruster_4/cmd
+      - thruster_5/cmd
+      - thruster_6/cmd
     gains_linear_x:  [-1.0, -1.0,  1.0,  1.0,  0.0,  0.0]
     gains_linear_y:  [-1.0,  1.0, -1.0,  1.0,  0.0,  0.0]
     gains_linear_z:  [ 0.0,  0.0,  0.0,  0.0, -1.0, -1.0]

@@ -35,13 +35,14 @@ plugged in:
 
     ros2 run bluerobotics_teleop joy_map
 
-If nothing is publishing /joy, a joy_node is started for the duration of
-the walkthrough and stopped on exit, however it ends. A
+If nothing is publishing Joy messages, a joy_node is started for the
+duration of the walkthrough and stopped on exit, however it ends. A
 leftover background joy_node is exactly the thing that used to break the
-next teleop session (two publishers interleaving on /joy, one of them
+next teleop session (two publishers interleaving on one topic, one of them
 autorepeating stale state), so the tool owns its helper's lifetime.
 Running the walkthrough next to a live teleop session still works: its
-joy_node is detected and no second one is started.
+joy_node publishes under the instance it drives (/<name>/joy), the tool
+finds that topic and reads it, and no second joy_node is started.
 """
 
 import argparse
@@ -91,13 +92,34 @@ class Baseline:
 
 
 class JoyMapNode(Node):
-    """Buffers the latest /joy message for the curses loop."""
+    """Buffers the latest Joy message for the curses loop."""
 
     def __init__(self) -> None:
         super().__init__('joy_map')
-        self.create_subscription(Joy, 'joy', self._joy_cb, 10)
         self._lock = threading.Lock()
         self._latest: Optional[Joy] = None
+        self._subscription = None
+
+    def live_joy_topic(self) -> Optional[str]:
+        """
+        Return the topic a running joy_node publishes on, or None.
+
+        A teleop session publishes under the instance it drives, so the
+        topic is /<name>/joy rather than /joy; any Joy topic with a
+        publisher counts, /joy first when there are several.
+        """
+        topics = sorted(
+            name for name, types in self.get_topic_names_and_types()
+            if 'sensor_msgs/msg/Joy' in types
+            and self.count_publishers(name) > 0)
+        if '/joy' in topics:
+            return '/joy'
+        return topics[0] if topics else None
+
+    def listen(self, topic: str) -> None:
+        """Read Joy messages from `topic`."""
+        self._subscription = self.create_subscription(
+            Joy, topic, self._joy_cb, 10)
 
     def _joy_cb(self, msg: Joy) -> None:
         with self._lock:
@@ -202,7 +224,7 @@ def capture_baseline(stdscr, node, steps, n_samples=20, timeout_sec=5.0):
         curses.napms(50)
         waited += 0.05
         if waited > timeout_sec and not samples_axes:
-            stdscr.addnstr(12, 2, 'No /joy messages! Is joy_node running?',
+            stdscr.addnstr(12, 2, 'No Joy messages! Is joy_node running?',
                            w - 4, curses.A_BOLD)
             stdscr.refresh()
             curses.napms(3000)
@@ -529,20 +551,24 @@ def main(args=None):
     executor = rclpy.executors.SingleThreadedExecutor()
     executor.add_node(node)
 
-    # Self-contained input: if nobody is publishing /joy (no teleop session
-    # up), run our own joy_node for the walkthrough and stop it on exit.
+    # Self-contained input: if nobody is publishing Joy messages (no teleop
+    # session up), run our own joy_node for the walkthrough and stop it on
+    # exit; a live session's joy_node, under its instance name, is reused.
     # autorepeat is required: without it joy_node stays silent while no
     # control moves and the baseline capture times out. The executable is
     # spawned directly (no ros2 run wrapper, which does not forward
     # signals reliably), tied to this process as tightly as the platform
     # allows (see spawn_kwargs).
     joy_proc = None
-    time.sleep(0.5)  # let discovery settle before counting publishers
-    if node.count_publishers('joy') == 0:
+    time.sleep(0.5)  # let discovery settle before looking for publishers
+    joy_topic = node.live_joy_topic()
+    if joy_topic is None:
+        joy_topic = '/joy'
         joy_proc = subprocess.Popen(
             joy_node_command(),
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             **spawn_kwargs())
+    node.listen(joy_topic)
 
     def _spin():
         try:

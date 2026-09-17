@@ -3,9 +3,11 @@
 # port reverse.
 twist_to_thrust:
   ros__parameters:
+    # Relative to the instance: the teleop launch runs the mixer in the
+    # /<name> namespace, so these resolve to /<name>/motor_port/cmd and so on.
     thruster_topics:
-      - /blueboat/motor_port/cmd
-      - /blueboat/motor_stbd/cmd
+      - motor_port/cmd
+      - motor_stbd/cmd
     gains_linear_x:  [ 1.0,  1.0]
     gains_linear_y:  [ 0.0,  0.0]
     gains_linear_z:  [ 0.0,  0.0]
