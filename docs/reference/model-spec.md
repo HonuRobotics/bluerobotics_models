@@ -34,6 +34,7 @@ The workflow this specification serves is built on published standards owned by 
 | glTF 2.0, Khronos | The mesh format and its material model. Normative except where this specification narrows, adds to, or departs from it, each of which is marked |
 | REP 103, ROS | Coordinate conventions and units for the part frame |
 | BCP 14 | The meaning of the requirement keywords in this document |
+| [REP 158](https://github.com/openrobotics/reps/blob/main/_posts/rep-0158%3A2006.md), ROS and Gazebo (Draft) | Asset conventions for simulation interoperability, written with glTF 2.0 as the export target. Cited below wherever a rule here matches one of its requirements |
 
 Three obligations follow from that design goal, and this document is bound by all of them. Where this specification departs from a standard, the departure is stated explicitly and the reason given, never left as a silent local habit. Where it adds a requirement the standard does not make, the rule says which consumer needs it, so that a reader can tell a limitation of our tools from a property of the format. And where a standard is silent, this specification says so plainly rather than implying an authority that does not exist.
 
@@ -142,6 +143,8 @@ The model MUST be Y-up, as glTF specifies.
 
 > **Undecided.** Whether the delivered file faces +X, which is what authoring in the part frame produces and what every current delivery does, or +Z, which is the convention stated in glTF. Tracked as review decision 2.
 
+[REP 158](https://github.com/openrobotics/reps/blob/main/_posts/rep-0158%3A2006.md) requires "the strict ROS Right-Handed convention: X-forward, Y-left, Z-up", which is external support for +X. Its Z-up is stated about the USD stage and does not bear on the Y-up rule in section 5.2. See the reference for the rest.
+
 **Implementation Note.** glTF says "the front side of a glTF asset faces +Z", but states it about the asset as a whole rather than any individual mesh, and states it without a normative keyword. No validator checks it. Until this is decided, modelers SHOULD continue to author in the part frame, which yields a file facing +X, and MUST NOT re-orient a delivery to face +Z without agreement.
 
 ### 5.4 Origin
@@ -177,6 +180,8 @@ The model SHOULD NOT contain degenerate, zero-area triangles.
 ### 6.1 UV sets
 
 The model MUST have exactly one UV set, `TEXCOORD_0`, with coordinates inside the range 0 to 1.
+
+[REP 158](https://github.com/openrobotics/reps/blob/main/_posts/rep-0158%3A2006.md) requires the same range and adds uniqueness: "Unique UVs must be packed into the [0, 1] space". It reserves coordinates outside that range for seamless tiling with repeat wrap modes, which this document does not permit. See the reference for the rest.
 
 A second UV set MAY be used, and then only to carry a baked ambient occlusion lightmap.
 
@@ -216,7 +221,9 @@ Textures MUST be 2048 pixels or smaller on each side.
 
 Any texture carrying alpha MUST be PNG.
 
-> **Undecided.** Whether base color textures may be JPEG, and the size cap per map type. Every current delivery is JPEG, because the Blender exporter's default inherits the format of the source image. Tracked as review decision 4.
+Normal, metallic, roughness and packed ORM textures MUST be PNG, which [REP 158](https://github.com/openrobotics/reps/blob/main/_posts/rep-0158%3A2006.md) also requires. It permits JPEG for base color and emissive only where they carry no alpha, and excludes EXR, TIFF and other high dynamic range formats from material maps. See the reference for the rest.
+
+> **Undecided.** Whether base color textures may be JPEG, and the size cap per map type. Every current delivery is JPEG, because the Blender exporter's default inherits the format of the source image. Tracked as review decision 4. REP 158 permits JPEG for base color and emissive maps without alpha, which is external support for allowing it.
 
 **Implementation Note.** Roughness and metalness maps receive no mipmaps, so large ones shimmer at distance and SHOULD be smaller than the base color map. Base color and emissive are treated as sRGB; every other map is linear. 16-bit images are converted to 8 bits on upload and buy nothing.
 
