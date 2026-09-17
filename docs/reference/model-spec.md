@@ -74,10 +74,10 @@ References to external documents are normative if this specification uses those 
 Some text is purely informative, giving background or explaining why a rule exists. A section whose title is suffixed "(Informative)" contains only informative language. All Notes, Implementation Notes and Examples are informative. Everything not so marked is normative.
 
 ### 2.4 Decision status
-
+% CLAUDE: Make it clear that the plan is to clear the decided, discuss and as many open items as possible before we run the first pilot of the workflow. We may leave some items open as we don't have time and budget to be exhaustive. 
 Where this specification states a requirement in normative language, the team has decided it. Three kinds of block mark everything else, so that the state of every question is visible in the text rather than discoverable only by asking:
 
-> **Decided.** A decision taken after the first draft, with the reason in one or two sentences and where the evidence is. The rule it produced appears as normative text next to it. The block exists so a reader can see what changed and why.
+> **Decided.** A decision taken after the first draft, with the reason in one or two sentences and where the evidence is. The rule it produced appears as normative text next to it. The block exists so a reader can see what changed and why. 
 
 > **Discuss.** A proposal is on the table and states the rule as it would read, but the team has not agreed to it. Until it does, the proposed rule imposes no requirement. Tracked as review decision N.
 
@@ -128,7 +128,7 @@ A delivery MUST include a visual model named `<part>.visual.glb`, where `<part>`
 
 The part name MUST be lowercase snake_case, and MUST match the directory it is delivered into. Naming rules for parts are given in [Parts](../design/parts.md) and are not repeated here.
 
-> **Open.** Whether a delivery also includes collision geometry from the modeler, as an SDF of primitive shapes as the current pipeline expects, or as a simplified STL as the earlier draft proposed, and whether the modeler still delivers `model.sdf` at all or only the GLB plus a filled-in datasheet row. Nothing settles this yet; the community pattern is hand-placed primitive colliders beside a single visual, which is also what the existing parts do. Tracked as review decisions 1 and 3.
+> **Open.** Whether a delivery also includes collision geometry from the modeler, as an SDF of primitive shapes as the current pipeline expects, or as a simplified STL as the earlier draft proposed, and whether the modeler still delivers `model.sdf` at all or only the GLB plus a filled-in datasheet row. Nothing settles this yet; the community pattern is hand-placed primitive colliders beside a single visual, which is also what the existing parts do. Tracked as review decisions 1 and 3.  % CLAUDE: For now it is decided.   Modeler will provide model.sdf with collisions as SDF primatives.   Then open an issue to extend this to other collisions representations, i.e, meshes.
 
 > **Discuss.** Whether a delivery carries a manifest recording the source of the geometry, the source of its dimensions and the texture provenance. Proposed: yes, because it is cheap and answers questions the audit could not. Archiving the Blender source file is a separate and heavier commitment, storage, licensing of purchased textures and an implied ability to re-export, and is not proposed. Tracked as review decision 12.
 
