@@ -540,6 +540,7 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l3"><a class="reference internal" href="#run">Run</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#blueboat">BlueBoat</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#bluerov2">BlueROV2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#a-named-instance-or-two">A named instance, or two</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#safety-behavior">Safety behavior</a></li>
@@ -666,20 +667,23 @@ window.runMermaid = runMermaid;</script>
 <h1>Teleoperate with a gamepad<a class="headerlink" href="#teleoperate-with-a-gamepad" title="Link to this heading"></a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">bluerobotics_teleop</span></code> drives either vehicle with a standard gamepad:
 <code class="docutils literal notranslate"><span class="pre">joy_node</span></code> reads the pad, <code class="docutils literal notranslate"><span class="pre">teleop_twist_joy</span></code> maps the sticks to a
-normalized <code class="docutils literal notranslate"><span class="pre">/cmd_vel</span></code>, and the <code class="docutils literal notranslate"><span class="pre">twist_to_thrust</span></code> mixer turns that Twist
+normalized <code class="docutils literal notranslate"><span class="pre">cmd_vel</span></code>, and the <code class="docutils literal notranslate"><span class="pre">twist_to_thrust</span></code> mixer turns that Twist
 into per thruster thrust commands through a per vehicle gain matrix. The
-thrust topics it publishes are the ones documented in each vehicle’s
-Actuators page (<a class="reference internal" href="../vehicles/blueboat/actuators.html"><span class="std std-doc">BlueBoat</span></a>,
+stack binds to one vehicle instance, <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code>: its three nodes and their
+topics run under <code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;</span></code>, and the mixer’s thruster topics, relative in
+its config, land on <code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/motor_port/cmd</span></code> and the like. Those are the
+topics documented in each vehicle’s Actuators page
+(<a class="reference internal" href="../vehicles/blueboat/actuators.html"><span class="std std-doc">BlueBoat</span></a>,
 <a class="reference internal" href="../vehicles/bluerov2/actuators.html"><span class="std std-doc">BlueROV2</span></a>), so the same launch works
 against the simulation or a bridged real vehicle.</p>
 <pre  class="mermaid">
         flowchart LR
   PAD([&quot;gamepad&quot;]) --&gt; JOY[&quot;joy_node&quot;]
-  JOY -- &quot;/joy&lt;br/&gt;sensor_msgs/Joy&quot; --&gt; TTJ[&quot;teleop_twist_joy_node&quot;]
-  TTJ -- &quot;/cmd_vel&lt;br/&gt;geometry_msgs/Twist, normalized&quot; --&gt; MIX[&quot;twist_to_thrust&quot;]
-  JOY -- &quot;/joy&lt;br/&gt;deadman, EPA&quot; --&gt; MIX
+  JOY -- &quot;/&amp;lt;name&amp;gt;/joy&lt;br/&gt;sensor_msgs/Joy&quot; --&gt; TTJ[&quot;teleop_twist_joy_node&quot;]
+  TTJ -- &quot;/&amp;lt;name&amp;gt;/cmd_vel&lt;br/&gt;geometry_msgs/Twist, normalized&quot; --&gt; MIX[&quot;twist_to_thrust&quot;]
+  JOY -- &quot;/&amp;lt;name&amp;gt;/joy&lt;br/&gt;deadman, EPA&quot; --&gt; MIX
   CFG[&quot;per vehicle mixer.yaml&lt;br/&gt;gain matrix, command envelope&quot;] -.-&gt; MIX
-  MIX -- &quot;one std_msgs/Float64 per thruster&lt;br/&gt;/blueboat/motor_*/cmd&lt;br/&gt;/bluerov2/thruster_*/cmd&quot; --&gt; OUT([&quot;simulation or&lt;br/&gt;bridged vehicle&quot;])
+  MIX -- &quot;one std_msgs/Float64 per thruster&lt;br/&gt;/&amp;lt;name&amp;gt;/motor_*/cmd (boat)&lt;br/&gt;/&amp;lt;name&amp;gt;/thruster_*/cmd (ROV)&quot; --&gt; OUT([&quot;the instance &amp;lt;name&amp;gt;:&lt;br/&gt;simulation or bridged vehicle&quot;])
     </pre><section id="configure-the-gamepad-mapping-optional">
 <h2>Configure the gamepad mapping (optional)<a class="headerlink" href="#configure-the-gamepad-mapping-optional" title="Link to this heading"></a></h2>
 <p>A gamepad mapping ties the pad’s controls, stick axes and buttons, to the vessel’s controllable degrees of freedom: surge, sway, heave and yaw, plus the deadman button and the thrust ceiling (EPA).</p>
@@ -696,11 +700,12 @@ against the simulation or a bridged real vehicle.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>run<span class="w"> </span>bluerobotics_teleop<span class="w"> </span>joy_map
 </pre></div>
 </div>
-<p>If nothing is publishing <code class="docutils literal notranslate"><span class="pre">/joy</span></code>, the tool starts its own <code class="docutils literal notranslate"><span class="pre">joy_node</span></code>
+<p>If nothing is publishing Joy messages, the tool starts its own <code class="docutils literal notranslate"><span class="pre">joy_node</span></code>
 (with the autorepeat the baseline capture needs) and stops it on exit,
 however the walkthrough ends, so there is no background node to forget.
-Running the walkthrough next to a live teleop session also works: its <code class="docutils literal notranslate"><span class="pre">joy_node</span></code>
-is detected and reused.</p>
+Running the walkthrough next to a live teleop session also works: its
+<code class="docutils literal notranslate"><span class="pre">joy_node</span></code> publishes on <code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/joy</span></code>, and the tool finds and reads that
+topic instead of starting a second one.</p>
 <p>One walkthrough maps every function (surge, sway, heave, yaw, deadman,
 EPA) for every vehicle at once: the mapping describes the pad, not a
 vehicle, and a vehicle without a motion zeroes it in its mixer gains.</p>
@@ -715,6 +720,30 @@ tool.</p>
 <section id="run">
 <h2>Run<a class="headerlink" href="#run" title="Link to this heading"></a></h2>
 <p>Hold RB to drive. The thrust ceiling starts at 20%, so the vehicle is sluggish until you press D pad up, 10% per click.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Argument</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>What</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">vehicle</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bluerov2</span></code></p></td>
+<td><p>Which mixer to load: <code class="docutils literal notranslate"><span class="pre">bluerov2</span></code>, <code class="docutils literal notranslate"><span class="pre">bluerov2_heavy</span></code> or <code class="docutils literal notranslate"><span class="pre">blueboat</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p>the vehicle’s own name</p></td>
+<td><p>The instance to drive, the name it was spawned under; the stack runs under <code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">device_id</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>The gamepad <code class="docutils literal notranslate"><span class="pre">joy_node</span></code> opens; a second stack takes a second pad</p></td>
+</tr>
+</tbody>
+</table>
+<p>Without <code class="docutils literal notranslate"><span class="pre">name:=</span></code>, the stack drives the instance the vehicle’s own
+<code class="docutils literal notranslate"><span class="pre">sim.launch.xml</span></code> spawns: <code class="docutils literal notranslate"><span class="pre">blueboat</span></code>, or <code class="docutils literal notranslate"><span class="pre">bluerov2</span></code> for both ROV loadouts.</p>
 <section id="blueboat">
 <h3>BlueBoat<a class="headerlink" href="#blueboat" title="Link to this heading"></a></h3>
 <p>Start the simulation (<a class="reference internal" href="../vehicles/blueboat/running.html"><span class="std std-doc">options</span></a>):</p>
@@ -737,13 +766,38 @@ tool.</p>
 </pre></div>
 </div>
 </section>
+<section id="a-named-instance-or-two">
+<h3>A named instance, or two<a class="headerlink" href="#a-named-instance-or-two" title="Link to this heading"></a></h3>
+<p>An instance spawned under another name
+(<a class="reference internal" href="namespaces.html#a-second-instance-in-the-same-world"><span class="std std-ref">Several vehicles</span></a>)
+takes <code class="docutils literal notranslate"><span class="pre">name:=</span></code>. Two boats on one ocean, <code class="docutils literal notranslate"><span class="pre">boat_a</span></code> and <code class="docutils literal notranslate"><span class="pre">boat_b</span></code>, get one
+stack each, on two gamepads:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>bluerobotics_teleop<span class="w"> </span>teleop.launch.py<span class="w"> </span>vehicle:<span class="o">=</span>blueboat<span class="w"> </span>name:<span class="o">=</span>boat_a
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>bluerobotics_teleop<span class="w"> </span>teleop.launch.py<span class="w"> </span>vehicle:<span class="o">=</span>blueboat<span class="w"> </span>name:<span class="o">=</span>boat_b<span class="w"> </span>device_id:<span class="o">=</span><span class="m">1</span>
+</pre></div>
+</div>
+<p>Each stack publishes only under its name, so the pads never cross:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>topic<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>cmd
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>/boat_a/cmd_vel
+/boat_a/motor_port/cmd
+/boat_a/motor_stbd/cmd
+/boat_b/cmd_vel
+/boat_b/motor_port/cmd
+/boat_b/motor_stbd/cmd
+</pre></div>
+</div>
+</section>
 </section>
 <section id="safety-behavior">
 <h2>Safety behavior<a class="headerlink" href="#safety-behavior" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p><strong>Deadman</strong>: holding the deadman button (RB by default) is required for
 any output; releasing it zeroes every thruster immediately.</p></li>
-<li><p><strong>Command timeout</strong>: a stale <code class="docutils literal notranslate"><span class="pre">/cmd_vel</span></code> zeroes every thruster.</p></li>
+<li><p><strong>Command timeout</strong>: a stale <code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/cmd_vel</span></code> zeroes every thruster.</p></li>
 <li><p><strong>EPA (end point adjustment)</strong>: the thrust ceiling starts at 20% and is
 stepped in 10% increments from the D pad, so full thrust is opt in.</p></li>
 <li><p><strong>50 Hz republish</strong>: latched commands downstream can never go stale.</p></li>
@@ -765,8 +819,8 @@ stepped in 10% increments from the D pad, so full thrust is opt in.</p></li>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ls<span class="w"> </span>/dev/input/by-id/<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>joystick
 </pre></div>
 </div>
-<p>Once the pad enumerates, confirm messages are flowing. With teleop running, or <code class="docutils literal notranslate"><span class="pre">ros2</span> <span class="pre">run</span> <span class="pre">joy</span> <span class="pre">joy_node</span></code> on its own:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/joy
+<p>Once the pad enumerates, confirm messages are flowing. With teleop running, on the instance’s topic (<code class="docutils literal notranslate"><span class="pre">/joy</span></code> for a bare <code class="docutils literal notranslate"><span class="pre">ros2</span> <span class="pre">run</span> <span class="pre">joy</span> <span class="pre">joy_node</span></code>):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/blueboat/joy
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">axes</span></code> and <code class="docutils literal notranslate"><span class="pre">buttons</span></code> should change as you move the sticks. If they do, the pad and <code class="docutils literal notranslate"><span class="pre">joy_node</span></code> are fine and any remaining problem is downstream: the mapping, the deadman, or the mixer. If the pad enumerates but <code class="docutils literal notranslate"><span class="pre">/joy</span></code> stays silent, check that your user can read the device; <code class="docutils literal notranslate"><span class="pre">/dev/input/event*</span></code> is normally group <code class="docutils literal notranslate"><span class="pre">input</span></code>.</p>

@@ -69,7 +69,10 @@ ros2 launch kai_bringup spawn_vehicle.launch.xml name:=boat_b y:=-4 yaw:=1.57 ge
 Each boat gets its topics under its name, its own bridge and
 `robot_state_publisher` in its namespace, and its own TF prefix; the clock
 is bridged once by the simulation launch, which drops the `/clock` entry
-this bridge config carries. The boats float there under any name because
+this bridge config carries. A controller binds to one boat through those
+topics: the [teleop stack](teleop.md#a-named-instance-or-two) takes
+`name:=boat_b` and runs under `/boat_b`, so a second stack on a second
+gamepad drives `boat_a` alongside it. The boats float there under any name because
 their displacement collisions are marked ([Buoyancy](../design/buoyancy.md)).
 In this repository's own worlds, buoyancy is enabled by model name
 (`<enable>blueboat::hull_displacement</enable>`), so a renamed instance

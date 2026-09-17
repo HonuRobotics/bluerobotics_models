@@ -182,6 +182,7 @@
 <li class="toctree-l3"><a class="reference internal" href="teleop.html#run">Run</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="teleop.html#blueboat">BlueBoat</a></li>
 <li class="toctree-l4"><a class="reference internal" href="teleop.html#bluerov2">BlueROV2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="teleop.html#a-named-instance-or-two">A named instance, or two</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="teleop.html#safety-behavior">Safety behavior</a></li>
@@ -367,7 +368,10 @@ ros2<span class="w"> </span>launch<span class="w"> </span>kai_bringup<span class
 <p>Each boat gets its topics under its name, its own bridge and
 <code class="docutils literal notranslate"><span class="pre">robot_state_publisher</span></code> in its namespace, and its own TF prefix; the clock
 is bridged once by the simulation launch, which drops the <code class="docutils literal notranslate"><span class="pre">/clock</span></code> entry
-this bridge config carries. The boats float there under any name because
+this bridge config carries. A controller binds to one boat through those
+topics: the <a class="reference internal" href="teleop.html#a-named-instance-or-two"><span class="std std-ref">teleop stack</span></a> takes
+<code class="docutils literal notranslate"><span class="pre">name:=boat_b</span></code> and runs under <code class="docutils literal notranslate"><span class="pre">/boat_b</span></code>, so a second stack on a second
+gamepad drives <code class="docutils literal notranslate"><span class="pre">boat_a</span></code> alongside it. The boats float there under any name because
 their displacement collisions are marked (<a class="reference internal" href="../design/buoyancy.html"><span class="std std-doc">Buoyancy</span></a>).
 In this repository’s own worlds, buoyancy is enabled by model name
 (<code class="docutils literal notranslate"><span class="pre">&lt;enable&gt;blueboat::hull_displacement&lt;/enable&gt;</span></code>), so a renamed instance
