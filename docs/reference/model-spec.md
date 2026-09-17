@@ -38,6 +38,8 @@ The workflow this specification serves is built on published standards owned by 
 
 Three obligations follow from that design goal, and this document is bound by all of them. Where this specification departs from a standard, the departure is stated explicitly and the reason given, never left as a silent local habit. Where it adds a requirement the standard does not make, the rule says which consumer needs it, so that a reader can tell a limitation of our tools from a property of the format. And where a standard is silent, this specification says so plainly rather than implying an authority that does not exist.
 
+**Implementation Note.** Gazebo's glTF support carries no roadmap commitment, and this document does not treat it as one. The published Gazebo roadmap has no glTF, GLB, PBR or mesh-format item. The direction is on record only in project management committee minutes: [2026-08-17](https://discourse.openrobotics.org/t/gazebo-pmc-meeting-minutes-2026-08-17/57494) discusses deprecating COLLADA in favour of glTF and GLB and leaves it unresolved, and [2026-06-15](https://discourse.openrobotics.org/t/gazebo-pmc-meeting-minutes-2026-06-15/55498) decided to move mesh loading to Assimp by default. Behavior is what `MeshManager.cc` does today, which routes `gltf`, `glb` and `fbx` to the Assimp loader while `dae`, `obj` and `stl` keep their custom ones. Rules below cite that behavior as intent or as fact accordingly, never a roadmap.
+
 ### 1.3 Project-specific content (Informative)
 
 This specification is written for the Blue Robotics parts library, but most of it is not specific to that library or to this repository. The general content is the format subset, the coordinate and frame rules, and the material, texture and transparency requirements, all of which follow from glTF and from how robotics renderers consume it. The project-specific content is confined to section 3, naming, section 4.1, delivery location, and the toolchain versions in section 9.
@@ -117,7 +119,13 @@ The part name MUST be lowercase snake_case, and MUST match the directory it is d
 
 ### 4.2 Format
 
-The model MUST be glTF 2.0 in the binary container, `.glb`.
+The model MUST be glTF 2.0 in the binary container, `.glb`. 
+
+**Implementation Note.** `.gltf` is ruled out on this stack rather than on its merits, and the merits are real. Its images version independently in git, which matters because textures are 59 percent of every byte we store, so re-exporting geometry to change one map is waste and a diff names which map changed. It is also easier to see what a model is made of without a tool.
+
+What rules it out is a defect in the version we run. gz-common 7.3.0 decides whether to apply the glTF root rotation by comparing an already-lowercased file extension against the literal `"glTF"`, which never matches, so a `.gltf` file loses that rotation while a `.glb` keeps it. A `.gltf` delivery would load into Gazebo mis-oriented and report nothing. Gazebo additionally decodes external textures eagerly when the mesh loads. Both have upstream fixes that the pinned container does not yet carry, so this is worth revisiting rather than settled forever. For scale, Fuel holds 53 GLB models against a single `.gltf`, and that one is broken. Evidence in section 1.8 of [VISUAL_ASSET_PIPELINE_REVIEW.md](VISUAL_ASSET_PIPELINE_REVIEW.md).
+
+This does not settle decision 16. A `.glb` packs only the first buffer into its binary chunk, and images may still carry a `uri` pointing at an external file, so the container and the texture question are separable.
 
 The file MUST validate against the Khronos glTF Validator with zero errors. Validator warnings and infos MUST be reviewed but do not by themselves fail a delivery.
 
