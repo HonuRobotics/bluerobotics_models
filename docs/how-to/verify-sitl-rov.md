@@ -41,7 +41,7 @@ connects and then roughly once a minute.  This is annoying, but not of concern. 
 See troubleshooting notes in [ArduPilot SITL setup](../getting-started/ardupilot_setup.md).
 ```
 
-## Verification
+## Verification - teleop via the autopilot. 
 
 One axis at a time, at the MAVProxy prompt in the autopilot shell. 
 
@@ -76,7 +76,7 @@ Directions below are in the vehicle's own frame, [REP 103](https://www.ros.org/r
 |---|---|---|
 | `rc 5 1510` | surge | moves ahead, holds heading and depth |
 | `rc 5 1490` | surge | moves astern |
-| `rc 6 1510` | sway | crabs to starboard (its own right, -y), nose stays put |
+| `rc 6 1510` | sway | crabs to starboard (its own right, -y)|
 | `rc 4 1510` | yaw | turns to starboard, clockwise seen from above |
 | `rc 3 1510` | heave | rises |
 | `rc 3 1490` | heave | sinks |
@@ -84,20 +84,16 @@ Directions below are in the vehicle's own frame, [REP 103](https://www.ros.org/r
 | `rc all 1500` | — | stops |
 
 
-```{important}
-The check passes when each RC channel, commanded on its own, produces the
+The verification passes when each RC channel, commanded on its own, produces the
 motion described above.
-```
 
 The sign convention can be confusing, because two coordinate conventions do not agree:
 
 * ArduPilot uses x forward, y **right**, z down - FRD, as in MAVLink's [`MAV_FRAME_BODY_FRD`](https://mavlink.io/en/messages/common.html#MAV_FRAME_BODY_FRD). 
 * ROS uses x forward, y **left**, z up - FLU, per [REP 103](https://www.ros.org/reps/rep-0103.html).
 
-They differ by a 180 degree roll about x, so not every axis flips: surge and roll read the same, sway, pitch and yaw are opposite, and heave reads the same because ArduSub's throttle stick is defined positive up even though its z axis points down.
 
-
-The commands are deliberately tiny. 1510 about 2.5% of full stick and it is  enough to see the vehicle move. This is because the actuators and vehicle dynamics have not been tuned yet.  That will happen later in the spec.
+The commands are deliberately tiny. 1510 about 2.5% of full stick and it is  enough to see the vehicle move. This is because the actuators and vehicle dynamics have not been tuned yet.  That will happen later in [the spec](../specs/SITL_SPEC.md)
 
 To see what the autopilot is commanding while you move the sticks, echo the thruster topics:
 
@@ -106,4 +102,3 @@ gz topic -e -t /bluerov2/thruster_1/cmd
 gz topic -e -t /bluerov2/thruster_5/cmd
 ```
 
-Values are normalized, so anything outside [-1, 1] is a bug in the mapping rather than an aggressive command. Thruster 1 is a horizontal and should respond to surge, sway and yaw; thruster 5 is a vertical and should respond only to heave and roll.
