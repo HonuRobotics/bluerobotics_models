@@ -6,7 +6,7 @@ Not necessary to simuate many robots, but ArduPilot is the default for many low-
 
 Set up ArduPilot SITL and the Gazebo plugin, so a vehicle in these models can be driven by the same autopilot firmware it runs on the water. 
 
-This walkthrough has only been testing using [drydock](https://github.com/HonuRobotics/drydock)'s `maritime` container, and that is the only environment this page officially supports. 
+This walkthrough has only been tested using [drydock](https://github.com/HonuRobotics/drydock)'s `maritime` container, and that is the only environment this page officially supports.
 
 ## What you are installing
 
@@ -26,7 +26,7 @@ Neither source build is a colcon package, so neither belongs in `src/`. For this
 
 ### Source repo clones
 
- Both checkouts are pinned: ArduPilot to the `Rover-4.7.1` release tag, and the `ardupilot_gazebo` clone is fixed by commit hash.
+Both checkouts are pinned: ArduPilot to the `Rover-4.7.1` release tag, and the `ardupilot_gazebo` clone is fixed by commit hash.
 
 ```bash
 mkdir -p ~/maritime_ws/thirdparty
@@ -50,9 +50,7 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build -j$(nproc)
 ```
 
-`GZ_VERSION=jetty` is not optional. With the variable unset, `ardupilot_gazebo`'s
-CMakeLists falls through to its Harmonic branch and looks for `gz-sim8`.
-
+`GZ_VERSION=jetty` is not optional. With the variable unset, `ardupilot_gazebo`'s CMakeLists falls through to its Harmonic branch and looks for `gz-sim8`.
 
 The resulting shared libraries are in `build/`, e.g.,  `libArduPilotPlugin.so`.
 
@@ -69,23 +67,17 @@ source venv-ardupilot/bin/activate
 ./waf rover
 ```
 
-Also build ArduCopter 
+Also build ArduCopter, for the Iris smoke test below:
+
 ```bash
 ./waf copter
-``` 
-to run the Iris UAV test below. 
-
-
-
-
+```
 
 The script offers to edit your shell login file twice — once to activate its venv in every terminal, once to add `Tools/autotest` to `PATH`. Decline both. `DO_PYTHON_VENV_ENV=0` handles the first; answer `N` to the second if you are prompted, and note that plain `-y` answers `y` to it. Both edits go to the host's `~/.profile` through the bind mount, and both are handled instead by the environment script below.
 
-### Verify the Python environment  % CLAUDE: This section is too verbose.  Just the facts - what to do and what to expect without so much commentary and what-ifs.
+### Verify the Python environment
 
-The prereq script installs its Python dependencies as a single `pip install`, and if that resolution fails part-way it leaves an incomplete environment without stopping the script. This is worth checking rather than discovering later as an import error inside MAVProxy.
-
-With the venv active:
+The prereq script's single `pip install` can fail part-way without stopping the script. With the venv active, check:
 
 ```bash
 for m in future pymavlink serial MAVProxy em pexpect lxml numpy psutil yaml; do
@@ -93,28 +85,17 @@ for m in future pymavlink serial MAVProxy em pexpect lxml numpy psutil yaml; do
 done
 ```
 
-Install anything it reports. Each package installs cleanly on its own — the failure is in the batch, not in the packages, so there is nothing to work around.
-
-Two are worth knowing about specifically. **MAVProxy** is often absent, and **`future`** is a MAVProxy dependency that MAVProxy does not declare, so installing MAVProxy alone does not bring it and the first symptom is `ModuleNotFoundError: No module named 'future'` from `rline.py`.
+Expect no output. Install anything it reports by name; MAVProxy and its undeclared dependency `future` are the usual two:
 
 ```bash
 pip install MAVProxy future
 ```
 
-`--map` and `--console` additionally need wxPython, which comes from apt rather than pip — the pip build compiles wxWidgets and takes the best part of an hour, while the venv's `--system-site-packages` makes the apt module visible from inside it. It is in drydock's package list.
+`--map` and `--console` also need wxPython. It comes from apt (`python3-wxgtk4.0`), is already in drydock's image, and is visible inside the venv because of `--system-site-packages`.
 
-ArduPilot's list also includes `dronecan`, `geocoder`, `tabulate`, `wsproto`, `junitparser` and `intelhex`. None are needed for SITL — they cover CAN peripherals, map geocoding, autotest reporting and hex generation for real flight boards — so leave them missing unless something asks.
+## Environment
 
-```{warning}
-Do not inspect this venv from the host. It is created with
-`--system-site-packages`, so a `pip list` run outside the container reports
-the host's packages as though they were the venv's, and a module can appear
-installed when it is not.
-```
-
-## Environment % CLAUDE: Again, tldr.   Just a sentence or two on whay we need to do this step and then the step.
-
-SITL needs four things on the environment that nothing else in this workspace wants: the Gazebo variables, `Tools/autotest` on `PATH`, and the ArduPilot venv. Put them in one script rather than in a shell login file — under drydock, `$HOME` is shared with the host, so a login file is the wrong place for paths that only make sense inside the container.
+SITL needs the Gazebo variables, `Tools/autotest` on `PATH` and the ArduPilot venv, and nothing else in the workspace wants any of them. They go in one script rather than a login file, because `$HOME` is shared with the host. Write it once:
 
 ```bash
 cat > ~/maritime_ws/thirdparty/setup-ardupilot.sh <<'EOF'
@@ -138,9 +119,7 @@ esac
 EOF
 ```
 
-The venv activation has to come before the `PATH` line, not after. A venv's `activate` restores `PATH` to its pre-activation value when it runs, so a `PATH` entry added first disappears the moment the venv is activated — and only in shells where the venv was already active, which makes it look intermittent. The `case` guard keeps repeated sourcing from stacking duplicate entries.
-
-Then, in every shell doing SITL work:
+Then source it in every shell doing SITL work, after the colcon workspace, since it appends to paths the workspace has already set:
 
 ```bash
 source ~/maritime_ws/thirdparty/setup-ardupilot.sh
