@@ -6,7 +6,7 @@ Not necessary to simuate many robots, but ArduPilot is the default for many low-
 
 Set up ArduPilot SITL and the Gazebo plugin, so a vehicle in these models can be driven by the same autopilot firmware it runs on the water. 
 
-Two ways to work, and the build commands are identical in both. On a host already set up for this repository — Ubuntu 26.04 with ROS 2 Lyrical and `ros_gz`, per [Requirements](requirements.md) — everything below runs directly. In [drydock](https://github.com/HonuRobotics/drydock), the same commands run inside the `maritime` container. Only the prerequisite step differs.
+This walkthrough has only been testing using [drydock](https://github.com/HonuRobotics/drydock)'s `maritime` container, and that is the only environment this page officially supports. 
 
 ## What you are installing
 
@@ -21,38 +21,15 @@ Four pieces, which stay separate:
 
 Neither source build is a colcon package, so neither belongs in `src/`. For this example, those source repositories are cloned in `~/maritime_ws/thirdparty/`, but it can be located in another location.   We build from this source, but do not anticipate making commits.
 
-```bash
-mkdir -p ~/maritime_ws/thirdparty
-```
-
-## Host/Container prerequisites
-
-`ardupilot_gazebo` needs a few development packages beyond what this repository already requires. Gazebo itself is not among them: it arrives as `ros_gz`'s dependency, as [Requirements](requirements.md) describes.
-
-On a host:
-
-```bash
-sudo apt install cmake rapidjson-dev libopencv-dev \
-                 libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
-```
-
-In drydock they are listed in `projects/maritime/apt-packages.txt`, so rebuilding the image is all that is needed:
-
-```bash
-~/maritime_ws/tools/drydock/drydock build maritime
-```
 
 
-GStreamer is required unconditionally by the plugin's CMakeLists, even though
-only its optional camera plugin uses it. A configure that stops at
-`gstreamer-1.0 not found` means these packages are missing, not that anything
-is wrong with your Gazebo.
 
 ### Source repo clones
 
- Both checkouts are pinned: ArduPilot to the `Rover-4.7.1` release tag, and the `ardupilot_gazebo` clone is fixed by commit hash. 
+ Both checkouts are pinned: ArduPilot to the `Rover-4.7.1` release tag, and the `ardupilot_gazebo` clone is fixed by commit hash.
 
 ```bash
+mkdir -p ~/maritime_ws/thirdparty
 cd ~/maritime_ws/thirdparty
 git clone https://github.com/ArduPilot/ardupilot.git
 git -C ardupilot checkout Rover-4.7.1
@@ -61,11 +38,9 @@ git clone https://github.com/ArduPilot/ardupilot_gazebo.git
 git -C ardupilot_gazebo checkout 082a0fe231f6e63bc8d1598f1cba461d9e2ea7f5
 ```
 
-`Rover-4.7.1` is the 4.7 release the Blue Robotics parameter sets in this repository are derived from; `Sub-4.7.1` and `Copter-4.7.1` are the same commit, so the one checkout serves every both boat and ROV. 
-
 ## Build the Gazebo plugin
 
-From host (or in drydock, attach to the container first with `~/maritime_ws/tools/drydock/drydock join maritime`.)
+In the container:
 
 ```bash
 cd ~/maritime_ws/thirdparty/ardupilot_gazebo
@@ -75,14 +50,9 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build -j$(nproc)
 ```
 
-```{important}
 `GZ_VERSION=jetty` is not optional. With the variable unset, `ardupilot_gazebo`'s
-CMakeLists falls through to its Harmonic branch and looks for `gz-sim8`, which
-does not exist here — the failure reads as a missing Gazebo rather than a wrong
-one.
-```
+CMakeLists falls through to its Harmonic branch and looks for `gz-sim8`.
 
-(The reason is that Jetty dropped the version suffix from its CMake package names. `ardupilot_gazebo`'s Jetty branch accordingly calls `find_package(gz-sim)` with no number and sets its version variables to the empty string, where the Harmonic and Ionic branches ask for `gz-sim8` and `gz-sim9`. That holds whether Gazebo came from upstream packages or, as under ROS 2 Lyrical, from `ros-lyrical-gz-sim-vendor` — both install `gz-sim-config.cmake`.)
 
 The resulting shared libraries are in `build/`, e.g.,  `libArduPilotPlugin.so`.
 
@@ -90,8 +60,6 @@ The resulting shared libraries are in `build/`, e.g.,  `libArduPilotPlugin.so`.
 
 ```bash
 cd ~/maritime_ws/thirdparty/ardupilot
-
-# Create the venv inside the checkout; the prereq script finds and uses it.
 python3 -m venv --system-site-packages venv-ardupilot
 
 DO_PYTHON_VENV_ENV=0 Tools/environment_install/install-prereqs-ubuntu.sh -y
@@ -101,19 +69,19 @@ source venv-ardupilot/bin/activate
 ./waf rover
 ```
 
-Also build ArduCopter
+Also build ArduCopter 
 ```bash
 ./waf copter
 ``` 
-to rund the Iris UAV test below
+to run the Iris UAV test below. 
 
-Ubuntu 26.04 ("resolute") is on the prereq script's supported list, so it should not need coaxing.
 
-The venv is not optional and is worth understanding; see [Why a venv](#why-a-venv) below if the reason matters to you.
+
+
 
 The script offers to edit your shell login file twice — once to activate its venv in every terminal, once to add `Tools/autotest` to `PATH`. Decline both. `DO_PYTHON_VENV_ENV=0` handles the first; answer `N` to the second if you are prompted, and note that plain `-y` answers `y` to it. Both edits go to the host's `~/.profile` through the bind mount, and both are handled instead by the environment script below.
 
-### Verify the Python environment
+### Verify the Python environment  % CLAUDE: This section is too verbose.  Just the facts - what to do and what to expect without so much commentary and what-ifs.
 
 The prereq script installs its Python dependencies as a single `pip install`, and if that resolution fails part-way it leaves an incomplete environment without stopping the script. This is worth checking rather than discovering later as an import error inside MAVProxy.
 
@@ -133,7 +101,7 @@ Two are worth knowing about specifically. **MAVProxy** is often absent, and **`f
 pip install MAVProxy future
 ```
 
-`--map` and `--console` additionally need wxPython, which comes from apt rather than pip — the pip build compiles wxWidgets and takes the best part of an hour, while the venv's `--system-site-packages` makes the apt module visible from inside it. It is in drydock's package list; on a host, `sudo apt install python3-wxgtk4.0`.
+`--map` and `--console` additionally need wxPython, which comes from apt rather than pip — the pip build compiles wxWidgets and takes the best part of an hour, while the venv's `--system-site-packages` makes the apt module visible from inside it. It is in drydock's package list.
 
 ArduPilot's list also includes `dronecan`, `geocoder`, `tabulate`, `wsproto`, `junitparser` and `intelhex`. None are needed for SITL — they cover CAN peripherals, map geocoding, autotest reporting and hex generation for real flight boards — so leave them missing unless something asks.
 
@@ -144,7 +112,7 @@ the host's packages as though they were the venv's, and a module can appear
 installed when it is not.
 ```
 
-## Environment
+## Environment % CLAUDE: Again, tldr.   Just a sentence or two on whay we need to do this step and then the step.
 
 SITL needs four things on the environment that nothing else in this workspace wants: the Gazebo variables, `Tools/autotest` on `PATH`, and the ArduPilot venv. Put them in one script rather than in a shell login file — under drydock, `$HOME` is shared with the host, so a login file is the wrong place for paths that only make sense inside the container.
 
@@ -210,9 +178,8 @@ sim_vehicle.py -v ArduCopter -f gazebo-iris --model JSON --console --map -w \
 
 The two `--add-param-file` arguments layer the frame's parameter files on top of whatever `sim_vehicle.py` loads for `-f gazebo-iris` model.
 
-`ardupilot_gazebo`'s README leaves the parameter files out. At the pin its command works; on newer ArduPilot it will not arm.
 
-`-w` wipes the EEPROM so the parameter files are reloaded. Worth using on the first run and after any aborted one: defaults are only written to a *fresh* EEPROM, and an EEPROM left can introduce stale information. 
+
 
 Then at the MAVProxy prompt:
 
