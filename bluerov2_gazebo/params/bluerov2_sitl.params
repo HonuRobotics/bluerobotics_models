@@ -17,16 +17,15 @@
 # absent or supplied by ArduPilot's own SITL defaults. Every value below is
 # the shipped one unless a DELTA comment says otherwise.
 #
-# Load it AFTER ArduPilot's own sub defaults, which supply the SITL side
-# (fake accelerometer calibration so pre-arm passes, joystick button map,
-# position controller gains). Last file wins:
+# Load it LAST. `-f gazebo-bluerov2` makes sim_vehicle.py load ArduPilot's own sub.parm first: the SITL side (fake accelerometer calibration so pre-arm passes, joystick button map, position controller gains). This file goes after it, and the last file wins:
 #
 #   sim_vehicle.py -v ArduSub -f gazebo-bluerov2 --model JSON --console -w \
 #     --add-param-file=$AP/default_params/sub.parm \
 #     --add-param-file=<this file>
 #
-# Do not add sub-6dof.parm. It sets FRAME_CONFIG 2 for the Heavy, which
-# expects eight thrusters; this vehicle has six.
+# The explicit sub.parm repeats what `-f` already loaded. It is harmless and is kept so the command reads the same on newer ArduPilot, which stops loading frame defaults when `--model` is given.
+#
+# sub-6dof.parm is not loaded by this frame, and should not be added. It sets FRAME_CONFIG 2 for the Heavy, which expects eight thrusters; this vehicle has six.
 
 # ---- Frame ----------------------------------------------------------------
 # 1 = Vectored: four horizontal thrusters at 45 degrees for surge, sway and
