@@ -3,8 +3,7 @@
   Flat water for SITL. The same world as blueboat_water.sdf - seabed, graded
   buoyancy, no waves - with the ArduPilot flavoured BlueBoat already in it.
 
-  Waves come in phase 4. Flat water first, so that anything odd about the
-  autopilot interface is not confused with anything odd about the sea state.
+  Waves come later. Flat water first, so that anything odd about the autopilot interface is not confused with anything odd about the sea state.
 
   Run it directly, no ROS:
 

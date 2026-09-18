@@ -12,16 +12,13 @@
 # speeds - plus the deltas simulation requires. Every value below is the
 # shipped one unless a DELTA comment says otherwise.
 #
-# Load it AFTER ArduPilot's own rover defaults, which supply the SITL side
-# (accelerometer calibration so pre-arm passes, SIM_PIN_MASK, mode slots) but
-# also set SERVO1/3_MIN/MAX to 1000/2000. Last file wins:
+# Load it LAST. `-f rover-skid` makes sim_vehicle.py load ArduPilot's own rover.parm and rover-skid.parm first: the SITL side (accelerometer calibration so pre-arm passes, SIM_PIN_MASK, mode slots), but also SERVO1/3_MIN/MAX at 1000/2000 and SERVO1_FUNCTION 73 / SERVO3_FUNCTION 74, the reverse of the shipped boat. Every one of those is set again below, and the last file wins:
 #
 #   sim_vehicle.py -v Rover -f rover-skid --model JSON --console --map -w \
 #     --add-param-file=$AP/default_params/rover.parm \
 #     --add-param-file=<this file>
 #
-# Do not add rover-skid.parm. It sets SERVO1_FUNCTION 73 / SERVO3_FUNCTION 74,
-# the reverse of the shipped boat.
+# The explicit rover.parm repeats what `-f` already loaded. It is harmless and is kept so the command reads the same on newer ArduPilot, which stops loading frame defaults when `--model` is given.
 
 # ---- Frame ----------------------------------------------------------------
 FRAME_CLASS      2          # Boat
@@ -57,9 +54,7 @@ MOT_THR_MIN      0
 MOT_THR_MAX      100
 MOT_SLEWRATE     200
 MOT_STR_THR_MIX  0.6
-MOT_THST_ASYM    1.6        # Forward/reverse thrust ratio. Not yet honored by
-                            # the simulated thruster, which is symmetric about
-                            # its command. Phase 3 reconciles the two.
+MOT_THST_ASYM    1.6        # Forward/reverse thrust ratio; ArduPilot scales reverse outputs up by it. The simulated thruster models the same asymmetry its own way, scaling each direction on its own limit (51.5 N ahead and 40.2 N astern at present, a 1.28 ratio, and placeholders), so the two are applied in series. Reconciling them is part of the stabilization-layer work.
 
 # ---- Speeds and navigation ------------------------------------------------
 CRUISE_SPEED     1
@@ -70,8 +65,7 @@ TURN_RADIUS      0.1
 PILOT_STEER_TYPE 3
 
 # ---- Control gains --------------------------------------------------------
-# Shipped verbatim. Whether these work unmodified against our thrust model is
-# the exit criterion for phase 3, so they are deliberately not retuned here.
+# Shipped verbatim. Whether these work unmodified against our thrust model is a question for the stabilization-layer work, so they are deliberately not retuned here.
 ATC_SPEED_P      1
 ATC_SPEED_I      0.2
 ATC_SPEED_D      0

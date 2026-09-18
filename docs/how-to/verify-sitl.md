@@ -87,12 +87,10 @@ Equal positive numbers for throttle alone, equal and opposite for steering alone
 
 Magnitudes. The thruster scales each direction on its own limit, so the T200's asymmetry — roughly 51.5 N ahead against 40.2 N astern — is represented. The hull is not: the hydrodynamic damping coefficients are placeholders awaiting identification. Speeds and accelerations are therefore not meaningful yet, and a boat that reaches the wrong speed at full throttle is expected rather than a defect.
 
-## The parameter files are not optional
+## The parameter files
 
-Both `--add-param-file` arguments are required, for the reason described in [ArduPilot SITL setup](../getting-started/ardupilot_setup.md): recent ArduPilot resolves frame defaults from the SITL binary's embedded `vehicleinfo.json` keyed by `--model`, not by the `-f` frame name. With `--model JSON` nothing matches and no frame defaults are applied at all.
+`-f rover-skid` makes `sim_vehicle.py` load ArduPilot's own `rover.parm` and `rover-skid.parm` before anything passed with `--add-param-file`, and it prints the full `--defaults` list it built, so the order is visible at startup. Last file wins, and the order is the whole point:
 
-Order matters, and so does what is left out:
-
-- `rover.parm` first. It carries the SITL side — accelerometer calibration so pre-arm passes, `SIM_PIN_MASK`, the mode slots — but also sets `SERVO1/3_MIN/MAX` to 1000/2000.
-- `blueboat_sitl.params` last, so the shipped boat's 1100/1900 range and its throttle assignment win.
-- **Not** `rover-skid.parm`. It sets `SERVO1_FUNCTION 73` and `SERVO3_FUNCTION 74`, which is the reverse of the shipped BlueBoat and would swap the thrusters.
+- `rover.parm` and `rover-skid.parm` come first, from `-f`. They carry the SITL side — accelerometer calibration so pre-arm passes, `SIM_PIN_MASK`, the mode slots — but also set `SERVO1/3_MIN/MAX` to 1000/2000 and, from `rover-skid.parm`, `SERVO1_FUNCTION 73` and `SERVO3_FUNCTION 74`, the reverse of the shipped BlueBoat.
+- `blueboat_sitl.params` last, so the shipped boat's 1100/1900 range, its throttle assignment and its speeds win. Every parameter `rover-skid.parm` sets is set again there; if the boat turns on the spot at `rc 3 1700`, the first thing to check is that this file is last.
+- The explicit `--add-param-file=rover.parm` repeats what `-f` already loaded. It is harmless at the pinned release and is kept so the same command works on newer ArduPilot, which stops loading frame defaults when `--model` is given; see [ArduPilot SITL setup](../getting-started/ardupilot_setup.md).
