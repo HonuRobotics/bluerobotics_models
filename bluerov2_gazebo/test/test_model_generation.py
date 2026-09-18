@@ -72,14 +72,15 @@ def urdf_for(config_text):
     return ET.fromstring(out.stdout), out.stdout, f.name, config
 
 
-def gen_model(config_text):
+def gen_model(config_text, ardupilot=False):
     """Generate model.sdf via generate_model.py; return (root, text)."""
     _, _, urdf, config = urdf_for(config_text)
     with tempfile.NamedTemporaryFile('w', suffix='.sdf', delete=False) as f:
         out_path = f.name
     run = subprocess.run(
-        [sys.executable, str(GZ_LIB / 'generate_model.py'), config, urdf,
-         str(MODEL_XACRO), out_path],
+        [sys.executable, str(GZ_LIB / 'generate_model.py')]
+        + (['--ardupilot'] if ardupilot else [])
+        + [config, urdf, str(MODEL_XACRO), out_path],
         capture_output=True, text=True, timeout=120)
     assert run.returncode == 0, f'generate_model failed:\n{run.stderr}'
     text = Path(out_path).read_text()
@@ -180,9 +181,10 @@ def test_buoyancy_displacement_realizes_the_declaration():
         assert '<enable>bluerov2::buoyancy_displacement</enable>' in text, world
 
 
-def test_plugin_references_survive_lumping():
+@pytest.mark.parametrize('ardupilot', [False, True])
+def test_plugin_references_survive_lumping(ardupilot):
     """Plugin joint/link refs exist in the POST lumping converted model."""
-    sdf_root, _ = gen_model(FULL_CONFIG)
+    sdf_root, _ = gen_model(FULL_CONFIG, ardupilot=ardupilot)
     _, urdf_text, urdf_path, _ = urdf_for(FULL_CONFIG)
     joint_refs = {ref.text for ref in sdf_root.iter('joint_name')}
     joint_refs |= {ref.text for ref in sdf_root.iter('jointName')}
@@ -276,3 +278,52 @@ def test_model_name_follows_the_topic_namespace():
     root, _ = gen_model(FULL_CONFIG.replace(
         'topic_namespace: bluerov2', 'topic_namespace: rov_a'))
     assert root.find('model').get('name') == 'rov_a'
+
+
+def test_ardupilot_variant_is_additive():
+    """ardupilot:=false generates exactly what it always did."""
+    plain, plain_text = gen_model(default_config())
+    assert not plugins(plain, 'ArduPilotPlugin')
+    assert 'imu_sensor' not in plain_text
+
+
+def test_ardupilot_controls_follow_the_thrusters():
+    """One <control> per propeller, on the channel ArduSub expects."""
+    root, _ = gen_model(default_config(), ardupilot=True)
+    ap = plugins(root, 'ArduPilotPlugin')
+    assert len(ap) == 1, 'expected exactly one ArduPilotPlugin'
+    controls = ap[0].findall('control')
+
+    thruster_topics = {
+        p.find('joint_name').text: p.find('topic').text
+        for p in plugins(root, 'gz-maritime-thruster-system')}
+    assert thruster_topics, 'no thrusters to compare the controls against'
+    assert len(controls) == len(thruster_topics), (
+        f'{len(controls)} controls for {len(thruster_topics)} thrusters')
+
+    # Channels are contiguous from zero: ArduSub assigns Motor1..MotorN to
+    # SERVO1..SERVON from FRAME_CONFIG, and channel= is zero based.
+    assert sorted(int(c.get('channel')) for c in controls) == \
+        list(range(len(controls)))
+
+    for control in controls:
+        joint = control.find('jointName').text
+        channel = int(control.get('channel'))
+        assert joint == f'thruster_{channel + 1}_joint', (
+            f'channel {channel} drives {joint}; ArduSub mixes that channel '
+            f'as Motor {channel + 1}')
+        # The command topic must be the one the thruster listens on: both
+        # come from the same topic_base, and this is what proves it.
+        assert control.find('cmd_topic').text == '/' + thruster_topics[joint]
+
+
+def test_ardupilot_imu_is_the_declared_frame():
+    """The imuName resolves to the sensor on the chassis's imu frame."""
+    root, _ = gen_model(default_config(), ardupilot=True)
+    ap = plugins(root, 'ArduPilotPlugin')[0]
+    link, sensor = ap.find('imuName').text.split('::')
+    links = {ln.get('name'): ln for ln in root.iter('link')}
+    assert link in links, f'imuName names a link that does not exist: {link}'
+    assert any(s.get('name') == sensor and s.get('type') == 'imu'
+               for s in links[link].iter('sensor')), (
+        f'{link} carries no imu sensor named {sensor}')
