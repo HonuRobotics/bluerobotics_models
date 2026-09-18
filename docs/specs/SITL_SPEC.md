@@ -22,6 +22,8 @@ The unit of work and of review is a phase: one phase, one pull request.
 
 Status values: **done** (merged), **in review**, **next**, **later**.
 
+This spec is the only document that is current about the plan. [SITL_SPEC_CONTEXT.md](SITL_SPEC_CONTEXT.md) is the original static roadmap, kept for the reasoning behind these decisions.
+
 ## Phases
 
 | Phase | Deliverable | Repository | Status |
@@ -79,13 +81,27 @@ Documentation: both vehicles' actuator pages move to the new topic and units, an
 3. The phase 1 walkthrough re-run by hand, reproducing the same `rc` results on the new mode.
 4. `gz topic -e -t /blueboat/motor_port/cmd` while moving the sticks, confirming the `<control>` block emits [-1, 1] and carries no vehicle physics.
 
-### Phase 2.999 — Pin the ArduPilot versions
+### Phase 2.999 — Patches from PR #58
 
 **Objective:** make the versions we depend on reproducible. Current setup document doesnt name versions of ArduPilot and `ardupilot_gazebo`Raised in review of this spec. A small PR, done before phase 3.
 
 The simplest thing that work: the setup document names the versions and the clone steps check them out. Nothing mechanized, nothing new to maintain for now.
 
 *Verified by* following the setup document from a clean `thirdparty/` and then do both walkthroughs.
+
+**Problem:** Phase numbers were inadvertently included in source documentation as references to chunks of work.  When we changed the plan with #58, it was noticed that the source documentation was out of sync with the numbers in the this document.  E.g., 
+```
+Some comments in the source now name the wrong phase:
+ - blueboat_sitl.params lines 62 and 74 say phase 3; it's now phase 4.
+ - blueboat_sitl.sdf line 6 says waves are phase 4; they're now phase 7.
+ ```
+
+**Solution** 
+
+* Short term: Have AI remove the phase numbers from source documentation to remove the dependency
+* Long term: Improve the workflow so that AI generated documentation does not generate unitended dependencies.  
+
+*Verified by* Not verified - just tell the agents to clean it up for now. 
 
 ### Phase 3 — BlueROV2 under ArduSub
 
