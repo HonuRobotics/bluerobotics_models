@@ -235,11 +235,21 @@ Then phase 4's step responses and phase 6's survey mission re-run in a stated se
 
 This phase also produces the material worth showing: a wave-field run is the demonstration, so capturing video or stills while the reviewer is there costs nothing extra.
 
-### Phase 8 — Documentation and CI
+### Phase 8 — Documentation and Announce
 
-**Objective:** have the documentation work as one manual rather than one set of pages per phase, and have the launch files and CI that a user rather than a developer needs. Each phase drafts its own pages; this is where they are read end to end. Also a decision on what, if any, of the SITL path is testable headlessly in CI.
+**Objective:** The user-facing documention should be in the form of walkthroughs that simultaneously serve two purposes: 
+
+1. to demonstrate to a user the capability 
+2. to support development as end-to-end testing of the new feature while the feature is being developed and as a regression test for later. 
+
+This documentation will have been built incrementally in the previous phases.  This phase is simply to clean that up that documenation for consistency and make a public announcement about the features of this spec. 
+
 
 Packaging and binary distribution are deliberately not here. Everything in this plan is source-built in the drydock container, and ArduPilot in particular is cloned into `thirdparty/` rather than installed, because it has no rosdep key and is pinned by hand. Deciding where these packages are meant to land is its own effort with its own owner, and putting it on this plan's critical path would couple a simulation milestone to a distribution decision. The one thing this plan owes that effort is a flag: `thruster.repos` pins an unreleased sibling package, which is exactly the kind of thing packaging trips over, and it goes away when the thruster mode reaches gz-sim upstream in phase 9.
+
+CI is left out of the plan and discussion on CI in Issue #66 so we are tracking.
+
+
 
 #### Automated verification
 
