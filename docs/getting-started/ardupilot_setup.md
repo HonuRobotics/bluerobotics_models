@@ -65,11 +65,7 @@ DO_PYTHON_VENV_ENV=0 Tools/environment_install/install-prereqs-ubuntu.sh -y
 source venv-ardupilot/bin/activate
 ./waf configure --board sitl
 ./waf rover
-```
-
-Also build ArduCopter, for the Iris smoke test below:
-
-```bash
+./waf sub
 ./waf copter
 ```
 
@@ -77,26 +73,25 @@ The script offers to edit your shell login file twice — once to activate its v
 
 ### Verify the Python environment
 
-The prereq script's single `pip install` can fail part-way without stopping the script. With the venv active, check:
+The prereq script's single `pip install` can fail part-way without stopping the script. Check, in the venv — every `pip install` on this page goes there, never into the system Python:
 
 ```bash
+source ~/maritime_ws/thirdparty/ardupilot/venv-ardupilot/bin/activate
 for m in future pymavlink serial MAVProxy em pexpect lxml numpy psutil yaml; do
   python3 -c "import $m" 2>/dev/null || echo "MISSING $m"
 done
 ```
 
-Expect no output. Install anything it reports by name; MAVProxy and its undeclared dependency `future` are the usual two:
+Expect no output. If you see any of them missing (`future`, `pymavlink`, `serial` are `MAVProxy`) then fix by direct pip install.
 
 ```bash
 pip install MAVProxy future
 ```
 
-`--map` and `--console` also need wxPython. It comes from apt (`python3-wxgtk4.0`), is already in drydock's image, and is visible inside the venv because of `--system-site-packages`.
 
 ## Environment
 
-SITL needs the Gazebo variables, `Tools/autotest` on `PATH` and the ArduPilot venv, and nothing else in the workspace wants any of them. They go in one script rather than a login file, because `$HOME` is shared with the host. Write it once:
-
+SITL needs the Gazebo variables, `Tools/autotest` on `PATH` and the ArduPilot venv. They go in one script rather than a login file, because `$HOME` is shared with the host. Write the file once:
 ```bash
 cat > ~/maritime_ws/thirdparty/setup-ardupilot.sh <<'EOF'
 # Source before running gz sim or sim_vehicle.py.
@@ -157,10 +152,7 @@ sim_vehicle.py -v ArduCopter -f gazebo-iris --model JSON --console --map -w \
 
 The two `--add-param-file` arguments layer the frame's parameter files on top of whatever `sim_vehicle.py` loads for `-f gazebo-iris` model.
 
-
-
-
-Then at the MAVProxy prompt:
+Then at the MAVProxy prompt (the terminal in which you ran `sim_vehicle.py`):
 
 ```
 mode guided
@@ -192,7 +184,7 @@ nobody here has modified.
 
 **Gazebo starts but the vehicle never arms, and MAVProxy reports no heartbeat from the physics backend** — the two processes are not talking. SITL sends to UDP 9002 and the plugin listens there; check that the model's `<fdm_addr>` is `127.0.0.1` and that both are running inside the same container.
 
-**`PreArm: Motors: Check frame class and type`** — the frame's parameters were never applied. Either the checkout is not at the pin (`git -C ~/maritime_ws/thirdparty/ardupilot describe --tags` should say `Rover-4.7.1`; newer ArduPilot does not load frame defaults when `--model` is given) or the `--add-param-file` arguments were dropped. Keep both arguments; `-w` alone does not help, because there are no defaults for it to reload.
+**`PreArm: Motors: Check frame class and type`** — the frame's parameters were never applied. Either the checkout is not at the pin (`git -C ~/maritime_ws/thirdparty/ardupilot tag --points-at HEAD` should list `Rover-4.7.1`; newer ArduPilot does not load frame defaults when `--model` is given) or the `--add-param-file` arguments were dropped. Keep both arguments; `-w` alone does not help, because there are no defaults for it to reload.
 
 **The vehicle arms but does not move** — usually the frame argument. The frame passed to `sim_vehicle.py` has to match the model's `<control>` channel wiring, and `--model JSON` has to be present or SITL uses its own internal physics and ignores Gazebo entirely.
 
