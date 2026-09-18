@@ -29,7 +29,8 @@ Status values: **done** (merged), **in review**, **next**, **later**.
 | 0 | Toolchain and a setup document | `bluerobotics_models`, `drydock` | done — [#43](https://github.com/HonuRobotics/bluerobotics_models/pull/43) |
 | 1 | BlueBoat under ArduRover, newtons interface | `bluerobotics_models` | done — [#44](https://github.com/HonuRobotics/bluerobotics_models/pull/44) |
 | 2 | Normalized command mode on the thruster | `gz-maritime`, `bluerobotics_models` | done — [gz-maritime#18](https://github.com/HonuRobotics/gz-maritime/pull/18), [#53](https://github.com/HonuRobotics/bluerobotics_models/pull/53) |
-| 3 | BlueROV2 under ArduSub | `bluerobotics_models` | next |
+| 2.999 | Pin the ArduPilot versions | `bluerobotics_models` | next |
+| 3 | BlueROV2 under ArduSub | `bluerobotics_models` | later |
 | 4 | Stabilization layer, boat | `bluerobotics_models` | later |
 | 5 | Stabilization layer, ROV | `bluerobotics_models` | later |
 | 6 | Waypoint mission, boat only | `bluerobotics_models` | later |
@@ -47,7 +48,7 @@ Both vehicles are in scope up to and including phase 5. Phases 0 to 2 were BlueB
 
 * Developed and verified inside the drydock container.
 * End-to-end walkthroughs are written against running in the drydock environment
-* ArduPilot and `ardupilot_gazebo` are built from source into `thirdparty/`, not installed from apt and not resolved by rosdep — neither has a rosdep key, and both are version pinned deliberately.
+* ArduPilot and `ardupilot_gazebo` are built from source into `thirdparty/`, not installed from apt and not resolved by rosdep — neither has a rosdep key.
 * Extending CI to install and exercise an autopilot is out of scope, and so are rosdep keys, buildfarm and packaging. These aspects of the project are not ready for packaging and that work contains its own decisions.  
 
 ### Phase 0 — Toolchain and a setup document
@@ -78,6 +79,14 @@ Documentation: both vehicles' actuator pages move to the new topic and units, an
 3. The phase 1 walkthrough re-run by hand, reproducing the same `rc` results on the new mode.
 4. `gz topic -e -t /blueboat/motor_port/cmd` while moving the sticks, confirming the `<control>` block emits [-1, 1] and carries no vehicle physics.
 
+### Phase 2.999 — Pin the ArduPilot versions
+
+**Objective:** make the versions we depend on reproducible. Current setup document doesnt name versions of ArduPilot and `ardupilot_gazebo`Raised in review of this spec. A small PR, done before phase 3.
+
+The simplest thing that work: the setup document names the versions and the clone steps check them out. Nothing mechanized, nothing new to maintain for now.
+
+*Verified by* following the setup document from a clean `thirdparty/` and then do both walkthroughs.
+
 ### Phase 3 — BlueROV2 under ArduSub
 
 **Objective:** have the BlueROV2 moving under ArduSub, bringing it up to the line the BlueBoat reached in phase 1. It shares the thruster interface from phase 2 and nothing else today — no `ArduPilotPlugin` block, no IMU frame, no parameter set, no SITL world — so this is phase 1 done again for a different vehicle: prove the plumbing and the channel mapping in the simplest mode, and leave fidelity to phase 5.
@@ -91,6 +100,8 @@ Documentation: both vehicles' actuator pages move to the new topic and units, an
 Use the ArduSub configuration from BlueRobotics so that Ardu config matches the ROV.  This is also a good check that the way we've modelled the ROV is consistent with the Ardu config - which it should be.  
 
 *To be verified by* a walkthrough written alongside the work, in the shape of [Verify the SITL connection](../how-to/verify-sitl.md) but per axis: in `MANUAL`, arm, then command surge, sway, heave and yaw one at a time and confirm each produces that motion and no other. A cross-coupled response means the allocation is wrong; a reversed one means a thruster or a channel is. Magnitudes are not trusted yet, exactly as in phase 1.
+
+
 
 ### Phase 4 — Stabilization layer, boat
 
