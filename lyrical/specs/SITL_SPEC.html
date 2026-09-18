@@ -1,0 +1,708 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SITL spec &mdash; BlueRobotics Models lyrical documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/honu.css?v=44af46ee" />
+
+  
+    <link rel="shortcut icon" href="../_static/honu-robotics-favicon.svg"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=46f74c5b"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            BlueRobotics Models
+              <img src="../_static/honu-robotics-white-logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../getting-started/requirements.html">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting-started/installation.html">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../getting-started/installation.html#from-source">From source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../getting-started/installation.html#from-ros-packages-debs">From ROS packages (debs)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../getting-started/first-simulation.html">First simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting-started/ardupilot_setup.html">ArduPilot SITL setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#what-you-are-installing">What you are installing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#host-container-prerequisites">Host/Container prerequisites</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../getting-started/ardupilot_setup.html#source-repo-clones">Source repo clones</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#build-the-gazebo-plugin">Build the Gazebo plugin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#build-the-ardupilot-firmware">Build the ArduPilot firmware</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../getting-started/ardupilot_setup.html#verify-the-python-environment">Verify the Python environment</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#environment">Environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#smoke-test">Smoke test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#reference">Reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../getting-started/ardupilot_setup.html#why-a-venv-and-why-not-to-skip-it">Why a venv, and why not to skip it</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../vehicles/index.html">Vehicles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../vehicles/blueboat/index.html">BlueBoat</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/running.html">Running the simulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/running.html#launch-arguments">Launch arguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/running.html#choosing-the-world">Choosing the world</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/running.html#in-rviz">In RViz</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/actuators.html">Actuators</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/actuators.html#available-actuators">Available actuators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/actuators.html#actuators-ros-api">Actuators ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/blueboat/actuators.html#thrusters">Thrusters</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/actuators.html#gazebo-transport-api">Gazebo transport API</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/sensors.html">Sensors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/sensors.html#available-sensors">Available sensors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/sensors.html#sensors-ros-api">Sensors ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/blueboat/sensors.html#echosounder">Echosounder</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/configuration.html">Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/configuration.html#hull-displacement">Hull displacement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/configuration.html#payload">Payload</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/index.html#the-default-vehicle">The default vehicle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../vehicles/bluerov2/index.html">BlueROV2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/running.html">Running the simulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/running.html#launch-arguments">Launch arguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/running.html#choosing-the-world">Choosing the world</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/running.html#in-rviz">In RViz</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/actuators.html">Actuators</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/actuators.html#available-actuators">Available actuators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/actuators.html#actuators-ros-api">Actuators ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/actuators.html#thrusters">Thrusters</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/actuators.html#grippers">Grippers</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/actuators.html#gazebo-transport-api">Gazebo transport API</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/sensors.html">Sensors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#available-sensors">Available sensors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#sensors-ros-api">Sensors ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#camera">Camera</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#stereo-camera">Stereo camera</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#scanning-sonar">Scanning sonar</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#dvl">DVL</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/configuration.html">Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/configuration.html#variants">Variants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/configuration.html#buoyancy">Buoyancy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/configuration.html#payload">Payload</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/index.html#the-default-vehicle">The default vehicle</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/index.html">How-to guides</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/change-parts.html">Change the fitted parts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#fit-the-other-propellers">Fit the other propellers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#leave-the-ping2-kit-off">Leave the Ping2 kit off</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#add-the-antenna-mast-or-the-payload-bracket">Add the antenna mast or the payload bracket</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#rename-the-ping-topics">Rename the Ping topics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#add-a-part-somewhere-specific">Add a part somewhere specific</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#declare-your-own-mount-point">Declare your own mount point</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#see-what-you-got">See what you got</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/installed-vehicle.html">Configure an installed vehicle</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/installed-vehicle.html#the-launch-does-it-for-you">The launch does it for you</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/installed-vehicle.html#generate-the-artifacts-yourself">Generate the artifacts yourself</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/installed-vehicle.html#overlay-workspace">Overlay workspace</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/add-part.html">Add a part</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/add-part.html#where-a-part-goes">Where a part goes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/add-sensor-part.html">Add a sensor part</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/own-world.html">Run in your own world</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/own-world.html#include-the-default-model">Include the default model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/own-world.html#spawn-at-runtime">Spawn at runtime</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/own-world.html#use-the-stock-launch-with-your-world">Use the stock launch with your world</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/own-world.html#with-a-custom-config">With a custom config</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/teleop.html">Teleoperate with a gamepad</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/teleop.html#configure-the-gamepad-mapping-optional">Configure the gamepad mapping (optional)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/teleop.html#run">Run</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../how-to/teleop.html#blueboat">BlueBoat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../how-to/teleop.html#bluerov2">BlueROV2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../how-to/teleop.html#a-named-instance-or-two">A named instance, or two</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/teleop.html#safety-behavior">Safety behavior</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/teleop.html#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/verify-sitl.html">Verify the SITL connection</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#the-checks">The checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#what-the-autopilot-is-doing-with-those-commands">What the autopilot is doing with those commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#what-this-does-not-check">What this does not check</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#the-parameter-files-are-not-optional">The parameter files are not optional</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/namespaces.html">Several vehicles and several simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/namespaces.html#one-name-per-instance">One name per instance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../how-to/namespaces.html#topic-overrides-under-the-name">Topic overrides under the name</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/namespaces.html#a-second-instance-in-the-same-world">A second instance in the same world</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/namespaces.html#several-simulations">Several simulations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/faq.html">Troubleshooting / FAQ</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/faq.html#xacro-fails-with-assembly-error">xacro fails with “ASSEMBLY ERROR: …”</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/faq.html#the-boat-appears-rolled-90-degrees-in-rviz-parts-detached">The boat appears rolled 90 degrees in RViz, parts detached</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/faq.html#the-boat-moves-sideways-instead-of-forward">The boat moves sideways instead of forward</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/faq.html#no-ranges-on-blueboat-ping-range">No ranges on /blueboat/ping/range</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/faq.html#a-part-looks-rolled-90-degrees-in-rviz-but-fine-in-gazebo">A part looks rolled 90 degrees in RViz but fine in Gazebo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/faq.html#cannot-locate-rosdep-definition">“Cannot locate rosdep definition”</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/faq.html#two-simulations-interfere-with-each-other">Two simulations interfere with each other</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/faq.html#robot-state-publisher-warns-about-the-root-link-inertia">robot_state_publisher warns about the root link inertia</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/parts-catalog.html">Parts catalog and slots</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/parts-catalog.html#catalog">Catalog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/parts-catalog.html#slots">Slots</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/parts-catalog.html#blueboat-chassis">BlueBoat chassis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/parts-catalog.html#bluerov2-chassis">BlueROV2 chassis</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/parts-catalog.html#configuration-keys">Configuration keys</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/parts-catalog.html#frames">Frames</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../design/index.html">Design</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../design/architecture.html">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design/architecture.html#the-pieces">The pieces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/architecture.html#why-it-works-this-way">Why it works this way</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design/parts.html">Parts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design/parts.html#the-part-contract">The part contract</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/parts.html#meshes">Meshes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/parts.html#reviewing-parts">Reviewing parts</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design/slots.html">Slots and assembly</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design/slots.html#resolution">Resolution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/slots.html#what-a-slot-is-in-the-urdf">What a slot is in the URDF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/slots.html#why-defaults-live-in-the-parts">Why defaults live in the parts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/slots.html#where-to-add-a-slot">Where to add a slot</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design/buoyancy.html">Buoyancy: all up round mass and displacement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design/buoyancy.html#usv-hull-displacement">USV: hull displacement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/buoyancy.html#uuv-declared-trim-bluerov2">UUV: declared trim (BlueROV2)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/buoyancy.html#marked-for-any-world">Marked for any world</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/buoyancy.html#constraints">Constraints</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../design/gazebo-composition.html">Gazebo composition</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../design/gazebo-composition.html#merge-include-and-lumping">Merge include and lumping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/gazebo-composition.html#sensors-and-thrusters-follow-their-part">Sensors and thrusters follow their part</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/gazebo-composition.html#the-bridge-agrees-by-construction">The bridge agrees by construction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/gazebo-composition.html#build-time-and-launch-time">Build time and launch time</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design/gazebo-composition.html#what-is-in-the-composed-model">What is in the composed model</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../project/index.html">Project</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../project/contributing.html">Contributing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../project/contributing.html#build-and-test">Build and test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../project/contributing.html#pre-commit-hooks">Pre-commit hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../project/contributing.html#conventions">Conventions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../project/contributing.html#documentation">Documentation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">BlueRobotics Models</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">SITL spec</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/specs/SITL_SPEC.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sitl-spec">
+<h1>SITL spec<a class="headerlink" href="#sitl-spec" title="Link to this heading"></a></h1>
+<p>Experimenting with spec-driven development.</p>
+<p>This spec defines our current SITL integration plan  and is stated so it can be verified.  There is deeper background and context in  <a class="reference internal" href="SITL_SPEC_CONTEXT.html"><span class="std std-doc">SITL_SPEC_CONTEXT.md</span></a></p>
+<section id="how-this-spec-is-used">
+<h2>How this spec is used<a class="headerlink" href="#how-this-spec-is-used" title="Link to this heading"></a></h2>
+<p>The spec and the source are both editable and a commit may modify either or both.</p>
+<p>Types of PRs:</p>
+<ul class="simple">
+<li><p><strong>Spec only.</strong> The plan moves ahead of the source — a request to review the intent before anything is built.</p></li>
+<li><p><strong>Source only.</strong> If the change is only to source, the spec is still valid and the PR is implementation consistent with the spec.  Makes it easier for humans and agents to review the source if they know the spec.</p></li>
+<li><p><strong>Spec and source together.</strong> The plan and its implementation change at once. This is for what the plan did not anticipate, an unexpected issue or a technical detail too small to be worth a standalone spec revision and review, but significant enough that leaving the spec alone would make it false.</p></li>
+</ul>
+<p>The unit of work and of review is a phase: one phase, one pull request.</p>
+<p>Status values: <strong>done</strong> (merged), <strong>in review</strong>, <strong>next</strong>, <strong>later</strong>.</p>
+<p>This spec is the only document that is current about the plan. <a class="reference internal" href="SITL_SPEC_CONTEXT.html"><span class="std std-doc">SITL_SPEC_CONTEXT.md</span></a> is the original static roadmap, kept for the reasoning behind these decisions.</p>
+</section>
+<section id="phases">
+<h2>Phases<a class="headerlink" href="#phases" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Phase</p></th>
+<th class="head"><p>Deliverable</p></th>
+<th class="head"><p>Repository</p></th>
+<th class="head"><p>Status</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>Toolchain and a setup document</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code>, <code class="docutils literal notranslate"><span class="pre">drydock</span></code></p></td>
+<td><p>done — <a class="reference external" href="https://github.com/HonuRobotics/bluerobotics_models/pull/43">#43</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>BlueBoat under ArduRover, newtons interface</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code></p></td>
+<td><p>done — <a class="reference external" href="https://github.com/HonuRobotics/bluerobotics_models/pull/44">#44</a></p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>Normalized command mode on the thruster</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gz-maritime</span></code>, <code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code></p></td>
+<td><p>done — <a class="reference external" href="https://github.com/HonuRobotics/gz-maritime/pull/18">gz-maritime#18</a>, <a class="reference external" href="https://github.com/HonuRobotics/bluerobotics_models/pull/53">#53</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>2.999</p></td>
+<td><p>Pin the ArduPilot versions</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code></p></td>
+<td><p>next</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>BlueROV2 under ArduSub</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code></p></td>
+<td><p>later</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>Stabilization layer, boat</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code></p></td>
+<td><p>later</p></td>
+</tr>
+<tr class="row-even"><td><p>5</p></td>
+<td><p>Stabilization layer, ROV</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code></p></td>
+<td><p>later</p></td>
+</tr>
+<tr class="row-odd"><td><p>6</p></td>
+<td><p>Waypoint mission, boat only</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code></p></td>
+<td><p>later</p></td>
+</tr>
+<tr class="row-even"><td><p>7</p></td>
+<td><p>Waves, boat only</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code></p></td>
+<td><p>later</p></td>
+</tr>
+<tr class="row-odd"><td><p>8</p></td>
+<td><p>Documentation and CI</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code></p></td>
+<td><p>later</p></td>
+</tr>
+<tr class="row-even"><td><p>9</p></td>
+<td><p>Upstream the thruster mode</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gz-maritime</span></code>, then <code class="docutils literal notranslate"><span class="pre">gz-sim</span></code></p></td>
+<td><p>later</p></td>
+</tr>
+</tbody>
+</table>
+<p>Each phase states an objective and how it is verified met. The objective is the clarification of intent — what this phase is for and what it deliberately leaves to a later one — and the verification is the checks actually run to decide it is done, automated where they can be and by hand where they cannot.</p>
+<p>From phase 4 on, each phase states its verification in two parts. <strong>Automated</strong> is what CI and an agent can run unattended: which existing tests become load-bearing for the change, and which new ones the phase writes. <strong>Human</strong> is the instruction to a PR reviewer, and it is usually “follow this page and confirm what it says will happen” — which only works if the page states the development environment, the exact run steps and what a correct result looks like. A phase whose human verification cannot be written as a walkthrough has a documentation gap to close before it is done.</p>
+<p>Both vehicles are in scope up to and including phase 5. Phases 0 to 2 were BlueBoat-first because the BlueBoat is the simpler platform and had the published parameter sets to be faithful to; phase 3 brings the BlueROV2 up to the same line, then phase 4 does the stabilization layer for the boat and phase 5 repeats it for the ROV. Phases 6 and 7 are the boat alone, for reasons each states. Where a phase claims both vehicles, a walkthrough that covers only one is an incomplete phase.</p>
+<section id="prerequisites-assumptions-and-contraints">
+<h3>Prerequisites, assumptions and contraints<a class="headerlink" href="#prerequisites-assumptions-and-contraints" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Developed and verified inside the drydock container.</p></li>
+<li><p>End-to-end walkthroughs are written against running in the drydock environment</p></li>
+<li><p>ArduPilot and <code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo</span></code> are built from source into <code class="docutils literal notranslate"><span class="pre">thirdparty/</span></code>, not installed from apt and not resolved by rosdep — neither has a rosdep key.</p></li>
+<li><p>Extending CI to install and exercise an autopilot is out of scope, and so are rosdep keys, buildfarm and packaging. These aspects of the project are not ready for packaging and that work contains its own decisions.</p></li>
+</ul>
+</section>
+<section id="phase-0-toolchain-and-a-setup-document">
+<h3>Phase 0 — Toolchain and a setup document<a class="headerlink" href="#phase-0-toolchain-and-a-setup-document" title="Link to this heading"></a></h3>
+<p><strong>Objective:</strong> have <code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo</span></code> and the ArduPilot firmware building and running inside drydock, and a setup document written alongside the work rather than after it. Nothing of ours is involved — this establishes the toolchain and proves the loop closes on a vehicle somebody else wrote.</p>
+<p><em>Verified by</em> the procedure in <a class="reference internal" href="../getting-started/ardupilot_setup.html"><span class="std std-doc">ArduPilot SITL setup</span></a></p>
+</section>
+<section id="phase-1-blueboat-under-ardurover-newtons-interface">
+<h3>Phase 1 — BlueBoat under ArduRover, newtons interface<a class="headerlink" href="#phase-1-blueboat-under-ardurover-newtons-interface" title="Link to this heading"></a></h3>
+<p><strong>Objective:</strong> have the BlueBoat moving under ArduRover, on the newtons interface exactly as it stood, so the plumbing and the channel mapping are proven without waiting on phase 2. <code class="docutils literal notranslate"><span class="pre">MANUAL</span></code> only, so that no low-level stabilization has to be configured to get a result. Includes a documentation walkthrough complete enough that a PR reviewer can exercise the whole path end to end.</p>
+<p><em>Verified by</em> the walkthrough in <a class="reference internal" href="../how-to/verify-sitl.html"><span class="std std-doc">Verify the SITL connection</span></a>, by hand. <code class="docutils literal notranslate"><span class="pre">mode</span> <span class="pre">manual</span></code>, <code class="docutils literal notranslate"><span class="pre">arm</span> <span class="pre">throttle</span></code>, then <code class="docutils literal notranslate"><span class="pre">rc</span></code> overrides at the MAVProxy prompt, each with a stated expectation and a stated meaning if it fails:</p>
+</section>
+<section id="phase-2-normalized-command-mode-on-the-thruster">
+<h3>Phase 2 — Normalized command mode on the thruster<a class="headerlink" href="#phase-2-normalized-command-mode-on-the-thruster" title="Link to this heading"></a></h3>
+<p><strong>Objective:</strong> have one thruster interface that an autopilot and a custom controller reach the same way — a third input mode taking a normalized command in [-1, 1], scaled by the limits the plugin already carries. It lives in <code class="docutils literal notranslate"><span class="pre">gz-maritime</span></code> because a normalized thruster command is vehicle-agnostic capability, not something a vehicle repository should own.</p>
+<p>The thruster plugin is forked into a package we own and patched in place: it is a system plugin, so it builds as a standalone shared library against the installed gz-sim headers and is loaded by filename — no Gazebo source build. The schema stays additive, so a model that does not ask for the new mode behaves exactly as before, and the existing <code class="docutils literal notranslate"><span class="pre">&lt;deadband&gt;</span></code> is reused. The topic suffix changes from <code class="docutils literal notranslate"><span class="pre">/thrust</span></code> to <code class="docutils literal notranslate"><span class="pre">/cmd</span></code>, since the units change.</p>
+<p>Documentation: both vehicles’ actuator pages move to the new topic and units, and the phase 1 walkthrough is re-run and corrected against the new interface rather than left to drift.</p>
+<p><em>Verified by</em> a mix, since this phase has something automated to check:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">colcon</span> <span class="pre">test</span></code> on <code class="docutils literal notranslate"><span class="pre">gz_thruster</span></code> — six cases over the scaling: the ends and center, half command on each side of an asymmetric range, out-of-range clamping, NaN, propeller direction, and force mode unchanged.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">colcon</span> <span class="pre">test</span></code> on <code class="docutils literal notranslate"><span class="pre">blueboat_gazebo</span></code>, <code class="docutils literal notranslate"><span class="pre">bluerov2_gazebo</span></code> and <code class="docutils literal notranslate"><span class="pre">bluerobotics_teleop</span></code> — the generated model names the forked plugin, the bridge and mixers speak <code class="docutils literal notranslate"><span class="pre">/cmd</span></code> with a unity envelope, and the launch tests spawn a vehicle, command it and assert it moves.</p></li>
+<li><p>The phase 1 walkthrough re-run by hand, reproducing the same <code class="docutils literal notranslate"><span class="pre">rc</span></code> results on the new mode.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gz</span> <span class="pre">topic</span> <span class="pre">-e</span> <span class="pre">-t</span> <span class="pre">/blueboat/motor_port/cmd</span></code> while moving the sticks, confirming the <code class="docutils literal notranslate"><span class="pre">&lt;control&gt;</span></code> block emits [-1, 1] and carries no vehicle physics.</p></li>
+</ol>
+</section>
+<section id="phase-2-999-patches-from-pr-58">
+<h3>Phase 2.999 — Patches from PR #58<a class="headerlink" href="#phase-2-999-patches-from-pr-58" title="Link to this heading"></a></h3>
+<p><strong>Objective:</strong> make the versions we depend on reproducible. Current setup document doesnt name versions of ArduPilot and <code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo</span></code>Raised in review of this spec. A small PR, done before phase 3.</p>
+<p>The simplest thing that work: the setup document names the versions and the clone steps check them out. Nothing mechanized, nothing new to maintain for now.</p>
+<p><em>Verified by</em> following the setup document from a clean <code class="docutils literal notranslate"><span class="pre">thirdparty/</span></code> and then do both walkthroughs.</p>
+<p><strong>Problem:</strong> Phase numbers were inadvertently included in source documentation as references to chunks of work.  When we changed the plan with #58, it was noticed that the source documentation was out of sync with the numbers in the this document.  E.g.,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Some</span> <span class="n">comments</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">source</span> <span class="n">now</span> <span class="n">name</span> <span class="n">the</span> <span class="n">wrong</span> <span class="n">phase</span><span class="p">:</span>
+ <span class="o">-</span> <span class="n">blueboat_sitl</span><span class="o">.</span><span class="n">params</span> <span class="n">lines</span> <span class="mi">62</span> <span class="ow">and</span> <span class="mi">74</span> <span class="n">say</span> <span class="n">phase</span> <span class="mi">3</span><span class="p">;</span> <span class="n">it</span><span class="s1">'s now phase 4.</span>
+ <span class="o">-</span> <span class="n">blueboat_sitl</span><span class="o">.</span><span class="n">sdf</span> <span class="n">line</span> <span class="mi">6</span> <span class="n">says</span> <span class="n">waves</span> <span class="n">are</span> <span class="n">phase</span> <span class="mi">4</span><span class="p">;</span> <span class="n">they</span><span class="s1">'re now phase 7.</span>
+</pre></div>
+</div>
+<p><strong>Solution</strong></p>
+<ul class="simple">
+<li><p>Short term: Have AI remove the phase numbers from source documentation to remove the dependency</p></li>
+<li><p>Long term: Improve the workflow so that AI generated documentation does not generate unitended dependencies.</p></li>
+</ul>
+<p><em>Verified by</em> Not verified - just tell the agents to clean it up for now.</p>
+</section>
+<section id="phase-3-bluerov2-under-ardusub">
+<h3>Phase 3 — BlueROV2 under ArduSub<a class="headerlink" href="#phase-3-bluerov2-under-ardusub" title="Link to this heading"></a></h3>
+<p><strong>Objective:</strong> have the BlueROV2 moving under ArduSub, bringing it up to the line the BlueBoat reached in phase 1. It shares the thruster interface from phase 2 and nothing else today — no <code class="docutils literal notranslate"><span class="pre">ArduPilotPlugin</span></code> block, no IMU frame, no parameter set, no SITL world — so this is phase 1 done again for a different vehicle: prove the plumbing and the channel mapping in the simplest mode, and leave fidelity to phase 5.</p>
+<ul class="simple">
+<li><p>ArduSub rather than ArduRover, built the same way and pinned the same way: a release tag paired with the matching published BlueROV2 parameter directory. Our derived file lands at <code class="docutils literal notranslate"><span class="pre">bluerov2_gazebo/params/bluerov2_sitl.params</span></code>, alongside the BlueBoat’s.  To be documented alongside blueboat.</p></li>
+<li><p>An <code class="docutils literal notranslate"><span class="pre">ArduPilotPlugin</span></code> block on the BlueROV2 model, behind the same <code class="docutils literal notranslate"><span class="pre">ardupilot</span></code> xacro flag, with one <code class="docutils literal notranslate"><span class="pre">&lt;control&gt;</span></code> per thruster — six on the standard vehicle, eight on the heavy.</p></li>
+<li><p>An IMU frame on the BlueROV2 chassis, declared the way the BlueBoat’s is: a <code class="docutils literal notranslate"><span class="pre">frames</span></code> entry in the part, not a Gazebo-only link.</p></li>
+<li><p>A SITL world for the ROV, and the servo-to-thruster mapping stated in the  config rather than assumed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MANUAL</span></code> only. ArduSub’s stabilized modes close loops around attitude and depth, and those need the actuator work in phase 5 before proceeding.</p></li>
+</ul>
+<p>Use the ArduSub configuration from BlueRobotics so that Ardu config matches the ROV.  This is also a good check that the way we’ve modelled the ROV is consistent with the Ardu config - which it should be.</p>
+<p><em>To be verified by</em> a walkthrough written alongside the work, in the shape of <a class="reference internal" href="../how-to/verify-sitl.html"><span class="std std-doc">Verify the SITL connection</span></a> but per axis: in <code class="docutils literal notranslate"><span class="pre">MANUAL</span></code>, arm, then command surge, sway, heave and yaw one at a time and confirm each produces that motion and no other. A cross-coupled response means the allocation is wrong; a reversed one means a thruster or a channel is. Magnitudes are not trusted yet, exactly as in phase 1.</p>
+</section>
+<section id="phase-4-stabilization-layer-boat">
+<h3>Phase 4 — Stabilization layer, boat<a class="headerlink" href="#phase-4-stabilization-layer-boat" title="Link to this heading"></a></h3>
+<p><strong>Objective:</strong> demonstrate the BlueBoat’s inner loops (yaw rate and surge ) behaving under Blue Robotics’ published gains the way the hardware boat does, by engineering judgement.  Requires the vehicle configuration to match the hardware and the hydrodynamics to be identified, which is most of the work.</p>
+<p>The boat is first b/c it is simpler</p>
+<p>Mode: ArduRover’s <code class="docutils literal notranslate"><span class="pre">ACRO</span></code>, where the throttle stick commands a speed and the steering stick commands a turn rate, so both inner loops are exercised directly. No waypoints, no navigation.</p>
+<p><code class="docutils literal notranslate"><span class="pre">STEERING</span></code> mode is out of scope.  It is not needed at this point to be able to move onto waypoint guidance.   This is not on the critical path, so trying to keep scope from ballooning.</p>
+<p>Use Blue Robotics  performance data to set the  <code class="docutils literal notranslate"><span class="pre">max_thrust_cmd</span></code>, <code class="docutils literal notranslate"><span class="pre">min_thrust_cmd</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;deadband&gt;</span></code> parameters at the boat’s battery voltage.</p>
+<ul class="simple">
+<li><p>the BlueBoat runs M200 motors with the 112 mm weedless propeller,</p></li>
+<li><p>the BlueROV2 runs T200s with a 76 mm propeller,
+both on a 14.8 V nominal pack.</p></li>
+</ul>
+<p>Note: Our part library does not yet reflect that: the M200 propeller parts carry T200 endpoints as placeholders and say so in their own headers. Correcting them is part of this phase. The general lesson is the one the provenance page exists for — a number present in the model is not evidence of anything until something records where it came from.</p>
+<p><strong>The parameter provenance.</strong> Three descriptions of a configured BlueBoat exist and they disagree:</p>
+<ol class="arabic simple">
+<li><p>Blue Robotics’ dump off the hardware,</p></li>
+<li><p>their own SITL parameter set, and</p></li>
+<li><p>the block contributed to <code class="docutils literal notranslate"><span class="pre">SITL_Models</span></code>.</p></li>
+</ol>
+<p>The differences specify which channel carries which throttle, whether a thruster is reversed, the servo range, the neutral trim, the cruise speed, etc. . This phase audits our derived file against the published ones line by line, decides which source is authoritative for what, and justifies every remaining delta in the file itself rather than silently.</p>
+<p>Divergences found in the audit are recorded here rather than raised with Blue Robotics or ArduPilot; this plan is about being faithful to what they ship, not about changing it.</p>
+<p>Then the cross-checks, which are where an autopilot parameter is allowed to speak: the forward/reverse ratio against <code class="docutils literal notranslate"><span class="pre">MOT_THST_ASYM</span></code>, which the shipped BlueBoat parameters set to 1.6; <code class="docutils literal notranslate"><span class="pre">MOT_SLEWRATE</span></code> 200 %/s either represented or shown to be dominated by the thruster’s own dynamics; <code class="docutils literal notranslate"><span class="pre">SERVO_RATE</span></code> 50 Hz against <code class="docutils literal notranslate"><span class="pre">SIM_RATE_HZ</span></code>. A persistent disagreement on <code class="docutils literal notranslate"><span class="pre">MOT_THST_ASYM</span></code> is a finding about the vehicle’s calibration, not a reason to move the thrust numbers.</p>
+<p><strong>The stabilization loops.</strong> ArduRover’s <code class="docutils literal notranslate"><span class="pre">ATC_STR_RAT_*</span></code> steering-rate PID and <code class="docutils literal notranslate"><span class="pre">ATC_SPEED_*</span></code> speed PID, with <code class="docutils literal notranslate"><span class="pre">CRUISE_SPEED</span></code> and <code class="docutils literal notranslate"><span class="pre">CRUISE_THROTTLE</span></code> as the feedforward. Blue Robotics publish gains for all of them, and the target is that those gains work unmodified.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ATC_STR_ANG_P</span></code>, the outer heading controller, is deliberately not exercised here: <code class="docutils literal notranslate"><span class="pre">ACRO</span></code> does not reach it. It wraps the same rate loop and is validated in phase 6, where the boat actually uses it.</p>
+<p>This inverts the usual direction for parameter selection. Normally the controller is tuned to the plant. Here the controller is the artifact we are trying to be faithful to, so its gains are held at the published values and the vehicle dynamics are what moves — the hydrodynamic damping and added-mass coefficients, which today are placeholders with no measurement behind them.</p>
+<p>That inversion runs close to the hazard this whole document is written against, and the line has to be drawn explicitly. Thruster limits and deadband come from measurement, so they are fixed and unavailable for fitting. The hydrodynamic coefficients have never been measured, so choosing them to reproduce observed vehicle behavior is identification rather than tuning-to-succeed. It stops being identification the moment a measured value is moved to make a loop behave.</p>
+<p>The reason this needs a procedure rather than good intentions is the “colinearity of the regressors” (a phrase I love ;). Closed-loop response under a fixed controller is a weak observation: many combinations of added mass, linear damping, quadratic damping, thrust limits and gains produce nearly the same response, so the parameters are not separately identifiable from closed-loop runs. The procedure that follows from that:</p>
+<ol class="arabic simple">
+<li><p>Fix everything measurable elsewhere — mass and inertia from the model, thrust and deadband from the data above. These are not free.</p></li>
+<li><p>Identify the remaining hydrodynamic coefficients from <strong>open-loop</strong> trials, with the controller out of the loop: acceleration from rest at a fixed command, coast-down from steady speed, steady-state speed against command, turning circle at fixed differential. Each excites damping directly rather than through a controller.</p></li>
+<li><p>Use the closed-loop stabilization runs as validation only, never as the fit.</p></li>
+<li><p>Report what was fit, from which trial, and what stayed unexplained.</p></li>
+</ol>
+<p>Choosing the coefficients is a judgement call. An automated fit against a colinear set will find numbers that satisfy the trial and are physically odd, so the tooling runs the trials and reports the numbers while a developer picks the values.</p>
+<p>Acceptance here is engineering judgement rather than a threshold, and the judgement should be made against named quantities — time to speed, overshoot, settling time, steady-state error, achieved turn rate — rather than against an impression of the response.  As we get into this and I see what examples are out there, I’ll try to write these into automated tests that we can run.</p>
+<p>Note that this will also indiretly test that we have the boat’s sensors provisioned correctly and consistent with the hardware because in order for the feedback to work, the sensing feedback will need to be correct.</p>
+<p>Documentation: a page recording where the parameter file came from, which values are the shipped ones, and which are deltas with the reason for each — enough that a reviewer can confirm we are running Blue Robotics’ configuration rather than one tuned until the boat behaved. The file already carries this in its header and its <code class="docutils literal notranslate"><span class="pre">DELTA</span></code> comments; this phase makes it a reviewable document.</p>
+<p>The same page carries a mode table: per mode, what the rc commands, what the vehicle is observed to do, and which feedback the loop needs to close. ArduPilot’s own documentation for boats and submarines is thin and in places misleading, so the table is filled in from what the implementation actually establishes and then used for verification. To keep the spec somewhat lightweight, leave this TBD for the docs and to be verfied during review.</p>
+<section id="automated-verification">
+<h4>Automated verification<a class="headerlink" href="#automated-verification" title="Link to this heading"></a></h4>
+<p>Existing tests that become pertinent: <code class="docutils literal notranslate"><span class="pre">test_gz_launch.py</span></code> already derives its commands from <code class="docutils literal notranslate"><span class="pre">MAX_THRUST</span></code> / <code class="docutils literal notranslate"><span class="pre">MIN_THRUST</span></code> module constants, so changing the limits changes what it commands. Its distance and speed thresholds are tuned to today’s numbers and will need re-tuning — treat that re-tuning as the signal it is, not as a chore. <code class="docutils literal notranslate"><span class="pre">test_model_generation.py</span></code> asserts the limits reach the generated SDF.</p>
+<p>New tests this phase writes:</p>
+<ul class="simple">
+<li><p>The parameter file’s <code class="docutils literal notranslate"><span class="pre">SERVOn_FUNCTION</span></code> values agree with the composition’s channel order. These live in different files with different provenance and nothing checks them today; when they drift the vehicle still runs, it just steers the wrong way.</p></li>
+<li><p>Every value in a <code class="docutils literal notranslate"><span class="pre">*_sitl.params</span></code> file either matches the published source or carries a <code class="docutils literal notranslate"><span class="pre">DELTA</span></code> comment. This is the audit made executable, so it cannot rot.  Pin this to released params where possible.</p></li>
+<li><p>The open-loop identification trials as headless runs — acceleration, coast-down, steady-state speed, turning circle — each producing a number and asserting it against the identified coefficients. These are the regression guard for the hydrodynamics: they fail if someone later moves a coefficient without redoing the identification.  We’ll need to use engineering judgement to set up these ranges.</p></li>
+</ul>
+<p>Whether the closed-loop checks below can be automated at all is decided during the phase. It needs a MAVLink client the workspace does not declare today and a tolerance nobody can yet defend, so the criteria are written down first and automated only if that turns out to be cheap.</p>
+</section>
+<section id="human-verification">
+<h4>Human verification<a class="headerlink" href="#human-verification" title="Link to this heading"></a></h4>
+<p>The reviewer runs the step responses from the walkthrough: command a speed, let it settle, and compare steady state against the command, then command a turn rate and check the same. The check is that the shipped gains — <code class="docutils literal notranslate"><span class="pre">ATC_STR_RAT_*</span></code> and <code class="docutils literal notranslate"><span class="pre">ATC_SPEED_*</span></code> — work unmodified. If the boat needs retuning, the actuator model or the hydrodynamics is wrong, not the gains.</p>
+<p>The judgement call is whether the responses look like the real vessel: time to speed, overshoot, settling, steady-state error. The page has to put the expected figures in front of the reviewer rather than leaving it to memory.  I’ll try to write as many automatable test conditiosn here as we can, but that may be harder than the engineering judgement - and not worth the extra effort.</p>
+<p>The page must state that this runs in drydock, give the shell-by-shell commands, and say what the observation looks like when it is right. The tolerance is an open question below, so will need to develop description of what should be expected and what indicates a problem.</p>
+</section>
+</section>
+<section id="phase-5-stabilization-layer-rov">
+<h3>Phase 5 — Stabilization layer, ROV<a class="headerlink" href="#phase-5-stabilization-layer-rov" title="Link to this heading"></a></h3>
+<p><strong>Objective:</strong> the same exercise as phase 4, for the BlueROV2 under ArduSub, carrying whatever the boat taught. Held separate because the vehicle has more degrees of freedom, a different autopilot and a different set of loops, and because doing the simpler one first is how the pattern gets settled.</p>
+<p>Modes: ArduSub’s <code class="docutils literal notranslate"><span class="pre">STABILIZE</span></code> and <code class="docutils literal notranslate"><span class="pre">ALT_HOLD</span></code>. What they close is attitude and depth — forward and lateral remain direct motor demands, so the ROV’s objective is heading and depth holding rather than a commanded speed. There is no surge-speed loop to exercise.</p>
+<p>The work follows phase 4’s shape: thrust limits from Blue Robotics’ T200 data at the vehicle’s own voltage, an audit of the derived parameter file against the published chain, hydrodynamic identification by the same open-loop-then-validate procedure, and a provenance page. Two things differ and are worth stating in advance.</p>
+<p>First, the ROV’s published bollard figures are a cross-check the boat has no equivalent of: Blue Robotics quote thrust for the assembled vehicle as well as for the thruster on a bench, and the two do not have to agree. Which one the model should carry is a decision for this phase rather than an assumption.</p>
+<p>Second, the standard six-thruster vehicle has less authority than the mode names suggest. The <code class="docutils literal notranslate"><span class="pre">Vectored</span></code> frame mixes no pitch at all, and Blue Robotics ship a roll gain of zero, so <code class="docutils literal notranslate"><span class="pre">STABILIZE</span></code> on that vehicle meaningfully closes yaw. The phase should say what it is actually holding rather than what the mode is called.</p>
+<section id="id1">
+<h4>Automated verification<a class="headerlink" href="#id1" title="Link to this heading"></a></h4>
+<p>The parameter audit and the identification trials from phase 4, pointed at the ROV. The launch tests in <code class="docutils literal notranslate"><span class="pre">bluerov2_gazebo</span></code> become pertinent for the same reason the boat’s do: they derive their commands from the thrust constants.</p>
+</section>
+<section id="id2">
+<h4>Human verification<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<p>The reviewer holds depth and heading in a stabilized mode and confirms the shipped ArduSub gains work unmodified, judged against the same kind of named quantities as the boat’s — settling, overshoot, steady-state error. Same rule: if it needs retuning, the actuator model or the hydrodynamics is wrong, not the gains.</p>
+</section>
+</section>
+<section id="phase-6-waypoint-mission-boat-only">
+<h3>Phase 6 — Waypoint mission, boat only<a class="headerlink" href="#phase-6-waypoint-mission-boat-only" title="Link to this heading"></a></h3>
+<p><strong>Objective:</strong> demonstrate one standard waypoint mission on the BlueBoat, flown unattended in <code class="docutils literal notranslate"><span class="pre">AUTO</span></code> with the failsafes in the loop. This is the autopilot layer above the phase 4 stabilization layer.  It is also the broader test of the transfer claim, because the parameters governing it were tuned on the water.</p>
+<p>The inner loops are inherited unchanged: the waypoint controller produces a turn rate and a speed, and those go to the same <code class="docutils literal notranslate"><span class="pre">ATC_STR_RAT_*</span></code> and <code class="docutils literal notranslate"><span class="pre">ATC_SPEED_*</span></code> controllers phase 4 validated. One loop is new — <code class="docutils literal notranslate"><span class="pre">ATC_STR_ANG_P</span></code>, the heading controller, which a boat reaches on arriving at a waypoint and on pivot turns between legs. That is the only control gain this phase puts under test for the first time, and it is worth naming so it does not arrive as a surprise.</p>
+<ul class="simple">
+<li><p>One mission, held in the repository rather than typed in per run: a lawnmower survey pattern, in <code class="docutils literal notranslate"><span class="pre">blueboat_gazebo/missions/</span></code> and installed with the package, in the QGC WPL format both MAVProxy’s <code class="docutils literal notranslate"><span class="pre">wp</span> <span class="pre">load</span></code> and QGroundControl read.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">WP_SPEED</span></code>, <code class="docutils literal notranslate"><span class="pre">WP_RADIUS</span></code> and <code class="docutils literal notranslate"><span class="pre">TURN_RADIUS</span></code> from the factory parameters.</p></li>
+</ul>
+<p>One mission, not a family of them. It is a fixed artifact so that the automated run, the walkthrough and any later regression all exercise the same waypoints — a mission that changes between runs is not a regression test. Anything beyond it is more mission rather than more evidence.</p>
+<p><strong>The BlueROV2 is not in this phase.</strong> Geodetic waypoint navigation asks for something the vehicle does not have: underwater there is no GNSS, so a position fix has to come from DVL dead reckoning or an acoustic system, and the BlueROV2 as configured is not set up for that. It is not where ArduSub is strongest either, and it is not what the VRX application needs. The ROV’s closed-loop behavior is fully exercised one layer down, in phase 5.</p>
+<p>If a guidance result disappoints, the first question is whether phase 4 is actually finished. Splitting the phases exists to make that question answerable: with the inner loops validated and the hydrodynamics identified separately, a bad track points at the navigation parameters rather than at everything at once.</p>
+<p>Other closed-loop behaviors are out of scope, as listed below — <code class="docutils literal notranslate"><span class="pre">GUIDED</span></code>, <code class="docutils literal notranslate"><span class="pre">LOITER</span></code>, <code class="docutils literal notranslate"><span class="pre">HOLD</span></code> and station keeping, follow and line- or path-following modes. They are more capability on the same loops rather than a different thing to prove.</p>
+<section id="id3">
+<h4>Automated verification<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<p>New: a headless run of the repository’s mission file — upload it over MAVLink, fly it, and assert each waypoint is reached within a radius and the mission completes. Failsafes scripted the same way: trigger GCS loss, low battery and a failing arming check, and assert the response rather than the parameter.</p>
+<p>The test loads the same file the walkthrough tells a reviewer to load. This is the one place where the automated check and the human one are the same procedure, only unattended — which is the argument for the mission being a versioned artifact rather than a set of instructions.</p>
+</section>
+<section id="id4">
+<h4>Human verification<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
+<p>The reviewer loads the mission file from the installed package, then watches it run on the MAVProxy map or in QGroundControl, touching nothing. Checked against <code class="docutils literal notranslate"><span class="pre">CRUISE_SPEED</span></code> 1 m/s and <code class="docutils literal notranslate"><span class="pre">TURN_RADIUS</span></code> 0.1 m. Cross-track error and achieved turn radius are the quantities to judge against, and the page states the expected figures beforehand.</p>
+<p>Then each failsafe triggered deliberately, with the expected response stated in the page before the reviewer triggers it.</p>
+</section>
+</section>
+<section id="phase-7-waves-boat-only">
+<h3>Phase 7 — Waves, boat only<a class="headerlink" href="#phase-7-waves-boat-only" title="Link to this heading"></a></h3>
+<p><strong>Objective:</strong> This is a regression test and demonstration for marketing and raising awareness.   We’ll repeat the tests of phases 4 and 6 within an active wavefield. Previous tests did not exercise the added wave enfironment effects.   In theory this should work out of the box, but important to test end-to-end to identify regressions.  This is only pertinent to the Boat.  Testing the ROV in near surface waves is out of scope.</p>
+<p>Since this is a regression check rather than new capability, the work is mostly in the world and the run rather than in the vehicle: a wave world for the BlueBoat, and the phase 4 and 6 checks pointed at it. If something has to change in the boat to survive a sea state, then we fix.</p>
+<section id="id5">
+<h4>Automated verification<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
+<p>Existing: <code class="docutils literal notranslate"><span class="pre">gz_waves</span></code> carries its own suite in <code class="docutils literal notranslate"><span class="pre">gz-maritime</span></code>, and <code class="docutils literal notranslate"><span class="pre">blueboat_gazebo</span></code>’s launch tests must keep passing once a wave world is an option rather than always flat water.</p>
+<p>New: phase 6’s headless mission run, repeated in a wave world, asserting the same waypoints are reached and the mission completes — with widened bounds, stated and justified, rather than the flat-water ones. Plus a station-hold run asserting the pose stays bounded and the EKF’s innovations stay inside a threshold, which is the check worth most here: the failure mode is slow divergence that a human watching for two minutes will not see.</p>
+</section>
+<section id="id6">
+<h4>Human verification<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
+<p>The reviewer runs both wave providers, Gerstner and FFT, and watches the boat in the viewport — the buoyancy lag between the two is a visual finding before it is a numerical one, and it is the known issue this phase is most likely to surface.</p>
+<p>Then phase 4’s step responses and phase 6’s survey mission re-run in a stated sea state, confirming the boat still completes them and degrades gracefully rather than diverging. The sea state and the widened bounds are numbers to pick before the run and write into the page, so the reviewer is checking a claim rather than forming an impression.</p>
+<p>This phase also produces the material worth showing: a wave-field run is the demonstration, so capturing video or stills while the reviewer is there costs nothing extra.</p>
+</section>
+</section>
+<section id="phase-8-documentation-and-announce">
+<h3>Phase 8 — Documentation and Announce<a class="headerlink" href="#phase-8-documentation-and-announce" title="Link to this heading"></a></h3>
+<p><strong>Objective:</strong> The user-facing documention should be in the form of walkthroughs that simultaneously serve two purposes:</p>
+<ol class="arabic simple">
+<li><p>to demonstrate to a user the capability</p></li>
+<li><p>to support development as end-to-end testing of the new feature while the feature is being developed and as a regression test for later.</p></li>
+</ol>
+<p>This documentation will have been built incrementally in the previous phases.  This phase is simply to clean that up that documenation for consistency and make a public announcement about the features of this spec.</p>
+<p>Packaging and binary distribution are deliberately not here. Everything in this plan is source-built in the drydock container, and ArduPilot in particular is cloned into <code class="docutils literal notranslate"><span class="pre">thirdparty/</span></code> rather than installed, because it has no rosdep key and is pinned by hand. Deciding where these packages are meant to land is its own effort with its own owner, and putting it on this plan’s critical path would couple a simulation milestone to a distribution decision. The one thing this plan owes that effort is a flag: <code class="docutils literal notranslate"><span class="pre">thruster.repos</span></code> pins an unreleased sibling package, which is exactly the kind of thing packaging trips over, and it goes away when the thruster mode reaches gz-sim upstream in phase 9.</p>
+<p>CI is left out of the plan and discussion on CI in Issue #66 so we are tracking.</p>
+<section id="id7">
+<h4>Automated verification<a class="headerlink" href="#id7" title="Link to this heading"></a></h4>
+<p>Existing: the <code class="docutils literal notranslate"><span class="pre">docs</span> <span class="pre">/</span> <span class="pre">docs</span></code> job already builds the site with warnings as errors, so a broken cross-reference fails the PR. The full <code class="docutils literal notranslate"><span class="pre">colcon</span> <span class="pre">test</span></code> across the workspace is the other half.</p>
+<p>New: a link check over the documentation, and whatever headless subset of the SITL path the phase concludes is worth running in CI — that conclusion is itself a deliverable, including “none of it, and here is why”.</p>
+</section>
+<section id="id8">
+<h4>Human verification<a class="headerlink" href="#id8" title="Link to this heading"></a></h4>
+<p>The reviewer starts from a clean workspace and follows the documentation end to end, reaching both a driving boat and a diving ROV without asking anyone a question. Every place they have to guess, ask, or read source is a defect to file against this phase.</p>
+</section>
+</section>
+<section id="phase-9-upstream-the-thruster-mode">
+<h3>Phase 9 — Upstream the thruster mode<a class="headerlink" href="#phase-9-upstream-the-thruster-mode" title="Link to this heading"></a></h3>
+<p><strong>Objective:</strong> have the normalized mode in Gazebo itself and the fork gone. It is a liability while it lasts — a divergence from a <code class="docutils literal notranslate"><span class="pre">Thruster</span></code> that is not frozen, plus a <code class="docutils literal notranslate"><span class="pre">.repos</span></code> pin and a plugin name that exist only because the mode is not upstream yet. The delta is kept tiny so the eventual pull request stays readable.</p>
+<p>Timing matters: prepare it for <code class="docutils literal notranslate"><span class="pre">gz-sim</span></code> only once the mode has stopped changing. Then, once it is released in Gazebo, delete the local implementation along with the <code class="docutils literal notranslate"><span class="pre">.repos</span></code> pin that fetches it and the models’ reference to the forked plugin name.</p>
+<section id="id9">
+<h4>Automated verification<a class="headerlink" href="#id9" title="Link to this heading"></a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">gz_thruster</span></code> tests go upstream with the plugin. Locally, the whole workspace suite must pass with <code class="docutils literal notranslate"><span class="pre">gz_thruster</span></code> deleted and the models naming <code class="docutils literal notranslate"><span class="pre">gz-sim-thruster-system</span></code> — that is the check that the fork left nothing behind.</p>
+</section>
+<section id="id10">
+<h4>Human verification<a class="headerlink" href="#id10" title="Link to this heading"></a></h4>
+<p>The reviewer re-runs the phase 2 walkthrough on the stock plugin and gets the same results, and confirms nothing in the workspace still pins a branch or names the forked library.</p>
+</section>
+</section>
+</section>
+<section id="what-the-phases-are-protecting">
+<h2>What the phases are protecting<a class="headerlink" href="#what-the-phases-are-protecting" title="Link to this heading"></a></h2>
+<p>Phases 4 to 6 are the real test of the sim2real transfer claim — first that the inner loops track under the published gains, boat then ROV, then that waypoint guidance flies a mission on top of them on the boat — and the hazard they guard against is a simulation that cannot fail. Every number here can be adjusted until the boat behaves, and a model tuned to agree with the autopilot it is meant to test proves nothing. Any moment where an autopilot parameter is used to justify a physics value is that failure happening.</p>
+<p>“Close, with these caveats” is an acceptable and publishable answer, provided it is stated as a result rather than discovered as a disappointment.</p>
+</section>
+<section id="out-of-scope">
+<h2>Out of scope<a class="headerlink" href="#out-of-scope" title="Link to this heading"></a></h2>
+<p>Stated so they are not quietly re-entered: PWM as the plugin’s interface; thrust curves, rotor dynamics or advance-ratio work; arbitration between competing commanders; hardware in the loop; forking the firmware; pull requests to <code class="docutils literal notranslate"><span class="pre">SITL_Models</span></code>; building Gazebo from source; any change to <code class="docutils literal notranslate"><span class="pre">gz_waves</span></code> or <code class="docutils literal notranslate"><span class="pre">ehukai</span></code>.</p>
+<p>Closed-loop behaviors beyond the phases above are out of scope: <code class="docutils literal notranslate"><span class="pre">GUIDED</span></code>, <code class="docutils literal notranslate"><span class="pre">LOITER</span></code>, <code class="docutils literal notranslate"><span class="pre">HOLD</span></code> and station keeping, follow modes, and line- or path-following. Each is more capability riding on the same stabilization and guidance loops rather than a different thing to prove, so exercising them adds review burden without adding evidence. They become interesting once the transfer claim is settled.</p>
+<p>Waypoint missions for the BlueROV2 are out of scope, for the reason phase 6 gives: geodetic navigation underwater needs a position source the vehicle is not configured for, and the ROV’s closed-loop behavior is fully exercised one layer down in phase 5.</p>
+<p>The BlueROV2 in waves is out of scope. Near-surface wave interaction for a submerged vehicle is its own modeling problem, and phase 7 is a regression check on the boat rather than new capability for either vehicle.</p>
+<p>The Holybro X500 and any other UAV is out of scope for this plan. It is a different vehicle class with a different autopilot binding, it lives in <code class="docutils literal notranslate"><span class="pre">holybro_models</span></code> rather than here, and nothing in these phases is blocked on it. Rebinding it from PX4 is its own effort with its own plan.</p>
+<p>PX4 is community supported and deliberately not designed out. The normalized command is what a PX4 actuator output produces too, so the interface fits; we keep the design open to it and do not test it.</p>
+<p>Packaging: this set of features all too new and too unstable to dedicated cycles to packaging (and debugging packaging) at this point. Also, It is not overt in our SOW that we have to do anything specific. Since we are over budget and behind schedule, it seems like being conservative with scope is the way.</p>
+</section>
+<section id="open-questions">
+<h2>Open questions<a class="headerlink" href="#open-questions" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>What we compare the closed-loop behavior in phases 4 to 6 <em>against</em>. “Similar to the hardware vessel” needs a source: logs from a real BlueBoat or BlueROV2, or published performance figures. Without one, the judgement has nothing to be a judgement about, and this is the dependency most likely to block that phase.</p></li>
+</ul>
+<p>Leaving that open is the point rather than a gap. A waterfall spec would pick a source and a tolerance now, on no evidence, and the phase would then be measured against a guess. Flagging it here says we know the issue is there; the decision gets made from what the implementation turns up, recorded in the source and its documentation, and folded back into this spec only if it changes the intent.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Honu Robotics.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: lyrical
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl id="honu-version-list">
+      <dt>Distributions</dt>
+      <dd><a href="/bluerobotics_models/lyrical/" data-version="lyrical">Lyrical</a></dd>
+    </dl>
+  </div>
+</div>
+<script>
+  (function () {
+    var current = "lyrical";
+    var base = "/bluerobotics_models/";
+
+    /* Keep the reader on the same page when switching versions; the
+       version root href stays as the fallback for pages a version lacks. */
+    function wire() {
+      document.querySelectorAll('.rst-other-versions a[data-version]').forEach(function (a) {
+        var target = a.getAttribute('data-version');
+        var path = window.location.pathname;
+        if (target !== current && path.indexOf('/' + current + '/') !== -1) {
+          a.href = path.replace('/' + current + '/', '/' + target + '/');
+        }
+      });
+    }
+
+    if (!window.fetch) { wire(); return; }
+
+    /* The deploy tool maintains versions.json at the site root; reading it
+       at runtime lets builds published before a new distribution existed
+       still offer it in the flyout. Offline or local preview builds fall
+       back to the build time list rendered above. */
+    fetch(base + 'versions.json', {cache: 'no-cache'}).then(function (response) {
+      if (!response.ok) { throw new Error(response.status); }
+      return response.json();
+    }).then(function (entries) {
+      var list = document.getElementById('honu-version-list');
+      if (!list || !entries.length) { return; }
+      list.querySelectorAll('dd').forEach(function (dd) { dd.remove(); });
+      entries.forEach(function (entry) {
+        var a = document.createElement('a');
+        a.href = entry.url;
+        a.setAttribute('data-version', entry.name);
+        a.textContent = entry.name.charAt(0).toUpperCase() + entry.name.slice(1);
+        var dd = document.createElement('dd');
+        dd.appendChild(a);
+        list.appendChild(dd);
+      });
+    }).catch(function () {}).finally(wire);
+  })();
+</script><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
