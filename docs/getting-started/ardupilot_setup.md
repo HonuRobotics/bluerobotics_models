@@ -50,13 +50,18 @@ is wrong with your Gazebo.
 
 ### Source repo clones
 
-On the host (if using drydock, assume the container is mounting the users home)
+ Both checkouts are pinned: ArduPilot to the `Rover-4.7.1` release tag, and the `ardupilot_gazebo` clone is fixed by commit hash. 
 
 ```bash
 cd ~/maritime_ws/thirdparty
-git clone --recurse-submodules https://github.com/ArduPilot/ardupilot.git
-git clone https://github.com/ArduPilot/ardupilot_gazebo.git 
+git clone https://github.com/ArduPilot/ardupilot.git
+git -C ardupilot checkout Rover-4.7.1
+git -C ardupilot submodule update --init --recursive
+git clone https://github.com/ArduPilot/ardupilot_gazebo.git
+git -C ardupilot_gazebo checkout 082a0fe231f6e63bc8d1598f1cba461d9e2ea7f5
 ```
+
+`Rover-4.7.1` is the 4.7 release the Blue Robotics parameter sets in this repository are derived from; `Sub-4.7.1` and `Copter-4.7.1` are the same commit, so the one checkout serves every both boat and ROV. 
 
 ## Build the Gazebo plugin
 
@@ -82,12 +87,6 @@ one.
 The resulting shared libraries are in `build/`, e.g.,  `libArduPilotPlugin.so`.
 
 ## Build the ArduPilot firmware
-
-```{note}
-The steps below are the documented upstream ones and have not yet been run
-end to end in drydock. The clone is large (submodules included) and the build
-takes a while. Correct this section once you have been through it.
-```
 
 ```bash
 cd ~/maritime_ws/thirdparty/ardupilot
@@ -160,7 +159,7 @@ AP_GZ=$HOME/maritime_ws/thirdparty/ardupilot_gazebo
 [ "$VIRTUAL_ENV" = "$AP/venv-ardupilot" ] || . "$AP/venv-ardupilot/bin/activate"
 
 export GZ_VERSION=jetty
-export GZ_SIM_SYSTEM_PLUGIN_PATH=$AP_GZ/build
+export GZ_SIM_SYSTEM_PLUGIN_PATH=$AP_GZ/build${GZ_SIM_SYSTEM_PLUGIN_PATH:+:$GZ_SIM_SYSTEM_PLUGIN_PATH}
 export GZ_SIM_RESOURCE_PATH=$AP_GZ/models:$AP_GZ/worlds${GZ_SIM_RESOURCE_PATH:+:$GZ_SIM_RESOURCE_PATH}
 export SDF_PATH=$GZ_SIM_RESOURCE_PATH
 
@@ -179,12 +178,7 @@ Then, in every shell doing SITL work:
 source ~/maritime_ws/thirdparty/setup-ardupilot.sh
 ```
 
-Both path variables append to whatever is already set rather than replacing it. That matters as soon as this is combined with a sourced colcon workspace: the vehicle packages put their own model directories on `GZ_SIM_RESOURCE_PATH` through environment hooks, and overwriting it leaves every mesh in the boat unresolvable.
-
-`SDF_PATH` duplicates `GZ_SIM_RESOURCE_PATH` on purpose. They are read by different things, and setting only one produces errors that look like malformed SDF rather than a missing path.
-
-
-## Smoke test
+## Smoke test - Iris UAV
 
 
 Two shells. In the first:
@@ -214,11 +208,11 @@ sim_vehicle.py -v ArduCopter -f gazebo-iris --model JSON --console --map -w \
   --add-param-file=$AP/gazebo-iris.parm
 ```
 
-The two `--add-param-file` arguments are not optional, and the reason is worth understanding because it recurs with the boat. Recent ArduPilot moved frame defaults into the SITL binary's embedded `vehicleinfo.json`, which it looks up **keyed by `--model`** rather than by the `-f` frame name. We pass `--model JSON`, no frame is named `JSON`, so nothing is found and no defaults are applied — `-f gazebo-iris` still selects the right build target, but its parameter files never reach the vehicle. The symptom is `PreArm: Motors: Check frame class and type`, because `FRAME_CLASS` was never set.
+The two `--add-param-file` arguments layer the frame's parameter files on top of whatever `sim_vehicle.py` loads for `-f gazebo-iris` model.
 
-`ardupilot_gazebo`'s README predates this change and its command alone will not arm.
+`ardupilot_gazebo`'s README leaves the parameter files out. At the pin its command works; on newer ArduPilot it will not arm.
 
-`-w` wipes the EEPROM so the frame's parameters are reloaded. Worth using on the first run and after any aborted one: this version of ArduPilot embeds frame defaults in the SITL binary's ROMFS rather than passing them with `--defaults`, and they are only written to a *fresh* EEPROM. An EEPROM left behind by an earlier attempt keeps whatever it had, which for a first run means no `FRAME_CLASS` at all.
+`-w` wipes the EEPROM so the parameter files are reloaded. Worth using on the first run and after any aborted one: defaults are only written to a *fresh* EEPROM, and an EEPROM left can introduce stale information. 
 
 Then at the MAVProxy prompt:
 
@@ -252,9 +246,11 @@ nobody here has modified.
 
 **Gazebo starts but the vehicle never arms, and MAVProxy reports no heartbeat from the physics backend** — the two processes are not talking. SITL sends to UDP 9002 and the plugin listens there; check that the model's `<fdm_addr>` is `127.0.0.1` and that both are running inside the same container.
 
-**`PreArm: Motors: Check frame class and type`** — the frame's parameters were never applied. Add the `--add-param-file` arguments above; `-w` alone does not help, because there are no defaults for it to reload. Setting `FRAME_CLASS 1` and `FRAME_TYPE 1` by hand and rebooting also arms the Iris, but leaves the frame's other defaults missing.
+**`PreArm: Motors: Check frame class and type`** — the frame's parameters were never applied. Either the checkout is not at the pin (`git -C ~/maritime_ws/thirdparty/ardupilot describe --tags` should say `Rover-4.7.1`; newer ArduPilot does not load frame defaults when `--model` is given) or the `--add-param-file` arguments were dropped. Keep both arguments; `-w` alone does not help, because there are no defaults for it to reload.
 
 **The vehicle arms but does not move** — usually the frame argument. The frame passed to `sim_vehicle.py` has to match the model's `<control>` channel wiring, and `--model JSON` has to be present or SITL uses its own internal physics and ignores Gazebo entirely.
+
+**The vehicle arms, the thruster topics carry commands, and still nothing moves** — the thruster plugin is not loaded. Check that `GZ_SIM_SYSTEM_PLUGIN_PATH` still contains the workspace's `install/lib` after sourcing this script; if it holds only `ardupilot_gazebo/build`, the script is overwriting it rather than appending, and `gz-maritime-thruster-system` cannot be found. Commands keep flowing because `ArduPilotPlugin` publishes them regardless of whether anything is listening.
 
 ## Reference
 
