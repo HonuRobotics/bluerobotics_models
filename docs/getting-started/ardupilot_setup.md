@@ -8,6 +8,10 @@ Set up ArduPilot SITL and the Gazebo plugin, so a vehicle in these models can be
 
 This walkthrough has only been tested using [drydock](https://github.com/HonuRobotics/drydock)'s `maritime` container, and that is the only environment this page officially supports.
 
+## Prerequisites
+
+- Setup the development environment, specifically the [drydock](https://github.com/HonuRobotics/drydock) dev container, following instructions at [requirements.md](requirements.md) and source installation at [installation.md].
+
 ## What you are installing
 
 Four pieces, which stay separate:
