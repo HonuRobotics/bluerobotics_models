@@ -1,8 +1,16 @@
 # Verify the SITL connection
 
-Confirm that ArduRover in SITL is driving the simulated BlueBoat, and that it drives it the right way round. Setup for ArduPilot itself is in [ArduPilot SITL setup](../getting-started/ardupilot_setup.md); this page assumes it is done and the Iris smoke test passed.
+This walkthrough is to confirm that ArduRover in SITL is driving the simulated BlueBoat correctly. 
 
-Two shells. Both need the colcon workspace and then the ArduPilot environment, in that order.
+## Prerequisites
+
+* Setup and run the drydock + source development environment: [installation_drydock.md](../getting-started/installation_drydock.md)
+* [ArduPilot SITL setup](../getting-started/ardupilot_setup.md); (the rest of this page assumes the Iris smoke test passed.)
+
+
+## Walkthrough
+
+You will start two shells. Both need the colcon workspace and then the ArduPilot environment, in that order.  All commands are issued within the drydock dev container.
 
 First, the simulation:
 
@@ -23,7 +31,7 @@ sim_vehicle.py -v Rover -f rover-skid --model JSON --console -w \
   --add-param-file=$(ros2 pkg prefix --share blueboat_gazebo)/params/blueboat_sitl.params
 ```
 
-## Verify that the boat drives in the correct directions and polarity.  
+### Verify that the boat drives in the correct directions and polarity.  
 
 At the MAVProxy prompt, drive the USV forward (surge):
 

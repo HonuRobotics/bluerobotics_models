@@ -10,9 +10,9 @@ This walkthrough has only been tested using [drydock](https://github.com/HonuRob
 
 ## Prerequisites
 
-- Setup the development environment, specifically the [drydock](https://github.com/HonuRobotics/drydock) dev container, following instructions at [requirements.md](requirements.md) and source installation at [installation.md].
+- Setup the drydock + source development environment: [installation_drydock.md](../getting-started/installation_drydock.md)
 
-## What you are installing
+## Install 
 
 Four pieces, which stay separate:
 
@@ -23,14 +23,9 @@ Four pieces, which stay separate:
 | MAVProxy | command-line ground station; comes up with `sim_vehicle.py` | pip, by ArduPilot's prereq script | that script's Python environment |
 | QGroundControl | GUI ground station, what a BlueBoat operator uses | AppImage download | anywhere; not needed for the smoke test |
 
-Neither source build is a colcon package, so neither belongs in `src/`. For this example, those source repositories are cloned in `~/maritime_ws/thirdparty/`, but it can be located in another location.   We build from this source, but do not anticipate making commits.
-
-
-
-
 ### Source repo clones
 
-Both checkouts are pinned: ArduPilot to the `Rover-4.7.1` release tag, and the `ardupilot_gazebo` clone is fixed by commit hash.
+Both checkouts are below pinned: ArduPilot to the `Rover-4.7.1` release tag, and the `ardupilot_gazebo` clone is fixed by commit hash.
 
 ```bash
 mkdir -p ~/maritime_ws/thirdparty
