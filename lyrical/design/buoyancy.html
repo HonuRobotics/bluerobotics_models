@@ -47,16 +47,31 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../getting-started/index.html">Getting started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../getting-started/requirements.html">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../getting-started/requirements.html">Requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../getting-started/requirements.html#docker-container-drydock">Docker container: drydock</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../getting-started/requirements.html#drydock-maritime-build-run-and-join">drydock maritime: build, run and join</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../getting-started/installation.html">Installation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../getting-started/installation.html#from-source">From source</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../getting-started/installation.html#from-ros-packages-debs">From ROS packages (debs)</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../getting-started/installation_drydock.html">Installation - Drydock</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../getting-started/installation_drydock.html#on-host-setup-workspace-clone-drydock-source-and-build-image">On Host: Setup workspace, clone drydock source, and build image</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../getting-started/installation_drydock.html#on-host-clone-source-for-this-project">On Host: Clone source for this project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../getting-started/installation_drydock.html#on-host-start-bash-session-within-drydock-maritime-container">On Host: Start bash session within drydock maritime container</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../getting-started/installation_drydock.html#in-container-build-the-project">In Container: Build the project</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../getting-started/first-simulation.html">First simulation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../getting-started/ardupilot_setup.html">ArduPilot SITL setup</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#what-you-are-installing">What you are installing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#host-container-prerequisites">Host/Container prerequisites</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#install">Install</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../getting-started/ardupilot_setup.html#source-repo-clones">Source repo clones</a></li>
 </ul>
 </li>
@@ -66,7 +81,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#environment">Environment</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#smoke-test">Smoke test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#smoke-test-iris-uav">Smoke test - Iris UAV</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#reference">Reference</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../getting-started/ardupilot_setup.html#why-a-venv-and-why-not-to-skip-it">Why a venv, and why not to skip it</a></li>
@@ -190,10 +205,11 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../how-to/verify-sitl.html">Verify the SITL connection</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#the-checks">The checks</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#what-the-autopilot-is-doing-with-those-commands">What the autopilot is doing with those commands</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#what-this-does-not-check">What this does not check</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#the-parameter-files-are-not-optional">The parameter files are not optional</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#walkthrough">Walkthrough</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../how-to/verify-sitl.html#verify-that-the-boat-drives-in-the-correct-directions-and-polarity">Verify that the boat drives in the correct directions and polarity.</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../how-to/namespaces.html">Several vehicles and several simulations</a><ul>

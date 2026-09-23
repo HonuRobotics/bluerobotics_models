@@ -7,6 +7,7 @@ Install the models and run your first simulation.
 
 requirements
 installation
+installation_drydock
 first-simulation
 ardupilot_setup
 ```

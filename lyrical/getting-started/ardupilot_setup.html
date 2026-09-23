@@ -47,16 +47,31 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Getting started</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="requirements.html">Requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="requirements.html#docker-container-drydock">Docker container: drydock</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="requirements.html#drydock-maritime-build-run-and-join">drydock maritime: build, run and join</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html">Installation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="installation.html#from-source">From source</a></li>
 <li class="toctree-l3"><a class="reference internal" href="installation.html#from-ros-packages-debs">From ROS packages (debs)</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="installation_drydock.html">Installation - Drydock</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation_drydock.html#on-host-setup-workspace-clone-drydock-source-and-build-image">On Host: Setup workspace, clone drydock source, and build image</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="installation_drydock.html#on-host-clone-source-for-this-project">On Host: Clone source for this project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="installation_drydock.html#on-host-start-bash-session-within-drydock-maritime-container">On Host: Start bash session within drydock maritime container</a></li>
+<li class="toctree-l4"><a class="reference internal" href="installation_drydock.html#in-container-build-the-project">In Container: Build the project</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="first-simulation.html">First simulation</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">ArduPilot SITL setup</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#what-you-are-installing">What you are installing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#host-container-prerequisites">Host/Container prerequisites</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install">Install</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#source-repo-clones">Source repo clones</a></li>
 </ul>
 </li>
@@ -66,7 +81,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#environment">Environment</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#smoke-test">Smoke test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#smoke-test-iris-uav">Smoke test - Iris UAV</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reference">Reference</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#why-a-venv-and-why-not-to-skip-it">Why a venv, and why not to skip it</a></li>
@@ -190,10 +205,11 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../how-to/verify-sitl.html">Verify the SITL connection</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#the-checks">The checks</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#what-the-autopilot-is-doing-with-those-commands">What the autopilot is doing with those commands</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#what-this-does-not-check">What this does not check</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#the-parameter-files-are-not-optional">The parameter files are not optional</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#walkthrough">Walkthrough</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../how-to/verify-sitl.html#verify-that-the-boat-drives-in-the-correct-directions-and-polarity">Verify that the boat drives in the correct directions and polarity.</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../how-to/namespaces.html">Several vehicles and several simulations</a><ul>
@@ -310,9 +326,15 @@
 <p>Setting up ArduPilot optional.</p>
 <p>Not necessary to simuate many robots, but ArduPilot is the default for many low-level control and navigation solutions.  Therefore, as reference implmentations, we illustrate how to integrate the Gazebo robot simuation with ArduPilot software in the loop (SITL).</p>
 <p>Set up ArduPilot SITL and the Gazebo plugin, so a vehicle in these models can be driven by the same autopilot firmware it runs on the water.</p>
-<p>Two ways to work, and the build commands are identical in both. On a host already set up for this repository — Ubuntu 26.04 with ROS 2 Lyrical and <code class="docutils literal notranslate"><span class="pre">ros_gz</span></code>, per <a class="reference internal" href="requirements.html"><span class="std std-doc">Requirements</span></a> — everything below runs directly. In <a class="reference external" href="https://github.com/HonuRobotics/drydock">drydock</a>, the same commands run inside the <code class="docutils literal notranslate"><span class="pre">maritime</span></code> container. Only the prerequisite step differs.</p>
-<section id="what-you-are-installing">
-<h2>What you are installing<a class="headerlink" href="#what-you-are-installing" title="Link to this heading"></a></h2>
+<p>This walkthrough has only been tested using <a class="reference external" href="https://github.com/HonuRobotics/drydock">drydock</a>’s <code class="docutils literal notranslate"><span class="pre">maritime</span></code> container, and that is the only environment this page officially supports.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Setup the drydock + source development environment: <a class="reference internal" href="installation_drydock.html"><span class="std std-doc">installation_drydock.md</span></a></p></li>
+</ul>
+</section>
+<section id="install">
+<h2>Install<a class="headerlink" href="#install" title="Link to this heading"></a></h2>
 <p>Four pieces, which stay separate:</p>
 <table class="docutils align-default">
 <thead>
@@ -345,40 +367,23 @@
 </tr>
 </tbody>
 </table>
-<p>Neither source build is a colcon package, so neither belongs in <code class="docutils literal notranslate"><span class="pre">src/</span></code>. For this example, those source repositories are cloned in <code class="docutils literal notranslate"><span class="pre">~/maritime_ws/thirdparty/</span></code>, but it can be located in another location.   We build from this source, but do not anticipate making commits.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>-p<span class="w"> </span>~/maritime_ws/thirdparty
-</pre></div>
-</div>
-</section>
-<section id="host-container-prerequisites">
-<h2>Host/Container prerequisites<a class="headerlink" href="#host-container-prerequisites" title="Link to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo</span></code> needs a few development packages beyond what this repository already requires. Gazebo itself is not among them: it arrives as <code class="docutils literal notranslate"><span class="pre">ros_gz</span></code>’s dependency, as <a class="reference internal" href="requirements.html"><span class="std std-doc">Requirements</span></a> describes.</p>
-<p>On a host:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>cmake<span class="w"> </span>rapidjson-dev<span class="w"> </span>libopencv-dev<span class="w"> </span><span class="se">\</span>
-<span class="w">                 </span>libgstreamer1.0-dev<span class="w"> </span>libgstreamer-plugins-base1.0-dev
-</pre></div>
-</div>
-<p>In drydock they are listed in <code class="docutils literal notranslate"><span class="pre">projects/maritime/apt-packages.txt</span></code>, so rebuilding the image is all that is needed:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>~/maritime_ws/tools/drydock/drydock<span class="w"> </span>build<span class="w"> </span>maritime
-</pre></div>
-</div>
-<p>GStreamer is required unconditionally by the plugin’s CMakeLists, even though
-only its optional camera plugin uses it. A configure that stops at
-<code class="docutils literal notranslate"><span class="pre">gstreamer-1.0</span> <span class="pre">not</span> <span class="pre">found</span></code> means these packages are missing, not that anything
-is wrong with your Gazebo.</p>
 <section id="source-repo-clones">
 <h3>Source repo clones<a class="headerlink" href="#source-repo-clones" title="Link to this heading"></a></h3>
-<p>On the host (if using drydock, assume the container is mounting the users home)</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/maritime_ws/thirdparty
-git<span class="w"> </span>clone<span class="w"> </span>--recurse-submodules<span class="w"> </span>https://github.com/ArduPilot/ardupilot.git
-git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ArduPilot/ardupilot_gazebo.git<span class="w"> </span>
+<p>Both checkouts are below pinned: ArduPilot to the <code class="docutils literal notranslate"><span class="pre">Rover-4.7.1</span></code> release tag, and the <code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo</span></code> clone is fixed by commit hash.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>-p<span class="w"> </span>~/maritime_ws/thirdparty
+<span class="nb">cd</span><span class="w"> </span>~/maritime_ws/thirdparty
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ArduPilot/ardupilot.git
+git<span class="w"> </span>-C<span class="w"> </span>ardupilot<span class="w"> </span>checkout<span class="w"> </span>Rover-4.7.1
+git<span class="w"> </span>-C<span class="w"> </span>ardupilot<span class="w"> </span>submodule<span class="w"> </span>update<span class="w"> </span>--init<span class="w"> </span>--recursive
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ArduPilot/ardupilot_gazebo.git
+git<span class="w"> </span>-C<span class="w"> </span>ardupilot_gazebo<span class="w"> </span>checkout<span class="w"> </span>082a0fe231f6e63bc8d1598f1cba461d9e2ea7f5
 </pre></div>
 </div>
 </section>
 </section>
 <section id="build-the-gazebo-plugin">
 <h2>Build the Gazebo plugin<a class="headerlink" href="#build-the-gazebo-plugin" title="Link to this heading"></a></h2>
-<p>From host (or in drydock, attach to the container first with <code class="docutils literal notranslate"><span class="pre">~/maritime_ws/tools/drydock/drydock</span> <span class="pre">join</span> <span class="pre">maritime</span></code>.)</p>
+<p>In the container:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/maritime_ws/thirdparty/ardupilot_gazebo
 
 <span class="nb">export</span><span class="w"> </span><span class="nv">GZ_VERSION</span><span class="o">=</span>jetty
@@ -386,27 +391,12 @@ cmake<span class="w"> </span>-S<span class="w"> </span>.<span class="w"> </span>
 cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span>
 </pre></div>
 </div>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p><code class="docutils literal notranslate"><span class="pre">GZ_VERSION=jetty</span></code> is not optional. With the variable unset, <code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo</span></code>’s
-CMakeLists falls through to its Harmonic branch and looks for <code class="docutils literal notranslate"><span class="pre">gz-sim8</span></code>, which
-does not exist here — the failure reads as a missing Gazebo rather than a wrong
-one.</p>
-</div>
-<p>(The reason is that Jetty dropped the version suffix from its CMake package names. <code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo</span></code>’s Jetty branch accordingly calls <code class="docutils literal notranslate"><span class="pre">find_package(gz-sim)</span></code> with no number and sets its version variables to the empty string, where the Harmonic and Ionic branches ask for <code class="docutils literal notranslate"><span class="pre">gz-sim8</span></code> and <code class="docutils literal notranslate"><span class="pre">gz-sim9</span></code>. That holds whether Gazebo came from upstream packages or, as under ROS 2 Lyrical, from <code class="docutils literal notranslate"><span class="pre">ros-lyrical-gz-sim-vendor</span></code> — both install <code class="docutils literal notranslate"><span class="pre">gz-sim-config.cmake</span></code>.)</p>
+<p><code class="docutils literal notranslate"><span class="pre">GZ_VERSION=jetty</span></code> is not optional. With the variable unset, <code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo</span></code>’s CMakeLists falls through to its Harmonic branch and looks for <code class="docutils literal notranslate"><span class="pre">gz-sim8</span></code>.</p>
 <p>The resulting shared libraries are in <code class="docutils literal notranslate"><span class="pre">build/</span></code>, e.g.,  <code class="docutils literal notranslate"><span class="pre">libArduPilotPlugin.so</span></code>.</p>
 </section>
 <section id="build-the-ardupilot-firmware">
 <h2>Build the ArduPilot firmware<a class="headerlink" href="#build-the-ardupilot-firmware" title="Link to this heading"></a></h2>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The steps below are the documented upstream ones and have not yet been run
-end to end in drydock. The clone is large (submodules included) and the build
-takes a while. Correct this section once you have been through it.</p>
-</div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/maritime_ws/thirdparty/ardupilot
-
-<span class="c1"># Create the venv inside the checkout; the prereq script finds and uses it.</span>
 python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>--system-site-packages<span class="w"> </span>venv-ardupilot
 
 <span class="nv">DO_PYTHON_VENV_ENV</span><span class="o">=</span><span class="m">0</span><span class="w"> </span>Tools/environment_install/install-prereqs-ubuntu.sh<span class="w"> </span>-y
@@ -414,44 +404,29 @@ python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </
 <span class="nb">source</span><span class="w"> </span>venv-ardupilot/bin/activate
 ./waf<span class="w"> </span>configure<span class="w"> </span>--board<span class="w"> </span>sitl
 ./waf<span class="w"> </span>rover
+./waf<span class="w"> </span>sub
+./waf<span class="w"> </span>copter
 </pre></div>
 </div>
-<p>Also build ArduCopter</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./waf<span class="w"> </span>copter
-</pre></div>
-</div>
-<p>to rund the Iris UAV test below</p>
-<p>Ubuntu 26.04 (“resolute”) is on the prereq script’s supported list, so it should not need coaxing.</p>
-<p>The venv is not optional and is worth understanding; see <a class="reference internal" href="#why-a-venv">Why a venv</a> below if the reason matters to you.</p>
 <p>The script offers to edit your shell login file twice — once to activate its venv in every terminal, once to add <code class="docutils literal notranslate"><span class="pre">Tools/autotest</span></code> to <code class="docutils literal notranslate"><span class="pre">PATH</span></code>. Decline both. <code class="docutils literal notranslate"><span class="pre">DO_PYTHON_VENV_ENV=0</span></code> handles the first; answer <code class="docutils literal notranslate"><span class="pre">N</span></code> to the second if you are prompted, and note that plain <code class="docutils literal notranslate"><span class="pre">-y</span></code> answers <code class="docutils literal notranslate"><span class="pre">y</span></code> to it. Both edits go to the host’s <code class="docutils literal notranslate"><span class="pre">~/.profile</span></code> through the bind mount, and both are handled instead by the environment script below.</p>
 <section id="verify-the-python-environment">
 <h3>Verify the Python environment<a class="headerlink" href="#verify-the-python-environment" title="Link to this heading"></a></h3>
-<p>The prereq script installs its Python dependencies as a single <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code>, and if that resolution fails part-way it leaves an incomplete environment without stopping the script. This is worth checking rather than discovering later as an import error inside MAVProxy.</p>
-<p>With the venv active:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span>m<span class="w"> </span><span class="k">in</span><span class="w"> </span>future<span class="w"> </span>pymavlink<span class="w"> </span>serial<span class="w"> </span>MAVProxy<span class="w"> </span>em<span class="w"> </span>pexpect<span class="w"> </span>lxml<span class="w"> </span>numpy<span class="w"> </span>psutil<span class="w"> </span>yaml<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<p>The prereq script’s single <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> can fail part-way without stopping the script. Check, in the venv — every <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> on this page goes there, never into the system Python:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>~/maritime_ws/thirdparty/ardupilot/venv-ardupilot/bin/activate
+<span class="k">for</span><span class="w"> </span>m<span class="w"> </span><span class="k">in</span><span class="w"> </span>future<span class="w"> </span>pymavlink<span class="w"> </span>serial<span class="w"> </span>MAVProxy<span class="w"> </span>em<span class="w"> </span>pexpect<span class="w"> </span>lxml<span class="w"> </span>numpy<span class="w"> </span>psutil<span class="w"> </span>yaml<span class="p">;</span><span class="w"> </span><span class="k">do</span>
 <span class="w">  </span>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import </span><span class="nv">$m</span><span class="s2">"</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"MISSING </span><span class="nv">$m</span><span class="s2">"</span>
 <span class="k">done</span>
 </pre></div>
 </div>
-<p>Install anything it reports. Each package installs cleanly on its own — the failure is in the batch, not in the packages, so there is nothing to work around.</p>
-<p>Two are worth knowing about specifically. <strong>MAVProxy</strong> is often absent, and <strong><code class="docutils literal notranslate"><span class="pre">future</span></code></strong> is a MAVProxy dependency that MAVProxy does not declare, so installing MAVProxy alone does not bring it and the first symptom is <code class="docutils literal notranslate"><span class="pre">ModuleNotFoundError:</span> <span class="pre">No</span> <span class="pre">module</span> <span class="pre">named</span> <span class="pre">'future'</span></code> from <code class="docutils literal notranslate"><span class="pre">rline.py</span></code>.</p>
+<p>Expect no output. If you see any of them missing (<code class="docutils literal notranslate"><span class="pre">future</span></code>, <code class="docutils literal notranslate"><span class="pre">pymavlink</span></code>, <code class="docutils literal notranslate"><span class="pre">serial</span></code> are <code class="docutils literal notranslate"><span class="pre">MAVProxy</span></code>) then fix by direct pip install.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>MAVProxy<span class="w"> </span>future
 </pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">--map</span></code> and <code class="docutils literal notranslate"><span class="pre">--console</span></code> additionally need wxPython, which comes from apt rather than pip — the pip build compiles wxWidgets and takes the best part of an hour, while the venv’s <code class="docutils literal notranslate"><span class="pre">--system-site-packages</span></code> makes the apt module visible from inside it. It is in drydock’s package list; on a host, <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">python3-wxgtk4.0</span></code>.</p>
-<p>ArduPilot’s list also includes <code class="docutils literal notranslate"><span class="pre">dronecan</span></code>, <code class="docutils literal notranslate"><span class="pre">geocoder</span></code>, <code class="docutils literal notranslate"><span class="pre">tabulate</span></code>, <code class="docutils literal notranslate"><span class="pre">wsproto</span></code>, <code class="docutils literal notranslate"><span class="pre">junitparser</span></code> and <code class="docutils literal notranslate"><span class="pre">intelhex</span></code>. None are needed for SITL — they cover CAN peripherals, map geocoding, autotest reporting and hex generation for real flight boards — so leave them missing unless something asks.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Do not inspect this venv from the host. It is created with
-<code class="docutils literal notranslate"><span class="pre">--system-site-packages</span></code>, so a <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">list</span></code> run outside the container reports
-the host’s packages as though they were the venv’s, and a module can appear
-installed when it is not.</p>
 </div>
 </section>
 </section>
 <section id="environment">
 <h2>Environment<a class="headerlink" href="#environment" title="Link to this heading"></a></h2>
-<p>SITL needs four things on the environment that nothing else in this workspace wants: the Gazebo variables, <code class="docutils literal notranslate"><span class="pre">Tools/autotest</span></code> on <code class="docutils literal notranslate"><span class="pre">PATH</span></code>, and the ArduPilot venv. Put them in one script rather than in a shell login file — under drydock, <code class="docutils literal notranslate"><span class="pre">$HOME</span></code> is shared with the host, so a login file is the wrong place for paths that only make sense inside the container.</p>
+<p>SITL needs the Gazebo variables, <code class="docutils literal notranslate"><span class="pre">Tools/autotest</span></code> on <code class="docutils literal notranslate"><span class="pre">PATH</span></code> and the ArduPilot venv. They go in one script rather than a login file, because <code class="docutils literal notranslate"><span class="pre">$HOME</span></code> is shared with the host. Write the file once:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cat<span class="w"> </span>&gt;<span class="w"> </span>~/maritime_ws/thirdparty/setup-ardupilot.sh<span class="w"> </span><span class="s">&lt;&lt;'EOF'</span>
 <span class="s"># Source before running gz sim or sim_vehicle.py.</span>
 <span class="s">AP=$HOME/maritime_ws/thirdparty/ardupilot</span>
@@ -462,7 +437,7 @@ installed when it is not.</p>
 <span class="s">[ "$VIRTUAL_ENV" = "$AP/venv-ardupilot" ] || . "$AP/venv-ardupilot/bin/activate"</span>
 
 <span class="s">export GZ_VERSION=jetty</span>
-<span class="s">export GZ_SIM_SYSTEM_PLUGIN_PATH=$AP_GZ/build</span>
+<span class="s">export GZ_SIM_SYSTEM_PLUGIN_PATH=$AP_GZ/build${GZ_SIM_SYSTEM_PLUGIN_PATH:+:$GZ_SIM_SYSTEM_PLUGIN_PATH}</span>
 <span class="s">export GZ_SIM_RESOURCE_PATH=$AP_GZ/models:$AP_GZ/worlds${GZ_SIM_RESOURCE_PATH:+:$GZ_SIM_RESOURCE_PATH}</span>
 <span class="s">export SDF_PATH=$GZ_SIM_RESOURCE_PATH</span>
 
@@ -473,16 +448,13 @@ installed when it is not.</p>
 <span class="s">EOF</span>
 </pre></div>
 </div>
-<p>The venv activation has to come before the <code class="docutils literal notranslate"><span class="pre">PATH</span></code> line, not after. A venv’s <code class="docutils literal notranslate"><span class="pre">activate</span></code> restores <code class="docutils literal notranslate"><span class="pre">PATH</span></code> to its pre-activation value when it runs, so a <code class="docutils literal notranslate"><span class="pre">PATH</span></code> entry added first disappears the moment the venv is activated — and only in shells where the venv was already active, which makes it look intermittent. The <code class="docutils literal notranslate"><span class="pre">case</span></code> guard keeps repeated sourcing from stacking duplicate entries.</p>
-<p>Then, in every shell doing SITL work:</p>
+<p>Then source it in every shell doing SITL work, after the colcon workspace, since it appends to paths the workspace has already set:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>~/maritime_ws/thirdparty/setup-ardupilot.sh
 </pre></div>
 </div>
-<p>Both path variables append to whatever is already set rather than replacing it. That matters as soon as this is combined with a sourced colcon workspace: the vehicle packages put their own model directories on <code class="docutils literal notranslate"><span class="pre">GZ_SIM_RESOURCE_PATH</span></code> through environment hooks, and overwriting it leaves every mesh in the boat unresolvable.</p>
-<p><code class="docutils literal notranslate"><span class="pre">SDF_PATH</span></code> duplicates <code class="docutils literal notranslate"><span class="pre">GZ_SIM_RESOURCE_PATH</span></code> on purpose. They are read by different things, and setting only one produces errors that look like malformed SDF rather than a missing path.</p>
 </section>
-<section id="smoke-test">
-<h2>Smoke test<a class="headerlink" href="#smoke-test" title="Link to this heading"></a></h2>
+<section id="smoke-test-iris-uav">
+<h2>Smoke test - Iris UAV<a class="headerlink" href="#smoke-test-iris-uav" title="Link to this heading"></a></h2>
 <p>Two shells. In the first:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>~/maritime_ws/thirdparty/setup-ardupilot.sh
 gz<span class="w"> </span>sim<span class="w"> </span>-v4<span class="w"> </span>-r<span class="w"> </span>iris_runway.sdf
@@ -505,10 +477,8 @@ sim_vehicle.py<span class="w"> </span>-v<span class="w"> </span>ArduCopter<span 
 <span class="w">  </span>--add-param-file<span class="o">=</span><span class="nv">$AP</span>/gazebo-iris.parm
 </pre></div>
 </div>
-<p>The two <code class="docutils literal notranslate"><span class="pre">--add-param-file</span></code> arguments are not optional, and the reason is worth understanding because it recurs with the boat. Recent ArduPilot moved frame defaults into the SITL binary’s embedded <code class="docutils literal notranslate"><span class="pre">vehicleinfo.json</span></code>, which it looks up <strong>keyed by <code class="docutils literal notranslate"><span class="pre">--model</span></code></strong> rather than by the <code class="docutils literal notranslate"><span class="pre">-f</span></code> frame name. We pass <code class="docutils literal notranslate"><span class="pre">--model</span> <span class="pre">JSON</span></code>, no frame is named <code class="docutils literal notranslate"><span class="pre">JSON</span></code>, so nothing is found and no defaults are applied — <code class="docutils literal notranslate"><span class="pre">-f</span> <span class="pre">gazebo-iris</span></code> still selects the right build target, but its parameter files never reach the vehicle. The symptom is <code class="docutils literal notranslate"><span class="pre">PreArm:</span> <span class="pre">Motors:</span> <span class="pre">Check</span> <span class="pre">frame</span> <span class="pre">class</span> <span class="pre">and</span> <span class="pre">type</span></code>, because <code class="docutils literal notranslate"><span class="pre">FRAME_CLASS</span></code> was never set.</p>
-<p><code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo</span></code>’s README predates this change and its command alone will not arm.</p>
-<p><code class="docutils literal notranslate"><span class="pre">-w</span></code> wipes the EEPROM so the frame’s parameters are reloaded. Worth using on the first run and after any aborted one: this version of ArduPilot embeds frame defaults in the SITL binary’s ROMFS rather than passing them with <code class="docutils literal notranslate"><span class="pre">--defaults</span></code>, and they are only written to a <em>fresh</em> EEPROM. An EEPROM left behind by an earlier attempt keeps whatever it had, which for a first run means no <code class="docutils literal notranslate"><span class="pre">FRAME_CLASS</span></code> at all.</p>
-<p>Then at the MAVProxy prompt:</p>
+<p>The two <code class="docutils literal notranslate"><span class="pre">--add-param-file</span></code> arguments layer the frame’s parameter files on top of whatever <code class="docutils literal notranslate"><span class="pre">sim_vehicle.py</span></code> loads for <code class="docutils literal notranslate"><span class="pre">-f</span> <span class="pre">gazebo-iris</span></code> model.</p>
+<p>Then at the MAVProxy prompt (the terminal in which you ran <code class="docutils literal notranslate"><span class="pre">sim_vehicle.py</span></code>):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mode</span> <span class="n">guided</span>
 <span class="n">arm</span> <span class="n">throttle</span>
 <span class="n">takeoff</span> <span class="mi">5</span>
@@ -532,8 +502,9 @@ nobody here has modified.</span><a class="headerlink" href="#id2" title="Link to
 <p><strong><code class="docutils literal notranslate"><span class="pre">sim_vehicle.py:</span> <span class="pre">command</span> <span class="pre">not</span> <span class="pre">found</span></code></strong> — <code class="docutils literal notranslate"><span class="pre">setup-ardupilot.sh</span></code> has not been sourced in this shell. The prereq script only adds <code class="docutils literal notranslate"><span class="pre">Tools/autotest</span></code> to <code class="docutils literal notranslate"><span class="pre">PATH</span></code> if you accept its prompt, which under drydock you should not.</p>
 <p><strong><code class="docutils literal notranslate"><span class="pre">you</span> <span class="pre">need</span> <span class="pre">to</span> <span class="pre">install</span> <span class="pre">pexpect</span> <span class="pre">with</span> <span class="pre">'python3</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pexpect'</span></code></strong> — the prereq script has not been run, or its venv is not active. If <code class="docutils literal notranslate"><span class="pre">venv-ardupilot</span></code> does not exist, the script has not run; it is what creates it. <code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">~/venv-ardupilot/bin/activate</span></code> and try again. Resist the suggestion in the message: a system-wide pip install is refused on Ubuntu 26.04, and forcing it past that puts ArduPilot’s pinned dependencies alongside ROS’s.</p>
 <p><strong>Gazebo starts but the vehicle never arms, and MAVProxy reports no heartbeat from the physics backend</strong> — the two processes are not talking. SITL sends to UDP 9002 and the plugin listens there; check that the model’s <code class="docutils literal notranslate"><span class="pre">&lt;fdm_addr&gt;</span></code> is <code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code> and that both are running inside the same container.</p>
-<p><strong><code class="docutils literal notranslate"><span class="pre">PreArm:</span> <span class="pre">Motors:</span> <span class="pre">Check</span> <span class="pre">frame</span> <span class="pre">class</span> <span class="pre">and</span> <span class="pre">type</span></code></strong> — the frame’s parameters were never applied. Add the <code class="docutils literal notranslate"><span class="pre">--add-param-file</span></code> arguments above; <code class="docutils literal notranslate"><span class="pre">-w</span></code> alone does not help, because there are no defaults for it to reload. Setting <code class="docutils literal notranslate"><span class="pre">FRAME_CLASS</span> <span class="pre">1</span></code> and <code class="docutils literal notranslate"><span class="pre">FRAME_TYPE</span> <span class="pre">1</span></code> by hand and rebooting also arms the Iris, but leaves the frame’s other defaults missing.</p>
+<p><strong><code class="docutils literal notranslate"><span class="pre">PreArm:</span> <span class="pre">Motors:</span> <span class="pre">Check</span> <span class="pre">frame</span> <span class="pre">class</span> <span class="pre">and</span> <span class="pre">type</span></code></strong> — the frame’s parameters were never applied. Either the checkout is not at the pin (<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">-C</span> <span class="pre">~/maritime_ws/thirdparty/ardupilot</span> <span class="pre">tag</span> <span class="pre">--points-at</span> <span class="pre">HEAD</span></code> should list <code class="docutils literal notranslate"><span class="pre">Rover-4.7.1</span></code>; newer ArduPilot does not load frame defaults when <code class="docutils literal notranslate"><span class="pre">--model</span></code> is given) or the <code class="docutils literal notranslate"><span class="pre">--add-param-file</span></code> arguments were dropped. Keep both arguments; <code class="docutils literal notranslate"><span class="pre">-w</span></code> alone does not help, because there are no defaults for it to reload.</p>
 <p><strong>The vehicle arms but does not move</strong> — usually the frame argument. The frame passed to <code class="docutils literal notranslate"><span class="pre">sim_vehicle.py</span></code> has to match the model’s <code class="docutils literal notranslate"><span class="pre">&lt;control&gt;</span></code> channel wiring, and <code class="docutils literal notranslate"><span class="pre">--model</span> <span class="pre">JSON</span></code> has to be present or SITL uses its own internal physics and ignores Gazebo entirely.</p>
+<p><strong>The vehicle arms, the thruster topics carry commands, and still nothing moves</strong> — the thruster plugin is not loaded. Check that <code class="docutils literal notranslate"><span class="pre">GZ_SIM_SYSTEM_PLUGIN_PATH</span></code> still contains the workspace’s <code class="docutils literal notranslate"><span class="pre">install/lib</span></code> after sourcing this script; if it holds only <code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo/build</span></code>, the script is overwriting it rather than appending, and <code class="docutils literal notranslate"><span class="pre">gz-maritime-thruster-system</span></code> cannot be found. Commands keep flowing because <code class="docutils literal notranslate"><span class="pre">ArduPilotPlugin</span></code> publishes them regardless of whether anything is listening.</p>
 </section>
 <section id="reference">
 <h2>Reference<a class="headerlink" href="#reference" title="Link to this heading"></a></h2>
