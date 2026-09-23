@@ -2,13 +2,14 @@
 
 Confirm that ArduSub in SITL is driving the simulated BlueROV2 (standard configuration, not "heavy") in `MANUAL` mode, which means surge, yaw, sway and heave commands are provided via RC channels and ArduSub maps from commands in the body frame to individual thruster commands.  
 
-## Prereqs
+## Prerequisites
 
-* Setup for ArduPilot itself is in [ArduPilot SITL setup](../getting-started/ardupilot_setup.md). 
-* The workspace is built and sourced. See [Installation](../getting-started/installation.md).
-* The steps below were run in the [drydock](https://github.com/HonuRobotics/drydock) container, started with `drydock run maritime`. They should work on a host set up per [Requirements](../getting-started/requirements.md) as well.  Currently untested. 
+* Setup and run the drydock + source development environment: [installation_drydock.md](../getting-started/installation_drydock.md)
+* [ArduPilot SITL setup](../getting-started/ardupilot_setup.md); (the rest of this page assumes the Iris smoke test passed.)
 
-## Two shells: sim and autopilot
+## Walkthrough
+
+All commands are issued within the drydock dev container.
 
 ### The simulation
 
