@@ -2,7 +2,8 @@
 
 These step-by-step instructions are intended to be complete and unambiguous so that a user can set up a repeatable development envirnment locally.
 
-Overall the approach is....
+Overall the approach is as follows:
+
 - Docker OS: Uses the [drydock](https://github.com/HonuRobotics/drydock) project, `maritime` container to create a portable base envionment with Ubuntu, Gazebo, ROS and many build an run-time utilities.
 - ROS workspace install: Install the repositories of this project all in a single workspace: `maritime_ws`.
 
@@ -58,7 +59,7 @@ colcon build --merge-install
 source install/setup.bash 
 ```
 
-The build should finish cleanly.  There may be cmake deprecation warnings that can (usuall?) be ignored.
+The build should finish cleanly.  There may be cmake deprecation warnings that can (usually?) be ignored.
 
 Next step is to run a simulation. 
 
