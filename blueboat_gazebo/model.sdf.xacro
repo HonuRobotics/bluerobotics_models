@@ -199,7 +199,12 @@
        system reads marked collisions (gz-sim 229ec07e, carried by
        gz-maritime's gz_buoyancy) floats this link by them under whatever
        name the boat is spawned, with no <enable> list. Gazebo's stock
-       system ignores the attribute, so the worlds here are unchanged. -->
+       system ignores the attribute, so the worlds here are unchanged.
+
+       One windage box per hull, spanning the whole pontoon, carries
+       gz:wind="true" instead: a world with gz-maritime's wind system pushes
+       on the part of it above the waterline. Not the segments, which would
+       count a hull's frontal area once per segment in a head wind. -->
   <xacro:macro name="pontoon" params="hull side y n i:=0">
     <xacro:if value="${i != n}">
       <xacro:property name="seg_len" value="${hull['length'] / n}"/>
@@ -214,6 +219,16 @@
     </xacro:if>
   </xacro:macro>
 
+  <xacro:macro name="windage" params="hull side y">
+    <collision name="windage_${side}" gz:wind="true">
+      <pose>${hull['x']} ${y} ${hull['z']} 0 0 0</pose>
+      <geometry>
+        <box><size>${hull['length']} ${hull['width']} ${hull['height']}</size></box>
+      </geometry>
+      <surface><contact><collide_bitmask>0x00</collide_bitmask></contact></surface>
+    </collision>
+  </xacro:macro>
+
   <xacro:macro name="hull_displacement" params="hull">
     <link name="hull_displacement">
       <pose relative_to="${base_name}">0 0 0 0 0 0</pose>
@@ -226,6 +241,8 @@
       </inertial>
       <xacro:pontoon hull="${hull}" side="port" y="${hull['y']}"  n="${hull['segments']}"/>
       <xacro:pontoon hull="${hull}" side="stbd" y="${-hull['y']}" n="${hull['segments']}"/>
+      <xacro:windage hull="${hull}" side="port" y="${hull['y']}"/>
+      <xacro:windage hull="${hull}" side="stbd" y="${-hull['y']}"/>
     </link>
     <joint name="hull_displacement_joint" type="fixed">
       <parent>${base_name}</parent>

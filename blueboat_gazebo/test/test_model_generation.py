@@ -174,9 +174,21 @@ WATER_DENSITY = 1025.0
 
 def pontoon_boxes(model_root):
     """Return [(name, x, y, z, lx, ly, lz)] of the hull_displacement link's boxes."""
+    return link_boxes(model_root, 'pontoon_')
+
+
+def windage_boxes(model_root):
+    """Return [(name, x, y, z, lx, ly, lz)] of the hull_displacement link's windage boxes."""
+    return link_boxes(model_root, 'windage_')
+
+
+def link_boxes(model_root, prefix):
+    """Return the hull_displacement link's boxes whose names start with prefix."""
     link = next(li for li in model_root.iter('link') if li.get('name') == 'hull_displacement')
     boxes = []
     for coll in link.findall('collision'):
+        if not coll.get('name').startswith(prefix):
+            continue
         x, y, z = (float(v) for v in coll.find('pose').text.split()[:3])
         lx, ly, lz = (float(v) for v in coll.find('geometry/box/size').text.split())
         boxes.append((coll.get('name'), x, y, z, lx, ly, lz))
@@ -223,6 +235,33 @@ def test_pontoons_are_buoyancy_only_geometry():
         bitmask = coll.find('surface/contact/collide_bitmask')
         assert bitmask is not None, f'{coll.get("name")}: must not collide'
         assert int(bitmask.text, 16) == 0, coll.get('name')
+
+
+def test_one_windage_box_per_hull():
+    """
+    Each hull has one box marked gz:wind="true", spanning the whole pontoon.
+
+    A world with gz-maritime's wind system pushes on the part above the
+    waterline, whatever name the boat was spawned under. One box per hull,
+    not the buoyancy segments, so a head wind sees each hull's frontal area
+    once. The boxes collide with nothing and do not displace water.
+    """
+    root, _ = xacro(MODEL_XACRO, DEFAULT_CONFIG)
+    boxes = windage_boxes(root)
+    marked = [c.get('name') for c in root.iter('collision')
+              if c.get('{http://gazebosim.org/schema}wind') == 'true']
+    assert sorted(marked) == ['windage_port', 'windage_stbd']
+    assert sorted(name for name, *_ in boxes) == sorted(marked)
+    for name, x, y, z, lx, ly, lz in boxes:
+        sign = +1 if name.endswith('port') else -1
+        assert (x, y, z) == pytest.approx((HULL['x'], sign * HULL['y'], HULL['z']))
+        assert (lx, ly, lz) == pytest.approx((HULL['length'], HULL['width'], HULL['height']))
+    for coll in root.iter('collision'):
+        if coll.get('name') not in marked:
+            continue
+        assert coll.get('{http://gazebosim.org/schema}buoyancy') is None, coll.get('name')
+        bitmask = coll.find('surface/contact/collide_bitmask')
+        assert bitmask is not None and int(bitmask.text, 16) == 0, coll.get('name')
 
 
 def test_pontoons_tile_and_float_the_boat():
