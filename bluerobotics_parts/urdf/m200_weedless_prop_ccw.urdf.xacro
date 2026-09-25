@@ -1,18 +1,7 @@
 <?xml version="1.0"?>
 <!--
-  m200_weedless_prop_ccw part macro.
-
-  Bootstrapped from models/m200_weedless_prop_ccw/model.sdf by scripts/sdf_to_part.py on
-  2026-08-21. This file is the part: maintain it by hand from here on.
-
-  Inertia: estimated from the delivered collision geometry at 1000 kg/m^3 (SDF auto inertia); replace with measured values.
-
-  Drive: T200 16 V endpoints and prop diameter as placeholders for every
-  propeller option; replace with measured values for this prop.
-
-  Contract (see parts.xacro): <part>_info exports the metadata (attach,
-  slots, frames, drive); <part> instantiates the link, its mounting joint
-  and its slot / frame links.
+  m200_weedless_prop_ccw part macro for blueboat
+  Identical to m200_weedless_prop_cw.urdf.xacro - see documentation there.
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
@@ -23,7 +12,12 @@
         ),
         frames=dict(
         ),
-        drive=dict(diameter=0.076, max_thrust=51.5, min_thrust=-40.2, rotation='ccw'))}"/>
+        drive=dict(
+          diameter=0.1,
+          max_thrust=40.22, 
+          min_thrust=-20.1, 
+          deadband=0.2, 
+          rotation='ccw'))}"/>
   </xacro:macro>
 
   <xacro:macro name="m200_weedless_prop_ccw"
