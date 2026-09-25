@@ -49,10 +49,10 @@
     <link name="${name}">
       <inertial>
         <origin xyz="0.0212659 0 0.0724998" rpy="0 0 0"/>
-        <mass value="12"/>
-        <inertia ixx="1.6043" ixy="-1.22202e-18" ixz="0.00372803"
-                 iyy="0.988314" iyz="4.88808e-18"
-                 izz="2.53089"/>
+        <mass value="16.8"/>
+        <inertia ixx="1.51" ixy="0" ixz="0"
+                 iyy="2.41" iyz="0"
+                 izz="3.23"/>
       </inertial>
       <xacro:part_visual mesh="package://bluerobotics_parts/models/blueboat_chassis/blueboat_chassis.visual.glb"/>
       <xacro:if value="${collision}">

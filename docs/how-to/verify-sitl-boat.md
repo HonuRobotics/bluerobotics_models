@@ -17,7 +17,7 @@ First, the simulation:
 ```bash
 source ~/maritime_ws/install/setup.bash
 source ~/maritime_ws/thirdparty/setup-ardupilot.sh
-gz sim -v4 -r $(ros2 pkg prefix --share blueboat_gazebo)/worlds/blueboat_sitl.sdf
+gz sim -v3 -r $(ros2 pkg prefix --share blueboat_gazebo)/worlds/blueboat_sitl.sdf
 ```
 
 Then the autopilot:
