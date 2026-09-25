@@ -11,6 +11,7 @@ running
 actuators
 sensors
 configuration
+parameters
 ```
 
 ## The default vehicle

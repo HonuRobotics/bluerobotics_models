@@ -1,8 +1,6 @@
 # Closed-loop response (Boat)
 
-This walkthrough is to confirm that ArduRover's inner loops drive the simulated BlueBoat the way the real one behaves, under Blue Robotics' published gains. It uses `ACRO`, where the throttle stick commands a **speed** and the steering stick a **turn rate**, so both inner loops are exercised directly.
-
-[Verify the SITL connection (Boat)](verify-sitl-boat.md) checks the wiring — each stick moves the axis it names. This page checks the numbers.
+This walkthrough is to confirm that ArduRover's inner control loops (stabilization layer) drive the simulated BlueBoat the way the real one behaves, under Blue Robotics' published gains. It uses `ACRO`, where the throttle stick commands a **speed** and the steering stick a **turn rate**.
 
 ```{note}
 OUTLINE. The expected figures are blank until the hydrodynamic
@@ -70,7 +68,8 @@ For each row the quantities to judge are time to reach the demand, overshoot, se
 The gains are not ours to move. `ATC_SPEED_*` and `ATC_STR_RAT_*` are Blue
 Robotics' published values, and this page checks that they work unmodified.
 If a row only passes with a gain changed, the actuator model or the
-hydrodynamics is wrong — see the parameter provenance page (TBD).
+hydrodynamics is wrong — see
+[Parameters](../vehicles/blueboat/parameters.md).
 ```
 
 ### If a row is wrong
