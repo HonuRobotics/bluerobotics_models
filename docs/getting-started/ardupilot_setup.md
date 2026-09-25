@@ -189,6 +189,8 @@ nobody here has modified.
 
 **The vehicle arms, the thruster topics carry commands, and still nothing moves** — the thruster plugin is not loaded. Check that `GZ_SIM_SYSTEM_PLUGIN_PATH` still contains the workspace's `install/lib` after sourcing this script; if it holds only `ardupilot_gazebo/build`, the script is overwriting it rather than appending, and `gz-maritime-thruster-system` cannot be found. Commands keep flowing because `ArduPilotPlugin` publishes them regardless of whether anything is listening.
 
+**`[warning] [ArduPilotPlugin.cc] ArduPilot controller has reset`**, once at startup and then roughly once a minute — expected, and not a problem with your setup. It is an upstream bug in `ardupilot_gazebo`: the plugin keeps ArduPilot's 32-bit frame counter in a `uint16_t`, so the counter wraps about every 66 seconds at 1000 Hz and the plugin reads the wrap as SITL having restarted. The startup one has a different cause, an initial frame count of -1, and is equally harmless. The fix is a one-word change to the variable's type, open upstream as [ardupilot_gazebo#174](https://github.com/ArduPilot/ardupilot_gazebo/pull/174); nothing in the simulation is reset when the message appears.
+
 ## Reference
 
 Optional background. None of it is needed to follow the steps above.
@@ -213,4 +215,6 @@ container's Python. `DO_PYTHON_VENV_ENV=0` suppresses the venv one; decline
 the `PATH` one. Set both explicitly in the environment script instead.
 ```
 
-Building `rover` alone is enough for the BlueBoat. `./waf copter` as well if you want the Iris smoke test below.
+Building `rover` alone is enough for the BlueBoat, and `sub` for the BlueROV2. `./waf copter` as well if you want the Iris smoke test below.
+
+The two vehicles differ only in what you hand `sim_vehicle.py`; the walkthroughs are [Verify the SITL connection (Boat)](../how-to/verify-sitl-boat.md) for the BlueBoat and [Verify the SITL connection (ROV)](../how-to/verify-sitl-rov.md) for the BlueROV2.
