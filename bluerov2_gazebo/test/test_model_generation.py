@@ -176,6 +176,7 @@ def test_buoyancy_displacement_realizes_the_declaration():
     assert bitmask is not None and int(bitmask.text, 16) == 0
     # The worlds enable buoyancy on exactly this link.
     for world in ('bluerov2_water.sdf', 'bluerov2_pool.sdf',
+                           'bluerov2_playground.sdf', 'bluerov2_sitl.sdf'):
                   'bluerov2_playground.sdf'):
         text = (GZ_SHARE / 'worlds' / world).read_text()
         assert '<enable>bluerov2::buoyancy_displacement</enable>' in text, world
