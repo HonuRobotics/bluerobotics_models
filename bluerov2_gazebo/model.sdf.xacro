@@ -38,7 +38,7 @@
        generated; true adds an IMU and the ArduPilotPlugin, so ArduSub can
        drive the ROV instead of ROS 2 topics. Two models come out of this one
        source: model://bluerov2 and model://bluerov2_with_ardupilot. See
-       docs how-to/verify-sitl-rov. -->
+       docs vehicles/bluerov2/verify-sitl-rov. -->
   <xacro:arg name="ardupilot" default="false"/>
   <xacro:property name="ardupilot" value="${'$(arg ardupilot)'.lower() == 'true'}"/>
 
@@ -460,6 +460,18 @@
            sonar does for the Ping360's beam frame. -->
       <xacro:sensor_link name="imu" frame="${base_name}_imu">
         <sensor name="imu_sensor" type="imu">
+          <!-- ArduPilotPlugin takes the gyro and accelerometer straight from
+               this message with no rotation: its precondition is "the imu
+               orientation conforms to the aircraft convention: x-forward,
+               y-right, z-down" (ArduPilotPlugin.cc CreateStateJSON). The
+               model is FLU like the rest of the ROS side, so the sensor is
+               rolled 180 degrees here to report FRD. The two transform
+               elements on the plugin below apply to pose and velocity only,
+               not to the IMU. Without this, yaw, pitch and roll rates reach
+               the autopilot with inverted signs and any mode that closes a
+               loop on them diverges. Upstream does the same on its own
+               models (iris_with_standoffs/model.sdf). -->
+          <pose degrees="true">0 0 0 180 0 0</pose>
           <always_on>1</always_on>
           <update_rate>1000</update_rate>
         </sensor>

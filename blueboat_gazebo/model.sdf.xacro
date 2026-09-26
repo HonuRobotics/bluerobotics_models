@@ -31,7 +31,7 @@
        generated; true adds an IMU and the ArduPilotPlugin, so ArduRover can
        drive the boat instead of ROS 2 topics. Two models come out of this one
        source: model://blueboat and model://blueboat_with_ardupilot. See
-       docs how-to/verify-sitl-boat. -->
+       docs vehicles/blueboat/verify-sitl-boat. -->
   <xacro:arg name="ardupilot" default="false"/>
   <xacro:property name="ardupilot" value="${'$(arg ardupilot)'.lower() == 'true'}"/>
 
@@ -53,7 +53,7 @@
   </xacro:macro>
 
   <!-- A propeller part drives its mounting joint: one Thruster plugin per
-       propeller instance, with the limits and diameter the part declares in
+       propeller instance, with the thrust limits the part declares in
        its `drive` table. Counter rotating pairs (ccw to port, cw to
        starboard in the default configuration) get opposite coefficient signs so
        their reaction yaw cancels in straight line running. Thrust commands
@@ -80,6 +80,12 @@
       <velocity_control>true</velocity_control>
       <max_thrust_cmd>${drive['max_thrust']}</max_thrust_cmd>
       <min_thrust_cmd>${drive['min_thrust']}</min_thrust_cmd>
+      <!-- Emitted only when the part declares one: the plugin enables the
+           deadband by the element's presence, so a zero would arm a cut that
+           never fires. -->
+      <xacro:if value="${'deadband' in drive and drive['deadband'] > 0}">
+        <deadband>${drive['deadband']}</deadband>
+      </xacro:if>
     </plugin>
   </xacro:macro>
 
@@ -245,22 +251,20 @@
       <xacro:hull_displacement hull="${cfg['hull_displacement']}"/>
     </xacro:if>
 
-    <!-- Hydrodynamic damping for the surface hull (Fossen). USV placeholder
-         coefficients: strong sway/yaw resistance, moderate surge, plus
-         heave/roll/pitch damping so the graded-buoyancy float settles instead of
-         bobbing. Tune against real BlueBoat response. -->
+    <!-- Hydrodynamic drag/damping coefficient (derivative terms) 
+          Surge and yaw coefficients are identified in PR #72.
+          The remainder are still placeholders - see Issue #73.
+    -->
     <plugin filename="gz-sim-hydrodynamics-system"
             name="gz::sim::systems::Hydrodynamics">
       <link_name>${base_name}</link_name>
       <water_density>1025.0</water_density>
-      <xU>-20</xU>    <yV>-40</yV>    <zW>-30</zW>
-      <kP>-20</kP>    <mQ>-20</mQ>    <nR>-15</nR>
-      <xUabsU>-30</xUabsU>
-      <yVabsV>-90</yVabsV>
-      <zWabsW>-100</zWabsW>
-      <kPabsP>-40</kPabsP>
-      <mQabsQ>-40</mQabsQ>
-      <nRabsR>-30</nRabsR>
+      <xU>0</xU>    <xUabsU>-7.0</xUabsU>  
+      <yV>-40</yV>    <yVabsV>-90</yVabsV>  
+      <zW>-30</zW>    <zWabsW>-50</zWabsW>  
+      <kP>-20</kP>    <kPabsP>-40</kPabsP>
+      <mQ>-20</mQ>    <mQabsQ>-40</mQabsQ>
+      <nR>-18</nR>  <nRabsR>0</nRabsR>
     </plugin>
 
     <!-- Joint states for the propeller joints, so robot_state_publisher can
@@ -287,6 +291,18 @@
            echosounder does for the Ping's beam frame. -->
       <xacro:sensor_link name="imu" frame="${base_name}_imu">
         <sensor name="imu_sensor" type="imu">
+          <!-- ArduPilotPlugin takes the gyro and accelerometer straight from
+               this message with no rotation: its precondition is "the imu
+               orientation conforms to the aircraft convention: x-forward,
+               y-right, z-down" (ArduPilotPlugin.cc CreateStateJSON). The
+               model is FLU like the rest of the ROS side, so the sensor is
+               rolled 180 degrees here to report FRD. The two transform
+               elements on the plugin below apply to pose and velocity only,
+               not to the IMU. Without this, yaw, pitch and roll rates reach
+               the autopilot with inverted signs and any mode that closes a
+               loop on them diverges. Upstream does the same on its own
+               models (iris_with_standoffs/model.sdf). -->
+          <pose degrees="true">0 0 0 180 0 0</pose>
           <always_on>1</always_on>
           <update_rate>1000</update_rate>
         </sensor>

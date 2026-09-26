@@ -1,18 +1,11 @@
 <?xml version="1.0"?>
 <!--
-  m200_weedless_prop_cw part macro.
+  m200_weedless_prop_cw part macro for blueboat
+  Identical to m200_weedless_prop_ccw.urdf.xacro
 
-  Bootstrapped from models/m200_weedless_prop_cw/model.sdf by scripts/sdf_to_part.py on
-  2026-08-21. This file is the part: maintain it by hand from here on.
+  Values derived according to src/bluerobotics_models/docs/vehicles/blueboat/parameters.md
 
-  Inertia: estimated from the delivered collision geometry at 1000 kg/m^3 (SDF auto inertia); replace with measured values.
-
-  Drive: T200 16 V endpoints and prop diameter as placeholders for every
-  propeller option; replace with measured values for this prop.
-
-  Contract (see parts.xacro): <part>_info exports the metadata (attach,
-  slots, frames, drive); <part> instantiates the link, its mounting joint
-  and its slot / frame links.
+  For the `drive` dictionary, `max_thrust` and `min_thrust` are in Newtons, and `rotation` indicates the propeller rotation direction.  `diameter`, is a bit confusing because it controls both the visual representation (how fast the prop spins for a given command) and, in certain modes, how the command is interpreted.   Not really ideal, but it works for now.  We declare a physical diameter value here, but it does not dictate the size of the visual or how it affects physics, just with how fast the propeller rotation is animated.  
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
@@ -23,7 +16,12 @@
         ),
         frames=dict(
         ),
-        drive=dict(diameter=0.076, max_thrust=51.5, min_thrust=-40.2, rotation='cw'))}"/>
+        drive=dict(
+          diameter=0.1,
+          max_thrust=40.22, 
+          min_thrust=-20.1, 
+          deadband=0.2, 
+          rotation='cw'))}"/>
   </xacro:macro>
 
   <xacro:macro name="m200_weedless_prop_cw"
@@ -33,7 +31,7 @@
     <link name="${name}">
       <inertial>
         <origin xyz="0.000336 3e-05 -5e-06" rpy="0 0 0"/>
-        <mass value="0.074472"/>
+        <mass value="0.01"/>
         <inertia ixx="1.41779e-05" ixy="0" ixz="-5.54437e-12"
                  iyy="3.11438e-05" iyz="0"
                  izz="3.11438e-05"/>

@@ -33,9 +33,14 @@
                   each with xyz / rpy
          drive    propellers only: what a simulator needs to drive the part
                   as a thruster on its mounting joint
-                    diameter    propeller diameter, m
+                    diameter    propeller diameter, m. Sets the spin
+                                rate the plugin commands, not the
+                                force on the hull
                     max_thrust  forward thrust limit, N
                     min_thrust  reverse thrust limit, N (negative)
+                    deadband    optional; thrust below which the thruster
+                                produces nothing, N. Omitted or 0 means
+                                none
                     rotation    'ccw' or 'cw', seen from behind looking
                                 forward along the spin axis
 

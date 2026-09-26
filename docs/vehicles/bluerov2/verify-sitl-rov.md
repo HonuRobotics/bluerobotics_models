@@ -4,8 +4,8 @@ Confirm that ArduSub in SITL is driving the simulated BlueROV2 (standard configu
 
 ## Prerequisites
 
-* Setup and run the drydock + source development environment: [installation_drydock.md](../getting-started/installation_drydock.md)
-* [ArduPilot SITL setup](../getting-started/ardupilot_setup.md); (the rest of this page assumes the Iris smoke test passed.)
+* Setup and run the drydock + source development environment: [installation_drydock.md](../../getting-started/installation_drydock.md)
+* [ArduPilot SITL setup](../../getting-started/ardupilot_setup.md); (the rest of this page assumes the Iris smoke test passed.)
 
 ## Walkthrough
 
@@ -39,7 +39,7 @@ sim_vehicle.py -v ArduSub -f gazebo-bluerov2 --model JSON --console -w \
 Gazebo prints `ArduPilot controller has reset` once shortly after SITL
 connects and then roughly once a minute.  This is annoying, but not of concern. (The fix is open upstream as
 [ardupilot_gazebo#174](https://github.com/ArduPilot/ardupilot_gazebo/pull/174).)
-See troubleshooting notes in [ArduPilot SITL setup](../getting-started/ardupilot_setup.md).
+See troubleshooting notes in [ArduPilot SITL setup](../../getting-started/ardupilot_setup.md).
 ```
 
 ## Verification - teleop via the autopilot. 
@@ -94,7 +94,7 @@ The sign convention can be confusing, because two coordinate conventions do not 
 * ROS uses x forward, y **left**, z up - FLU, per [REP 103](https://www.ros.org/reps/rep-0103.html).
 
 
-The commands are deliberately tiny. 1510 about 2.5% of full stick and it is  enough to see the vehicle move. This is because the actuators and vehicle dynamics have not been tuned yet.  That will happen later in [the spec](../specs/SITL_SPEC.md)
+The commands are deliberately tiny. 1510 about 2.5% of full stick and it is  enough to see the vehicle move. This is because the actuators and vehicle dynamics have not been tuned yet.  That will happen later in [the spec](../../specs/SITL_SPEC.md)
 
 To see what the autopilot is commanding while you move the sticks, echo the thruster topics:
 
