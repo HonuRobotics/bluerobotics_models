@@ -37,10 +37,36 @@ sim_vehicle.py -v Rover -f rover-skid --model JSON --console -w \
   --add-param-file=$(ros2 pkg prefix --share blueboat_gazebo)/params/blueboat_sitl.params
 ```
 
-### What ACRO asks for
+### Test closed-loop 
 
 
+#### surge
+
+Graph the autopilot internals
+```
 param set GCS_PID_MASK 2
+module load graph
+graph PID_TUNING.desired PID_TUNING.achieved
+```
+Send full forward speed command
+```
+rc 3 1900
+```
+Results in
+./images/surge_auto_1900.png
+
+
+Sending command 
+```
+rc 3 1700
+```
+results in
+./images/surge_auto_1700.png
+
+#### yaw-rate
+
+
+param set GCS_PID_MASK 1
 module load graph
 graph PID_TUNING.desired PID_TUNING.achieved
 
