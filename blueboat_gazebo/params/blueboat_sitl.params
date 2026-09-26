@@ -59,6 +59,15 @@ MOT_THST_ASYM    1.6        # Forward/reverse thrust ratio; ArduPilot scales rev
 # ---- Speeds and navigation ------------------------------------------------
 CRUISE_SPEED     1
 CRUISE_THROTTLE  16
+SPEED_MAX        3          # Shipped. Omitting it is not the same as leaving
+                            # it off: at 0 ArduRover estimates it as
+                            # CRUISE_SPEED / CRUISE_THROTTLE, which with the
+                            # two lines above is 6.25 m/s - twice what the
+                            # boat can do, so full throttle in ACRO demands a
+                            # speed it can never reach and the loop winds up.
+ACRO_TURN_RATE   45         # Shipped, deg/s. The firmware default is 180, so
+                            # omitting it asks for four times the turn rate
+                            # the vehicle is rated for.
 WP_SPEED         1
 WP_RADIUS        1
 TURN_RADIUS      0.1

@@ -44,7 +44,7 @@ From blueboat specs, max speed is 3 m/s and the max static thrust is 8.2 kgf.   
 
 Run a test to command full forward thrust and measure the steady state speed.  Compare the the 3 m/s target.
 
-Run the scenario for the open-loop (`MANUAL`) test - [Verify the SITL connection (Boat)](../../how-to/verify-sitl-boat.md)
+Run the scenario for the open-loop (`MANUAL`) test - [Verify the SITL connection (Boat)](verify-sitl-boat.md)
 
 Verify the speed of the USV two ways (do both, to make sure the simulated model state agrees with the state the autopilot senses):
 
@@ -135,7 +135,7 @@ TBD — the line-by-line table: every parameter in our file, which source it cam
 
 TBD — the cross-checks, which are the places an autopilot parameter is allowed to say something about our model rather than the reverse:
 
-- `MOT_THST_ASYM` against the thruster's forward/reverse ratio. Shipped is 1.6; our endpoints imply 2.0. Keeping 1.6 is what produces the steering clamp that makes full stick at zero throttle equal `ACRO_TURN_RATE`, so the disagreement is recorded as a finding about the vehicle's calibration rather than reconciled by moving a measured number.
+- `MOT_THST_ASYM` against the thruster's forward/reverse ratio. Shipped is 1.6; our endpoints imply 2.0. The disagreement is recorded as a finding about the vehicle's calibration rather than reconciled by moving a measured number - but note that this parameter is not inert. ArduPilot multiplies the reverse-going motor's command by it (`AP_MotorsUGV.cpp`, "Apply asymmetry correction"), so it sets the yaw moment per unit steering output, `k = 0.301 m × (40.22 N + 1.6 × 20.1 N) = 21.8 N·m`, and therefore the yaw damping that leaves the rate loop unbiased: `nR = k · FF`. Changing it to 2.0 would put `k` at 24.2 and require `nR` near 19.3. It also sets the steering clamp at zero throttle, `1/1.6 = 0.625`, which is what makes full stick there ask for close to `ACRO_TURN_RATE`.
 - `ACRO_TURN_RATE` is absent from our file, so SITL uses the firmware default of 180 deg/s instead of the shipped 45. It needs adding before any turn-rate result is judged.
 - `MOT_SLEWRATE` either represented, or shown to be dominated by the thruster's own dynamics.
 - `SERVO_RATE` against the simulation rate.
