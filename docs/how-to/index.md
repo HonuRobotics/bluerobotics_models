@@ -14,9 +14,6 @@ add-part
 add-sensor-part
 own-world
 teleop
-verify-sitl-boat
-verify-sitl-rov
-tune-sitl-boat
 namespaces
 faq
 ```
