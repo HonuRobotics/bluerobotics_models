@@ -252,6 +252,8 @@
     </xacro:if>
 
     <!-- Hydrodynamic drag/damping coefficient (derivative terms) 
+          Surge and yaw coefficients are identified in PR #72.
+          The remainder are still placeholders - see Issue #73.
     -->
     <plugin filename="gz-sim-hydrodynamics-system"
             name="gz::sim::systems::Hydrodynamics">
@@ -262,7 +264,7 @@
       <zW>-30</zW>    <zWabsW>-50</zWabsW>  
       <kP>-20</kP>    <kPabsP>-40</kPabsP>
       <mQ>-20</mQ>    <mQabsQ>-40</mQabsQ>
-      <nR>-15</nR>    <nRabsR>-30</nRabsR>
+      <nR>-10</nR>  <nRabsR>0</nRabsR>
     </plugin>
 
     <!-- Joint states for the propeller joints, so robot_state_publisher can

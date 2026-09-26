@@ -39,6 +39,12 @@ sim_vehicle.py -v Rover -f rover-skid --model JSON --console -w \
 
 ### What ACRO asks for
 
+
+param set GCS_PID_MASK 2
+module load graph
+graph PID_TUNING.desired PID_TUNING.achieved
+
+
 TBD — one paragraph: full throttle asks for `SPEED_MAX` and full steering for `ACRO_TURN_RATE`, so the demand is a parameter, not a stick position. Name which parameter sets which, so a reader can tell a wrong demand from a wrong response.
 
 ### Reading the response
