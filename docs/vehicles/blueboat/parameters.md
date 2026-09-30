@@ -21,7 +21,7 @@ Our approach in defining the BlueBoat parameters is as follows:
 
 ## Set via reference 
 
-See {download}`parameter_refs.ods <../../reference/parameter_refs.ods>` for the calculations.
+See {download}`parameter_refs.ods <../../reference/parameter_refs.ods>` for the raw calculations.  This spreadsheet is the raw calculations, provided here as a reference and to transparently show how we derived the first estimates of physical paramters.   Many of those parameters then had to be tuned via testing, i.e., selected in test, so the spreadsheet shows the background, this document describes the process and the final values are in the URDF values.  
 
 | | Source | Value | Destination|
 |---|---|---|---|
@@ -129,26 +129,3 @@ They differ on things that change behavior: which channel carries which throttle
 
 The rule we follow: the hardware dump is authoritative for the vehicle, because it is the only one of the three describing a boat that exists. The other two are consulted, not copied. Where a value is taken from one of them instead, or changed for simulation, it carries a `DELTA` comment.
 
-### Deltas, and the cross-checks
-
-TBD — the line-by-line table: every parameter in our file, which source it came from, whether the three agree, and the reason for each `DELTA`.
-
-TBD — the cross-checks, which are the places an autopilot parameter is allowed to say something about our model rather than the reverse:
-
-- `MOT_THST_ASYM` against the thruster's forward/reverse ratio. Shipped is 1.6; our endpoints imply 2.0. The disagreement is recorded as a finding about the vehicle's calibration rather than reconciled by moving a measured number - but note that this parameter is not inert. ArduPilot multiplies the reverse-going motor's command by it (`AP_MotorsUGV.cpp`, "Apply asymmetry correction"), so it sets the yaw moment per unit steering output, `k = 0.301 m × (40.22 N + 1.6 × 20.1 N) = 21.8 N·m`, and therefore the yaw damping that leaves the rate loop unbiased: `nR = k · FF`. Changing it to 2.0 would put `k` at 24.2 and require `nR` near 19.3. It also sets the steering clamp at zero throttle, `1/1.6 = 0.625`, which is what makes full stick there ask for close to `ACRO_TURN_RATE`.
-- `ACRO_TURN_RATE` is absent from our file, so SITL uses the firmware default of 180 deg/s instead of the shipped 45. It needs adding before any turn-rate result is judged.
-- `MOT_SLEWRATE` either represented, or shown to be dominated by the thruster's own dynamics.
-- `SERVO_RATE` against the simulation rate.
-
-## Modes
-
-TBD — per mode: what the RC input commands, what the vehicle is observed to do, and which feedback the loop needs to close. Filled in from what the implementation establishes rather than from ArduPilot's documentation, which is thin for boats.
-
-| Mode | Stick commands | Observed | Feedback required |
-|---|---|---|---|
-| `MANUAL` | | | |
-| `ACRO` | | | |
-
-## Open questions
-
-TBD — anything that could not be resolved from published data: the question, why it matters, and what was assumed in the meantime.

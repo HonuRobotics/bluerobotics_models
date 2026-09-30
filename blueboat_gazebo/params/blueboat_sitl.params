@@ -54,7 +54,7 @@ MOT_THR_MIN      0
 MOT_THR_MAX      100
 MOT_SLEWRATE     200
 MOT_STR_THR_MIX  0.6
-MOT_THST_ASYM    1.6        # Forward/reverse thrust ratio; ArduPilot scales reverse outputs up by it. The simulated thruster models the same asymmetry its own way, scaling each direction on its own limit (51.5 N ahead and 40.2 N astern at present, a 1.28 ratio, and placeholders), so the two are applied in series. Reconciling them is part of the stabilization-layer work.
+MOT_THST_ASYM    1.6       
 
 # ---- Speeds and navigation ------------------------------------------------
 CRUISE_SPEED     1
