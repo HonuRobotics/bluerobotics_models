@@ -31,6 +31,7 @@ parts:
     source: "Images and 3D files from https://bluerobotics.com/store/boat/blueboat/blueboat/"
     dimensionSource: "https://bluerobotics.com/store/boat/blueboat/blueboat/"
     nominalDimension: "length overall 1.20 m"
+    dimensionTolerance: 0.10
 
     # For the modeler to read. Not written to the file.
     referenceImages:
@@ -39,5 +40,5 @@ parts:
     visualRequirement: "Start simple"
     materials: "hull: plastic, frame: annodized aluminum"
     openings: "none"
-    priorities: "1. overall shape and proportions. 2. color. 3. materials
+    priorities: "1. overall shape and proportions. 2. color. 3. materials"
     notes: ""
