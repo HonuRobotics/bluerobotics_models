@@ -12,7 +12,9 @@ running
 actuators
 sensors
 configuration
+parameters
 verify-sitl-rov
+tune-sitl-rov
 ```
 
 ## The default vehicle
