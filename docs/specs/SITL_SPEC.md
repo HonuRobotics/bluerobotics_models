@@ -175,15 +175,9 @@ The same page carries a mode table: per mode, what the rc commands, what the veh
 
 #### Automated verification
 
-Existing tests that become pertinent: `test_gz_launch.py` already derives its commands from `MAX_THRUST` / `MIN_THRUST` module constants, so changing the limits changes what it commands. Its distance and speed thresholds are tuned to today's numbers and will need re-tuning — treat that re-tuning as the signal it is, not as a chore. `test_model_generation.py` asserts the limits reach the generated SDF.
-
-New tests this phase writes:
-
-- The parameter file's `SERVOn_FUNCTION` values agree with the composition's channel order. These live in different files with different provenance and nothing checks them today; when they drift the vehicle still runs, it just steers the wrong way.
-- Every value in a `*_sitl.params` file either matches the published source or carries a `DELTA` comment. This is the audit made executable, so it cannot rot.  Pin this to released params where possible. 
-- The open-loop identification trials as headless runs — acceleration, coast-down, steady-state speed, turning circle — each producing a number and asserting it against the identified coefficients. These are the regression guard for the hydrodynamics: they fail if someone later moves a coefficient without redoing the identification.  We'll need to use engineering judgement to set up these ranges.
-
 Whether the closed-loop checks below can be automated at all is decided during the phase. It needs a MAVLink client the workspace does not declare today and a tolerance nobody can yet defend, so the criteria are written down first and automated only if that turns out to be cheap.
+
+During execution of the phase it was decided to defer the automated checks until later and bound the scope for this phase with manual walkthrough for human verification of expected behavior under closed-loop control (stabilization).
 
 #### Human verification
 
