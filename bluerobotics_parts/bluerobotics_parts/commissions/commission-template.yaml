@@ -1,0 +1,43 @@
+# Commission template from gltf-robotics
+# One commission covers one vehicle or one batch of parts. The integrator fills
+# This covers just the blueboat_chassis part as a prototype of the new gltf workflow
+
+commission: blueboat
+
+# --- Stated once, applied to every part unless a part block says otherwise ---
+
+creator: Honu Robotics
+rights: "Copyright 2026 Honu Robotics. Licensed under the Apache License, Version 2.0."
+
+# Where the authoring files (.blend, CAD) are archived. Leave out if they are not.
+authoringSource: ".blend files should be archived in google drive "
+
+# For the modeler to read. Not written to any file.
+sources:
+  - "see docs/vehicles/blueboat/configuration.md"
+toolchain:
+  blender: "5.2.2 LTS"
+  exporter: "io_scene_gltf2 5.2.40"
+
+# --- One block per part, keyed by the part name (lowercase snake_case) ---
+
+parts:
+
+  blueboat_chassis:
+    # Written to the file's manifest.
+    partRole: base                      # exactly one base part per vehicle
+    datumPoint: "Intersection of three planes on the geometry mid-point as explained and illustrated in docs/vehicles/blueboat/configuration.md"
+    datumTarget: "None - in free space"          # optional
+    source: "Images and 3D files from https://bluerobotics.com/store/boat/blueboat/blueboat/"
+    dimensionSource: "https://bluerobotics.com/store/boat/blueboat/blueboat/"
+    nominalDimension: "length overall 1.20 m"
+
+    # For the modeler to read. Not written to the file.
+    referenceImages:
+      - "see docs/vehicles/blueboat/configuration.md and the images therein"
+    forwardFeature: "the bow; +X points from the transom to the bow"
+    visualRequirement: "Start simple"
+    materials: "hull: plastic, frame: annodized aluminum"
+    openings: "none"
+    priorities: "1. overall shape and proportions. 2. color. 3. materials
+    notes: ""
