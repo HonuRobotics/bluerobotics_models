@@ -4,9 +4,7 @@ This documents the sources and methods used to define the default BlueBoat vehic
 
 
 ```{note}
-OUTLINE. The tables below are headings and empty rows; each is filled in as
-phase 4 of the [SITL spec](../../specs/SITL_SPEC.md) produces it. Nothing
-here is measured yet.
+The physical values here are first estimates, derived from published specifications in `parameter_refs.ods`, and then adjusted in test until the open-loop response left enough control authority for the closed-loop performance the boat is rated for. They are a working set for simulation, not measurements taken off a vehicle.
 ```
 
 ## Approach
@@ -25,9 +23,9 @@ See {download}`parameter_refs.ods <../../reference/parameter_refs.ods>` for the 
 
 | | Source | Value | Destination|
 |---|---|---|---|
-| Mass | [BlueBoat spec sheets](https://bluerobotics.com/store/boat/blueboat/blueboat/) Boat chassis + 2 batteries | see [../parameter_refs.ods]  | blueboat_chassis.urdf.xacro |
-| Inertia tensor | Estimated based on uniform box and L, W, H dimensions BR specs. Consistent with original values. | see [../parameter_refs.ods] |  blueboat_chassis.urdf.xacro |
-| Thrust limits | Deduced from [thruster performance](https://bluerobotics.com/store/thrusters/t100-t200-thrusters/m200-motor/?attribute_cable-variant=BlueBoat+-+0.71+meter+cable+length+%2B+M14+WLP) at 16 V and max forward total thrust value from [blueboat specs](https://bluerobotics.com/store/boat/blueboat/blueboat/) | see [../parameter_refs.ods] | bluerobotics_parts/urdf/m200_weedless_prop_ccw.urdf.xacro and bluerobotics_parts/urdf/m200_weedless_prop_cw.urdf.xacro (known issue that they are repeated)
+| Mass | [BlueBoat spec sheets](https://bluerobotics.com/store/boat/blueboat/blueboat/) Boat chassis + 2 batteries | see {download}`parameter_refs.ods <../../reference/parameter_refs.ods>`  | blueboat_chassis.urdf.xacro |
+| Inertia tensor | Estimated based on uniform box and L, W, H dimensions BR specs. Consistent with original values. | see {download}`parameter_refs.ods <../../reference/parameter_refs.ods>` |  blueboat_chassis.urdf.xacro |
+| Thrust limits | Deduced from [thruster performance](https://bluerobotics.com/store/thrusters/t100-t200-thrusters/m200-motor/?attribute_cable-variant=BlueBoat+-+0.71+meter+cable+length+%2B+M14+WLP) at 16 V and max forward total thrust value from [blueboat specs](https://bluerobotics.com/store/boat/blueboat/blueboat/) | see {download}`parameter_refs.ods <../../reference/parameter_refs.ods>` | bluerobotics_parts/urdf/m200_weedless_prop_ccw.urdf.xacro and bluerobotics_parts/urdf/m200_weedless_prop_cw.urdf.xacro (known issue that they are repeated)
 | Deadband | Approximated from the graph for the [m200](https://bluerobotics.com/store/thrusters/t100-t200-thrusters/m200-motor/?attribute_cable-variant=BlueBoat+-+0.71+meter+cable+length+%2B+M14+WLP) and engineering judgement. Small deadband.  Can be tuned out with PWM settings per vessel. | | bluerobotics_parts/urdf/m200_weedless_prop_ccw.urdf.xacro
 
 
@@ -38,7 +36,7 @@ Derive estimates of the linear and quadratic drag based on published maximum vel
 #### Surge
 
 ##### Estimate
-From blueboat specs, max speed is 3 m/s and the max static thrust is 8.2 kgf.   The Fossen drag implementation has both a linear and quadratic terms.  We neglect the linear term and estimate the quadratic coefficient - see [../parameter_refs.ods] 
+From blueboat specs, max speed is 3 m/s and the max static thrust is 8.2 kgf.   The Fossen drag implementation has both a linear and quadratic terms.  We neglect the linear term and estimate the quadratic coefficient - see {download}`parameter_refs.ods <../../reference/parameter_refs.ods>` 
 
 ##### Test - Open-loop surge response
 
