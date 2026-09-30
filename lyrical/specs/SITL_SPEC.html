@@ -202,12 +202,22 @@
 <li class="toctree-l3"><a class="reference internal" href="../how-to/teleop.html#troubleshooting">Troubleshooting</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../how-to/verify-sitl.html">Verify the SITL connection</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#prerequisites">Prerequisites</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#walkthrough">Walkthrough</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../how-to/verify-sitl.html#verify-that-the-boat-drives-in-the-correct-directions-and-polarity">Verify that the boat drives in the correct directions and polarity.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/verify-sitl-boat.html">Verify the SITL connection (Boat)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl-boat.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl-boat.html#walkthrough">Walkthrough</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../how-to/verify-sitl-boat.html#verify-that-the-boat-drives-in-the-correct-directions-and-polarity">Verify that the boat drives in the correct directions and polarity.</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/verify-sitl-rov.html">Verify the SITL connection (ROV)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl-rov.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl-rov.html#walkthrough">Walkthrough</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../how-to/verify-sitl-rov.html#the-simulation">The simulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../how-to/verify-sitl-rov.html#the-autopilot-sitl">The autopilot (SITL)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl-rov.html#verification-teleop-via-the-autopilot">Verification - teleop via the autopilot.</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../how-to/namespaces.html">Several vehicles and several simulations</a><ul>
@@ -423,7 +433,7 @@
 <section id="phase-1-blueboat-under-ardurover-newtons-interface">
 <h3>Phase 1 — BlueBoat under ArduRover, newtons interface<a class="headerlink" href="#phase-1-blueboat-under-ardurover-newtons-interface" title="Link to this heading"></a></h3>
 <p><strong>Objective:</strong> have the BlueBoat moving under ArduRover, on the newtons interface exactly as it stood, so the plumbing and the channel mapping are proven without waiting on phase 2. <code class="docutils literal notranslate"><span class="pre">MANUAL</span></code> only, so that no low-level stabilization has to be configured to get a result. Includes a documentation walkthrough complete enough that a PR reviewer can exercise the whole path end to end.</p>
-<p><em>Verified by</em> the walkthrough in <a class="reference internal" href="../how-to/verify-sitl.html"><span class="std std-doc">Verify the SITL connection</span></a>, by hand. <code class="docutils literal notranslate"><span class="pre">mode</span> <span class="pre">manual</span></code>, <code class="docutils literal notranslate"><span class="pre">arm</span> <span class="pre">throttle</span></code>, then <code class="docutils literal notranslate"><span class="pre">rc</span></code> overrides at the MAVProxy prompt, each with a stated expectation and a stated meaning if it fails:</p>
+<p><em>Verified by</em> the walkthrough in <a class="reference internal" href="../how-to/verify-sitl-boat.html"><span class="std std-doc">Verify the SITL connection (Boat)</span></a>, by hand. <code class="docutils literal notranslate"><span class="pre">mode</span> <span class="pre">manual</span></code>, <code class="docutils literal notranslate"><span class="pre">arm</span> <span class="pre">throttle</span></code>, then <code class="docutils literal notranslate"><span class="pre">rc</span></code> overrides at the MAVProxy prompt, each with a stated expectation and a stated meaning if it fails:</p>
 </section>
 <section id="phase-2-normalized-command-mode-on-the-thruster">
 <h3>Phase 2 — Normalized command mode on the thruster<a class="headerlink" href="#phase-2-normalized-command-mode-on-the-thruster" title="Link to this heading"></a></h3>
@@ -467,7 +477,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">MANUAL</span></code> only. ArduSub’s stabilized modes close loops around attitude and depth, and those need the actuator work in phase 5 before proceeding.</p></li>
 </ul>
 <p>Use the ArduSub configuration from BlueRobotics so that Ardu config matches the ROV.  This is also a good check that the way we’ve modelled the ROV is consistent with the Ardu config - which it should be.</p>
-<p><em>To be verified by</em> a walkthrough written alongside the work, in the shape of <a class="reference internal" href="../how-to/verify-sitl.html"><span class="std std-doc">Verify the SITL connection</span></a> but per axis: in <code class="docutils literal notranslate"><span class="pre">MANUAL</span></code>, arm, then command surge, sway, heave and yaw one at a time and confirm each produces that motion and no other. A cross-coupled response means the allocation is wrong; a reversed one means a thruster or a channel is. Magnitudes are not trusted yet, exactly as in phase 1.</p>
+<p><em>To be verified by</em> a walkthrough written alongside the work, in the shape of <a class="reference internal" href="../how-to/verify-sitl-boat.html"><span class="std std-doc">Verify the SITL connection (Boat)</span></a> but per axis: in <code class="docutils literal notranslate"><span class="pre">MANUAL</span></code>, arm, then command surge, sway, heave and yaw one at a time and confirm each produces that motion and no other. A cross-coupled response means the allocation is wrong; a reversed one means a thruster or a channel is. Magnitudes are not trusted yet, exactly as in phase 1.</p>
 </section>
 <section id="phase-4-stabilization-layer-boat">
 <h3>Phase 4 — Stabilization layer, boat<a class="headerlink" href="#phase-4-stabilization-layer-boat" title="Link to this heading"></a></h3>

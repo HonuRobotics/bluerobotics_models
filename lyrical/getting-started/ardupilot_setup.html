@@ -204,12 +204,22 @@
 <li class="toctree-l3"><a class="reference internal" href="../how-to/teleop.html#troubleshooting">Troubleshooting</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../how-to/verify-sitl.html">Verify the SITL connection</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#prerequisites">Prerequisites</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl.html#walkthrough">Walkthrough</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../how-to/verify-sitl.html#verify-that-the-boat-drives-in-the-correct-directions-and-polarity">Verify that the boat drives in the correct directions and polarity.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/verify-sitl-boat.html">Verify the SITL connection (Boat)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl-boat.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl-boat.html#walkthrough">Walkthrough</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../how-to/verify-sitl-boat.html#verify-that-the-boat-drives-in-the-correct-directions-and-polarity">Verify that the boat drives in the correct directions and polarity.</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../how-to/verify-sitl-rov.html">Verify the SITL connection (ROV)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl-rov.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl-rov.html#walkthrough">Walkthrough</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../how-to/verify-sitl-rov.html#the-simulation">The simulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../how-to/verify-sitl-rov.html#the-autopilot-sitl">The autopilot (SITL)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/verify-sitl-rov.html#verification-teleop-via-the-autopilot">Verification - teleop via the autopilot.</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../how-to/namespaces.html">Several vehicles and several simulations</a><ul>
@@ -505,6 +515,7 @@ nobody here has modified.</span><a class="headerlink" href="#id2" title="Link to
 <p><strong><code class="docutils literal notranslate"><span class="pre">PreArm:</span> <span class="pre">Motors:</span> <span class="pre">Check</span> <span class="pre">frame</span> <span class="pre">class</span> <span class="pre">and</span> <span class="pre">type</span></code></strong> — the frame’s parameters were never applied. Either the checkout is not at the pin (<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">-C</span> <span class="pre">~/maritime_ws/thirdparty/ardupilot</span> <span class="pre">tag</span> <span class="pre">--points-at</span> <span class="pre">HEAD</span></code> should list <code class="docutils literal notranslate"><span class="pre">Rover-4.7.1</span></code>; newer ArduPilot does not load frame defaults when <code class="docutils literal notranslate"><span class="pre">--model</span></code> is given) or the <code class="docutils literal notranslate"><span class="pre">--add-param-file</span></code> arguments were dropped. Keep both arguments; <code class="docutils literal notranslate"><span class="pre">-w</span></code> alone does not help, because there are no defaults for it to reload.</p>
 <p><strong>The vehicle arms but does not move</strong> — usually the frame argument. The frame passed to <code class="docutils literal notranslate"><span class="pre">sim_vehicle.py</span></code> has to match the model’s <code class="docutils literal notranslate"><span class="pre">&lt;control&gt;</span></code> channel wiring, and <code class="docutils literal notranslate"><span class="pre">--model</span> <span class="pre">JSON</span></code> has to be present or SITL uses its own internal physics and ignores Gazebo entirely.</p>
 <p><strong>The vehicle arms, the thruster topics carry commands, and still nothing moves</strong> — the thruster plugin is not loaded. Check that <code class="docutils literal notranslate"><span class="pre">GZ_SIM_SYSTEM_PLUGIN_PATH</span></code> still contains the workspace’s <code class="docutils literal notranslate"><span class="pre">install/lib</span></code> after sourcing this script; if it holds only <code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo/build</span></code>, the script is overwriting it rather than appending, and <code class="docutils literal notranslate"><span class="pre">gz-maritime-thruster-system</span></code> cannot be found. Commands keep flowing because <code class="docutils literal notranslate"><span class="pre">ArduPilotPlugin</span></code> publishes them regardless of whether anything is listening.</p>
+<p><strong><code class="docutils literal notranslate"><span class="pre">[warning]</span> <span class="pre">[ArduPilotPlugin.cc]</span> <span class="pre">ArduPilot</span> <span class="pre">controller</span> <span class="pre">has</span> <span class="pre">reset</span></code></strong>, once at startup and then roughly once a minute — expected, and not a problem with your setup. It is an upstream bug in <code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo</span></code>: the plugin keeps ArduPilot’s 32-bit frame counter in a <code class="docutils literal notranslate"><span class="pre">uint16_t</span></code>, so the counter wraps about every 66 seconds at 1000 Hz and the plugin reads the wrap as SITL having restarted. The startup one has a different cause, an initial frame count of -1, and is equally harmless. The fix is a one-word change to the variable’s type, open upstream as <a class="reference external" href="https://github.com/ArduPilot/ardupilot_gazebo/pull/174">ardupilot_gazebo#174</a>; nothing in the simulation is reset when the message appears.</p>
 </section>
 <section id="reference">
 <h2>Reference<a class="headerlink" href="#reference" title="Link to this heading"></a></h2>
@@ -524,7 +535,8 @@ so every <em>host</em> terminal would then try to activate a venv built against 
 container’s Python. <code class="docutils literal notranslate"><span class="pre">DO_PYTHON_VENV_ENV=0</span></code> suppresses the venv one; decline
 the <code class="docutils literal notranslate"><span class="pre">PATH</span></code> one. Set both explicitly in the environment script instead.</p>
 </div>
-<p>Building <code class="docutils literal notranslate"><span class="pre">rover</span></code> alone is enough for the BlueBoat. <code class="docutils literal notranslate"><span class="pre">./waf</span> <span class="pre">copter</span></code> as well if you want the Iris smoke test below.</p>
+<p>Building <code class="docutils literal notranslate"><span class="pre">rover</span></code> alone is enough for the BlueBoat, and <code class="docutils literal notranslate"><span class="pre">sub</span></code> for the BlueROV2. <code class="docutils literal notranslate"><span class="pre">./waf</span> <span class="pre">copter</span></code> as well if you want the Iris smoke test below.</p>
+<p>The two vehicles differ only in what you hand <code class="docutils literal notranslate"><span class="pre">sim_vehicle.py</span></code>; the walkthroughs are <a class="reference internal" href="../how-to/verify-sitl-boat.html"><span class="std std-doc">Verify the SITL connection (Boat)</span></a> for the BlueBoat and <a class="reference internal" href="../how-to/verify-sitl-rov.html"><span class="std std-doc">Verify the SITL connection (ROV)</span></a> for the BlueROV2.</p>
 </section>
 </section>
 </section>
