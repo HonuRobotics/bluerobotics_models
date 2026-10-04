@@ -5,9 +5,7 @@ This walkthrough is to confirm that ArduSub's inner control loops (stabilization
 [Verify the SITL connection (ROV)](verify-sitl-rov.md) checks the wiring — each stick moves the axis it names. This page checks the numbers.
 
 ```{note}
-OUTLINE. The expected figures are blank until the hydrodynamic
-identification is done; each is filled in from a published source or from a
-trial. Nothing on this page has been run yet.
+The expected figures on this page are blank until the hydrodynamic identification is done, because what a correct response looks like depends on the damping being identified. Each is filled in from a published source or from a trial, and nothing here has been run yet.
 ```
 
 ## Prerequisites
@@ -63,7 +61,43 @@ connects and then roughly once a minute. This is annoying, but not of concern.
 
 ### Graph the autopilot internals
 
-TBD — which `GCS_PID_MASK` bits ArduSub uses, and the `graph` expressions for the yaw rate loop and the depth loop. Unlike the boat, the demand and achieved values here come from loops with an integrator, so what to watch is the transient rather than a standing offset.
+`GCS_PID_MASK` selects which loop the autopilot reports on. ArduSub's bits are not the boat's, and one of them is not in ArduPilot's parameter documentation:
+
+| Bit | Value | Loop reported |
+|---|---|---|
+| 0 | 1 | roll rate |
+| 1 | 2 | pitch rate |
+| 2 | 4 | yaw rate |
+| 3 | 8 | depth, as the vertical acceleration loop |
+
+Bit 3 is read by `GCS_MAVLink_Sub.cpp` in `send_pid_tuning`, but the parameter's own `@Bitmask` metadata in `ArduSub/Parameters.cpp` lists only roll, pitch and yaw — so the depth loop cannot be found from the published parameter reference. That is an upstream documentation gap, not a local one.
+
+Set one bit at a time. Every enabled loop sends `PID_TUNING` on the same message, so with two bits set the graph interleaves two loops and neither reads cleanly.
+
+For the yaw rate loop:
+
+```
+param set GCS_PID_MASK 4
+module load graph
+graph PID_TUNING.desired PID_TUNING.achieved
+```
+
+For the depth loop:
+
+```
+param set GCS_PID_MASK 8
+graph PID_TUNING.desired PID_TUNING.achieved
+```
+
+Both are degrees per second for yaw and m/s² for depth; the depth loop's achieved value is the earth-frame vertical acceleration with gravity removed, not a depth.
+
+Depth itself is easier read directly, and it is what the checks below are judged on:
+
+```
+graph VFR_HUD.alt
+```
+
+Unlike the boat, what to watch is the transient rather than a standing offset. Both loops carry an integrator, which drives steady-state error to zero whether or not the plant is right — so a loop that settles on target says little, and the settling time and overshoot on the way there say everything.
 
 ### Verify heading hold
 
@@ -105,4 +139,16 @@ actuator model or the hydrodynamics is wrong.
 
 ## If a row is wrong
 
-TBD — a short table mapping each symptom to the layer that owns it: no motion on an axis the frame does not mix, a response too slow or too fast being damping, saturation being thrust limits, and oscillation being a gain meeting the wrong plant.
+Each symptom belongs to a layer, and the point of the table is to send you to the right one rather than to the gains.
+
+| Symptom | Layer that owns it | Where to look |
+|---|---|---|
+| No motion at all on an axis | the frame, not a fault | `Vectored` mixes no pitch, and roll has no angle gain. Confirm the axis is one the vehicle closes before treating it as broken — see [Parameters](parameters.md) |
+| Response settles, but too slowly | damping too high | `nRabsR` for yaw, `zWabsW` for heave |
+| Response overshoots and rings | damping too low | the same two coefficients, from the other side |
+| Demand is met but the vehicle is sluggish reaching it | thrust limits | the `drive` endpoints on `t200_prop_cw` / `t200_prop_ccw`. If `PID_TUNING` shows the output pinned, the loop is asking for thrust the model does not have |
+| Oscillation that grows | a gain meeting the wrong plant | not the gain. A plant this far off is a damping or thrust error large enough to find in an open-loop trial, so go back to those |
+| Depth drifts steadily | buoyancy, not the loop | the vehicle should be neutrally buoyant; `test_gz_launch.py::test_vehicle_neutrally_buoyant` asserts it |
+| Heading wanders with no stick input | the IMU frame | the sensor is rolled 180° about x so it reports FRD, which is what `ArduPilotPlugin` requires. A yaw rate of the wrong sign makes the loop correct the way that makes it worse |
+
+The last row is worth checking first when something is inexplicable rather than merely wrong. It is what the boat spent the longest on: `MANUAL` drove correctly while the stabilized mode spun, because the plugin takes the gyro straight from the IMU message without rotating it.

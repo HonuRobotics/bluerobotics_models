@@ -282,9 +282,11 @@
        claim about geometry rather than a choice. ArduSub assigns
        SERVO1..6 to Motor1..6 automatically from FRAME_CONFIG, and our
        thruster_N slots sit where ArduSub's Vectored frame expects Motor N
-       (AP_Motors6DOF.cpp, SUB_FRAME_VECTORED). test_ardusub_frame.py
-       asserts that correspondence; if a slot moves, it fails there rather
-       than as a vehicle that swims sideways. -->
+       (AP_Motors6DOF.cpp, SUB_FRAME_VECTORED).
+       test_model_generation.py, in
+       test_ardupilot_controls_follow_the_thrusters, asserts that
+       correspondence; if a slot moves, it fails there rather than as a
+       vehicle that swims sideways. -->
   <xacro:macro name="ap_control" params="ptype name parent xyz rpy collision joint axis info">
     <xacro:if value="${'drive' in info and joint != 'fixed'}">
       <xacro:part_entry name="${name}"/>
