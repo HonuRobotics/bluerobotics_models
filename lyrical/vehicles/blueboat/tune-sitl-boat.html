@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration &mdash; BlueRobotics Models lyrical documentation</title>
+  <title>Tuning of closed-loop response for BlueBoat &mdash; BlueRobotics Models lyrical documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/honu.css?v=44af46ee" />
@@ -21,8 +21,8 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Verify the SITL connection (ROV)" href="verify-sitl-rov.html" />
-    <link rel="prev" title="Sensors" href="sensors.html" /> 
+    <link rel="next" title="BlueROV2" href="../bluerov2/index.html" />
+    <link rel="prev" title="Verify the SITL connection (Boat)" href="verify-sitl-boat.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -92,86 +92,7 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Vehicles</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../blueboat/index.html">BlueBoat</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../blueboat/running.html">Running the simulation</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../blueboat/running.html#launch-arguments">Launch arguments</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../blueboat/running.html#choosing-the-world">Choosing the world</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../blueboat/running.html#in-rviz">In RViz</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../blueboat/actuators.html">Actuators</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../blueboat/actuators.html#available-actuators">Available actuators</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../blueboat/actuators.html#actuators-ros-api">Actuators ROS API</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="../blueboat/actuators.html#thrusters">Thrusters</a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="../blueboat/actuators.html#gazebo-transport-api">Gazebo transport API</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../blueboat/sensors.html">Sensors</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../blueboat/sensors.html#available-sensors">Available sensors</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../blueboat/sensors.html#sensors-ros-api">Sensors ROS API</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="../blueboat/sensors.html#echosounder">Echosounder</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../blueboat/configuration.html">Configuration</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../blueboat/configuration.html#hull-displacement">Hull displacement</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../blueboat/configuration.html#payload">Payload</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../blueboat/parameters.html">BlueBoat Parameters</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../blueboat/parameters.html#approach">Approach</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../blueboat/parameters.html#set-via-reference">Set via reference</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="../blueboat/parameters.html#drag-estimates-open-loop">Drag estimates - open loop</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="../blueboat/parameters.html#surge">Surge</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="../blueboat/parameters.html#estimate">Estimate</a></li>
-<li class="toctree-l7"><a class="reference internal" href="../blueboat/parameters.html#test-open-loop-surge-response">Test - Open-loop surge response</a></li>
-<li class="toctree-l7"><a class="reference internal" href="../blueboat/parameters.html#select-in-test">Select in test</a></li>
-</ul>
-</li>
-<li class="toctree-l6"><a class="reference internal" href="../blueboat/parameters.html#yaw">Yaw</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="../blueboat/parameters.html#id1">Estimate</a></li>
-<li class="toctree-l7"><a class="reference internal" href="../blueboat/parameters.html#test-open-loop-yaw-response">Test - open-loop yaw response</a></li>
-<li class="toctree-l7"><a class="reference internal" href="../blueboat/parameters.html#id2">Select in test</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="../blueboat/parameters.html#the-autopilot-parameter-file">The autopilot parameter file</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="../blueboat/parameters.html#provenance-three-descriptions-and-they-disagree">Provenance: three descriptions, and they disagree</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../blueboat/verify-sitl-boat.html">Verify the SITL connection (Boat)</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../blueboat/verify-sitl-boat.html#prerequisites">Prerequisites</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../blueboat/verify-sitl-boat.html#walkthrough">Walkthrough</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="../blueboat/verify-sitl-boat.html#verify-that-the-boat-drives-in-the-correct-directions-and-polarity">Verify that the boat drives in the correct directions and polarity.</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../blueboat/tune-sitl-boat.html">Tuning of closed-loop response for BlueBoat</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../blueboat/tune-sitl-boat.html#prerequisites">Prerequisites</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../blueboat/tune-sitl-boat.html#walkthrough">Walkthrough</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="../blueboat/tune-sitl-boat.html#test-closed-loop-response">Test closed-loop response</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="../blueboat/tune-sitl-boat.html#surge-control">Surge control</a></li>
-<li class="toctree-l6"><a class="reference internal" href="../blueboat/tune-sitl-boat.html#yaw-rate-control">Yaw-rate control</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="../blueboat/tune-sitl-boat.html#summary">Summary</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../blueboat/index.html#the-default-vehicle">The default vehicle</a></li>
-</ul>
-</li>
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">BlueROV2</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">BlueBoat</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="running.html">Running the simulation</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="running.html#launch-arguments">Launch arguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="running.html#choosing-the-world">Choosing the world</a></li>
@@ -182,7 +103,6 @@
 <li class="toctree-l4"><a class="reference internal" href="actuators.html#available-actuators">Available actuators</a></li>
 <li class="toctree-l4"><a class="reference internal" href="actuators.html#actuators-ros-api">Actuators ROS API</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="actuators.html#thrusters">Thrusters</a></li>
-<li class="toctree-l5"><a class="reference internal" href="actuators.html#grippers">Grippers</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="actuators.html#gazebo-transport-api">Gazebo transport API</a></li>
@@ -191,31 +111,111 @@
 <li class="toctree-l3"><a class="reference internal" href="sensors.html">Sensors</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="sensors.html#available-sensors">Available sensors</a></li>
 <li class="toctree-l4"><a class="reference internal" href="sensors.html#sensors-ros-api">Sensors ROS API</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="sensors.html#camera">Camera</a></li>
-<li class="toctree-l5"><a class="reference internal" href="sensors.html#stereo-camera">Stereo camera</a></li>
-<li class="toctree-l5"><a class="reference internal" href="sensors.html#scanning-sonar">Scanning sonar</a></li>
-<li class="toctree-l5"><a class="reference internal" href="sensors.html#dvl">DVL</a></li>
+<li class="toctree-l5"><a class="reference internal" href="sensors.html#echosounder">Echosounder</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Configuration</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#variants">Variants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#buoyancy">Buoyancy</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#payload">Payload</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html">Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="configuration.html#hull-displacement">Hull displacement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="configuration.html#payload">Payload</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="verify-sitl-rov.html">Verify the SITL connection (ROV)</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="verify-sitl-rov.html#prerequisites">Prerequisites</a></li>
-<li class="toctree-l4"><a class="reference internal" href="verify-sitl-rov.html#walkthrough">Walkthrough</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="verify-sitl-rov.html#the-simulation">The simulation</a></li>
-<li class="toctree-l5"><a class="reference internal" href="verify-sitl-rov.html#the-autopilot-sitl">The autopilot (SITL)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="parameters.html">BlueBoat Parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="parameters.html#approach">Approach</a></li>
+<li class="toctree-l4"><a class="reference internal" href="parameters.html#set-via-reference">Set via reference</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="parameters.html#drag-estimates-open-loop">Drag estimates - open loop</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="parameters.html#surge">Surge</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="parameters.html#estimate">Estimate</a></li>
+<li class="toctree-l7"><a class="reference internal" href="parameters.html#test-open-loop-surge-response">Test - Open-loop surge response</a></li>
+<li class="toctree-l7"><a class="reference internal" href="parameters.html#select-in-test">Select in test</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="verify-sitl-rov.html#verification-teleop-via-the-autopilot">Verification - teleop via the autopilot.</a></li>
+<li class="toctree-l6"><a class="reference internal" href="parameters.html#yaw">Yaw</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="parameters.html#id1">Estimate</a></li>
+<li class="toctree-l7"><a class="reference internal" href="parameters.html#test-open-loop-yaw-response">Test - open-loop yaw response</a></li>
+<li class="toctree-l7"><a class="reference internal" href="parameters.html#id2">Select in test</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="parameters.html#the-autopilot-parameter-file">The autopilot parameter file</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="parameters.html#provenance-three-descriptions-and-they-disagree">Provenance: three descriptions, and they disagree</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="verify-sitl-boat.html">Verify the SITL connection (Boat)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="verify-sitl-boat.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="verify-sitl-boat.html#walkthrough">Walkthrough</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="verify-sitl-boat.html#verify-that-the-boat-drives-in-the-correct-directions-and-polarity">Verify that the boat drives in the correct directions and polarity.</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Tuning of closed-loop response for BlueBoat</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#walkthrough">Walkthrough</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#test-closed-loop-response">Test closed-loop response</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#surge-control">Surge control</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#yaw-rate-control">Yaw-rate control</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#summary">Summary</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="index.html#the-default-vehicle">The default vehicle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../bluerov2/index.html">BlueROV2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../bluerov2/running.html">Running the simulation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../bluerov2/running.html#launch-arguments">Launch arguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../bluerov2/running.html#choosing-the-world">Choosing the world</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../bluerov2/running.html#in-rviz">In RViz</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../bluerov2/actuators.html">Actuators</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../bluerov2/actuators.html#available-actuators">Available actuators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../bluerov2/actuators.html#actuators-ros-api">Actuators ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../bluerov2/actuators.html#thrusters">Thrusters</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../bluerov2/actuators.html#grippers">Grippers</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../bluerov2/actuators.html#gazebo-transport-api">Gazebo transport API</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../bluerov2/sensors.html">Sensors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../bluerov2/sensors.html#available-sensors">Available sensors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../bluerov2/sensors.html#sensors-ros-api">Sensors ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../bluerov2/sensors.html#camera">Camera</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../bluerov2/sensors.html#stereo-camera">Stereo camera</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../bluerov2/sensors.html#scanning-sonar">Scanning sonar</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../bluerov2/sensors.html#dvl">DVL</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../bluerov2/configuration.html">Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../bluerov2/configuration.html#variants">Variants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../bluerov2/configuration.html#buoyancy">Buoyancy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../bluerov2/configuration.html#payload">Payload</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../bluerov2/verify-sitl-rov.html">Verify the SITL connection (ROV)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../bluerov2/verify-sitl-rov.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../bluerov2/verify-sitl-rov.html#walkthrough">Walkthrough</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../bluerov2/verify-sitl-rov.html#the-simulation">The simulation</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../bluerov2/verify-sitl-rov.html#the-autopilot-sitl">The autopilot (SITL)</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../bluerov2/verify-sitl-rov.html#verification-teleop-via-the-autopilot">Verification - teleop via the autopilot.</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../bluerov2/index.html#the-default-vehicle">The default vehicle</a></li>
 </ul>
 </li>
 </ul>
@@ -360,10 +360,10 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Vehicles</a></li>
-          <li class="breadcrumb-item"><a href="index.html">BlueROV2</a></li>
-      <li class="breadcrumb-item active">Configuration</li>
+          <li class="breadcrumb-item"><a href="index.html">BlueBoat</a></li>
+      <li class="breadcrumb-item active">Tuning of closed-loop response for BlueBoat</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/vehicles/bluerov2/configuration.md" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/vehicles/blueboat/tune-sitl-boat.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -371,91 +371,102 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="configuration">
-<h1>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h1>
-<p>The BlueROV2 needs no configuration: every slot the parts declare fills
-itself with its default. The vehicle config
-(<code class="docutils literal notranslate"><span class="pre">bluerov2_description/config/bluerov2.yaml</span></code>, or any file passed as
-<code class="docutils literal notranslate"><span class="pre">config_file:=</span></code>) states differences only.</p>
-<section id="variants">
-<h2>Variants<a class="headerlink" href="#variants" title="Link to this heading"></a></h2>
-<p>The vehicle comes in two variants. The <strong>standard</strong> BlueROV2 carries six
-thrusters: four vectored horizontals and two verticals. The <strong>Heavy</strong>
-carries eight: the same horizontals plus four corner verticals, which add
-roll and pitch authority and more lift for payload. The variant is picked
-by the base part:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">base</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="nv">bluerov2_chassis</span><span class="p p-Indicator">,</span><span class="nt"> name</span><span class="p">:</span><span class="w"> </span><span class="nv">base_link</span><span class="p p-Indicator">}</span><span class="w">        </span><span class="c1"># standard</span>
-<span class="nt">base</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="nv">bluerov2_heavy_chassis</span><span class="p p-Indicator">,</span><span class="nt"> name</span><span class="p">:</span><span class="w"> </span><span class="nv">base_link</span><span class="p p-Indicator">}</span><span class="w">  </span><span class="c1"># heavy</span>
+  <section id="tuning-of-closed-loop-response-for-blueboat">
+<h1>Tuning of closed-loop response for BlueBoat<a class="headerlink" href="#tuning-of-closed-loop-response-for-blueboat" title="Link to this heading"></a></h1>
+<p>This walkthrough is to confirm that ArduRover’s inner control loops (stabilization layer) drive the simulated BlueBoat the way the hardware behaves, under Blue Robotics’ published gains.</p>
+<p>This closed-loop mode is Ardu’s <code class="docutils literal notranslate"><span class="pre">ACRO</span></code> mode where R/C channel 3 is a speed command (PWM command, scaled in Ardu to a setpoint in m/s) and channel 1 is a yaw-rate command (PWM, scaled to yaw-rate by Ardu.)</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Setup and run the drydock + source development environment: <a class="reference internal" href="../../getting-started/installation_drydock.html"><span class="std std-doc">installation_drydock.md</span></a></p></li>
+<li><p><a class="reference internal" href="../../getting-started/ardupilot_setup.html"><span class="std std-doc">ArduPilot SITL setup</span></a>; (the rest of this page assumes the Iris smoke test passed.)</p></li>
+<li><p><a class="reference internal" href="verify-sitl-boat.html"><span class="std std-doc">Verify the SITL connection (Boat)</span></a> passes.</p></li>
+</ul>
+</section>
+<section id="walkthrough">
+<h2>Walkthrough<a class="headerlink" href="#walkthrough" title="Link to this heading"></a></h2>
+<p>All commands are issued within the drydock dev container. Two shells, as in the verification walkthrough.</p>
+<p>First, the simulation:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>~/maritime_ws/install/setup.bash
+<span class="nb">source</span><span class="w"> </span>~/maritime_ws/thirdparty/setup-ardupilot.sh
+gz<span class="w"> </span>sim<span class="w"> </span>-v4<span class="w"> </span>-r<span class="w"> </span><span class="k">$(</span>ros2<span class="w"> </span>pkg<span class="w"> </span>prefix<span class="w"> </span>--share<span class="w"> </span>blueboat_gazebo<span class="k">)</span>/worlds/blueboat_sitl.sdf
 </pre></div>
 </div>
-<p>With the heavy hull, widen the buoyancy footprint to <code class="docutils literal notranslate"><span class="pre">&quot;0.457</span> <span class="pre">0.575&quot;</span></code>.</p>
+<p>Then the autopilot:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>~/maritime_ws/install/setup.bash
+<span class="nb">source</span><span class="w"> </span>~/maritime_ws/thirdparty/setup-ardupilot.sh
+<span class="nv">AP</span><span class="o">=</span><span class="nv">$HOME</span>/maritime_ws/thirdparty/ardupilot/Tools/autotest
+sim_vehicle.py<span class="w"> </span>-v<span class="w"> </span>Rover<span class="w"> </span>-f<span class="w"> </span>rover-skid<span class="w"> </span>--model<span class="w"> </span>JSON<span class="w"> </span>--console<span class="w"> </span>-w<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--add-param-file<span class="o">=</span><span class="nv">$AP</span>/default_params/rover.parm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--add-param-file<span class="o">=</span><span class="k">$(</span>ros2<span class="w"> </span>pkg<span class="w"> </span>prefix<span class="w"> </span>--share<span class="w"> </span>blueboat_gazebo<span class="k">)</span>/params/blueboat_sitl.params
+</pre></div>
+</div>
+<section id="test-closed-loop-response">
+<h3>Test closed-loop response<a class="headerlink" href="#test-closed-loop-response" title="Link to this heading"></a></h3>
+<p>These are qualitative tests that require engineering judgement.  It is important to state that fine tuning the interplay between the physics and the autopilot is not an objective of the simulation.  Getting the physics to sufficient fidelity to be able to develop transportable (sim2real) autopilot gains, is not feasible within the project scope, so we aim to reproduce the closed-loop behavior by tuning the system’s closed-loop behavior, end-to-end, so that it reproduces the behavior of the closed-loop hardware.</p>
+<section id="surge-control">
+<h4>Surge control<a class="headerlink" href="#surge-control" title="Link to this heading"></a></h4>
+<p>After you have the sim and autopilot (MAVProxy) running.</p>
+<p>In MAVProxy, graph the autopilot internals</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">param</span> <span class="nb">set</span> <span class="n">GCS_PID_MASK</span> <span class="mi">2</span>
+<span class="n">module</span> <span class="n">load</span> <span class="n">graph</span>
+<span class="n">graph</span> <span class="n">PID_TUNING</span><span class="o">.</span><span class="n">desired</span> <span class="n">PID_TUNING</span><span class="o">.</span><span class="n">achieved</span>
+</pre></div>
+</div>
+<p>then arm and activate the stabilization layer control in <code class="docutils literal notranslate"><span class="pre">ACRO</span></code> mode.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">arm</span> <span class="n">throttle</span>
+<span class="n">mode</span> <span class="n">acro</span>
+</pre></div>
+</div>
+<p>Send full forward speed command</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rc</span> <span class="mi">3</span> <span class="mi">1900</span>
+</pre></div>
+</div>
+<p>Scaling from PWM to speed setpoint is set by <code class="docutils literal notranslate"><span class="pre">SPEED_MAX</span></code> in <code class="docutils literal notranslate"><span class="pre">blueboat_gazebo/params/blueboat_sitl.params</span></code>. It is only consulted when positive: left at its default of 0, ArduRover estimates the maximum as <code class="docutils literal notranslate"><span class="pre">CRUISE_SPEED</span> <span class="pre">/</span> <span class="pre">CRUISE_THROTTLE</span></code> instead (<code class="docutils literal notranslate"><span class="pre">Rover/mode.cpp:366-378</span></code>).</p>
+<p>Results in
+<img alt="Surge closed loop response, full fwd" src="../../_images/surge_acro_tuned_full.png" /></p>
+<p>Sending half speed command</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rc</span> <span class="mi">3</span> <span class="mi">1700</span>
+</pre></div>
+</div>
+<p>Results:</p>
+<p><img alt="Surge closed-loop response, half fwd" src="../../_images/surge_acro_tuned_half.png" /></p>
 </section>
-<section id="buoyancy">
-<h2>Buoyancy<a class="headerlink" href="#buoyancy" title="Link to this heading"></a></h2>
-<p>A real vehicle is trimmed with foam and ballast to float slightly
-positive, so a dead vehicle surfaces on its own. The config declares that
-trim directly instead of asking you to tune volumes:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">net_buoyancy</span></code>: kilograms of lift beyond neutral (positive floats up). The shipped default is 0.0, so the vehicle holds whatever depth it is spawned at; set it a little positive (0.002 is about right) to model a real trim that surfaces a dead vehicle.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">cob_offset</span></code> and <code class="docutils literal notranslate"><span class="pre">cob_frame</span></code>: where the center of buoyancy sits,
-relative to the assembly’s center of mass (<code class="docutils literal notranslate"><span class="pre">com</span></code>) or to <code class="docutils literal notranslate"><span class="pre">base_link</span></code>;
-keeping it above the center of mass is what makes the vehicle passively
-stable in roll and pitch.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">fluid_density</span></code> and <code class="docutils literal notranslate"><span class="pre">footprint</span></code>: the water and the horizontal size of
-the displaced volume.</p></li>
-</ul>
-<p>The Gazebo composition realizes the declaration as a dedicated
-displacement volume solved from the assembled mass, so the declared trim
-holds when the config changes (<a class="reference internal" href="../../design/buoyancy.html"><span class="std std-doc">Buoyancy</span></a>).</p>
+<section id="yaw-rate-control">
+<h4>Yaw-rate control<a class="headerlink" href="#yaw-rate-control" title="Link to this heading"></a></h4>
+<p>Setup to graph the autopilot internals for the yaw loop.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">param</span> <span class="nb">set</span> <span class="n">GCS_PID_MASK</span> <span class="mi">1</span>
+<span class="n">module</span> <span class="n">load</span> <span class="n">graph</span>
+<span class="n">graph</span> <span class="n">PID_TUNING</span><span class="o">.</span><span class="n">desired</span> <span class="n">PID_TUNING</span><span class="o">.</span><span class="n">achieved</span>
+<span class="n">arm</span> <span class="n">throttle</span>
+<span class="n">mode</span> <span class="n">acro</span>
+</pre></div>
+</div>
+<p>Send full yaw-rate command</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rc</span> <span class="mi">1</span> <span class="mi">1900</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">ACRO_TURN_RATE</span></code> parameter controls the mapping from R/C PWM to yaw-rate setpoint in deg/s.</p>
+<p>Results:</p>
+<p><img alt="Yaw closed-loop response, full" src="../../_images/yaw_acro_tuned.png" /></p>
+<p>Note: when first developed (see open-loop tuning in [./parameters.md]) the closed-loop yaw response held a constant bias - the achieved rate was above the setpoint.  This suggests that the FF term was not a match with the open-loop plant DC gain.</p>
+<p>With <code class="docutils literal notranslate"><span class="pre">ATC_STR_RAT_I</span></code> at 0 there is no integrator to adapt to the mismatch between FF and DC Gain. Writing <code class="docutils literal notranslate"><span class="pre">G</span></code> for the plant’s DC gain in rad/s per unit steering output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">achieved</span> <span class="o">/</span> <span class="n">demanded</span> <span class="o">=</span> <span class="n">G</span><span class="p">(</span><span class="n">FF</span> <span class="o">+</span> <span class="n">P</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">G·P</span><span class="p">)</span>
+<span class="n">bias</span>                <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">G·FF</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">G·P</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The bias is zero exactly when <code class="docutils literal notranslate"><span class="pre">G</span> <span class="pre">=</span> <span class="pre">1</span> <span class="pre">/</span> <span class="pre">FF</span></code>.</p>
+<p>Steering output <code class="docutils literal notranslate"><span class="pre">u</span></code> reaches the water as a differential, with the reverse-going motor scaled by <code class="docutils literal notranslate"><span class="pre">MOT_THST_ASYM</span></code> (<code class="docutils literal notranslate"><span class="pre">AP_MotorsUGV.cpp</span></code>, “Apply asymmetry correction”), so the moment per unit output is</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>k = 0.301 m × (40.22 N + 1.6 × 20.1 N) = 21.8 N·m
+</pre></div>
+</div>
+<p>and with linear damping the plant gain is <code class="docutils literal notranslate"><span class="pre">G</span> <span class="pre">=</span> <span class="pre">k</span> <span class="pre">/</span> <span class="pre">nR</span></code>. Setting <code class="docutils literal notranslate"><span class="pre">G</span> <span class="pre">=</span> <span class="pre">1/FF</span></code> gives <code class="docutils literal notranslate"><span class="pre">nR</span> <span class="pre">=</span> <span class="pre">k</span> <span class="pre">·</span> <span class="pre">FF</span> <span class="pre">=</span> <span class="pre">21.8</span> <span class="pre">×</span> <span class="pre">0.8</span> <span class="pre">=</span> <span class="pre">17.4</span></code>, which is where the <code class="docutils literal notranslate"><span class="pre">-18</span></code> in the model comes from - selected in test and corroborated by the derivation above.</p>
 </section>
-<section id="payload">
-<h2>Payload<a class="headerlink" href="#payload" title="Link to this heading"></a></h2>
-<p>Everything else is payload: sensors and actuators fitted into slots, one
-config entry each. The fitted options and their topics live in
-<a class="reference internal" href="sensors.html"><span class="std std-doc">Sensors</span></a> and <a class="reference internal" href="actuators.html"><span class="std std-doc">Actuators</span></a>; the slots are:</p>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Slot</p></th>
-<th class="head"><p>Accepts</p></th>
-<th class="head"><p>Default</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">thruster_1</span></code> .. <code class="docutils literal notranslate"><span class="pre">thruster_6</span></code> (<code class="docutils literal notranslate"><span class="pre">_8</span></code> heavy)</p></td>
-<td><p>the matching T200 propeller</p></td>
-<td><p>fitted</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">camera</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">explorehd_camera</span></code>, <code class="docutils literal notranslate"><span class="pre">marinesitu_c3</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">explorehd_camera</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sonar</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ping360</span></code></p></td>
-<td><p>empty</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dvl</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">dvl_a50</span></code></p></td>
-<td><p>empty</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gripper</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">newton_gripper</span></code>, <code class="docutils literal notranslate"><span class="pre">sediment_sampler</span></code></p></td>
-<td><p>empty</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">payload</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">payload_skid</span></code></p></td>
-<td><p>empty</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">roof_rack</span></code></p></td>
-<td><p>empty</p></td>
-</tr>
-</tbody>
-</table>
-<p>Slot entries, free placements, ad hoc slots and topic overrides follow
-the same schema as the BlueBoat
-(<a class="reference internal" href="../../reference/parts-catalog.html#configuration-keys"><span class="std std-ref">Configuration keys</span></a>); the instance key is
-<code class="docutils literal notranslate"><span class="pre">of:</span></code>, not <code class="docutils literal notranslate"><span class="pre">on:</span></code>. Mistakes fail the build or the launch with a message
-naming the problem.</p>
+</section>
+</section>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading"></a></h2>
+<p>This walkthrough demonstrates and verifies the tuning of the various boat and autopilot parameters to achieve the desired closed-loop performance in <code class="docutils literal notranslate"><span class="pre">ACRO</span></code> mode that mimics the closed-loop behavior of the hardware.   Because there are many more model parameters than test cases, we have many “colinear regressors” and an infinite number of parameter sets equally “correct” in terms of closed-loop behavior.  Our approach, discussed more in <a class="reference internal" href="parameters.html"><span class="std std-doc">Parameters</span></a>, is to leave fixed what we know (a few physical parameters, thruster characteristics and autopilot settings) to modify the unknowns (hydrodynamic parameters) to design the closed-loop response.</p>
 </section>
 </section>
 
@@ -463,8 +474,8 @@ naming the problem.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="sensors.html" class="btn btn-neutral float-left" title="Sensors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="verify-sitl-rov.html" class="btn btn-neutral float-right" title="Verify the SITL connection (ROV)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="verify-sitl-boat.html" class="btn btn-neutral float-left" title="Verify the SITL connection (Boat)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../bluerov2/index.html" class="btn btn-neutral float-right" title="BlueROV2" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

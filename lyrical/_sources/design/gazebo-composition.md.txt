@@ -30,7 +30,7 @@ Each sensor is a massless link posed `relative_to` the frame its part
 declares for its sensing origin (`ping_beam`), with `frame_id` set to that
 frame under the instance name (`blueboat/ping_beam`), which is the name
 TF carries once `robot_state_publisher` prefixes the frames. Each propeller (a part
-whose `part_info` carries a `drive` table: diameter, thrust limits, sense
+whose `part_info` carries a `drive` table: thrust limits, deadband, sense
 of rotation) gets a Thruster plugin on its mounting joint, with the
 coefficient sign set by the rotation so a counter rotating pair cancels its
 reaction yaw. Both are emitted by running **the same assembly resolution**
@@ -77,6 +77,6 @@ launch.
 | geometry, inertia, joints | the URDF (merge included) |
 | `hull_displacement` link | box pontoons from the config; `<enable>blueboat::hull_displacement</enable>` in the world |
 | `gz-sim-hydrodynamics-system` | placeholder USV damping coefficients, to be identified |
-| `gz-maritime-thruster-system`, one per propeller | on `<name>_joint`, normalized command scaled onto the limits and diameter from the part's `drive` table (T200 16 V placeholders today), counter rotating |
+| `gz-maritime-thruster-system`, one per propeller | on `<name>_joint`, normalized command scaled onto the limits from the part's `drive` table (T200 16 V placeholders today), counter rotating |
 | `gz-sim-joint-state-publisher-system` | `/<name>/joint_states`, bridged for RViz |
 | `gpu_lidar` "ping" | the Ping2 as a one ray downward range sensor at `ping_beam` |

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration &mdash; BlueRobotics Models lyrical documentation</title>
+  <title>Verify the SITL connection (ROV) &mdash; BlueRobotics Models lyrical documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/honu.css?v=44af46ee" />
@@ -21,8 +21,8 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Verify the SITL connection (ROV)" href="verify-sitl-rov.html" />
-    <link rel="prev" title="Sensors" href="sensors.html" /> 
+    <link rel="next" title="How-to guides" href="../../how-to/index.html" />
+    <link rel="prev" title="Configuration" href="configuration.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -199,20 +199,20 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Configuration</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#variants">Variants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#buoyancy">Buoyancy</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#payload">Payload</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html">Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="configuration.html#variants">Variants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="configuration.html#buoyancy">Buoyancy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="configuration.html#payload">Payload</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="verify-sitl-rov.html">Verify the SITL connection (ROV)</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="verify-sitl-rov.html#prerequisites">Prerequisites</a></li>
-<li class="toctree-l4"><a class="reference internal" href="verify-sitl-rov.html#walkthrough">Walkthrough</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="verify-sitl-rov.html#the-simulation">The simulation</a></li>
-<li class="toctree-l5"><a class="reference internal" href="verify-sitl-rov.html#the-autopilot-sitl">The autopilot (SITL)</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Verify the SITL connection (ROV)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#walkthrough">Walkthrough</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#the-simulation">The simulation</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#the-autopilot-sitl">The autopilot (SITL)</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="verify-sitl-rov.html#verification-teleop-via-the-autopilot">Verification - teleop via the autopilot.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#verification-teleop-via-the-autopilot">Verification - teleop via the autopilot.</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="index.html#the-default-vehicle">The default vehicle</a></li>
@@ -361,9 +361,9 @@
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Vehicles</a></li>
           <li class="breadcrumb-item"><a href="index.html">BlueROV2</a></li>
-      <li class="breadcrumb-item active">Configuration</li>
+      <li class="breadcrumb-item active">Verify the SITL connection (ROV)</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/vehicles/bluerov2/configuration.md" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/vehicles/bluerov2/verify-sitl-rov.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -371,91 +371,152 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="configuration">
-<h1>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h1>
-<p>The BlueROV2 needs no configuration: every slot the parts declare fills
-itself with its default. The vehicle config
-(<code class="docutils literal notranslate"><span class="pre">bluerov2_description/config/bluerov2.yaml</span></code>, or any file passed as
-<code class="docutils literal notranslate"><span class="pre">config_file:=</span></code>) states differences only.</p>
-<section id="variants">
-<h2>Variants<a class="headerlink" href="#variants" title="Link to this heading"></a></h2>
-<p>The vehicle comes in two variants. The <strong>standard</strong> BlueROV2 carries six
-thrusters: four vectored horizontals and two verticals. The <strong>Heavy</strong>
-carries eight: the same horizontals plus four corner verticals, which add
-roll and pitch authority and more lift for payload. The variant is picked
-by the base part:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">base</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="nv">bluerov2_chassis</span><span class="p p-Indicator">,</span><span class="nt"> name</span><span class="p">:</span><span class="w"> </span><span class="nv">base_link</span><span class="p p-Indicator">}</span><span class="w">        </span><span class="c1"># standard</span>
-<span class="nt">base</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="nv">bluerov2_heavy_chassis</span><span class="p p-Indicator">,</span><span class="nt"> name</span><span class="p">:</span><span class="w"> </span><span class="nv">base_link</span><span class="p p-Indicator">}</span><span class="w">  </span><span class="c1"># heavy</span>
+  <section id="verify-the-sitl-connection-rov">
+<h1>Verify the SITL connection (ROV)<a class="headerlink" href="#verify-the-sitl-connection-rov" title="Link to this heading"></a></h1>
+<p>Confirm that ArduSub in SITL is driving the simulated BlueROV2 (standard configuration, not “heavy”) in <code class="docutils literal notranslate"><span class="pre">MANUAL</span></code> mode, which means surge, yaw, sway and heave commands are provided via RC channels and ArduSub maps from commands in the body frame to individual thruster commands.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Setup and run the drydock + source development environment: <a class="reference internal" href="../../getting-started/installation_drydock.html"><span class="std std-doc">installation_drydock.md</span></a></p></li>
+<li><p><a class="reference internal" href="../../getting-started/ardupilot_setup.html"><span class="std std-doc">ArduPilot SITL setup</span></a>; (the rest of this page assumes the Iris smoke test passed.)</p></li>
+</ul>
+</section>
+<section id="walkthrough">
+<h2>Walkthrough<a class="headerlink" href="#walkthrough" title="Link to this heading"></a></h2>
+<p>All commands are issued within the drydock dev container.</p>
+<section id="the-simulation">
+<h3>The simulation<a class="headerlink" href="#the-simulation" title="Link to this heading"></a></h3>
+<p>Start the ROV sim</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>~/maritime_ws/install/setup.bash
+<span class="nb">source</span><span class="w"> </span>~/maritime_ws/thirdparty/setup-ardupilot.sh
+gz<span class="w"> </span>sim<span class="w"> </span>-v4<span class="w"> </span>-r<span class="w"> </span><span class="k">$(</span>ros2<span class="w"> </span>pkg<span class="w"> </span>prefix<span class="w"> </span>--share<span class="w"> </span>bluerov2_gazebo<span class="k">)</span>/worlds/bluerov2_sitl.sdf
 </pre></div>
 </div>
-<p>With the heavy hull, widen the buoyancy footprint to <code class="docutils literal notranslate"><span class="pre">&quot;0.457</span> <span class="pre">0.575&quot;</span></code>.</p>
+<p>If successful, you should see Gazebo sim start with the ROV spawned in a simple underwater environment.</p>
 </section>
-<section id="buoyancy">
-<h2>Buoyancy<a class="headerlink" href="#buoyancy" title="Link to this heading"></a></h2>
-<p>A real vehicle is trimmed with foam and ballast to float slightly
-positive, so a dead vehicle surfaces on its own. The config declares that
-trim directly instead of asking you to tune volumes:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">net_buoyancy</span></code>: kilograms of lift beyond neutral (positive floats up). The shipped default is 0.0, so the vehicle holds whatever depth it is spawned at; set it a little positive (0.002 is about right) to model a real trim that surfaces a dead vehicle.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">cob_offset</span></code> and <code class="docutils literal notranslate"><span class="pre">cob_frame</span></code>: where the center of buoyancy sits,
-relative to the assembly’s center of mass (<code class="docutils literal notranslate"><span class="pre">com</span></code>) or to <code class="docutils literal notranslate"><span class="pre">base_link</span></code>;
-keeping it above the center of mass is what makes the vehicle passively
-stable in roll and pitch.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">fluid_density</span></code> and <code class="docutils literal notranslate"><span class="pre">footprint</span></code>: the water and the horizontal size of
-the displaced volume.</p></li>
-</ul>
-<p>The Gazebo composition realizes the declaration as a dedicated
-displacement volume solved from the assembled mass, so the declared trim
-holds when the config changes (<a class="reference internal" href="../../design/buoyancy.html"><span class="std std-doc">Buoyancy</span></a>).</p>
+<section id="the-autopilot-sitl">
+<h3>The autopilot (SITL)<a class="headerlink" href="#the-autopilot-sitl" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>~/maritime_ws/install/setup.bash
+<span class="nb">source</span><span class="w"> </span>~/maritime_ws/thirdparty/setup-ardupilot.sh
+<span class="nv">AP</span><span class="o">=</span><span class="nv">$HOME</span>/maritime_ws/thirdparty/ardupilot/Tools/autotest
+sim_vehicle.py<span class="w"> </span>-v<span class="w"> </span>ArduSub<span class="w"> </span>-f<span class="w"> </span>gazebo-bluerov2<span class="w"> </span>--model<span class="w"> </span>JSON<span class="w"> </span>--console<span class="w"> </span>-w<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--add-param-file<span class="o">=</span><span class="nv">$AP</span>/default_params/sub.parm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--add-param-file<span class="o">=</span><span class="k">$(</span>ros2<span class="w"> </span>pkg<span class="w"> </span>prefix<span class="w"> </span>--share<span class="w"> </span>bluerov2_gazebo<span class="k">)</span>/params/bluerov2_sitl.params
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Gazebo prints <code class="docutils literal notranslate"><span class="pre">ArduPilot</span> <span class="pre">controller</span> <span class="pre">has</span> <span class="pre">reset</span></code> once shortly after SITL
+connects and then roughly once a minute.  This is annoying, but not of concern. (The fix is open upstream as
+<a class="reference external" href="https://github.com/ArduPilot/ardupilot_gazebo/pull/174">ardupilot_gazebo#174</a>.)
+See troubleshooting notes in <a class="reference internal" href="../../getting-started/ardupilot_setup.html"><span class="std std-doc">ArduPilot SITL setup</span></a>.</p>
+</div>
 </section>
-<section id="payload">
-<h2>Payload<a class="headerlink" href="#payload" title="Link to this heading"></a></h2>
-<p>Everything else is payload: sensors and actuators fitted into slots, one
-config entry each. The fitted options and their topics live in
-<a class="reference internal" href="sensors.html"><span class="std std-doc">Sensors</span></a> and <a class="reference internal" href="actuators.html"><span class="std std-doc">Actuators</span></a>; the slots are:</p>
+</section>
+<section id="verification-teleop-via-the-autopilot">
+<h2>Verification - teleop via the autopilot.<a class="headerlink" href="#verification-teleop-via-the-autopilot" title="Link to this heading"></a></h2>
+<p>One axis at a time, at the MAVProxy prompt in the autopilot shell.</p>
+<p>Forward surge…</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mode</span> <span class="n">manual</span>
+<span class="n">arm</span> <span class="n">throttle</span>
+<span class="n">rc</span> <span class="mi">5</span> <span class="mi">1510</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">&lt;channel&gt;</span> <span class="pre">&lt;microseconds&gt;</span></code> overrides one RC input. Channel 5 is surge, and the channel spans 1100 to 1900; 1500 is neutral.</p>
+<p>Send <code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">all</span> <span class="pre">1500</span></code> between checks.</p>
+<p>The channel mapping is different from the usual ArduPilot one - of course it is.
+<code class="docutils literal notranslate"><span class="pre">ArduSub/Parameters.h</span></code> overrides it for Sub.</p>
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Slot</p></th>
-<th class="head"><p>Accepts</p></th>
-<th class="head"><p>Default</p></th>
+<tr class="row-odd"><th class="head"><p>RCMAP</p></th>
+<th class="head"><p>Channel</p></th>
+<th class="head"><p>Axis</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">thruster_1</span></code> .. <code class="docutils literal notranslate"><span class="pre">thruster_6</span></code> (<code class="docutils literal notranslate"><span class="pre">_8</span></code> heavy)</p></td>
-<td><p>the matching T200 propeller</p></td>
-<td><p>fitted</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">RCMAP_PITCH</span></code></p></td>
+<td><p>1</p></td>
+<td><p>pitch</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">camera</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">explorehd_camera</span></code>, <code class="docutils literal notranslate"><span class="pre">marinesitu_c3</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">explorehd_camera</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">RCMAP_ROLL</span></code></p></td>
+<td><p>2</p></td>
+<td><p>roll</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sonar</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ping360</span></code></p></td>
-<td><p>empty</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">RCMAP_THROTTLE</span></code></p></td>
+<td><p>3</p></td>
+<td><p>heave</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dvl</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">dvl_a50</span></code></p></td>
-<td><p>empty</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">RCMAP_YAW</span></code></p></td>
+<td><p>4</p></td>
+<td><p>yaw</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gripper</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">newton_gripper</span></code>, <code class="docutils literal notranslate"><span class="pre">sediment_sampler</span></code></p></td>
-<td><p>empty</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">RCMAP_FORWARD</span></code></p></td>
+<td><p>5</p></td>
+<td><p>surge</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">payload</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">payload_skid</span></code></p></td>
-<td><p>empty</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rack</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">roof_rack</span></code></p></td>
-<td><p>empty</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">RCMAP_LATERAL</span></code></p></td>
+<td><p>6</p></td>
+<td><p>sway</p></td>
 </tr>
 </tbody>
 </table>
-<p>Slot entries, free placements, ad hoc slots and topic overrides follow
-the same schema as the BlueBoat
-(<a class="reference internal" href="../../reference/parts-catalog.html#configuration-keys"><span class="std std-ref">Configuration keys</span></a>); the instance key is
-<code class="docutils literal notranslate"><span class="pre">of:</span></code>, not <code class="docutils literal notranslate"><span class="pre">on:</span></code>. Mistakes fail the build or the launch with a message
-naming the problem.</p>
+<p><code class="docutils literal notranslate"><span class="pre">param</span> <span class="pre">show</span> <span class="pre">RCMAP*</span></code> confirms.</p>
+<p>Directions below are in the vehicle’s own frame, <a class="reference external" href="https://www.ros.org/reps/rep-0103.html">REP 103</a>: x forward, y left, z up.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Command</p></th>
+<th class="head"><p>Axis</p></th>
+<th class="head"><p>Expected</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">5</span> <span class="pre">1510</span></code></p></td>
+<td><p>surge</p></td>
+<td><p>moves ahead, holds heading and depth</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">5</span> <span class="pre">1490</span></code></p></td>
+<td><p>surge</p></td>
+<td><p>moves astern</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">6</span> <span class="pre">1510</span></code></p></td>
+<td><p>sway</p></td>
+<td><p>crabs to starboard (its own right, -y)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">4</span> <span class="pre">1510</span></code></p></td>
+<td><p>yaw</p></td>
+<td><p>turns to starboard, clockwise seen from above</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">3</span> <span class="pre">1510</span></code></p></td>
+<td><p>heave</p></td>
+<td><p>rises</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">3</span> <span class="pre">1490</span></code></p></td>
+<td><p>heave</p></td>
+<td><p>sinks</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">1</span> <span class="pre">1510</span></code></p></td>
+<td><p>pitch</p></td>
+<td><p>no motion, and that is correct: on the six-thruster standard vehicle the four horizontals carry surge, sway and yaw and the two verticals carry heave and roll, so pitch is not actuated</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">all</span> <span class="pre">1500</span></code></p></td>
+<td><p>—</p></td>
+<td><p>stops</p></td>
+</tr>
+</tbody>
+</table>
+<p>The verification passes when each RC channel, commanded on its own, produces the
+motion described above.</p>
+<p>The sign convention can be confusing, because two coordinate conventions do not agree:</p>
+<ul class="simple">
+<li><p>ArduPilot uses x forward, y <strong>right</strong>, z down - FRD, as in MAVLink’s <a class="reference external" href="https://mavlink.io/en/messages/common.html#MAV_FRAME_BODY_FRD"><code class="docutils literal notranslate"><span class="pre">MAV_FRAME_BODY_FRD</span></code></a>.</p></li>
+<li><p>ROS uses x forward, y <strong>left</strong>, z up - FLU, per <a class="reference external" href="https://www.ros.org/reps/rep-0103.html">REP 103</a>.</p></li>
+</ul>
+<p>The commands are deliberately tiny. 1510 about 2.5% of full stick and it is  enough to see the vehicle move. This is because the actuators and vehicle dynamics have not been tuned yet.  That will happen later in <a class="reference internal" href="../../specs/SITL_SPEC.html"><span class="std std-doc">the spec</span></a></p>
+<p>To see what the autopilot is commanding while you move the sticks, echo the thruster topics:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gz<span class="w"> </span>topic<span class="w"> </span>-e<span class="w"> </span>-t<span class="w"> </span>/bluerov2/thruster_1/cmd
+gz<span class="w"> </span>topic<span class="w"> </span>-e<span class="w"> </span>-t<span class="w"> </span>/bluerov2/thruster_5/cmd
+</pre></div>
+</div>
 </section>
 </section>
 
@@ -463,8 +524,8 @@ naming the problem.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="sensors.html" class="btn btn-neutral float-left" title="Sensors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="verify-sitl-rov.html" class="btn btn-neutral float-right" title="Verify the SITL connection (ROV)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="configuration.html" class="btn btn-neutral float-left" title="Configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../how-to/index.html" class="btn btn-neutral float-right" title="How-to guides" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

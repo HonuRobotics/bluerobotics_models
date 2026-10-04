@@ -11,6 +11,9 @@ running
 actuators
 sensors
 configuration
+parameters
+verify-sitl-boat
+tune-sitl-boat
 ```
 
 ## The default vehicle

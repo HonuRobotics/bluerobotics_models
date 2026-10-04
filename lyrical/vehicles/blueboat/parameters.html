@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BlueBoat &mdash; BlueRobotics Models lyrical documentation</title>
+  <title>BlueBoat Parameters &mdash; BlueRobotics Models lyrical documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/honu.css?v=44af46ee" />
@@ -21,8 +21,8 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Running the simulation" href="running.html" />
-    <link rel="prev" title="Vehicles" href="../index.html" /> 
+    <link rel="next" title="Verify the SITL connection (Boat)" href="verify-sitl-boat.html" />
+    <link rel="prev" title="Configuration" href="configuration.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -92,7 +92,7 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Vehicles</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">BlueBoat</a><ul>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">BlueBoat</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="running.html">Running the simulation</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="running.html#launch-arguments">Launch arguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="running.html#choosing-the-world">Choosing the world</a></li>
@@ -121,28 +121,28 @@
 <li class="toctree-l4"><a class="reference internal" href="configuration.html#payload">Payload</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="parameters.html">BlueBoat Parameters</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="parameters.html#approach">Approach</a></li>
-<li class="toctree-l4"><a class="reference internal" href="parameters.html#set-via-reference">Set via reference</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="parameters.html#drag-estimates-open-loop">Drag estimates - open loop</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="parameters.html#surge">Surge</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="parameters.html#estimate">Estimate</a></li>
-<li class="toctree-l7"><a class="reference internal" href="parameters.html#test-open-loop-surge-response">Test - Open-loop surge response</a></li>
-<li class="toctree-l7"><a class="reference internal" href="parameters.html#select-in-test">Select in test</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">BlueBoat Parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#approach">Approach</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#set-via-reference">Set via reference</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#drag-estimates-open-loop">Drag estimates - open loop</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#surge">Surge</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#estimate">Estimate</a></li>
+<li class="toctree-l7"><a class="reference internal" href="#test-open-loop-surge-response">Test - Open-loop surge response</a></li>
+<li class="toctree-l7"><a class="reference internal" href="#select-in-test">Select in test</a></li>
 </ul>
 </li>
-<li class="toctree-l6"><a class="reference internal" href="parameters.html#yaw">Yaw</a><ul>
-<li class="toctree-l7"><a class="reference internal" href="parameters.html#id1">Estimate</a></li>
-<li class="toctree-l7"><a class="reference internal" href="parameters.html#test-open-loop-yaw-response">Test - open-loop yaw response</a></li>
-<li class="toctree-l7"><a class="reference internal" href="parameters.html#id2">Select in test</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#yaw">Yaw</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#id1">Estimate</a></li>
+<li class="toctree-l7"><a class="reference internal" href="#test-open-loop-yaw-response">Test - open-loop yaw response</a></li>
+<li class="toctree-l7"><a class="reference internal" href="#id2">Select in test</a></li>
 </ul>
 </li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="parameters.html#the-autopilot-parameter-file">The autopilot parameter file</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="parameters.html#provenance-three-descriptions-and-they-disagree">Provenance: three descriptions, and they disagree</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-autopilot-parameter-file">The autopilot parameter file</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#provenance-three-descriptions-and-they-disagree">Provenance: three descriptions, and they disagree</a></li>
 </ul>
 </li>
 </ul>
@@ -168,7 +168,7 @@
 <li class="toctree-l4"><a class="reference internal" href="tune-sitl-boat.html#summary">Summary</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#the-default-vehicle">The default vehicle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#the-default-vehicle">The default vehicle</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../bluerov2/index.html">BlueROV2</a><ul>
@@ -360,9 +360,10 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Vehicles</a></li>
-      <li class="breadcrumb-item active">BlueBoat</li>
+          <li class="breadcrumb-item"><a href="index.html">BlueBoat</a></li>
+      <li class="breadcrumb-item active">BlueBoat Parameters</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/vehicles/blueboat/index.md" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/vehicles/blueboat/parameters.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -370,30 +371,155 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="blueboat">
-<h1>BlueBoat<a class="headerlink" href="#blueboat" title="Link to this heading"></a></h1>
-<p>The BlueBoat is a twin hull differential drive unmanned surface vessel. In
-simulation it floats on graded buoyancy, is driven by thrust commands to its
-two outboard motors, and carries the Ping2 echosounder.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="running.html">Running the simulation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="actuators.html">Actuators</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sensors.html">Sensors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="parameters.html">BlueBoat Parameters</a></li>
-<li class="toctree-l1"><a class="reference internal" href="verify-sitl-boat.html">Verify the SITL connection (Boat)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tune-sitl-boat.html">Tuning of closed-loop response for BlueBoat</a></li>
-</ul>
+  <section id="blueboat-parameters">
+<h1>BlueBoat Parameters<a class="headerlink" href="#blueboat-parameters" title="Link to this heading"></a></h1>
+<p>This documents the sources and methods used to define the default BlueBoat vehicle dynamic and autopilot parameters.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The physical values here are first estimates, derived from published specifications in <code class="docutils literal notranslate"><span class="pre">parameter_refs.ods</span></code>, and then adjusted in test until the open-loop response left enough control authority for the closed-loop performance the boat is rated for. They are a working set for simulation, not measurements taken off a vehicle.</p>
 </div>
-<section id="the-default-vehicle">
-<h2>The default vehicle<a class="headerlink" href="#the-default-vehicle" title="Link to this heading"></a></h2>
-<p>The default configuration is the chassis (pontoons, crossbeams, hatches and the
-outboard thruster bodies) with its two M200 weedless propellers, the flag
-on the aft crossbeam and the Ping2 echosounder on its integration kit
-bracket, face below the waterline. Everything else in the catalog can be
-fitted, and the defaults swapped or left off
-(<a class="reference internal" href="configuration.html"><span class="std std-doc">Configuration</span></a>).</p>
+<section id="approach">
+<h2>Approach<a class="headerlink" href="#approach" title="Link to this heading"></a></h2>
+<p>Our approach in defining the BlueBoat parameters is as follows:</p>
+<ol class="arabic simple">
+<li><p>Use the easily measurable parameters, e.g., mass</p></li>
+<li><p>Use what is provided as autopilot stabilization layer parameters</p></li>
+<li><p>Derive what we can from first principles and approximation, e.g., inertia tensor</p></li>
+<li><p>Select via testing and qualitative comparison, the hydrodynamic parameters that can not be easily measured or estimated.  These are the free parameters to tune the response to match (qualitatively) the known closed-loop performance.</p></li>
+</ol>
+</section>
+<section id="set-via-reference">
+<h2>Set via reference<a class="headerlink" href="#set-via-reference" title="Link to this heading"></a></h2>
+<p>See <a class="reference download internal" download="" href="../../_downloads/26ef3a749090f64392eef9e2507c4574/parameter_refs.ods"><code class="xref download docutils literal notranslate"><span class="pre">parameter_refs.ods</span></code></a> for the raw calculations.  This spreadsheet is the raw calculations, provided here as a reference and to transparently show how we derived the first estimates of physical paramters.   Many of those parameters then had to be tuned via testing, i.e., selected in test, so the spreadsheet shows the background, this document describes the process and the final values are in the URDF values.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p>Source</p></th>
+<th class="head"><p>Value</p></th>
+<th class="head"><p>Destination</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Mass</p></td>
+<td><p><a class="reference external" href="https://bluerobotics.com/store/boat/blueboat/blueboat/">BlueBoat spec sheets</a> Boat chassis + 2 batteries</p></td>
+<td><p>see <a class="reference download internal" download="" href="../../_downloads/26ef3a749090f64392eef9e2507c4574/parameter_refs.ods"><code class="xref download docutils literal notranslate"><span class="pre">parameter_refs.ods</span></code></a></p></td>
+<td><p>blueboat_chassis.urdf.xacro</p></td>
+</tr>
+<tr class="row-odd"><td><p>Inertia tensor</p></td>
+<td><p>Estimated based on uniform box and L, W, H dimensions BR specs. Consistent with original values.</p></td>
+<td><p>see <a class="reference download internal" download="" href="../../_downloads/26ef3a749090f64392eef9e2507c4574/parameter_refs.ods"><code class="xref download docutils literal notranslate"><span class="pre">parameter_refs.ods</span></code></a></p></td>
+<td><p>blueboat_chassis.urdf.xacro</p></td>
+</tr>
+<tr class="row-even"><td><p>Thrust limits</p></td>
+<td><p>Deduced from <a class="reference external" href="https://bluerobotics.com/store/thrusters/t100-t200-thrusters/m200-motor/?attribute_cable-variant=BlueBoat+-+0.71+meter+cable+length+%2B+M14+WLP">thruster performance</a> at 16 V and max forward total thrust value from <a class="reference external" href="https://bluerobotics.com/store/boat/blueboat/blueboat/">blueboat specs</a></p></td>
+<td><p>see <a class="reference download internal" download="" href="../../_downloads/26ef3a749090f64392eef9e2507c4574/parameter_refs.ods"><code class="xref download docutils literal notranslate"><span class="pre">parameter_refs.ods</span></code></a></p></td>
+<td><p>bluerobotics_parts/urdf/m200_weedless_prop_ccw.urdf.xacro and bluerobotics_parts/urdf/m200_weedless_prop_cw.urdf.xacro (known issue that they are repeated)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Deadband</p></td>
+<td><p>Approximated from the graph for the <a class="reference external" href="https://bluerobotics.com/store/thrusters/t100-t200-thrusters/m200-motor/?attribute_cable-variant=BlueBoat+-+0.71+meter+cable+length+%2B+M14+WLP">m200</a> and engineering judgement. Small deadband.  Can be tuned out with PWM settings per vessel.</p></td>
+<td><p></p></td>
+<td><p>bluerobotics_parts/urdf/m200_weedless_prop_ccw.urdf.xacro</p></td>
+</tr>
+</tbody>
+</table>
+<section id="drag-estimates-open-loop">
+<h3>Drag estimates - open loop<a class="headerlink" href="#drag-estimates-open-loop" title="Link to this heading"></a></h3>
+<p>Derive estimates of the linear and quadratic drag based on published maximum velocity specs.</p>
+<section id="surge">
+<h4>Surge<a class="headerlink" href="#surge" title="Link to this heading"></a></h4>
+<section id="estimate">
+<h5>Estimate<a class="headerlink" href="#estimate" title="Link to this heading"></a></h5>
+<p>From blueboat specs, max speed is 3 m/s and the max static thrust is 8.2 kgf.   The Fossen drag implementation has both a linear and quadratic terms.  We neglect the linear term and estimate the quadratic coefficient - see <a class="reference download internal" download="" href="../../_downloads/26ef3a749090f64392eef9e2507c4574/parameter_refs.ods"><code class="xref download docutils literal notranslate"><span class="pre">parameter_refs.ods</span></code></a></p>
+</section>
+<section id="test-open-loop-surge-response">
+<h5>Test - Open-loop surge response<a class="headerlink" href="#test-open-loop-surge-response" title="Link to this heading"></a></h5>
+<p>Run a test to command full forward thrust and measure the steady state speed.  Compare the the 3 m/s target.</p>
+<p>Run the scenario for the open-loop (<code class="docutils literal notranslate"><span class="pre">MANUAL</span></code>) test - <a class="reference internal" href="verify-sitl-boat.html"><span class="std std-doc">Verify the SITL connection (Boat)</span></a></p>
+<p>Verify the speed of the USV two ways (do both, to make sure the simulated model state agrees with the state the autopilot senses):</p>
+<ol class="arabic simple">
+<li><p>In Gazebo use UI to view the World Linear Velocity of the blueboat/base_link.  (USV travels in x, so no need to resolve to body-frame.)</p></li>
+<li><p>In MAVProxy…</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">module</span> <span class="n">load</span> <span class="n">graph</span>
+<span class="n">graph</span> <span class="n">VFR_HUD</span><span class="o">.</span><span class="n">groundspeed</span>
+</pre></div>
+</div>
+<p>Then command full speed</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rc</span> <span class="mi">3</span> <span class="mi">1900</span>
+</pre></div>
+</div>
+<p>The results do not meet expectations, we expected 3.0 m/s, but observe a steady-state speed 2.65 m/s.<br />
+<img alt="Surge speed in MAVProxy at full throttle" src="../../_images/surge_drag_tune_init.png" /></p>
+<p><img alt="World linear velocity of base_link in Gazebo" src="../../_images/surge_drag_tune_init_gz.png" /></p>
+</section>
+<section id="select-in-test">
+<h5>Select in test<a class="headerlink" href="#select-in-test" title="Link to this heading"></a></h5>
+<p>The referenced values give us a starting point.  We test and modify manually to get the desired but test the end-to-end behavior.  We reduce the quadratic drag so that there is a margin on necessary control authority to achieve closed loop speed of 3 m/s.</p>
+<p><img alt="Surge speed after reducing the quadratic drag" src="../../_images/surge_drag_sit.png" /></p>
+</section>
+</section>
+<section id="yaw">
+<h4>Yaw<a class="headerlink" href="#yaw" title="Link to this heading"></a></h4>
+<section id="id1">
+<h5>Estimate<a class="headerlink" href="#id1" title="Link to this heading"></a></h5>
+<p>Because we don’t have a spec on the open-loop yaw rate, we need to either estimate the open-loop yaw rate or deduce values from the known control parameters.  It is a coarse estimate, but we can use the value for the FF param from the published autopilot params - <code class="docutils literal notranslate"><span class="pre">ATC_STR_RAT_FF</span></code> = 0.8.   A simple estimate is to consider the linear case where the FF term is the inverse of the plant dc gain.  if you trace that through the autopilot system, that would be consistent with a linear drag value of -14.5 and we expect a turn rate max of 1.25 rad/s.</p>
+</section>
+<section id="test-open-loop-yaw-response">
+<h5>Test - open-loop yaw response<a class="headerlink" href="#test-open-loop-yaw-response" title="Link to this heading"></a></h5>
+<p>We run a similar test as described for surge to measure the max (full thrust) open-loop yaw response.</p>
+<p>Again, check the steady state yaw rate in both the sim and the autopilot to make sure they are consistent.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">module</span> <span class="n">load</span> <span class="n">graph</span>
+<span class="n">graph</span> <span class="n">ATTITUDE</span><span class="o">.</span><span class="n">yawspeed</span>
+
+</pre></div>
+</div>
+<p>Then command full yaw rate</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rc</span> <span class="mi">1</span> <span class="mi">1900</span>
+</pre></div>
+</div>
+<p><img alt="Yaw rate in MAVProxy at full steering" src="../../_images/yaw_drag_tune_init.png" /></p>
+</section>
+<section id="id2">
+<h5>Select in test<a class="headerlink" href="#id2" title="Link to this heading"></a></h5>
+<p>As expected the yaw-rate is less than the target, so we iteratively reduce the linear yaw drag term to get an open-loop response with sufficient control authority to achieve the desired closed-loop response.</p>
+<p><img alt="Yaw rate in MAVProxy at full steering after SIT" src="../../_images/yaw_drag_sit.png" /></p>
+</section>
+</section>
+</section>
+</section>
+<section id="the-autopilot-parameter-file">
+<h2>The autopilot parameter file<a class="headerlink" href="#the-autopilot-parameter-file" title="Link to this heading"></a></h2>
+<p>This section is about the <em>autopilot’s</em> configuration.</p>
+<p>The file is <code class="docutils literal notranslate"><span class="pre">blueboat_gazebo/params/blueboat_sitl.params</span></code>. It is derived from Blue Robotics’ dump off a vehicle, <code class="docutils literal notranslate"><span class="pre">params/ardupilot/ArduRover/4.7/Navigator/BlueBoat120.params</span></code> in <a class="reference external" href="https://github.com/bluerobotics/Blueos-Parameter-Repository">Blueos-Parameter-Repository</a>, whose header reads <em>Vehicle: Surface Boat / Platform: navigator / Version: 4.7.0-BETA</em>. That dump is 951 lines, most of it one unit’s accelerometer calibration, radio setup and logging. Ours carries only the subset that describes the vehicle — frame, outputs, motor limits, control gains, speeds — plus the deltas simulation requires. Every value is the shipped one unless a <code class="docutils literal notranslate"><span class="pre">DELTA</span></code> comment beside it says otherwise.</p>
+<p>It is loaded last. <code class="docutils literal notranslate"><span class="pre">-f</span> <span class="pre">rover-skid</span></code> makes <code class="docutils literal notranslate"><span class="pre">sim_vehicle.py</span></code> load ArduPilot’s own <code class="docutils literal notranslate"><span class="pre">rover.parm</span></code> and <code class="docutils literal notranslate"><span class="pre">rover-skid.parm</span></code> first, which supply the SITL side (fake accelerometer calibration so pre-arm passes, <code class="docutils literal notranslate"><span class="pre">SIM_PIN_MASK</span></code>, the mode slots) but also set <code class="docutils literal notranslate"><span class="pre">SERVO1/3_MIN/MAX</span></code> to 1000/2000 and <code class="docutils literal notranslate"><span class="pre">SERVO1_FUNCTION</span> <span class="pre">73</span></code> / <code class="docutils literal notranslate"><span class="pre">SERVO3_FUNCTION</span> <span class="pre">74</span></code> — the reverse of the shipped boat. Our file sets each of those again, and the last file wins.</p>
+<section id="provenance-three-descriptions-and-they-disagree">
+<h3>Provenance: three descriptions, and they disagree<a class="headerlink" href="#provenance-three-descriptions-and-they-disagree" title="Link to this heading"></a></h3>
+<p>There is no single authoritative description of a configured BlueBoat. There are three:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Source</p></th>
+<th class="head"><p>What it is</p></th>
+<th class="head"><p>Authoritative for</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">BlueBoat120.params</span></code></p></td>
+<td><p>a dump off real hardware, including that unit’s own calibration</p></td>
+<td><p>the vehicle as built: frame, output assignment, motor limits, gains, speeds</p></td>
+</tr>
+<tr class="row-odd"><td><p>Blue Robotics’ SITL set</p></td>
+<td><p>the parameters they use for their own simulation</p></td>
+<td><p>nothing by default — useful as a second opinion where the dump is ambiguous</p></td>
+</tr>
+<tr class="row-even"><td><p>the <code class="docutils literal notranslate"><span class="pre">SITL_Models</span></code> block</p></td>
+<td><p>the BlueBoat contributed to ArduPilot’s model repository</p></td>
+<td><p>nothing by default — it is a third party’s simulation, not the manufacturer’s vehicle</p></td>
+</tr>
+</tbody>
+</table>
+<p>They differ on things that change behavior: which channel carries which throttle, whether a thruster is reversed, the servo range, the neutral trim, the cruise speed. So “we use Blue Robotics’ parameters” is not by itself a well-defined claim, which is why the third column exists — it records which source wins for which kind of parameter, so a disagreement becomes a decision rather than an accident.</p>
+<p>The rule we follow: the hardware dump is authoritative for the vehicle, because it is the only one of the three describing a boat that exists. The other two are consulted, not copied. Where a value is taken from one of them instead, or changed for simulation, it carries a <code class="docutils literal notranslate"><span class="pre">DELTA</span></code> comment.</p>
+</section>
 </section>
 </section>
 
@@ -401,8 +527,8 @@ fitted, and the defaults swapped or left off
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../index.html" class="btn btn-neutral float-left" title="Vehicles" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="running.html" class="btn btn-neutral float-right" title="Running the simulation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="configuration.html" class="btn btn-neutral float-left" title="Configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="verify-sitl-boat.html" class="btn btn-neutral float-right" title="Verify the SITL connection (Boat)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
