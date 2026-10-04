@@ -14,8 +14,17 @@
 # This file carries the subset that describes the *vehicle* - frame, motor
 # outputs, the attitude gains the standard vehicle ships - and leaves out the
 # board, the peripherals and the accessories, which in simulation are either
-# absent or supplied by ArduPilot's own SITL defaults. Every value below is
-# the shipped one unless a DELTA comment says otherwise.
+# absent or supplied by ArduPilot's own SITL defaults.
+#
+# Every value below is one of three things, and each line says which:
+#   - shipped, meaning Blue Robotics publish it for this vehicle;
+#   - an ArduSub compiled default written out, because they publish nothing
+#     for that loop and a default nobody has looked at is not a choice;
+#   - a DELTA, meaning we changed it, with the reason on the line.
+#
+# The firmware defaults quoted here are ArduSub 4.7.1. The pinned ArduPilot
+# checkout is tagged Rover-4.7.1, and the same commit carries Sub-4.7.1, so
+# the constants below are the ones this SITL build compiles in.
 #
 # Load it LAST. `-f gazebo-bluerov2` makes sim_vehicle.py load ArduPilot's own sub.parm first: the SITL side (fake accelerometer calibration so pre-arm passes, joystick button map, position controller gains). This file goes after it, and the last file wins:
 #
@@ -52,6 +61,48 @@ SERVO6_FUNCTION  38
 ATC_ANG_RLL_P    0.0
 ATC_ANGLE_MAX    45
 ATC_INPUT_TC     0.1
+
+# ---- Yaw loops ------------------------------------------------------------
+# ArduSub compiled defaults, written out. Blue Robotics publish no yaw gains
+# and neither does ArduSub's SITL parameter file, so these are what the
+# firmware would use anyway - the point of stating them is that the loops
+# this vehicle actually closes are visible to a reviewer, and cannot move
+# because an upstream default changed. Constants are from
+# libraries/AC_AttitudeControl/AC_AttitudeControl_Sub.h.
+ATC_ANG_YAW_P    6.0        # AC_ATC_SUB_ANGLE_P
+ATC_RAT_YAW_P    0.180      # AC_ATC_SUB_RATE_YAW_P
+ATC_RAT_YAW_I    0.018      # AC_ATC_SUB_RATE_YAW_I
+ATC_RAT_YAW_D    0.0        # AC_ATC_SUB_RATE_YAW_D
+ATC_RAT_YAW_FF   0.0        # The Defaults struct sets ff to 0: no feedforward,
+                            # which is why the boat's trick of inverting a
+                            # published FF to estimate the plant does not
+                            # transfer to the ROV.
+ATC_RAT_YAW_IMAX 0.222      # AC_ATC_SUB_RATE_YAW_IMAX
+ATC_RAT_YAW_FLTT 5.0        # AC_ATC_SUB_RATE_YAW_FILT_HZ, as filt_T_hz
+ATC_RAT_YAW_FLTD 5.0        # AC_ATC_SUB_RATE_YAW_FILT_HZ, as filt_D_hz
+ATC_ACCEL_Y_MAX  1100       # AC_ATC_SUB_ACCEL_Y_MAX_DEGSS, deg/s/s
+
+# ---- Depth control --------------------------------------------------------
+# ArduSub compiled defaults, written out - and here that is not merely
+# documentation. sim_vehicle.py loads ArduPilot's own autotest file
+# default_params/sub.parm, which retunes the depth acceleration loop for the
+# vehicle ArduPilot tests with. Without these lines, depth behavior in
+# simulation is set by that file rather than by anything chosen for a
+# BlueROV2. This file loads last, so it puts the firmware values back.
+# Constants are from libraries/AC_AttitudeControl/AC_PosControl.cpp, the
+# APM_BUILD_ArduSub block.
+PSC_D_POS_P      3.0        # POSCONTROL_D_POS_P; sub.parm sets the same
+PSC_D_VEL_P      8.0        # POSCONTROL_D_VEL_P; sub.parm sets the same
+PSC_D_ACC_P      0.05       # POSCONTROL_D_ACC_P; sub.parm sets 0.2
+PSC_D_ACC_I      0.01       # POSCONTROL_D_ACC_I; sub.parm sets 0.4
+PSC_D_ACC_D      0.0        # POSCONTROL_D_ACC_D
+PSC_D_ACC_FF     0.0        # no feedforward by default; sub.parm sets 0.075
+PSC_D_ACC_IMAX   0.1        # POSCONTROL_D_ACC_IMAX
+PSC_D_JERK       5.0        # POSCONTROL_JERK_D_MSSS, m/s/s/s; sub.parm sets 8
+#
+# The horizontal position gains sub.parm also sets - PSC_NE_* - are left
+# alone. With EK3_SRC1_POSXY 0 there is no horizontal position estimate for
+# them to act on, so writing them out would suggest a loop that cannot run.
 
 # ---- Navigation sources ---------------------------------------------------
 # No horizontal position source: an ROV underwater has no GNSS, and this

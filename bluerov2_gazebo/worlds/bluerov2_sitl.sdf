@@ -5,7 +5,7 @@
   that vehicle's sensor needs.
 
   Running it takes two shells and the workspace sourced before the ArduPilot
-  environment; the whole procedure is in docs how-to/verify-sitl-rov.
+  environment; the whole procedure is in docs/vehicles/bluerov2/verify-sitl-rov.
 -->
 <sdf version="1.12">
   <world name="bluerov2_sitl">
