@@ -174,17 +174,17 @@ WATER_DENSITY = 1025.0
 
 def pontoon_boxes(model_root):
     """Return [(name, x, y, z, lx, ly, lz)] of the hull_displacement link's boxes."""
-    return link_boxes(model_root, 'pontoon_')
+    return link_boxes(model_root, 'hull_displacement')
 
 
 def windage_boxes(model_root):
-    """Return [(name, x, y, z, lx, ly, lz)] of the hull_displacement link's windage boxes."""
-    return link_boxes(model_root, 'windage_')
+    """Return [(name, x, y, z, lx, ly, lz)] of the windage link's boxes."""
+    return link_boxes(model_root, 'windage')
 
 
-def link_boxes(model_root, prefix):
-    """Return the hull_displacement link's boxes whose names start with prefix."""
-    link = next(li for li in model_root.iter('link') if li.get('name') == 'hull_displacement')
+def link_boxes(model_root, link_name):
+    """Return [(name, x, y, z, lx, ly, lz)] of every box collision of a link."""
+    link = next(li for li in model_root.iter('link') if li.get('name') == link_name)
     boxes = []
     for coll in link.findall('collision'):
         if not coll.get('name').startswith(prefix):
@@ -199,7 +199,9 @@ def test_hull_displacement_is_its_own_enabled_link():
     """
     Displacement lives on a dedicated link the worlds enable by name.
 
-    Fixed to base_link; the parts' collisions never displace.
+    Fixed to base_link; the parts' collisions never displace. The stock
+    buoyancy system floats every collision of the link it is enabled on, so
+    nothing but a buoyancy box may live here.
     """
     root, _ = xacro(MODEL_XACRO, DEFAULT_CONFIG)
     link = next(li for li in root.iter('link') if li.get('name') == 'hull_displacement')
@@ -208,6 +210,9 @@ def test_hull_displacement_is_its_own_enabled_link():
     assert joint.get('type') == 'fixed'
     assert joint.find('parent').text == 'base_link'
     assert joint.find('child').text == 'hull_displacement'
+    for coll in link.findall('collision'):
+        assert coll.get('{http://gazebosim.org/schema}buoyancy') == 'true', (
+            f'{coll.get("name")}: an unmarked box on the enabled link would displace water')
     for world in ('blueboat_water.sdf', 'blueboat_playground.sdf'):
         text = (GZ_SHARE / 'worlds' / world).read_text()
         assert '<enable>blueboat::hull_displacement</enable>' in text, world
@@ -237,14 +242,18 @@ def test_pontoons_are_buoyancy_only_geometry():
         assert int(bitmask.text, 16) == 0, coll.get('name')
 
 
-def test_one_windage_box_per_hull():
+def test_one_windage_box_per_hull_on_its_own_link():
     """
     Each hull has one box marked gz:wind="true", spanning the whole pontoon.
 
     A world with gz-maritime's wind system pushes on the part above the
     waterline, whatever name the boat was spawned under. One box per hull,
     not the buoyancy segments, so a head wind sees each hull's frontal area
-    once. The boxes collide with nothing and do not displace water.
+    once. The boxes sit on a link of their own, fixed to base_link like
+    hull_displacement, because the stock buoyancy system floats every
+    collision of the link it is enabled on: on hull_displacement they would
+    double the displacement. They collide with nothing and carry no
+    gz:buoyancy mark, so they displace nothing in either system.
     """
     root, _ = xacro(MODEL_XACRO, DEFAULT_CONFIG)
     boxes = windage_boxes(root)
@@ -262,6 +271,18 @@ def test_one_windage_box_per_hull():
         assert coll.get('{http://gazebosim.org/schema}buoyancy') is None, coll.get('name')
         bitmask = coll.find('surface/contact/collide_bitmask')
         assert bitmask is not None and int(bitmask.text, 16) == 0, coll.get('name')
+    link = next(li for li in root.iter('link') if li.get('name') == 'windage')
+    assert link.find('pose').get('relative_to') == 'base_link'
+    joint = next(j for j in root.iter('joint') if j.get('name') == 'windage_joint')
+    assert joint.get('type') == 'fixed'
+    assert joint.find('parent').text == 'base_link'
+    assert joint.find('child').text == 'windage'
+    hull = next(li for li in root.iter('link') if li.get('name') == 'hull_displacement')
+    assert not [c for c in hull.findall('collision') if c.get('name') in marked], (
+        'a windage box on hull_displacement displaces water under the stock buoyancy')
+    for world in (GZ_SHARE / 'worlds').glob('*.sdf'):
+        enabled = re.findall(r'<enable>(.*?)</enable>', world.read_text())
+        assert not [e for e in enabled if 'windage' in e], f'{world.name} floats the windage link'
 
 
 def test_pontoons_tile_and_float_the_boat():
