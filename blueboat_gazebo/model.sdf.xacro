@@ -272,8 +272,6 @@
       </inertial>
       <xacro:pontoon hull="${hull}" side="port" y="${hull['y']}"  n="${hull['segments']}"/>
       <xacro:pontoon hull="${hull}" side="stbd" y="${-hull['y']}" n="${hull['segments']}"/>
-      <xacro:windage hull="${hull}" side="port" y="${hull['y']}"/>
-      <xacro:windage hull="${hull}" side="stbd" y="${-hull['y']}"/>
     </link>
     <joint name="hull_displacement_joint" type="fixed">
       <parent>${base_name}</parent>

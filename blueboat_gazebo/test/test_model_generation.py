@@ -187,8 +187,6 @@ def link_boxes(model_root, link_name):
     link = next(li for li in model_root.iter('link') if li.get('name') == link_name)
     boxes = []
     for coll in link.findall('collision'):
-        if not coll.get('name').startswith(prefix):
-            continue
         x, y, z = (float(v) for v in coll.find('pose').text.split()[:3])
         lx, ly, lz = (float(v) for v in coll.find('geometry/box/size').text.split())
         boxes.append((coll.get('name'), x, y, z, lx, ly, lz))
