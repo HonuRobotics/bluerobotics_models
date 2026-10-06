@@ -416,6 +416,16 @@ waterplane restores correctly, where a single long box keys off its center
 and barely restores. The boat self settles to a draft of roughly
 <code class="docutils literal notranslate"><span class="pre">mass</span> <span class="pre">/</span> <span class="pre">(water_density</span> <span class="pre">*</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">length</span> <span class="pre">*</span> <span class="pre">width)</span></code>, which puts <code class="docutils literal notranslate"><span class="pre">base_link</span></code> at the
 waterline for the BlueBoat.</p>
+<p>A second link, <code class="docutils literal notranslate"><span class="pre">windage</span></code>, fixed to <code class="docutils literal notranslate"><span class="pre">base_link</span></code> the same way, carries one
+box per hull spanning the whole pontoon and marked <code class="docutils literal notranslate"><span class="pre">gz:wind=&quot;true&quot;</span></code>. In a
+world running gz-maritime’s wind system, the wind pushes on the part of each
+box above the waterline, whatever the boat was spawned as. The boxes are not
+the buoyancy segments, which would count each hull’s frontal area once per
+segment in a head wind, and they are not on <code class="docutils literal notranslate"><span class="pre">hull_displacement</span></code>: the stock
+buoyancy system floats every collision of the link it is enabled on, and a
+box with the hull’s full volume there would double the displacement. They
+neither collide nor carry <code class="docutils literal notranslate"><span class="pre">gz:buoyancy</span></code>, so they displace nothing in either
+system.</p>
 </section>
 <section id="uuv-declared-trim-bluerov2">
 <h2>UUV: declared trim (BlueROV2)<a class="headerlink" href="#uuv-declared-trim-bluerov2" title="Link to this heading"></a></h2>

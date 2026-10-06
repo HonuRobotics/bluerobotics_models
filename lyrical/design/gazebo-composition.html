@@ -456,16 +456,19 @@ launch.</p>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">hull_displacement</span></code> link</p></td>
 <td><p>box pontoons from the config; <code class="docutils literal notranslate"><span class="pre">&lt;enable&gt;blueboat::hull_displacement&lt;/enable&gt;</span></code> in the world</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gz-sim-hydrodynamics-system</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">windage</span></code> link</p></td>
+<td><p>one box per hull marked <code class="docutils literal notranslate"><span class="pre">gz:wind=&quot;true&quot;</span></code>, on its own link so the buoyancy <code class="docutils literal notranslate"><span class="pre">&lt;enable&gt;</span></code> never floats it</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gz-sim-hydrodynamics-system</span></code></p></td>
 <td><p>placeholder USV damping coefficients, to be identified</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gz-maritime-thruster-system</span></code>, one per propeller</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gz-maritime-thruster-system</span></code>, one per propeller</p></td>
 <td><p>on <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;_joint</span></code>, normalized command scaled onto the limits from the part’s <code class="docutils literal notranslate"><span class="pre">drive</span></code> table (T200 16 V placeholders today), counter rotating</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gz-sim-joint-state-publisher-system</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gz-sim-joint-state-publisher-system</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/joint_states</span></code>, bridged for RViz</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gpu_lidar</span></code> “ping”</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gpu_lidar</span></code> “ping”</p></td>
 <td><p>the Ping2 as a one ray downward range sensor at <code class="docutils literal notranslate"><span class="pre">ping_beam</span></code></p></td>
 </tr>
 </tbody>
