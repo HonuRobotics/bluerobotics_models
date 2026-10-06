@@ -37,6 +37,17 @@ and barely restores. The boat self settles to a draft of roughly
 `mass / (water_density * 2 * length * width)`, which puts `base_link` at the
 waterline for the BlueBoat.
 
+A second link, `windage`, fixed to `base_link` the same way, carries one
+box per hull spanning the whole pontoon and marked `gz:wind="true"`. In a
+world running gz-maritime's wind system, the wind pushes on the part of each
+box above the waterline, whatever the boat was spawned as. The boxes are not
+the buoyancy segments, which would count each hull's frontal area once per
+segment in a head wind, and they are not on `hull_displacement`: the stock
+buoyancy system floats every collision of the link it is enabled on, and a
+box with the hull's full volume there would double the displacement. They
+neither collide nor carry `gz:buoyancy`, so they displace nothing in either
+system.
+
 ## UUV: declared trim (BlueROV2)
 
 `buoyancy:` in the BlueROV2 config takes `net_buoyancy` (kg, positive floats

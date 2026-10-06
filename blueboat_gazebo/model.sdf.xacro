@@ -205,7 +205,11 @@
        system reads marked collisions (gz-sim 229ec07e, carried by
        gz-maritime's gz_buoyancy) floats this link by them under whatever
        name the boat is spawned, with no <enable> list. Gazebo's stock
-       system ignores the attribute, so the worlds here are unchanged. -->
+       system ignores the attribute, so the worlds here are unchanged.
+
+       Nothing but these boxes may live on this link: the stock system
+       floats every collision of the link it is enabled on. The wind sees
+       the hulls through a link of their own, windage, below. -->
   <xacro:macro name="pontoon" params="hull side y n i:=0">
     <xacro:if value="${i != n}">
       <xacro:property name="seg_len" value="${hull['length'] / n}"/>
@@ -218,6 +222,48 @@
       </collision>
       <xacro:pontoon hull="${hull}" side="${side}" y="${y}" n="${n}" i="${i + 1}"/>
     </xacro:if>
+  </xacro:macro>
+
+  <!-- ===================== Windage =====================
+       One box per hull, spanning the whole pontoon, marked gz:wind="true":
+       a world with gz-maritime's wind system pushes on the part of it above
+       the waterline, under whatever name the boat was spawned. One box, not
+       the buoyancy segments, which would count a hull's frontal area once
+       per segment in a head wind.
+
+       On a link of its own, fixed to the root link like hull_displacement,
+       and never on hull_displacement itself: the stock buoyancy system
+       floats every collision of the link it is enabled on, and a box with
+       the hull's full volume there would double the displacement. The boxes
+       collide with nothing (collide_bitmask 0x00) and carry no gz:buoyancy
+       mark, so they displace nothing in either buoyancy system. -->
+  <xacro:macro name="windage_box" params="hull side y">
+    <collision name="windage_${side}" gz:wind="true">
+      <pose>${hull['x']} ${y} ${hull['z']} 0 0 0</pose>
+      <geometry>
+        <box><size>${hull['length']} ${hull['width']} ${hull['height']}</size></box>
+      </geometry>
+      <surface><contact><collide_bitmask>0x00</collide_bitmask></contact></surface>
+    </collision>
+  </xacro:macro>
+
+  <xacro:macro name="windage" params="hull">
+    <link name="windage">
+      <pose relative_to="${base_name}">0 0 0 0 0 0</pose>
+      <inertial>
+        <mass>1e-5</mass>
+        <inertia>
+          <ixx>1e-8</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>1e-8</iyy><iyz>0</iyz><izz>1e-8</izz>
+        </inertia>
+      </inertial>
+      <xacro:windage_box hull="${hull}" side="port" y="${hull['y']}"/>
+      <xacro:windage_box hull="${hull}" side="stbd" y="${-hull['y']}"/>
+    </link>
+    <joint name="windage_joint" type="fixed">
+      <parent>${base_name}</parent>
+      <child>windage</child>
+    </joint>
   </xacro:macro>
 
   <xacro:macro name="hull_displacement" params="hull">
@@ -249,6 +295,7 @@
 
     <xacro:if value="${'hull_displacement' in cfg}">
       <xacro:hull_displacement hull="${cfg['hull_displacement']}"/>
+      <xacro:windage hull="${cfg['hull_displacement']}"/>
     </xacro:if>
 
     <!-- Hydrodynamic drag/damping coefficient (derivative terms) 
