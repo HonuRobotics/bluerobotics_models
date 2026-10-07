@@ -1,18 +1,37 @@
 # Run in your own world
 
-The composed model needs two things from the world: **graded buoyancy**
+The composed model needs three things from the world: **graded buoyancy**
 (water below z = 0, `gz-sim-buoyancy-system` enabled on the vehicle's
 displacement link: `<enable>blueboat::hull_displacement</enable>` for the
 boat, `<enable>bluerov2::buoyancy_displacement</enable>` for the ROV;
 enabling the whole model also works, with warnings about the parts'
-non box collisions) and, for the rendered sensors, `gz-sim-sensors-system`
-with the ogre2 render engine. The simplest start is a copy of the
-vehicle's water world, which holds both plugin blocks
-(`blueboat_water.sdf` / `bluerov2_water.sdf`):
+non box collisions), **gz-maritime's ocean current system**, and, for the
+rendered sensors, `gz-sim-sensors-system` with the ogre2 render engine. The
+simplest start is a copy of the vehicle's water world, which holds all three
+plugin blocks (`blueboat_water.sdf` / `bluerov2_water.sdf`):
 
 ```bash
 cp $(ros2 pkg prefix --share blueboat_gazebo)/worlds/blueboat_water.sdf my_world.sdf
 ```
+
+The ocean current system is not optional, even in still water. The
+vehicles' surge, sway and heave damping is the water's drag on their
+collisions marked `gz:ocean_current="true"`, and that system is what applies
+it; without it the vehicle has no damping in those directions and a boat
+under thrust speeds up without limit. Slack water is the default, set to
+your water's density:
+
+```xml
+<plugin filename="gz-maritime-ocean-current-system"
+        name="gz::sim::maritime::OceanCurrent">
+  <speed>0</speed>
+  <direction>0</direction>
+  <water_density>1025</water_density>
+</plugin>
+```
+
+A `<speed>` and the `<direction>` it sets towards, in degrees clockwise from
+north, give the world a current the vehicle drifts with.
 
 A world running gz-maritime's buoyancy system needs no `<enable>` entry:
 the displacement collisions are marked, so the vehicle floats under any

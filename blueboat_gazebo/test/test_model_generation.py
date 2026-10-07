@@ -267,6 +267,8 @@ def test_one_windage_box_per_hull_on_its_own_link():
         if coll.get('name') not in marked:
             continue
         assert coll.get('{http://gazebosim.org/schema}buoyancy') is None, coll.get('name')
+        # The same box is what the ocean current drags, below the waterline.
+        assert coll.get('{http://gazebosim.org/schema}ocean_current') == 'true', coll.get('name')
         bitmask = coll.find('surface/contact/collide_bitmask')
         assert bitmask is not None and int(bitmask.text, 16) == 0, coll.get('name')
     link = next(li for li in root.iter('link') if li.get('name') == 'windage')
@@ -490,3 +492,52 @@ def test_ardupilot_channels_command_the_thrusters_topics():
                         'motor_port_joint': '/blueboat/left/cmd'}
     for joint, topic in controls.items():
         assert topic == '/' + thrusters[joint].lstrip('/')
+
+
+GZ_NS = '{http://gazebosim.org/schema}'
+
+
+def test_ocean_current_marks_reproduce_the_identified_surge():
+    """
+    The hull boxes' drag coefficient carries the identified surge damping.
+
+    Surge, sway and heave come from the boxes marked gz:ocean_current, against
+    the water, so the Hydrodynamics plugin carries none of them. The boxes'
+    drag coefficient is chosen so that, at the boat's draft, the marks give
+    the surge coefficient identified in PR #72: 0.5 * rho * Cd * A = 7.0.
+    """
+    root, _ = xacro(MODEL_XACRO, DEFAULT_CONFIG)
+    hydro = plugins(root, 'gz-sim-hydrodynamics-system')
+    assert len(hydro) == 1
+    covered = [child.tag for child in hydro[0]
+               if re.fullmatch(r'[xyz](U|V|W)(abs)?(U|V|W)?', child.tag)]
+    assert covered == [], f'surge, sway or heave damping beside the marks: {covered}'
+
+    marked = [c for c in root.iter('collision')
+              if c.get(f'{GZ_NS}ocean_current') == 'true']
+    assert sorted(c.get('name') for c in marked) == ['windage_port', 'windage_stbd']
+    cds = {float(c.get(f'{GZ_NS}ocean_current_cd')) for c in marked}
+    assert len(cds) == 1
+    cd = cds.pop()
+
+    urdf_root = ET.parse(DESC_SHARE / 'urdf' / 'blueboat.urdf').getroot()
+    mass = sum(float(m.get('value')) for m in urdf_root.findall('.//inertial/mass'))
+    draft = mass / (WATER_DENSITY * 2 * HULL['length'] * HULL['width'])
+    front = 2 * HULL['width'] * draft
+    assert 0.5 * WATER_DENSITY * cd * front == pytest.approx(7.0, rel=0.03)
+
+
+def test_every_world_runs_the_ocean_current_system():
+    """
+    Each world runs gz-maritime's ocean current system, at its own density.
+
+    The system is the boat's surge, sway and heave damping, so it must run
+    even in slack water; its density matches the world's buoyancy.
+    """
+    for world in (GZ_SHARE / 'worlds').glob('*.sdf'):
+        text = world.read_text()
+        assert 'gz-maritime-ocean-current-system' in text, world.name
+        block = text.split('gz-maritime-ocean-current-system')[1].split('</plugin>')[0]
+        density = float(block.split('<water_density>')[1].split('<')[0])
+        buoyancy = float(text.split('<default_density>')[1].split('<')[0])
+        assert density == pytest.approx(buoyancy), world.name

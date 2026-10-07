@@ -224,12 +224,23 @@
     </xacro:if>
   </xacro:macro>
 
-  <!-- ===================== Windage =====================
+  <!-- ===================== Windage and water drag =====================
        One box per hull, spanning the whole pontoon, marked gz:wind="true":
        a world with gz-maritime's wind system pushes on the part of it above
        the waterline, under whatever name the boat was spawned. One box, not
        the buoyancy segments, which would count a hull's frontal area once
-       per segment in a head wind.
+       per segment in a head wind (or a head current).
+
+       The same box is marked gz:ocean_current="true": gz-maritime's ocean
+       current system drags the part below the waterline against the water,
+       along every axis, so the boat drifts with the world's current. That
+       is the boat's surge, sway and heave damping, which the Hydrodynamics
+       plugin below therefore leaves out. Its drag coefficient is set so the
+       marks reproduce the identified surge coefficient (xUabsU = -7.0, PR
+       #72): the 12.3 kg boat floats at a draft of 3.2 cm, the two hull ends
+       show the water 2 * 0.18 * 0.032 = 0.0114 m^2, and
+       7.0 / (0.5 * 1025 * 0.0114) is about 1.19. Sway and heave follow from
+       the same coefficient on the hulls' side and bottom areas.
 
        On a link of its own, fixed to the root link like hull_displacement,
        and never on hull_displacement itself: the stock buoyancy system
@@ -237,8 +248,10 @@
        the hull's full volume there would double the displacement. The boxes
        collide with nothing (collide_bitmask 0x00) and carry no gz:buoyancy
        mark, so they displace nothing in either buoyancy system. -->
+  <xacro:property name="ocean_current_cd" value="1.19"/>
   <xacro:macro name="windage_box" params="hull side y">
-    <collision name="windage_${side}" gz:wind="true">
+    <collision name="windage_${side}" gz:wind="true"
+               gz:ocean_current="true" gz:ocean_current_cd="${ocean_current_cd}">
       <pose>${hull['x']} ${y} ${hull['z']} 0 0 0</pose>
       <geometry>
         <box><size>${hull['length']} ${hull['width']} ${hull['height']}</size></box>
@@ -298,17 +311,20 @@
       <xacro:windage hull="${cfg['hull_displacement']}"/>
     </xacro:if>
 
-    <!-- Hydrodynamic drag/damping coefficient (derivative terms) 
-          Surge and yaw coefficients are identified in PR #72.
-          The remainder are still placeholders - see Issue #73.
+    <!-- Hydrodynamic drag/damping coefficients (derivative terms), for the
+         motions the hull boxes' gz:ocean_current marks do not cover: roll,
+         pitch and yaw. Surge, sway and heave come from the marks, against the
+         water, with the identified surge (xUabsU = -7.0, PR #72) carried by
+         their drag coefficient (see Windage and water drag). Fossen surge,
+         sway or heave here as well would damp the boat against the ground
+         too, hold it back in a current, and damp heave twice. The yaw
+         coefficient is identified in PR #72; roll and pitch are still
+         placeholders - see Issue #73.
     -->
     <plugin filename="gz-sim-hydrodynamics-system"
             name="gz::sim::systems::Hydrodynamics">
       <link_name>${base_name}</link_name>
       <water_density>1025.0</water_density>
-      <xU>0</xU>    <xUabsU>-7.0</xUabsU>  
-      <yV>-40</yV>    <yVabsV>-90</yVabsV>  
-      <zW>-30</zW>    <zWabsW>-50</zWabsW>  
       <kP>-20</kP>    <kPabsP>-40</kPabsP>
       <mQ>-20</mQ>    <mQabsQ>-40</mQabsQ>
       <nR>-18</nR>  <nRabsR>0</nRabsR>

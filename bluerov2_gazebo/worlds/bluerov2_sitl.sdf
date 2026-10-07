@@ -59,6 +59,19 @@
       <enable>bluerov2::buoyancy_displacement</enable>
     </plugin>
 
+    <!-- gz-maritime's ocean current (gz_ocean_current): slack water here,
+         <speed> in m/s and the <direction> it sets towards, in degrees
+         clockwise from north. It also drags the vehicle's collisions marked
+         gz:ocean_current="true" against the water, which is the vehicle's
+         surge, sway and heave damping, so it runs even with no current. The
+         density matches the buoyancy's water. -->
+    <plugin filename="gz-maritime-ocean-current-system"
+            name="gz::sim::maritime::OceanCurrent">
+      <speed>0</speed>
+      <direction>0</direction>
+      <water_density>1025</water_density>
+    </plugin>
+
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
       <pose>0 0 10 0 0 0</pose>

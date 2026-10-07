@@ -27,6 +27,10 @@
        dependency - gz-sim loads it from GZ_SIM_SYSTEM_PLUGIN_PATH - but it
        has to be built and on that path before the BlueBoat will run. -->
   <exec_depend>gz_thruster</exec_depend>
+  <!-- gz-maritime's ocean current: the system that drags the marked
+       hull against the water, and so the vehicle's surge, sway and heave
+       damping. Every world the vehicle runs in needs it. -->
+  <exec_depend>gz_ocean_current</exec_depend>
   <exec_depend>bluerobotics_common</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>ros_gz_sim</exec_depend>

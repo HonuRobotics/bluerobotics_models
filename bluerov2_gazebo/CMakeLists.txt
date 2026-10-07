@@ -153,6 +153,10 @@ if(BUILD_TESTING)
     TIMEOUT 180)
   # NOCAPTURE so the sim output printed at teardown reaches the test logs
   # even when every assertion passes.
+  # The vehicle in a set ocean current: it drifts with the water, which
+  # is what its marked collisions are dragged against.
+  ament_add_pytest_test(test_ocean_current test/test_ocean_current.py
+    TIMEOUT 300 NOCAPTURE)
   ament_add_pytest_test(test_gz_launch test/test_gz_launch.py TIMEOUT 420
     NOCAPTURE)
   ament_add_pytest_test(test_ros_launch test/test_ros_launch.py TIMEOUT 300

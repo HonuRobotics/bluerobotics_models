@@ -327,3 +327,68 @@ def test_ardupilot_imu_is_the_declared_frame():
     assert any(s.get('name') == sensor and s.get('type') == 'imu'
                for s in links[link].iter('sensor')), (
         f'{link} carries no imu sensor named {sensor}')
+
+
+GZ_NS = '{http://gazebosim.org/schema}'
+
+# The reference BlueROV2 quadratic drag, surge, sway and heave.
+REFERENCE_DRAG = (33.732, 54.16, 73.225)
+
+
+def test_water_drag_box_reproduces_the_reference_drag():
+    """
+    One box marked gz:ocean_current carries the ROV's translational drag.
+
+    With a drag coefficient of one, the faces normal to x, y and z give
+    0.5 * rho * A, which must equal the reference surge, sway and heave
+    coefficients; the Hydrodynamics plugin carries none of them. The box sits
+    on the centre of mass, on a link of its own that no world floats, and
+    displaces nothing.
+    """
+    root, _ = gen_model(default_config())
+    hydro = plugins(root, 'gz-sim-hydrodynamics-system')
+    assert len(hydro) == 1
+    covered = [child.tag for child in hydro[0]
+               if child.tag[0] in 'xyz' and child.tag[1] in 'UVW']
+    assert covered == [], f'surge, sway or heave damping beside the marks: {covered}'
+
+    marked = [c for c in root.iter('collision')
+              if c.get(f'{GZ_NS}ocean_current') == 'true']
+    assert [c.get('name') for c in marked] == ['water_drag']
+    box = marked[0]
+    assert box.get(f'{GZ_NS}buoyancy') is None
+    assert box.get(f'{GZ_NS}ocean_current_cd') is None, 'the default Cd of one'
+    bitmask = box.find('surface/contact/collide_bitmask')
+    assert bitmask is not None and int(bitmask.text, 16) == 0
+
+    density = float(yaml.safe_load(default_config())['buoyancy']['fluid_density'])
+    lx, ly, lz = (float(v) for v in box.find('geometry/box/size').text.split())
+    q = 0.5 * density
+    for area, drag in zip((ly * lz, lx * lz, lx * ly), REFERENCE_DRAG):
+        assert q * area == pytest.approx(drag, rel=1e-6)
+
+    urdf_root, _, _, _ = urdf_for(default_config())
+    _, com = assembly.mass_properties(urdf_root)
+    centre = [float(v) for v in box.find('pose').text.split()[:3]]
+    assert centre == pytest.approx(list(com), abs=1e-4)
+
+    link = root.find('.//link[@name="water_drag"]')
+    assert link is not None and link.find('pose').get('relative_to') == 'base_link'
+    for world in (GZ_SHARE / 'worlds').glob('*.sdf'):
+        assert 'bluerov2::water_drag' not in world.read_text(), world.name
+
+
+def test_every_world_runs_the_ocean_current_system():
+    """
+    Each world runs gz-maritime's ocean current system, at its own density.
+
+    The system is the ROV's surge, sway and heave damping, so it must run
+    even in slack water; its density matches the world's buoyancy.
+    """
+    for world in (GZ_SHARE / 'worlds').glob('*.sdf'):
+        text = world.read_text()
+        assert 'gz-maritime-ocean-current-system' in text, world.name
+        block = text.split('gz-maritime-ocean-current-system')[1].split('</plugin>')[0]
+        density = float(block.split('<water_density>')[1].split('<')[0])
+        buoyancy = float(text.split('<default_density>')[1].split('<')[0])
+        assert density == pytest.approx(buoyancy), world.name

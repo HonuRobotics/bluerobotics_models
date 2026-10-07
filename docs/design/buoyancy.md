@@ -48,6 +48,16 @@ box with the hull's full volume there would double the displacement. They
 neither collide nor carry `gz:buoyancy`, so they displace nothing in either
 system.
 
+The same boxes are marked `gz:ocean_current="true"`: gz-maritime's ocean
+current system drags the part of each below the waterline against the water,
+along every axis. That is the BlueBoat's surge, sway and heave damping, so the
+Hydrodynamics plugin leaves those three motions out and keeps roll, pitch and
+yaw; Fossen terms on the same axes would damp the boat against the ground as
+well, hold it back in a current, and damp heave twice. The boxes'
+`gz:ocean_current_cd` of 1.19 is chosen so the marks reproduce the identified
+surge coefficient (`xUabsU` = -7.0, PR #72) at the boat's draft: the two hull
+ends show the water about 0.0114 m², and 0.5 · 1025 · 1.19 · 0.0114 ≈ 7.0.
+
 ## UUV: declared trim (BlueROV2)
 
 `buoyancy:` in the BlueROV2 config takes `net_buoyancy` (kg, positive floats
@@ -65,6 +75,16 @@ contact geometry. The box itself never collides (`collide_bitmask`
 `0x00`). The same pattern as the BlueBoat's pontoons, with the box solved
 instead of declared.
 
+The ROV's surge, sway and heave damping is the water's drag on one more box,
+`water_drag`, on a link of its own, marked `gz:ocean_current="true"`, centred
+on the centre of mass. Its sides are sized from the reference BlueROV2
+quadratic coefficients so that, with a drag coefficient of one, each face
+reproduces one of them exactly: the faces normal to x, y and z are X / q,
+Y / q and Z / q with q = ρ / 2, which gives a box of about 0.48 × 0.30 ×
+0.22 m, close to the ROV's own envelope. Roll, pitch and yaw stay on the
+Hydrodynamics plugin. The box carries no `gz:buoyancy` and no world enables
+its link, so it displaces nothing.
+
 ## Marked for any world
 
 The displacement collisions of both vehicles carry `gz:buoyancy="true"`.
@@ -77,6 +97,12 @@ world that names no vehicle. The stock system ignores the attribute, so
 the worlds here keep their `<enable>` lists and behave exactly as before;
 on gz-maritime's open water the same generated model floats with no world
 edit.
+
+The `gz:ocean_current` marks are different: they are the vehicles' surge,
+sway and heave damping, so a world without gz-maritime's ocean current system
+leaves those motions undamped. Every world here runs the system, slack by
+default and at the density of its own water, and any other world the
+vehicles are used in must run it too.
 
 ## Constraints
 

@@ -76,8 +76,9 @@ launch.
 |---|---|
 | geometry, inertia, joints | the URDF (merge included) |
 | `hull_displacement` link | box pontoons from the config; `<enable>blueboat::hull_displacement</enable>` in the world |
-| `windage` link | one box per hull marked `gz:wind="true"`, on its own link so the buoyancy `<enable>` never floats it |
-| `gz-sim-hydrodynamics-system` | placeholder USV damping coefficients, to be identified |
+| `windage` link | one box per hull marked `gz:wind="true"` and `gz:ocean_current="true"`, on its own link so the buoyancy `<enable>` never floats it; the ocean current's drag on it is the surge, sway and heave damping, with a drag coefficient that reproduces the identified surge |
+| `gz-sim-hydrodynamics-system` | roll, pitch and yaw damping only (yaw identified, roll and pitch placeholders); surge, sway and heave come from the marks |
+| `gz-maritime-ocean-current-system` (world) | in every world, slack by default: it drags the marked boxes, so it must run wherever the vehicle does |
 | `gz-maritime-thruster-system`, one per propeller | on `<name>_joint`, normalized command scaled onto the limits from the part's `drive` table (T200 16 V placeholders today), counter rotating |
 | `gz-sim-joint-state-publisher-system` | `/<name>/joint_states`, bridged for RViz |
 | `gpu_lidar` "ping" | the Ping2 as a one ray downward range sensor at `ping_beam` |

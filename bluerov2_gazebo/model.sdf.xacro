@@ -422,7 +422,54 @@
               name="gz::sim::systems::DopplerVelocityLogSystem"/>
     </xacro:if>
 
-    <!-- Hydrodynamic damping (Fossen quadratic drag, reference BlueROV2).
+    <!-- ===================== Water drag =====================
+         The ROV's translational drag, surge, sway and heave, against the
+         water: one box marked gz:ocean_current="true", which gz-maritime's
+         ocean current system drags along every axis, relative to the water,
+         so the ROV drifts with the world's current. Its sides are sized so
+         that, with a drag coefficient of one, the box reproduces the
+         reference BlueROV2 quadratic coefficients exactly: a face of area A
+         across a flow gives 0.5 * rho * A * u^2, so the faces normal to x, y
+         and z are X / q, Y / q and Z / q, q = 0.5 * rho, and the box is
+         sqrt(Y Z / (X q)) by sqrt(X Z / (Y q)) by sqrt(X Y / (Z q)), about
+         0.48 by 0.30 by 0.22 m, close to the ROV's own envelope. Centred on
+         the centre of mass, so translation puts no moment on it.
+
+         On a link of its own, never on buoyancy_displacement: the stock
+         buoyancy system floats every collision of the link it is enabled
+         on. The box collides with nothing and carries no gz:buoyancy mark,
+         so it displaces nothing in either buoyancy system. -->
+    <xacro:property name="drag_x" value="33.732"/>
+    <xacro:property name="drag_y" value="54.16"/>
+    <xacro:property name="drag_z" value="73.225"/>
+    <xacro:property name="drag_q" value="${0.5 * water_density}"/>
+    <link name="water_drag">
+      <pose relative_to="${base_name}">0 0 0 0 0 0</pose>
+      <inertial>
+        <mass>1e-5</mass>
+        <inertia>
+          <ixx>1e-8</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>1e-8</iyy><iyz>0</iyz><izz>1e-8</izz>
+        </inertia>
+      </inertial>
+      <collision name="water_drag" gz:ocean_current="true">
+        <pose>${com[0]} ${com[1]} ${com[2]} 0 0 0</pose>
+        <geometry>
+          <box><size>${sqrt(drag_y * drag_z / (drag_x * drag_q))} ${sqrt(drag_x * drag_z / (drag_y * drag_q))} ${sqrt(drag_x * drag_y / (drag_z * drag_q))}</size></box>
+        </geometry>
+        <surface><contact><collide_bitmask>0x00</collide_bitmask></contact></surface>
+      </collision>
+    </link>
+    <joint name="water_drag_joint" type="fixed">
+      <parent>${base_name}</parent>
+      <child>water_drag</child>
+    </joint>
+
+    <!-- Hydrodynamic damping (Fossen quadratic drag, reference BlueROV2), for
+         the motions the water drag box does not cover: roll, pitch and yaw.
+         Surge, sway and heave come from the box, against the water; Fossen
+         terms on those axes as well would damp the ROV against the ground
+         too, hold it back in a current, and damp heave twice.
          Added mass (xDotU etc., e.g. von Benzon 2022) is intentionally left at
          zero: the plugin applies it as explicit acceleration feedback, which
          diverges when added mass exceeds rigid mass (heave: 18.68 vs 11.5 kg).
@@ -432,11 +479,7 @@
             name="gz::sim::systems::Hydrodynamics">
       <link_name>${base_name}</link_name>
       <water_density>1025.0</water_density>
-      <xU>0</xU>   <yV>0</yV>   <zW>0</zW>
       <kP>0</kP>   <mQ>0</mQ>   <nR>0</nR>
-      <xUabsU>-33.732</xUabsU>
-      <yVabsV>-54.16</yVabsV>
-      <zWabsW>-73.225</zWabsW>
       <kPabsP>-3.992</kPabsP>
       <mQabsQ>-3.992</mQabsQ>
       <nRabsR>-3.992</nRabsR>

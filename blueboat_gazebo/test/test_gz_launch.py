@@ -196,11 +196,14 @@ def test_forward_thrust_surges(sim):
     aligned with the body x axis and no residual yaw, wherever the nose ended
     up pointing.
     """
-    teleport(sim, 0, 0, 0.0)
+    # Start at the far end of the pool, nose towards the other: the run has
+    # to fit between the walls (+/-12.55 m), and set_pose keeps whatever
+    # velocity the boat had, such as the drift it surfaces with after the
+    # submersion test.
+    teleport(sim, -10.0, 0, 0.0)
     wait_sim_seconds(sim, 3)
     # ~5 N per motor, the value this test used before the interface went
-    # normalized, expressed against the limit the model declares. The run has
-    # to fit in the pool (walls at +/-12.55 m).
+    # normalized, expressed against the limit the model declares.
     ahead = 5.0 / MAX_THRUST
     command_motors(sim, {'port': ahead, 'stbd': ahead})
     wait_sim_seconds(sim, 6)          # onset transient: spin damps, speed builds
