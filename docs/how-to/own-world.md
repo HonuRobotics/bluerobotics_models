@@ -14,6 +14,27 @@ vehicle's water world, which holds both plugin blocks
 cp $(ros2 pkg prefix --share blueboat_gazebo)/worlds/blueboat_water.sdf my_world.sdf
 ```
 
+For a current, add gz-maritime's ocean current system. The vehicles' damping
+is gz-maritime's Hydrodynamics, which damps against the water, so they drift
+with it; without the system the water is slack and nothing changes:
+
+```xml
+<plugin filename="gz-maritime-ocean-current-system"
+        name="gz::sim::maritime::OceanCurrent">
+  <speed>0.5</speed>
+  <direction>90</direction>
+</plugin>
+```
+
+`<speed>` is in m/s and `<direction>` is the direction it sets towards, in
+degrees clockwise from north: 90 sets east. Change it while the world runs on
+`/world/<world>/ocean_current/set`:
+
+```bash
+gz topic -t /world/blueboat_water/ocean_current/set -m gz.msgs.Param \
+  -p 'params { key: "direction" value { type: DOUBLE double_value: 0 } }'
+```
+
 A world running gz-maritime's buoyancy system needs no `<enable>` entry:
 the displacement collisions are marked, so the vehicle floats under any
 spawn name ([Marked for any world](../design/buoyancy.md#marked-for-any-world)).

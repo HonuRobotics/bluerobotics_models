@@ -119,7 +119,8 @@ def test_model_generation_follows_config():
     assert len(props) == 4
     assert {t.find('joint_name').text for t in plugins(root, 'gz-maritime-thruster-system')} == \
         {f'{n}_joint' for n in props}
-    assert len(plugins(root, 'gz-sim-hydrodynamics-system')) == 1
+    assert len(plugins(root, 'gz-maritime-hydrodynamics-system')) == 1
+    assert not plugins(root, 'gz-sim-hydrodynamics-system')
     sensors = list(root.iter('sensor'))
     assert {s.get('type') for s in sensors} == {'gpu_lidar'}
     assert len(sensors) == 1  # only the Ping2 emits a sensor
