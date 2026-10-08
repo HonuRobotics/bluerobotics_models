@@ -423,13 +423,17 @@
     </xacro:if>
 
     <!-- Hydrodynamic damping (Fossen quadratic drag, reference BlueROV2).
+         gz-maritime's Hydrodynamics (gz_hydrodynamics): the same
+         coefficients as gz-sim's, damped against the water rather than the
+         ground, so the ROV drifts with the world's ocean current.
          Added mass (xDotU etc., e.g. von Benzon 2022) is intentionally left at
          zero: the plugin applies it as explicit acceleration feedback, which
          diverges when added mass exceeds rigid mass (heave: 18.68 vs 11.5 kg).
-         The stable path is SDF <fluid_added_mass>, pending build time URDF
-         conversion so base_link's inertial can carry it. -->
-    <plugin filename="gz-sim-hydrodynamics-system"
-            name="gz::sim::systems::Hydrodynamics">
+         If it is ever wanted, it goes in these coefficients, kept well below
+         the rigid mass, not in SDF <fluid_added_mass>: only DART implements
+         that, so it would tie the ROV to one physics engine. -->
+    <plugin filename="gz-maritime-hydrodynamics-system"
+            name="gz::sim::maritime::Hydrodynamics">
       <link_name>${base_name}</link_name>
       <water_density>1025.0</water_density>
       <xU>0</xU>   <yV>0</yV>   <zW>0</zW>

@@ -301,9 +301,12 @@
     <!-- Hydrodynamic drag/damping coefficient (derivative terms) 
           Surge and yaw coefficients are identified in PR #72.
           The remainder are still placeholders - see Issue #73.
+          gz-maritime's Hydrodynamics (gz_hydrodynamics): the same
+          coefficients as gz-sim's, damped against the water rather than
+          the ground, so the boat drifts with the world's ocean current.
     -->
-    <plugin filename="gz-sim-hydrodynamics-system"
-            name="gz::sim::systems::Hydrodynamics">
+    <plugin filename="gz-maritime-hydrodynamics-system"
+            name="gz::sim::maritime::Hydrodynamics">
       <link_name>${base_name}</link_name>
       <water_density>1025.0</water_density>
       <xU>0</xU>    <xUabsU>-7.0</xUabsU>  
