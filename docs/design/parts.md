@@ -6,6 +6,20 @@ only (visual, collision, inertia). Parts are vehicle agnostic and live in
 (parts plus the joints between them) live in the per vehicle description
 packages.
 
+## Vocabulary: part, not asset
+
+This library says part, mesh and assembly, and avoids the word asset.
+
+Asset is a container word in 3D work. It covers meshes, textures, materials, rigs, animations, scenes and whole library entries, at every scale from a single image file to a finished vehicle. It describes where something sits in a production pipeline rather than what it is, and it promises nothing to whoever consumes it.
+
+The words used here are narrower on purpose, and each one names a contract:
+
+- A **part** is one physical component, declared by a macro that states its attach point, slots, frames and mass properties.
+- A **mesh** is one file, `<part>.visual.glb`, holding geometry and materials and nothing else.
+- An **assembly** is parts plus the joints between them.
+
+The ambiguity is not hypothetical. glTF itself uses `asset` for the block describing an entire file, so inside a `.glb` the mesh is not the asset, the file is. A sentence about "the asset" is therefore ambiguous in exactly the pipeline we work in.
+
 ## The part contract
 
 A part is one file, `bluerobotics_parts/urdf/<part>.urdf.xacro`, holding two
