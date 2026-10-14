@@ -3,7 +3,7 @@
 Where the BlueROV2's autopilot parameters and vehicle dynamics come from, so a reviewer can confirm we run the manufacturer's configuration where one exists and ArduSub's own where it does not.
 
 ```{note}
-The autopilot parameters below are settled: every value is either Blue Robotics' published figure or an ArduSub compiled default written out, and the table says which. The thrust endpoints and deadband are settled from published data. The hydrodynamic coefficients are not — they are still being identified, and their section says so.
+The autopilot parameters below are settled: every value is either Blue Robotics' published figure or an ArduSub compiled default written out, and the table says which. The thrust endpoints and deadband are settled from published data. The hydrodynamic coefficients have a coarse first estimate but are not settled — they are still being identified, and their section says so.
 ```
 
 ## What is fixed and what is free
@@ -14,7 +14,7 @@ The autopilot parameters below are settled: every value is either Blue Robotics'
 | `ATC_ANG_YAW_P`, `ATC_RAT_YAW_*`, `PSC_D_*` | ArduSub firmware defaults | No — see the note below on why these are the reference |
 | Thrust limits and deadband | T200 bench data, scaled to Blue Robotics' published bollard pull for the assembled vehicle — see [Thrust](#thrust) | No — measured |
 | Mass, inertia | the model | No |
-| Hydrodynamic damping in yaw and heave | never measured; identified here | Yes, by identification from open-loop trials |
+| Hydrodynamic damping in surge, sway, heave and yaw | never measured; a coarse estimate from published thrust and top speeds, then identified here | Yes, by identification from open-loop trials |
 
 Identification stops being identification the moment a measured value is moved to make a loop behave. If the loops cannot work without moving one, that is a finding to write down here.
 
@@ -121,12 +121,62 @@ The cost: just outside that band the real thruster delivers about 0.4 N, not 2.6
 
 ## Hydrodynamics
 
-TBD — the identified coefficients, each with the trial it came from, and what stayed unexplained.
+### Coarse identification
 
-| Coefficient | Value | Identified from | Notes |
-|---|---|---|---|
-| `nRabsR` (yaw) | | | |
-| `zWabsW` (heave) | | | |
+A first estimate, from published figures and stated guesses, made before any trial. Quadratic drag only: the linear terms are zero. At top speed the full thrust is balanced by drag alone, so each coefficient is the full thrust over the top speed squared, *c* = *F* / *v*².
+
+| Coefficient | Value | Full thrust *F* | Top speed *v* | Confidence |
+|---|---|---|---|---|
+| `xUabsU` (surge) | −39.2 N·s²/m² | 9 kgf = 88.3 N, published forward bollard | 1.5 m/s, published maximum forward speed | [Practice] |
+| `yVabsV` (sway) | −157.0 N·s²/m² | 9 kgf = 88.3 N, published lateral bollard | 0.75 m/s, estimated at half the surge speed | [Open] |
+| `zWabsW` (heave) | −122.1 N·s²/m² | 7 kgf = 68.7 N, published vertical bollard | 0.75 m/s, estimated at half the surge speed | [Open] |
+| `nRabsR` (yaw) | −2.11 N·m·s²/rad² | 20.8 N·m, derived below | π rad/s (180 °/s), estimated | [Open] |
+| `kPabsP` (roll), `mQabsQ` (pitch) | −3.992 N·m·s²/rad² | — | — | unchanged; neither axis is closed on this vehicle |
+
+Blue Robotics publish no yaw figure, so the yaw torque comes from the thrusters and the frame. A full yaw command drives all four horizontals at full, two ahead and two astern, so the torque is (34.9 + 27.2) N × (0.164 + 0.171) m = 20.8 N·m. The thrust figures are the installed endpoints from [Thrust](#thrust); the moment arms are each thruster's perpendicular distance from the center, from the slot positions and 45° mounting in `bluerov2_chassis.urdf.xacro`. Nothing in it depends on the damping being identified.
+
+The sway, heave and yaw top speeds are guesses, to be revised as we learn more; the coefficients follow from them directly, so revising a speed means recomputing its row.
+
+### Verifying the coarse identification
+
+This differs from the boat. There, the hydrodynamics were tuned by hand against the closed-loop response under Blue Robotics' gains. Here they are set open loop from estimated top speeds, and the check is mostly automated: a test commands each axis and reports what the vehicle did, and a person reads the report and spot-checks it in the viewport.
+
+**1. Run the axis test.** In drydock:
+
+```bash
+source ~/maritime_ws/install/setup.bash
+cd ~/maritime_ws/src/bluerobotics_models/bluerov2_gazebo
+python3 -m pytest -s test/test_gz_launch.py -k axis
+```
+
+`colcon test --packages-select bluerov2_gazebo` runs it too, and writes the same output to `log/latest_test/bluerov2_gazebo/stdout.log`.
+
+The test commands 0.5 on each of surge, sway, heave and yaw, in both directions, through the teleop mixer's allocation. It passes a case when the motion lies within 20° of the commanded axis and its speed is within a factor of ten of an expected figure. The expected figures come from the vehicle's published performance and engineering judgment, not from this model.
+
+**2. Read the table.** The run ends with one row per case: the expected speed, the limits, the measured speed, their ratio, the angle off the commanded axis, and the velocity in the body frame. Read it for more than pass or fail:
+
+- **Measured speed.** Under quadratic drag, a 0.5 command should give about 0.71 (√0.5) of the axis's top speed in the coarse identification table above. A measured speed far from that points at the coefficient for that axis, or at the thrust.
+- **Ratio.** Measured over expected, the figure the factor-of-ten limit is applied to.
+- **Off axis.** A few degrees is coupling. An angle near 180° is a reversed thruster or a wrong mixer sign.
+- **Body rate.** The off-axis components say which way the vehicle drifts. A drift with the same sign in both directions of an axis is coupling, not polarity.
+
+**3. Spot-check in the viewport.** The table can be right about numbers and still miss something a person sees at once, such as the vehicle tumbling or rolling. Start the playground with the GUI:
+
+```bash
+source ~/maritime_ws/install/setup.bash
+gz sim -r $(ros2 pkg prefix --share bluerov2_gazebo)/worlds/bluerov2_playground.sdf
+```
+
+Then, in a second shell, command one axis by publishing half of that axis's row from `bluerobotics_teleop/config/bluerov2/mixer.yaml` to each thruster. For surge, the `gains_linear_x` row:
+
+```bash
+for n in 1 2 3 4 5 6; do
+  g=$(python3 -c "import yaml; print(yaml.safe_load(open('$HOME/maritime_ws/src/bluerobotics_models/bluerobotics_teleop/config/bluerov2/mixer.yaml'))['twist_to_thrust']['ros__parameters']['gains_linear_x'][$n-1] * 0.5)")
+  gz topic -t /bluerov2/thruster_$n/cmd -m gz.msgs.Double -p "data: $g"
+done
+```
+
+Watch that the vehicle moves along the commanded axis at roughly the speed in the table, without rolling or pitching. A single publish can be lost while the topic is first discovered; if a thruster does not respond, run the loop again. Publish `data: 0.0` to every thruster to stop. Repeat with `gains_linear_y`, `gains_linear_z` and `gains_angular_z`, and with `* -0.5` for the reverse direction.
 
 Added mass is zero and stays zero: the model declares no added-mass terms, and the hydrodynamics plugin's explicit-acceleration path diverges when added mass exceeds rigid-body mass.
 
@@ -147,3 +197,5 @@ What the modes do *not* close is worth stating in the same table: roll, because 
 ## Open questions
 
 TBD — anything that could not be resolved from published data: the question, why it matters, and what was assumed in the meantime.
+
+- **Sway fails the axis test's direction check.** With the coarse coefficients, a sway command drifts backward as well as sideways, by the same amount in both directions, so the motion falls just outside the 20° bound. That rules out polarity; the suspected cause, not yet confirmed, is a small yaw torque from the thruster layout turning the vehicle while it slides, which the open-loop teleop mix does nothing to hold. The test is left failing and the behavior will be assessed by hand in the spot check.

@@ -438,7 +438,11 @@
               name="gz::sim::systems::DopplerVelocityLogSystem"/>
     </xacro:if>
 
-    <!-- Hydrodynamic damping (Fossen quadratic drag, reference BlueROV2).
+    <!-- Hydrodynamic damping: Fossen quadratic drag only, linear terms zero.
+         Surge, sway, heave and yaw are a coarse identification from the
+         published bollard thrust and top speeds; roll and pitch are not
+         closed on this vehicle and keep their earlier reference value.
+         Derivation: docs/vehicles/bluerov2/parameters.md.
          Added mass (xDotU etc., e.g. von Benzon 2022) is intentionally left at
          zero: the plugin applies it as explicit acceleration feedback, which
          diverges when added mass exceeds rigid mass (heave: 18.68 vs 11.5 kg).
@@ -450,12 +454,12 @@
       <water_density>1025.0</water_density>
       <xU>0</xU>   <yV>0</yV>   <zW>0</zW>
       <kP>0</kP>   <mQ>0</mQ>   <nR>0</nR>
-      <xUabsU>-33.732</xUabsU>
-      <yVabsV>-54.16</yVabsV>
-      <zWabsW>-73.225</zWabsW>
+      <xUabsU>-39.2</xUabsU>
+      <yVabsV>-157.0</yVabsV>
+      <zWabsW>-122.1</zWabsW>
       <kPabsP>-3.992</kPabsP>
       <mQabsQ>-3.992</mQabsQ>
-      <nRabsR>-3.992</nRabsR>
+      <nRabsR>-2.11</nRabsR>
     </plugin>
 
     <!-- Thrusters, sensors and claw controllers: one per matching part
