@@ -3,7 +3,7 @@
 Where the BlueROV2's autopilot parameters and vehicle dynamics come from, so a reviewer can confirm we run the manufacturer's configuration where one exists and ArduSub's own where it does not.
 
 ```{note}
-The autopilot parameters below are settled: every value is either Blue Robotics' published figure or an ArduSub compiled default written out, and the table says which. The thrust endpoints and the hydrodynamic coefficients are not settled — they are still being identified, and their sections say so.
+The autopilot parameters below are settled: every value is either Blue Robotics' published figure or an ArduSub compiled default written out, and the table says which. The thrust endpoints and deadband are settled from published data. The hydrodynamic coefficients are not — they are still being identified, and their section says so.
 ```
 
 ## What is fixed and what is free
@@ -12,7 +12,7 @@ The autopilot parameters below are settled: every value is either Blue Robotics'
 |---|---|---|
 | Frame, motor outputs, `ATC_ANG_RLL_P`, `ATC_ANGLE_MAX`, `ATC_INPUT_TC`, `EK3_SRC1_POSXY` | Blue Robotics' published chain | No — they are what we are being faithful to |
 | `ATC_ANG_YAW_P`, `ATC_RAT_YAW_*`, `PSC_D_*` | ArduSub firmware defaults | No — see the note below on why these are the reference |
-| Thrust limits | Blue Robotics' published bollard pull for the assembled vehicle | No — measured |
+| Thrust limits and deadband | T200 bench data, scaled to Blue Robotics' published bollard pull for the assembled vehicle — see [Thrust](#thrust) | No — measured |
 | Mass, inertia | the model | No |
 | Hydrodynamic damping in yaw and heave | never measured; identified here | Yes, by identification from open-loop trials |
 
@@ -77,16 +77,47 @@ The roll and pitch rate gains are deliberately not written out. `sub.parm` does 
 
 Blue Robotics publish two different things, and they do not agree:
 
-| Figure | Value | Measured on |
+| Figure | Value | Measured on | Source |
+|---|---|---|---|
+| T200 bench thrust at 14 V / 16 V | 4.524 / 5.245 kgf ahead, 3.517 / 4.069 kgf astern | the thruster alone | [T200 performance data](https://cad.bluerobotics.com/T200-Public-Performance-Data-10-20V-September-2019.xlsx) |
+| BlueROV2 bollard pull | 9 kgf forward (45°), 9 kgf lateral (45°), 7 kgf vertical | the assembled vehicle | [BlueROV2 specifications](https://bluerobotics.com/store/rov/bluerov2/) |
+
+The model carries the vehicle's figure, because the vehicle's own measurement is the better evidence for how the vehicle behaves. It is applied in two layers, so each number lives where it belongs:
+
+1. **The part carries the thruster on a bench**, at the vehicle's 14.8 V pack, interpolated between the 14 V and 16 V sheets: **4.812 kgf = 47.2 N ahead, 3.738 kgf = 36.7 N astern**. That is a fact about the T200 and is in `bluerobotics_parts/urdf/t200_prop_ccw.urdf.xacro` and `t200_prop_cw.urdf.xacro`.
+2. **The vehicle applies an installation factor**, `thrust_install_factor` in `bluerov2_gazebo/model.sdf.xacro`, for what the frame costs the thrusters: ducting, interference, flow through a crowded frame. That is a fact about this vehicle.
+
+### The installation factor
+
+ArduSub's `Vectored` mixing (`AP_Motors6DOF.cpp`, `Sub-4.7.1`) sets which way each thruster runs in a bollard pull:
+
+- **Forward:** thrusters 1 and 2 astern, 3 and 4 ahead. Lateral is the same split. Each horizontal is at 45°, so it contributes cos 45° of its thrust.
+- **Vertical:** both verticals run the same way.
+
+Setting the factor *k* so the bench figures reproduce the published pull:
+
+| Axis | Equation | *k* |
 |---|---|---|
-| T200 bench thrust at 16 V | 51.5 N ahead / 40.2 N astern | the thruster alone |
-| BlueROV2 bollard pull | ~9 kgf forward, ~9 kgf lateral, ~7 kgf vertical | the assembled vehicle |
+| forward / lateral | 0.707 × 2 × *k* × (4.812 + 3.738) = 9 kgf | 0.744 |
+| vertical | 2 × *k* × 4.812 = 7 kgf | 0.727 |
 
-Four horizontals at 45° at the bench figure would give about 146 N forward where the vehicle measures about 88 N; two verticals would give 103 N against about 69 N. So in situ each thruster delivers roughly 60–65% of its bench figure — ducting, interference, flow through a crowded frame.
+The vertical row assumes the published 7 kgf is the ahead direction, the stronger one. Against the astern figure it would be 0.936, which is out of line with the horizontals; the agreement between 0.744 and 0.727 is the reason to read it this way. [Practice]
 
-**The model carries the derated figures**, because the vehicle's own measurement is the better evidence for how the vehicle behaves, and the bench number would let the simulated ROV out-thrust the real one by half. TBD — the per-thruster endpoints, the arithmetic, and the resulting factor.
+**The model uses *k* = 0.74**, one factor for all six thrusters, giving **34.9 N ahead and 27.2 N astern** per installed thruster. With it the model reproduces 8.94 kgf forward and lateral and 7.12 kgf vertical.
 
-`deadband` is not set. Blue Robotics give no figure for the T200 beyond charts, and the boat's value is not transferable.
+The Heavy has no published bollard figures and takes the same factor. That is an assumption, not a measurement. [Open]
+
+```{note}
+An earlier draft of this page put the factor at 60–65%. That compared the 16 V bench figures against the pull with all four horizontals running ahead; with the pack voltage and the astern pair accounted for, it is 0.74. [Corrected]
+```
+
+### Deadband
+
+The T200's ESC gives zero thrust within ±32 µs of neutral at 14 V and ±28 µs at 16 V, out of a ±400 µs range: about 0.075 of the command, from the same performance data.
+
+The plugin's `<deadband>` is a threshold on thrust in newtons, not on the command. Under the plugin's linear map from command to thrust, 0.075 of the bench endpoint is **3.5 N**, which the part declares; the vehicle scales it by *k* with the endpoints, so the installed deadband is **2.6 N** and the dead zone stays the same fraction of the command.
+
+The cost: just outside that band the real thruster delivers about 0.4 N, not 2.6 N, because its thrust curve is not linear near zero. Thrust curves are out of scope, so the model reproduces where the dead zone is rather than the force at its edge. [Practice]
 
 ## Hydrodynamics
 

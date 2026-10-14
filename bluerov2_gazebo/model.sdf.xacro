@@ -67,7 +67,15 @@
        <topic_base>/cmd, speed feedback on <topic_base>/cmd/ang_vel:
        the plugin prefixes a custom <topic> with its <namespace> (the model
        name unless given), so the namespace is emptied and the topic follows
-       the config like every other part topic, not the spawn name. -->
+       the config like every other part topic, not the spawn name.
+
+       The ROV spec declares bollard pull force values.  These values not consistent
+       with the bench thrust values of the individual thrusters.
+       So we introduce a derived factor to correct for this as a 
+       multiplier on the bench thrust. The Heavy
+       has no published bollard figures and takes the same factor as an
+       assumption. Derivation: docs/vehicles/bluerov2/parameters.md. -->
+  <xacro:property name="thrust_install_factor" value="0.74"/>
   <xacro:macro name="prop_thruster" params="name drive topic_base">
     <plugin filename="gz-maritime-thruster-system"
             name="gz::sim::maritime::Thruster">
@@ -85,8 +93,14 @@
       <fluid_density>1025.0</fluid_density>
       <propeller_diameter>${drive['diameter']}</propeller_diameter>
       <velocity_control>true</velocity_control>
-      <max_thrust_cmd>${drive['max_thrust']}</max_thrust_cmd>
-      <min_thrust_cmd>${drive['min_thrust']}</min_thrust_cmd>
+      <max_thrust_cmd>${drive['max_thrust'] * thrust_install_factor}</max_thrust_cmd>
+      <min_thrust_cmd>${drive['min_thrust'] * thrust_install_factor}</min_thrust_cmd>
+      <!-- Emitted only when the part declares one: the plugin enables the
+           deadband by the element's presence, so a zero would arm a cut that
+           never fires. -->
+      <xacro:if value="${'deadband' in drive and drive['deadband'] > 0}">
+        <deadband>${drive['deadband'] * thrust_install_factor}</deadband>
+      </xacro:if>
     </plugin>
   </xacro:macro>
 
