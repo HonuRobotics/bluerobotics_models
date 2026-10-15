@@ -139,48 +139,64 @@ The sway, heave and yaw top speeds are guesses, to be revised as we learn more; 
 
 ### Verifying the coarse identification
 
-This differs from the boat. There, the hydrodynamics were tuned by hand against the closed-loop response under Blue Robotics' gains. Here they are set open loop from estimated top speeds, and the check is mostly automated: a test commands each axis and reports what the vehicle did, and a person reads the report and spot-checks it in the viewport.
+This differs from the boat. There, because we had estimates on the maximum surge and yaw rate from the Ardu configuration, we could tune with the objective of matching the specified closed-loop response.  Here we do something similar in that we first set open loop from estimated top speeds, and the check is mostly automated: a test commands each axis and reports what the vehicle did, and a person reads the report and spot-checks it in the viewport.
 
-**1. Run the axis test.** In drydock:
+**1. Run the autmated, headless motion tests.** In drydock:
+
+This test runs automated open-loop command tests, providing fixed command efforts in each controllable degree of freedom (surge, sway, heave an yaw).  The commands are giving in both +/- directions.  They pass through teleop mixer thrust allocation (not the ArduSub vectored thrust allocaion)
+
+(Warning: This test takes order of minutes to complete!)
 
 ```bash
 source ~/maritime_ws/install/setup.bash
 cd ~/maritime_ws/src/bluerobotics_models/bluerov2_gazebo
 python3 -m pytest -s test/test_gz_launch.py -k axis
 ```
+(BTW, the same test can be run with 
+`colcon test --packages-select bluerov2_gazebo` which the same output to `log/latest_test/bluerov2_gazebo/stdout.log`.
 
-`colcon test --packages-select bluerov2_gazebo` runs it too, and writes the same output to `log/latest_test/bluerov2_gazebo/stdout.log`.
+The test commands (currently 0.5, or 50% effort) on each of surge, sway, heave and yaw, in both directions, through the teleop mixer's allocation (not through ArduSub's vectored thrust).  The test  passes a case when the motion lies within a fized angle (currently 20 degrees) of the commanded axis and its speed is within a factor of ten of an expected figure. The expected figures come from the vehicle's published performance and engineering judgment, not from this model.
 
-The test commands 0.5 on each of surge, sway, heave and yaw, in both directions, through the teleop mixer's allocation. It passes a case when the motion lies within 20° of the commanded axis and its speed is within a factor of ten of an expected figure. The expected figures come from the vehicle's published performance and engineering judgment, not from this model.
-
-**2. Read the table.** The run ends with one row per case: the expected speed, the limits, the measured speed, their ratio, the angle off the commanded axis, and the velocity in the body frame. Read it for more than pass or fail:
+The test ends with one row per case: the expected speed, the limits, the measured speed, their ratio, the angle off the commanded axis, and the velocity in the body frame. Read it for more than pass or fail:
 
 - **Measured speed.** Under quadratic drag, a 0.5 command should give about 0.71 (√0.5) of the axis's top speed in the coarse identification table above. A measured speed far from that points at the coefficient for that axis, or at the thrust.
 - **Ratio.** Measured over expected, the figure the factor-of-ten limit is applied to.
 - **Off axis.** A few degrees is coupling. An angle near 180° is a reversed thruster or a wrong mixer sign.
 - **Body rate.** The off-axis components say which way the vehicle drifts. A drift with the same sign in both directions of an axis is coupling, not polarity.
 
-**3. Spot-check in the viewport.** The table can be right about numbers and still miss something a person sees at once, such as the vehicle tumbling or rolling. Start the playground with the GUI:
+Expect to see output similar to this (the numbers will likely be different)
+```
+Axis command results
+case     expected     speed limits  measured     ratio  off axis (<= 20)  body rate x, y, z       result
+-------  -----------  ------------  -----------  -----  ----------------  ----------------------  ------
+surge +  0.750 m/s    0.075 - 7.5   1.060 m/s    1.41   3.4 deg           +1.058, -0.060, +0.021  pass  
+surge -  0.750 m/s    0.075 - 7.5   1.060 m/s    1.41   3.3 deg           -1.058, -0.057, +0.018  pass  
+sway +   0.500 m/s    0.05 - 5      0.534 m/s    1.07   6.8 deg           +0.059, +0.530, +0.023  pass  
+sway -   0.500 m/s    0.05 - 5      0.567 m/s    1.13   22.3 deg          -0.214, -0.525, +0.014  FAIL  
+heave +  0.500 m/s    0.05 - 5      0.472 m/s    0.94   1.3 deg           +0.002, -0.010, +0.472  pass  
+heave -  0.500 m/s    0.05 - 5      0.536 m/s    1.07   3.4 deg           +0.030, -0.010, -0.535  pass  
+yaw +    3.142 rad/s  0.314 - 31.4  2.221 rad/s  0.71   0.2 deg           -0.005, +0.005, +2.221  pass  
+yaw -    3.142 rad/s  0.314 - 31.4  2.221 rad/s  0.71   0.2 deg           +0.005, -0.005, -2.221  pass 
+```
+**2. Spot-check in the viewport (manual and with GUI).** The table can be right about numbers and still miss something a person sees at once, such as the vehicle tumbling or rolling. Start the playground with the GUI:
 
 ```bash
 source ~/maritime_ws/install/setup.bash
 gz sim -r $(ros2 pkg prefix --share bluerov2_gazebo)/worlds/bluerov2_playground.sdf
 ```
 
-Then, in a second shell, command one axis by publishing half of that axis's row from `bluerobotics_teleop/config/bluerov2/mixer.yaml` to each thruster. For surge, the `gains_linear_x` row:
+Then, in a second shell, command one axis with  the small utility `axis_command`, which sends each thruster what the teleop mixer would for that axis (the same allocation as the test). E.g., Surge ahead at 0.5:
 
 ```bash
-for n in 1 2 3 4 5 6; do
-  g=$(python3 -c "import yaml; print(yaml.safe_load(open('$HOME/maritime_ws/src/bluerobotics_models/bluerobotics_teleop/config/bluerov2/mixer.yaml'))['twist_to_thrust']['ros__parameters']['gains_linear_x'][$n-1] * 0.5)")
-  gz topic -t /bluerov2/thruster_$n/cmd -m gz.msgs.Double -p "data: $g"
-done
+source ~/maritime_ws/install/setup.bash
+ros2 run bluerobotics_teleop axis_command x 0.5 --timeout -1
 ```
 
-Watch that the vehicle moves along the commanded axis at roughly the speed in the table, without rolling or pitching. A single publish can be lost while the topic is first discovered; if a thruster does not respond, run the loop again. Publish `data: 0.0` to every thruster to stop. Repeat with `gains_linear_y`, `gains_linear_z` and `gains_angular_z`, and with `* -0.5` for the reverse direction.
+It prints the per-thruster commands and holds them until Ctrl+C (`--timeout -1`; the default is one second), then stops every thruster. Repeat for `y`, `z` and `yaw`, and with `-0.5` for the reverse direction.
 
-Added mass is zero and stays zero: the model declares no added-mass terms, and the hydrodynamics plugin's explicit-acceleration path diverges when added mass exceeds rigid-body mass.
+(In the future, this utility script may be replace by a future keyboard teleop configuration - see issue #77)
 
-Why the trials are open loop, and why this differs from the boat: ArduSub's yaw loops are P+I with no feedforward, and the depth loop has an integrator too. An integrator drives steady-state error to zero whether or not the plant is right, so unlike the boat there is no standing bias to infer the plant gain from — and no published feedforward to invert. The open-loop trials are the only evidence, and the closed-loop runs are validation of the transient.
+This manual validation is less algorithmic and engineering judgement.  It helps to have piloted one of these ROV's in the past.  They are snappy and responsive, so the user should verify it "feels" similar.  Also, because we will be mainly using this under the control of ArduSub, we can afford to have the open-loop ROV tuned to be more controllable and then regulate the max rates using ArduSub settings.
 
 ## Modes
 
