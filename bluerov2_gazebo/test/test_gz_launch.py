@@ -32,7 +32,7 @@ import time
 import uuid
 
 from ament_index_python.packages import get_package_share_directory
-from conftest import launch_sim, make_cli, poll_until
+from conftest import launch_sim, make_cli, poll_until, REPORT_TABLES
 import pytest
 import yaml
 
@@ -310,25 +310,12 @@ START = {
 }
 POOL = {'x': 12.3, 'y': 12.3, 'z_top': -0.3, 'z_bottom': -4.7}
 
-# One row per axis case, printed as a table once the module finishes, so a
-# run shows every measurement beside its limits, not just pass or fail.
-# Visible with `pytest -s`, and in the colcon test log (NOCAPTURE).
-AXIS_RESULTS = []
-
-
-@pytest.fixture(scope='module', autouse=True)
-def axis_results_table():
-    """Print the axis cases' measurements against their limits at the end."""
-    yield
-    if not AXIS_RESULTS:
-        return
-    head = ('case', 'expected', 'speed limits', 'measured', 'ratio',
-            f'off axis (<= {DIRECTION_DEG:g})', 'body rate x, y, z', 'result')
-    rows = [head] + AXIS_RESULTS
-    widths = [max(len(r[i]) for r in rows) for i in range(len(head))]
-    lines = ['  '.join(c.ljust(w) for c, w in zip(r, widths)) for r in rows]
-    lines.insert(1, '  '.join('-' * w for w in widths))
-    print('\n\nAxis command results\n' + '\n'.join(lines))
+# One row per axis case, printed as a table at the end of the run (see
+# conftest.REPORT_TABLES), so a run shows every measurement beside its
+# limits, not just pass or fail. In the terminal and in the colcon test log.
+AXIS_TABLE = 'Axis command results'
+AXIS_HEAD = ('case', 'expected', 'speed limits', 'measured', 'ratio',
+             f'off axis (<= {DIRECTION_DEG:g})', 'body rate x, y, z', 'result')
 
 
 def mixer_commands(axis, sign):
@@ -384,7 +371,7 @@ def test_axis_command_moves_the_vehicle(sim, axis, sign):
               f'commands {commands}')
     lo, hi = expected / SPEED_FACTOR, expected * SPEED_FACTOR
     ok = off_axis <= DIRECTION_DEG and lo <= speed <= hi
-    AXIS_RESULTS.append((
+    REPORT_TABLES.setdefault(AXIS_TABLE, [AXIS_HEAD]).append((
         f'{axis} {"+" if sign > 0 else "-"}', f'{expected:.3f} {unit}',
         f'{lo:.3g} - {hi:.3g}', f'{speed:.3f} {unit}', f'{speed / expected:.2f}',
         f'{off_axis:.1f} deg', ', '.join(f'{c:+.3f}' for c in rate),
