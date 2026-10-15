@@ -13,7 +13,8 @@ The autopilot parameters below are settled: every value is either Blue Robotics'
 | Frame, motor outputs, `ATC_ANG_RLL_P`, `ATC_ANGLE_MAX`, `ATC_INPUT_TC`, `EK3_SRC1_POSXY` | Blue Robotics' published chain | No — they are what we are being faithful to |
 | `ATC_ANG_YAW_P`, `ATC_RAT_YAW_*`, `PSC_D_*` | ArduSub firmware defaults | No — see the note below on why these are the reference |
 | Thrust limits and deadband | T200 bench data, scaled to Blue Robotics' published bollard pull for the assembled vehicle — see [Thrust](#thrust) | No — measured |
-| Mass, inertia | the model | No |
+| Mass | Blue Robotics' published weight in air — see [Mass](#mass) | No |
+| Inertia | the model, scaled to the mass | No |
 | Hydrodynamic damping in surge, sway, heave and yaw | never measured; a coarse estimate from published thrust and top speeds, then identified here | Yes, by identification from open-loop trials |
 
 Identification stops being identification the moment a measured value is moved to make a loop behave. If the loops cannot work without moving one, that is a finding to write down here.
@@ -72,6 +73,14 @@ There is no `DELTA` row, and that is the result rather than an omission: every v
 Blue Robotics' published configuration departs from stock ArduSub in only three values — the roll gain, the lean-angle limit and the horizontal position source. The roll gain is the one that changes what a mode does, and it is why `STABILIZE` on this vehicle meaningfully closes yaw and not roll.
 
 The roll and pitch rate gains are deliberately not written out. `sub.parm` does not touch them, so nothing is moving underneath us, and neither loop is under test here: pitch because the `Vectored` frame mixes none, roll because its angle gain is zero.
+
+## Mass
+
+Blue Robotics publish the BlueROV2's weight in air, with the default ballast and their lithium-ion battery, as 11–12 kg ([BlueROV2 specifications](https://bluerobotics.com/store/rov/bluerov2/)). The model targets the middle of that range, **11.5 kg**, for the assembled vehicle.
+
+The mass is not set in one place: the model adds up every part. The six T200 thruster bodies, six propellers and the camera are parts with their own masses, together 2.144 kg, so the chassis (`base_link` in `bluerobotics_parts/urdf/bluerov2_chassis.urdf.xacro`) carries the rest: 11.5 − 2.144 = **9.36 kg**. Changing a part's mass, or adding parts in the vehicle config, changes the total; buoyancy follows it automatically, so the vehicle stays at its configured trim.
+
+The chassis inertia tensor was scaled to an earlier 9.4 kg; at 9.36 kg the difference is under 0.5% and it is left as is. [Practice]
 
 ## Thrust
 
