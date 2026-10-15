@@ -81,7 +81,9 @@
              gently nose down); the bootstrap estimate from the collision
              volumes put it 3 cm low, which made surge climb. -->
         <origin xyz="0.00979373 -0.000225576 0.011" rpy="0 0 0"/>
-        <mass value="9.4"/>
+        <!-- Chosen so the assembled vehicle matches Blue Robotics' published
+             weight in air: docs/vehicles/bluerov2/parameters.md, Mass. -->
+        <mass value="9.36"/>
         <!-- Bare hull: the T200 bodies and props are parts on the
              thruster_body / thruster slots. Tensor scaled to this mass. -->
         <inertia ixx="1.399298e-01" ixy="-5.670210e-06" ixz="-5.037078e-04"
