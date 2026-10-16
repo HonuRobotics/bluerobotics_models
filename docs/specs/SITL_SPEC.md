@@ -34,7 +34,7 @@ This spec is the only document that is current about the plan. [SITL_SPEC_CONTEX
 | 2.999 | Pin the ArduPilot versions | `bluerobotics_models` | next |
 | 3 | BlueROV2 under ArduSub | `bluerobotics_models` | later |
 | 4 | Stabilization layer, boat | `bluerobotics_models` | later |
-| 5 | Stabilization layer, ROV | `bluerobotics_models` | later |
+| 5 | Stabilization layer, ROV | `bluerobotics_models` | in review |
 | 6 | Waypoint mission, boat only | `bluerobotics_models` | later |
 | 7 | Waves, boat only | `bluerobotics_models` | later |
 | 8 | Documentation and CI | `bluerobotics_models` | later |
@@ -193,19 +193,21 @@ The page must state that this runs in drydock, give the shell-by-shell commands,
 
 Modes: ArduSub's `STABILIZE` and `ALT_HOLD`. What they close is attitude and depth — forward and lateral remain direct motor demands, so the ROV's objective is heading and depth holding rather than a commanded speed. There is no surge-speed loop to exercise.
 
-The work follows phase 4's shape: thrust limits from Blue Robotics' T200 data at the vehicle's own voltage, an audit of the derived parameter file against the published chain, hydrodynamic identification by the same open-loop-then-validate procedure, and a provenance page. Two things differ and are worth stating in advance.
+The work follows phase 4's shape: thrust limits from Blue Robotics' T200 data at the vehicle's own voltage, an audit of the derived parameter file against the published chain, hydrodynamic identification, and a provenance page. Two things differ and are worth stating in advance.
 
-First, the ROV's published bollard figures are a cross-check the boat has no equivalent of: Blue Robotics quote thrust for the assembled vehicle as well as for the thruster on a bench, and the two do not have to agree. Which one the model should carry is a decision for this phase rather than an assumption.
+First, the ROV's published bollard figures are a cross-check the boat has no equivalent of: Blue Robotics quote thrust for the assembled vehicle as well as for the thruster on a bench, and the two do not have to agree. Decided in this phase: the thruster parts carry the bench figures, and the vehicle applies an installation factor that reproduces the published bollard pull.
 
 Second, the standard six-thruster vehicle has less authority than the mode names suggest. The `Vectored` frame mixes no pitch at all, and Blue Robotics ship a roll gain of zero, so `STABILIZE` on that vehicle meaningfully closes yaw. The phase should say what it is actually holding rather than what the mode is called.
 
+Third, as done: Blue Robotics publish no gains for these loops, so the reference is ArduSub's own firmware defaults, written out in the parameter file. And the hydrodynamics are identified differently from the boat's: a coarse open-loop estimate, quadratic drag only, from the published bollard thrust and estimated top speeds, judged by whether the vehicle responds as snappily as the real one. Since the ROV runs under ArduSub, the open-loop model may lean toward controllability, with ArduSub's settings limiting the rates.
+
 #### Automated verification
 
-The parameter audit and the identification trials from phase 4, pointed at the ROV. The launch tests in `bluerov2_gazebo` become pertinent for the same reason the boat's do: they derive their commands from the thrust constants.
+An open-loop axis test in `bluerov2_gazebo`: each of surge, sway, heave and yaw commanded in both directions through the teleop mixer's allocation, checked for direction and for speed within a factor of ten of an expected figure taken from published performance and engineering judgement. It prints a table of every case against its limits for a person to read. It does not exercise ArduSub's allocation; the walkthroughs do.
 
 #### Human verification
 
-The reviewer holds depth and heading in a stabilized mode and confirms the shipped ArduSub gains work unmodified, judged against the same kind of named quantities as the boat's — settling, overshoot, steady-state error. Same rule: if it needs retuning, the actuator model or the hydrodynamics is wrong, not the gains.
+The reviewer follows the walkthroughs: the open-loop spot check on the parameters page, `MANUAL` under ArduSub to confirm the channels and polarity, then heading hold in `STABILIZE` and depth hold in `ALT_HOLD`, judged against the same kind of named quantities as the boat's — time to reach the demand, overshoot, settling. Same rule: if it needs retuning, the actuator model or the hydrodynamics is wrong, not the gains.
 
 ### Phase 6 — Waypoint mission, boat only
 
