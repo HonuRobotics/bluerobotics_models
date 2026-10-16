@@ -3,6 +3,7 @@
   <model name="m200_weedless_prop_ccw">
     <link name="m200_weedless_prop_ccw_link">
       <visual name="m200_weedless_prop_ccw_visual">
+        <pose>0 0 0 1.5708 0 1.5708</pose>
         <geometry>
           <mesh>
             <uri>m200_weedless_prop_ccw_visual.glb</uri>
