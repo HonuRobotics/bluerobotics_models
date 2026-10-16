@@ -19,32 +19,6 @@
           </cylinder>
         </geometry>
       </collision>
-      <light type="directional" name="Sun">
-        <pose>0.0 0.0 0.0 1.570796 -0.0 0.0</pose>
-        <intensity>1.0</intensity>
-        <diffuse>(1.0, 1.0, 1.0, 1.0)</diffuse>
-        <cast_shadows>True</cast_shadows>
-        <specular>1.0, 1.0, 1.0</specular>
-        <attenuation>
-          <range>10</range>
-          <linear>0.0</linear>
-          <constant>1.0</constant>
-          <quadratic>1.0</quadratic>
-        </attenuation>
-      </light>
     </link>
-    <light type="directional" name="Sun">
-      <pose>0.0 0.0 0.0 1.570796 -0.0 0.0</pose>
-      <intensity>1.0</intensity>
-      <diffuse>(1.0, 1.0, 1.0, 1.0)</diffuse>
-      <cast_shadows>True</cast_shadows>
-      <specular>1.0, 1.0, 1.0</specular>
-      <attenuation>
-        <range>10</range>
-        <linear>0.0</linear>
-        <constant>1.0</constant>
-        <quadratic>1.0</quadratic>
-      </attenuation>
-    </light>
   </model>
 </sdf>
