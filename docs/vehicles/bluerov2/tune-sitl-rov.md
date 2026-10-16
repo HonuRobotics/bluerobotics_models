@@ -2,7 +2,7 @@
 
 This walkthrough is to confirm that ArduSub's inner control loops (stabilization layer) drive the simulated BlueROV2 the way the hardware behaves. `STABILIZE` holds heading, `ALT_HOLD` adds depth.
 
-[Verify the SITL connection (ROV)](verify-sitl-rov.md) checks the wiring — each stick moves the axis it names. This page checks the numbers.
+[Verify the SITL connection (ROV)](verify-sitl-rov.md) checks the ArduSub connections in MANUAL (open-loop) mode.  This should be done prior to this step to verify that the thruster allocation, channels, arming, etc. are working.  
 
 ```{note}
 The expected figures on this page are blank until the hydrodynamic identification is done, because what a correct response looks like depends on the damping being identified. Each is filled in from a published source or from a trial, and nothing here has been run yet.
@@ -12,22 +12,27 @@ The expected figures on this page are blank until the hydrodynamic identificatio
 
 * Setup and run the drydock + source development environment: [installation_drydock.md](../../getting-started/installation_drydock.md)
 * [ArduPilot SITL setup](../../getting-started/ardupilot_setup.md); (the rest of this page assumes the Iris smoke test passed.)
-* [Verify the SITL connection (ROV)](verify-sitl-rov.md) passes.
+* [Verify the SITL connection (ROV) for MANUAl ](verify-sitl-rov.md) passes.
 
-## What these modes actually hold
+## Mode descriptions
 
-`STABILIZE` names roll, pitch and yaw, but on the standard six-thruster vehicle only yaw is closed:
+* `STABILIZE` can regulate roll, pitch and yaw, but on this vehicle only yaw (heading) is in effect (Blue Robotics ship a roll gain of zero (`ATC_ANG_RLL_P`), and the `Vectored` frame has no pitch actuation). 
+* Forward (surge) and lateral (sway) pass straight through, as in `MANUAL`.
+* `ALT_HOLD` regulates heading as `STABILIZE` does, and adds depth (z) hold.
 
-| Axis | Closed? | Why |
-|---|---|---|
-| roll | no | `ATC_ANG_RLL_P` is 0 — Blue Robotics' shipped value. Two verticals give little roll authority; the Heavy, with four, is the variant that closes it |
-| pitch | no | the `Vectored` frame mixes no pitch at all, so there is nothing to close a loop with |
-| yaw | yes | `ATC_ANG_YAW_P` above `ATC_RAT_YAW_*` |
-| depth | in `ALT_HOLD` | `PSC_D_POS_P` → `PSC_D_VEL_P` → `PSC_D_ACC_*` |
+The yaw stabilize is implemented in ArduSub (`ArduSub/mode_stabilize.cpp`; `mode_althold.cpp` repeats it) as follows:
 
-So heading and depth are the objectives. A stick that produces no motion is not necessarily a defect here — see the pitch row.
+* **Stick deflected: a rate.** Outside the yaw channel's dead zone, the stick sets a yaw-rate target (stick angle × `ACRO_YAW_P`).  This setupoint is the input to the yaw-rate `ATC_RAT_YAW_*`
+* **Stick released: a bearing.** When the rc command returns to 1500 ± the dead zone (`RC4_DZ`, scaled by the pilot gain), ArduSub commands zero yaw rate for 250 ms to brake the turn, re-reading the heading every cycle. The heading at the end of that window is latched and held. The delay stops the vehicle bouncing back after a fast turn.
+* **Holding the bearing: a cascade.** The heading error goes through `ATC_ANG_YAW_P` alone, a proportional-only outer loop (a square-root controller limited by `ATC_ACCEL_Y_MAX`), which produces a yaw-rate target for the same `ATC_RAT_YAW_*` PID. Any integral action comes from the inner loop's `ATC_RAT_YAW_I`.
 
-Heading is two loops, and which one you are testing depends on the stick. Deflected, the yaw stick commands a **rate**, closed by `ATC_RAT_YAW_*`. Released, ArduSub waits 250 ms for the vehicle to slow, latches the heading it then has, and holds that **bearing** through `ATC_ANG_YAW_P`. That latch matters when judging: heading hold is against the bearing at release, not the one you started from.
+For more detail on the yaw and depth hold controllers (ArduSub builds them from the same libraries as Copter, `AC_AttitudeControl_Sub` and `AC_PosControl`, so Copter's developer pages describe them):
+
+* [Copter Attitude Control](https://ardupilot.org/dev/docs/apmcopter-programming-attitude-control-2.html): the angle P and square-root controller feeding the rate PID (yaw hold).
+* [Copter Position Control and Navigation](https://ardupilot.org/dev/docs/code-overview-copter-poscontrol-and-navigation.html): the vertical cascade, position P to velocity P to acceleration PID, that `ALT_HOLD` uses for depth (the `PSC_D_*` parameters).
+* [Sub Modes](https://ardupilot.org/sub/docs/modes.html): the user-level summary of each mode.
+* Source at the pinned tag: [`ArduSub/mode_stabilize.cpp`](https://github.com/ArduPilot/ardupilot/blob/Sub-4.7.1/ArduSub/mode_stabilize.cpp) and [`mode_althold.cpp`](https://github.com/ArduPilot/ardupilot/blob/Sub-4.7.1/ArduSub/mode_althold.cpp).
+
 
 ## Walkthrough
 
@@ -52,89 +57,129 @@ sim_vehicle.py -v ArduSub -f gazebo-bluerov2 --model JSON --console -w \
   --add-param-file=$(ros2 pkg prefix --share bluerov2_gazebo)/params/bluerov2_sitl.params
 ```
 
-```{note}
-Gazebo prints `ArduPilot controller has reset` once shortly after SITL
-connects and then roughly once a minute. This is annoying, but not of concern.
-(The fix is open upstream as
-[ardupilot_gazebo#174](https://github.com/ArduPilot/ardupilot_gazebo/pull/174).)
-```
+### Before either walkthrough
 
-### Graph the autopilot internals
+Each walkthrough excites one hold loop with `rc` overrides at the MAVProxy prompt and graphs that loop's internals while it responds. What to watch is the transient, not a standing offset: both loops carry an integrator, which drives steady-state error to zero whether or not the plant is right, so a loop that settles on target says little, and the time to reach the demand, overshoot and settling time say everything.
 
-`GCS_PID_MASK` selects which loop the autopilot reports on. ArduSub's bits are not the boat's, and one of them is not in ArduPilot's parameter documentation:
+`GCS_PID_MASK` selects which loop the autopilot reports on, in `PID_TUNING` messages. One bit per walkthrough:
 
 | Bit | Value | Loop reported |
 |---|---|---|
-| 0 | 1 | roll rate |
-| 1 | 2 | pitch rate |
 | 2 | 4 | yaw rate |
 | 3 | 8 | depth, as the vertical acceleration loop |
 
-Bit 3 is read by `GCS_MAVLink_Sub.cpp` in `send_pid_tuning`, but the parameter's own `@Bitmask` metadata in `ArduSub/Parameters.cpp` lists only roll, pitch and yaw — so the depth loop cannot be found from the published parameter reference. That is an upstream documentation gap, not a local one.
+Set one bit at a time: every enabled loop sends the same message, so with two bits set the graph interleaves two loops and neither reads cleanly. (Bit 3 is read by `send_pid_tuning` in `ArduSub/GCS_MAVLink_Sub.cpp`, but the parameter's `@Bitmask` metadata in `ArduSub/Parameters.cpp` does not list it, so it cannot be found from ArduPilot's published parameter reference.)
 
-Set one bit at a time. Every enabled loop sends `PID_TUNING` on the same message, so with two bits set the graph interleaves two loops and neither reads cleanly.
+Send `rc all 1500` before each walkthrough. In both modes the sticks that are not under test pass straight through, so any channel left off neutral moves the vehicle.
 
-For the yaw rate loop:
+### Walkthrough 1: heading hold (`STABILIZE`)
+
+1. Graph the yaw rate loop and the heading:
+
+   ```
+   param set GCS_PID_MASK 4
+   module load graph
+   graph PID_TUNING.desired*5729.58 PID_TUNING.achieved
+   graph VFR_HUD.heading
+   ```
+
+   The scale factor is there because ArduSub sends the two yaw fields in different units: `desired` is the rate target in rad/s × 0.01, `achieved` is the gyro rate in deg/s. Multiplying by 100 × 57.2958 puts both in deg/s. Without it the demand plots near zero and the loop looks as if it is not tracking. (Not yet confirmed in a run.)
+
+2. Enter the mode and arm:
+
+   ```
+   mode stabilize
+   arm throttle
+   ```
+
+   The heading should hold steady with no stick input.
+
+3. Command a yaw rate, and hold it for about five seconds:
+
+   ```
+   rc 4 1600
+   ```
+
+   The rate loop is under test: `achieved` should rise to `desired` and track it, and the heading should ramp.
+
+4. Release the stick:
+
+   ```
+   rc 4 1500
+   ```
+
+   The rate brakes to zero over about 250 ms, ArduSub latches the heading it has at the end of that window, and the heading-hold loop takes over. Judge the hold against the heading at release, not the one you started from.
+   
+   This image shows the results of a test as described above to assess the transients.  While there is significant overshoot in the yaw-rate, the meaningful behavior of having yaw-hold is unaffected.
+  ![](./images/ardu_yaw_steps.png)
+   
+  This image shows the yaw hold behavior.  We can see that the yaw position oscillates slowly +/- a few degrees.
+  ![](./images/ardu_yaw_ss.png)
+
+
+Another end-to-end test at this point is to issue a sway command, e.g.,
 
 ```
-param set GCS_PID_MASK 4
-module load graph
-graph PID_TUNING.desired PID_TUNING.achieved
+rc 6 1550
 ```
 
-For the depth loop:
+Now, with heading regulated, the ROV should translate in the y direction withtout changing heading.
 
-```
-param set GCS_PID_MASK 8
-graph PID_TUNING.desired PID_TUNING.achieved
-```
+### Walkthrough 2: depth hold (`ALT_HOLD`)
 
-Both are degrees per second for yaw and m/s² for depth; the depth loop's achieved value is the earth-frame vertical acceleration with gravity removed, not a depth.
+The vehicle starts at 2 m depth, with the seabed at 5 m and the surface above, so keep the steps short.
 
-Depth itself is easier read directly, and it is what the checks below are judged on:
+1. Graph the vertical acceleration loop and the depth:
 
-```
-graph VFR_HUD.alt
-```
+   ```
+   rc all 1500
+   param set GCS_PID_MASK 8
+   module load graph
+   graph PID_TUNING.desired*-100 PID_TUNING.achieved
+   graph VFR_HUD.alt
+   ```
 
-Unlike the boat, what to watch is the transient rather than a standing offset. Both loops carry an integrator, which drives steady-state error to zero whether or not the plant is right — so a loop that settles on target says little, and the settling time and overshoot on the way there say everything.
+   These two are vertical acceleration with gravity removed, not depth, and they have mismatched units like the yaw pair: `desired` is the acceleration target in m/s² × 0.01, positive down (NED), while `achieved` is in m/s², positive up. Multiplying by −100 puts both in m/s², positive up. (Not yet confirmed in a run.) `VFR_HUD.alt` is the depth reading, negative below the surface.
 
-### Verify heading hold
+2. Enter the mode and arm (skip `arm throttle` if still armed from the first walkthrough):
 
-```
-arm throttle
-mode stabilize
-```
+   ```
+   mode alt_hold
+   arm throttle
+   ```
 
-TBD — hold the yaw stick, release it, and judge against the bearing at release.
+   Depth should hold steady with no stick input.
 
-| Check | Command | Expect | Measured |
-|---|---|---|---|
-| yaw rate | yaw stick deflected | TBD | |
-| heading hold | stick released | TBD — holds the bearing at release | |
-| heading disturbance | pushed off and left | TBD — returns, with what overshoot | |
+3. Command a climb for about two seconds:
 
-### Verify depth hold
+   ```
+   rc 3 1600
+   ```
 
-```
-mode alt_hold
-```
+   In `ALT_HOLD` the heave stick commands a climb rate, not thrust, so the vehicle rises at a steady rate.
 
-TBD — a step in commanded depth, then a disturbance.
+4. Release the stick:
 
-| Check | Command | Expect | Measured |
-|---|---|---|---|
-| depth step | heave stick, then release | TBD | |
-| depth disturbance | pushed off depth and left | TBD — returns, with what overshoot | |
+   ```
+   rc 3 1500
+   ```
 
-For each row the quantities to judge are time to reach the demand, overshoot and settling time. Steady-state error is not the measure here: both loops carry an integrator, so it is driven to zero whether or not the plant is right. A wrong plant shows up as the shape of the response.
+   The depth target stops where the vehicle is, and the depth-hold loop brings it to rest there.
+
+The two images below show the resulting graphs for both the transient and steady state reponse.  These graphs illustrate that the Ardu SITL is function, that the hydrodynamics are tuned to roughly match what is known about the closed-loop response for yaw and depth.   There are a couple of issues that this raises for future consideration, each has an issue.
+
+1. The units on the ALT graph are obviously not depth below the water surface in meters.   For the ROV, drive-by-wire, situation, the absolute value of depth is not important, it is how the system allows the operator to make relative changes to the setpoint. ([#78](https://github.com/HonuRobotics/bluerobotics_models/issues/78))
+2. The graph of depth-rate desired and actual is not scaled correctly. ([#79](https://github.com/HonuRobotics/bluerobotics_models/issues/79))
+
+![](./images/ardu_depth_steps.png)
+![](./images/ardu_depth_ss.png)
+
 
 ```{important}
-The gains are not ours to move. Blue Robotics publish none for these loops,
+The ArduSub controller gains are considered fixed. Blue Robotics publish none for these loops,
 so the reference is ArduSub's own firmware defaults, written out explicitly
 in the parameter file — see
-[Parameters](parameters.md). If a row only passes with a gain changed, the
-actuator model or the hydrodynamics is wrong.
+[Parameters](parameters.md). 
 ```
 
 ## If a row is wrong
