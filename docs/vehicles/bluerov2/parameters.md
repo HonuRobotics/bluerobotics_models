@@ -176,17 +176,18 @@ The test ends with one row per case: the expected speed, the limits, the measure
 
 Expect to see output similar to this (the numbers will likely be different)
 ```
-Axis command results
-case     expected     speed limits  measured     ratio  off axis (<= 20)  body rate x, y, z       result
+================================== Axis command results ===================================
+case     expected     speed limits  measured     ratio  off axis (<= 25)  body rate x, y, z       result
 -------  -----------  ------------  -----------  -----  ----------------  ----------------------  ------
-surge +  0.750 m/s    0.075 - 7.5   1.060 m/s    1.41   3.4 deg           +1.058, -0.060, +0.021  pass  
-surge -  0.750 m/s    0.075 - 7.5   1.060 m/s    1.41   3.3 deg           -1.058, -0.057, +0.018  pass  
-sway +   0.500 m/s    0.05 - 5      0.534 m/s    1.07   6.8 deg           +0.059, +0.530, +0.023  pass  
-sway -   0.500 m/s    0.05 - 5      0.567 m/s    1.13   22.3 deg          -0.214, -0.525, +0.014  FAIL  
-heave +  0.500 m/s    0.05 - 5      0.472 m/s    0.94   1.3 deg           +0.002, -0.010, +0.472  pass  
-heave -  0.500 m/s    0.05 - 5      0.536 m/s    1.07   3.4 deg           +0.030, -0.010, -0.535  pass  
-yaw +    3.142 rad/s  0.314 - 31.4  2.221 rad/s  0.71   0.2 deg           -0.005, +0.005, +2.221  pass  
-yaw -    3.142 rad/s  0.314 - 31.4  2.221 rad/s  0.71   0.2 deg           +0.005, -0.005, -2.221  pass 
+surge +  0.750 m/s    0.075 - 7.5   1.059 m/s    1.41   1.2 deg           +1.058, -0.010, +0.020  pass
+surge -  0.750 m/s    0.075 - 7.5   1.058 m/s    1.41   1.3 deg           -1.058, -0.015, +0.018  pass
+sway +   0.500 m/s    0.05 - 5      0.568 m/s    1.14   22.5 deg          -0.217, +0.524, +0.013  pass
+sway -   0.500 m/s    0.05 - 5      0.558 m/s    1.12   19.7 deg          -0.188, -0.525, +0.010  pass
+heave +  0.500 m/s    0.05 - 5      0.472 m/s    0.94   1.4 deg           +0.002, -0.012, +0.472  pass
+heave -  0.500 m/s    0.05 - 5      0.536 m/s    1.07   3.2 deg           +0.030, -0.002, -0.535  pass
+yaw +    3.142 rad/s  0.314 - 31.4  2.221 rad/s  0.71   0.1 deg           -0.002, +0.004, +2.221  pass
+yaw -    3.142 rad/s  0.314 - 31.4  2.221 rad/s  0.71   0.2 deg           +0.004, -0.005, -2.221  pass
+======================= 8 passed, 5 deselected in 103.66s (0:01:43) =======================
 ```
 **2. Spot-check in the viewport (manual and with GUI).** The table can be right about numbers and still miss something a person sees at once, such as the vehicle tumbling or rolling. Start the playground with the GUI:
 
