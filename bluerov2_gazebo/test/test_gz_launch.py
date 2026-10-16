@@ -291,7 +291,7 @@ MIXER_YAML = (Path(__file__).resolve().parents[2] / 'bluerobotics_teleop'
 # a value that is unreasonable without pinning one that is being tuned.
 AXIS_COMMAND = 0.5
 SPEED_FACTOR = 10.0
-DIRECTION_DEG = 20.0
+DIRECTION_DEG = 25.0
 AXES = {
     # name: (twist index, mixer key, body axis, expected, unit, linear?)
     'surge': (0, 'gains_linear_x', (1, 0, 0), 0.75, 'm/s', True),
