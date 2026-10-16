@@ -14,6 +14,7 @@ configuration
 parameters
 verify-sitl-boat
 tune-sitl-boat
+mission-sitl-boat
 ```
 
 ## The default vehicle
