@@ -49,6 +49,8 @@ setup(
             'bluerobotics_teleop.twist_to_thrust_node:main',
             'joy_map = '
             'bluerobotics_teleop.joy_map_node:main',
+            'axis_command = '
+            'bluerobotics_teleop.axis_command:main',
         ],
     },
 )

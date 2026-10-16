@@ -32,8 +32,9 @@ import time
 import uuid
 
 from ament_index_python.packages import get_package_share_directory
-from conftest import launch_sim, make_cli, poll_until
+from conftest import launch_sim, make_cli, poll_until, REPORT_TABLES
 import pytest
+import yaml
 
 WORLD = (Path(get_package_share_directory('bluerov2_gazebo'))
          / 'worlds' / 'bluerov2_playground.sdf')
@@ -94,12 +95,91 @@ def teleport(env, x, y, z):
     assert code == 0 and 'true' in out, f'set_pose failed:\n{out}\n{err}'
 
 
-# T200 thrust limits at 16 V, as the propeller parts declare them in
-# bluerobotics_parts and the model passes to max_thrust_cmd / min_thrust_cmd.
-# Commands below are normalized, so they are written as a force over its
-# limit rather than as a bare number that would drift if a limit changed.
-MAX_THRUST = 51.5
-MIN_THRUST = -40.2
+def pose_track(env, messages=120):
+    """
+    Sample the vehicle's world pose from the dynamic pose stream.
+
+    Returns [(t, (x, y, z), (qw, qx, qy, qz))] in sim time. The stream runs
+    at the scene broadcaster's rate, fine enough that consecutive samples
+    never alias a fast spin the way two separate pose reads would.
+    """
+    code, out, err = gz(env, 'topic', '-e', '-t',
+                        f'/world/{WORLD_NAME}/dynamic_pose/info',
+                        '-n', str(messages), timeout=60)
+    assert code == 0, f'cannot read the pose stream:\n{err}'
+    track = []
+    for msg in out.split('header {')[1:]:
+        sec = re.search(r'stamp\s*{[^}]*?\bsec:\s*(\d+)', msg)
+        nsec = re.search(r'stamp\s*{[^}]*?nsec:\s*(\d+)', msg)
+        body = re.search(r'name: "bluerov2".*?position\s*{([^}]*)}'
+                         r'\s*orientation\s*{([^}]*)}', msg, re.S)
+        if not body:
+            continue
+
+        def field(block, key, default=0.0):
+            m = re.search(rf'\b{key}:\s*({_NUM})', block)
+            return float(m.group(1)) if m else default
+
+        pos, ori = body.groups()
+        track.append(((int(sec.group(1)) if sec else 0)
+                      + (int(nsec.group(1)) if nsec else 0) / 1e9,
+                      tuple(field(pos, k) for k in 'xyz'),
+                      (field(ori, 'w', 1.0),) + tuple(field(ori, k) for k in 'xyz')))
+    assert len(track) >= 10, f'too few pose samples ({len(track)}):\n{out[:500]}'
+    return track
+
+
+def _qmul(a, b):
+    aw, ax, ay, az = a
+    bw, bx, by, bz = b
+    return (aw * bw - ax * bx - ay * by - az * bz,
+            aw * bx + ax * bw + ay * bz - az * by,
+            aw * by - ax * bz + ay * bw + az * bx,
+            aw * bz + ax * by - ay * bx + az * bw)
+
+
+def _qconj(q):
+    return (q[0], -q[1], -q[2], -q[3])
+
+
+def _to_body(q, v):
+    """Rotate a world-frame vector into the body frame of orientation q."""
+    return _qmul(_qmul(_qconj(q), (0.0,) + tuple(v)), q)[1:]
+
+
+def body_rates(track):
+    """
+    Mean linear and angular velocity over a track, both in the body frame.
+
+    Each consecutive pair contributes its displacement, rotated into the body
+    frame at the earlier sample, and its relative rotation as an axis-angle
+    rate; the means are taken over the whole span of sim time.
+    """
+    lin, ang = [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]
+    for (t0, p0, q0), (t1, p1, q1) in zip(track, track[1:]):
+        if t1 <= t0:
+            continue
+        d = _to_body(q0, [b - a for a, b in zip(p0, p1)])
+        rw, *rv = _qmul(_qconj(q0), q1)
+        if rw < 0:
+            rw, rv = -rw, [-c for c in rv]
+        s = math.sqrt(sum(c * c for c in rv))
+        angle = 2.0 * math.atan2(s, rw)
+        axis = [c / s for c in rv] if s > 1e-12 else [0.0, 0.0, 0.0]
+        for i in range(3):
+            lin[i] += d[i]
+            ang[i] += axis[i] * angle
+    span = track[-1][0] - track[0][0]
+    assert span > 0, 'pose samples carry no sim time span'
+    return [c / span for c in lin], [c / span for c in ang]
+
+
+def _angle_deg(v, axis):
+    norm = math.sqrt(sum(c * c for c in v))
+    if norm == 0:
+        return 180.0
+    cos = sum(a * b for a, b in zip(v, axis)) / norm
+    return math.degrees(math.acos(max(-1.0, min(1.0, cos))))
 
 
 def latch_thrusters(env, mapping, period=0.3):
@@ -199,67 +279,104 @@ def test_vehicle_neutrally_buoyant(sim):
         f'(z {z0:.3f} -> {z1:.3f} over {t1 - t0:.1f} sim s)')
 
 
-def test_vertical_thrusters_heave(sim):
-    """
-    The vertical pair heaves: commanded up, the climb dwarfs any passive drift.
+# The teleop mixer's gains for the standard vehicle, read from the sibling
+# package's source rather than declared as a dependency: bluerobotics_teleop
+# already test-depends on this package, and the reverse would be a cycle.
+MIXER_YAML = (Path(__file__).resolve().parents[2] / 'bluerobotics_teleop'
+              / 'config' / 'bluerov2' / 'mixer.yaml')
 
-    Positive commands push down (both vertical axes point -z), so up is
-    negative. The heavy variant's extra pair (7, 8) is not in the playground's
-    standard model and is exercised by the same macro at generation time.
+# Expected speed for a 0.5 command on each axis, from the vehicle's published
+# performance and engineering judgement - not from the model under test, whose
+# coefficients are still being identified. A factor of ten either way catches
+# a value that is unreasonable without pinning one that is being tuned.
+AXIS_COMMAND = 0.5
+SPEED_FACTOR = 10.0
+DIRECTION_DEG = 25.0
+AXES = {
+    # name: (twist index, mixer key, body axis, expected, unit, linear?)
+    'surge': (0, 'gains_linear_x', (1, 0, 0), 0.75, 'm/s', True),
+    'sway': (1, 'gains_linear_y', (0, 1, 0), 0.5, 'm/s', True),
+    'heave': (2, 'gains_linear_z', (0, 0, 1), 0.5, 'm/s', True),
+    'yaw': (3, 'gains_angular_z', (0, 0, 1), math.pi, 'rad/s', False),
+}
+
+# Start points that leave room to travel in the commanded direction: the
+# pool walls are at +/-12.55 m, the floor at -5 m and the surface at 0.
+START = {
+    ('surge', 1): (-10.0, 0.0, -2.5), ('surge', -1): (10.0, 0.0, -2.5),
+    ('sway', 1): (0.0, -10.0, -2.5), ('sway', -1): (0.0, 10.0, -2.5),
+    ('heave', 1): (0.0, 0.0, -4.2), ('heave', -1): (0.0, 0.0, -0.8),
+    ('yaw', 1): (0.0, 0.0, -2.5), ('yaw', -1): (0.0, 0.0, -2.5),
+}
+POOL = {'x': 12.3, 'y': 12.3, 'z_top': -0.3, 'z_bottom': -4.7}
+
+# One row per axis case, printed as a table at the end of the run (see
+# conftest.REPORT_TABLES), so a run shows every measurement beside its
+# limits, not just pass or fail. In the terminal and in the colcon test log.
+AXIS_TABLE = 'Axis command results'
+AXIS_HEAD = ('case', 'expected', 'speed limits', 'measured', 'ratio',
+             f'off axis (<= {DIRECTION_DEG:g})', 'body rate x, y, z', 'result')
+
+
+def mixer_commands(axis, sign):
+    """Per-thruster commands the teleop mixer would send for one axis."""
+    params = yaml.safe_load(MIXER_YAML.read_text())['twist_to_thrust']['ros__parameters']
+    gains = params[AXES[axis][1]]
+    topics = params['thruster_topics']
+    return {int(re.search(r'thruster_(\d+)', t).group(1)):
+            max(-1.0, min(1.0, g * sign * AXIS_COMMAND))
+            for t, g in zip(topics, gains)}
+
+
+@pytest.mark.parametrize('sign', [1, -1], ids=['pos', 'neg'])
+@pytest.mark.parametrize('axis', list(AXES))
+def test_axis_command_moves_the_vehicle(sim, axis, sign):
     """
-    teleport(sim, 0, 0, -3.0)
-    wait_sim_seconds(sim, 3)
-    t0, z0 = sim_seconds(sim), model_pose(sim)[2]
-    # ~-20 N, the value this test used before the interface went normalized.
-    # Astern scales on its own limit, which is the smaller of the two.
-    up = -20.0 / -MIN_THRUST
-    procs = latch_thrusters(sim, {5: up, 6: up})
+    A 0.5 command on one body axis moves the vehicle along that axis.
+
+    Checks polarity and allocation first and magnitude only loosely: the
+    motion must lie within 20 degrees of the commanded axis (REP 103: x
+    forward, y port, z up, yaw counter-clockwise from above) and its speed
+    within a factor of ten of the expected figure.
+
+    This does NOT test the autopilot's thruster allocation (ArduSub's
+    Vectored frame). It is contingent on the teleop thruster allocation in
+    bluerobotics_teleop/config/bluerov2/mixer.yaml and only pertains to that
+    setup.
+    """
+    _, _, body_axis, expected, unit, linear = AXES[axis]
+    teleport(sim, *START[(axis, sign)])
+    wait_sim_seconds(sim, 3)           # let the relocation transient damp out
+    commands = mixer_commands(axis, sign)
+    procs = latch_thrusters(sim, commands)
     try:
-        wait_sim_seconds(sim, 6)
-        t1, z1 = sim_seconds(sim), model_pose(sim)[2]
+        wait_sim_seconds(sim, 2)       # onset: speed builds toward steady state
+        track = pose_track(sim)
     finally:
-        release_thrusters(sim, procs, (5, 6))
-    rate = (z1 - z0) / (t1 - t0)
-    assert rate > 0.10, (
-        f'no heave authority: climbed {rate:.3f} m/s '
-        f'(z {z0:.2f} -> {z1:.2f} over {t1 - t0:.1f} sim s)')
+        release_thrusters(sim, procs, tuple(commands))
 
+    for _, (x, y, z), _ in track:
+        assert (abs(x) < POOL['x'] and abs(y) < POOL['y']
+                and POOL['z_bottom'] < z < POOL['z_top']), (
+            f'{axis} {sign:+d}: ran out of pool at ({x:.2f}, {y:.2f}, {z:.2f}); '
+            'the measurement window is too long for this speed')
 
-def test_forward_thrust_mix_surges(sim):
-    """
-    The vectored surge mix drives the vehicle along its nose, without crab.
-
-    Command onset can rotate the heading (see latch_thrusters), so the
-    assertion is on the steady state, which is what the model owns: velocity
-    aligned with the body x axis and no residual yaw, wherever the nose ended
-    up pointing.
-    """
-    teleport(sim, 0, 0, -3.0)
-    wait_sim_seconds(sim, 3)
-    # 5 N per thruster: the run must FIT IN THE POOL (walls at +/-12.55 m).
-    # At 10 N the steady ~1 m/s over both windows reaches the wall and
-    # the vehicle slides along it, reading as crab.
-    # ~-5 N and +5 N, each against its own limit.
-    astern, ahead = -5.0 / -MIN_THRUST, 5.0 / MAX_THRUST
-    procs = latch_thrusters(sim, {1: astern, 2: astern, 3: ahead, 4: ahead})
-    try:
-        wait_sim_seconds(sim, 6)      # onset transient: spin damps, speed builds
-        t1 = sim_seconds(sim)
-        x1, y1, _, _, _, yaw1 = model_pose(sim)
-        wait_sim_seconds(sim, 6)
-        t2 = sim_seconds(sim)
-        x2, y2, _, _, _, yaw2 = model_pose(sim)
-    finally:
-        release_thrusters(sim, procs, (1, 2, 3, 4))
-    dx, dy = x2 - x1, y2 - y1
-    speed = math.hypot(dx, dy) / (t2 - t1)
-    assert speed > 0.05, (
-        f'no surge: {speed:.3f} m/s over {t2 - t1:.1f} sim s')
-    crab = math.degrees(math.atan2(dy, dx) - yaw2)
-    crab = (crab + 180) % 360 - 180
-    assert abs(crab) < 20, (
-        f'not moving along the nose: crab {crab:+.1f} deg, '
-        f'travel ({dx:+.2f},{dy:+.2f}) m at yaw {math.degrees(yaw2):+.1f} deg')
-    residual_yaw = math.degrees(yaw2 - yaw1)
-    assert abs(residual_yaw) < 20, (
-        f'still yawing in steady state: {residual_yaw:+.1f} deg over the window')
+    lin, ang = body_rates(track)
+    rate = lin if linear else ang
+    target = [sign * c for c in body_axis]
+    speed = math.sqrt(sum(c * c for c in rate))
+    off_axis = _angle_deg(rate, target)
+    detail = (f'{axis} {sign:+d}: measured {speed:.3f} {unit} '
+              f'({", ".join(f"{c:+.3f}" for c in rate)}), expected {expected:.3f}, '
+              f'commands {commands}')
+    lo, hi = expected / SPEED_FACTOR, expected * SPEED_FACTOR
+    ok = off_axis <= DIRECTION_DEG and lo <= speed <= hi
+    REPORT_TABLES.setdefault(AXIS_TABLE, [AXIS_HEAD]).append((
+        f'{axis} {"+" if sign > 0 else "-"}', f'{expected:.3f} {unit}',
+        f'{lo:.3g} - {hi:.3g}', f'{speed:.3f} {unit}', f'{speed / expected:.2f}',
+        f'{off_axis:.1f} deg', ', '.join(f'{c:+.3f}' for c in rate),
+        'pass' if ok else 'FAIL'))
+    assert off_axis <= DIRECTION_DEG, (
+        f'{detail}: motion is {off_axis:.1f} deg off the commanded axis')
+    assert expected / SPEED_FACTOR <= speed <= expected * SPEED_FACTOR, (
+        f'{detail}: speed outside a factor of {SPEED_FACTOR:g} of expected')

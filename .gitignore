@@ -5,3 +5,15 @@ __pycache__/
 *.pyc
 .devcontainer/
 .devcontainer/*
+
+# glTF validator output, written beside the asset it checked
+*.report.json
+
+# ArduPilot SITL run output, written into whatever directory you launched from
+logs/
+terrain/
+eeprom.bin
+mav.parm
+mav_*.parm
+mav.tlog
+mav.tlog.raw

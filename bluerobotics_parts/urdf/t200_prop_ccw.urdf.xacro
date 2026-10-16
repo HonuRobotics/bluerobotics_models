@@ -7,8 +7,10 @@
 
   Inertia: estimated from the delivered collision geometry at 1000 kg/m^3 (SDF auto inertia); replace with measured values.
 
-  Drive: T200 16 V endpoints and prop diameter as placeholders for every
-  propeller option; replace with measured values for this prop.
+  Drive: T200 bench thrust at the vehicle's pack voltage, from Blue Robotics'
+  published performance data, and the ESC's zero-thrust band as a deadband.
+  A vehicle that loses thrust to its installation scales them. Derivation
+  and sources: docs/vehicles/bluerov2/parameters.md.
 
   Contract (see parts.xacro): <part>_info exports the metadata (attach,
   slots, frames, drive); <part> instantiates the link, its mounting joint
@@ -23,7 +25,7 @@
         ),
         frames=dict(
         ),
-        drive=dict(diameter=0.076, max_thrust=51.5, min_thrust=-40.2, rotation='ccw'))}"/>
+        drive=dict(diameter=0.076, max_thrust=47.2, min_thrust=-36.7, deadband=3.5, rotation='ccw'))}"/>
   </xacro:macro>
 
   <xacro:macro name="t200_prop_ccw"
