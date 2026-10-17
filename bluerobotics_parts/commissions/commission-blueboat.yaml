@@ -1,0 +1,78 @@
+# Commission template from gltf-robotics
+# One commission covers one vehicle or one batch of parts. The integrator fills
+# This covers the blueboat_chassis and its two propellers as a prototype of the new gltf workflow
+
+commission: blueboat
+
+# --- Stated once, applied to every part unless a part block says otherwise ---
+
+creator: Honu Robotics
+rights: "Copyright 2026 Honu Robotics. Licensed under the Apache License, Version 2.0."
+
+# Where the authoring files (.blend, CAD) are archived. Leave out if they are not.
+authoringSource: ".blend files should be archived in google drive "
+
+# For the modeler to read. Not written to any file.
+sources:
+  - "see docs/vehicles/blueboat/configuration.md"
+toolchain:
+  blender: "5.2.2 LTS"
+  exporter: "io_scene_gltf2 5.2.40"
+
+# --- One block per part, keyed by the part name (lowercase snake_case) ---
+
+parts:
+
+  blueboat_chassis:
+    # Written to the file's manifest.
+    partRole: base                      # exactly one base part per vehicle
+    datumPoint: "Intersection of three planes on the geometry mid-point as explained and illustrated in docs/vehicles/blueboat/configuration.md"
+    datumTarget: "None - in free space"          # optional
+    source: "Images and 3D files from https://bluerobotics.com/store/boat/blueboat/blueboat/"
+    dimensionSource: "https://bluerobotics.com/store/boat/blueboat/blueboat/"
+    nominalDimension: "length overall 1.20 m"
+    dimensionTolerance: 0.10
+
+    # For the modeler to read. Not written to the file.
+    referenceImages:
+      - "see docs/vehicles/blueboat/configuration.md and the images therein"
+    forwardFeature: "the bow; +X points from the transom to the bow"
+    visualRequirement: "Start simple"
+    materials: "hull: plastic, frame: annodized aluminum"
+    openings: "none"
+    priorities: "1. overall shape and proportions. 2. color. 3. materials"
+    notes: ""
+
+  m200_weedless_prop_cw:
+    partRole: component
+    datumPoint: "center of the hub's mating face, on the spin axis"
+    source: "vendor 3D model WEEDLESS_PROPELLER_BR-101303, https://cad.bluerobotics.com/WEEDLESS_PROPELLER_BR-101303.zip"
+    dimensionSource: "https://bluerobotics.com/store/thrusters/t100-t200-thrusters/weedless-propeller-set/"
+    nominalDimension: "diameter 112 mm"
+    dimensionTolerance: 0.02           # meters
+
+    referenceImages:
+      - "product images at the source page; the CW and CCW props are mirror images"
+    forwardFeature: "the direction of thrust in forward operation, along the spin axis"
+    visualRequirement: "viewed from 1 m and beyond; blade count, sweep and handedness must be recognizable"
+    materials: "propeller: non-metal, polycarbonate 30% glass-filled"
+    openings: "hub bore"
+    priorities: "1. blade shape and handedness. 2. hub. 3. color"
+    notes: "clockwise; fills the chassis slot motor_stbd. Same datum and geometry as m200_weedless_prop_ccw, mirrored."
+
+  m200_weedless_prop_ccw:
+    partRole: component
+    datumPoint: "center of the hub's mating face, on the spin axis"
+    source: "vendor 3D model WEEDLESS_PROPELLER_BR-101303, https://cad.bluerobotics.com/WEEDLESS_PROPELLER_BR-101303.zip"
+    dimensionSource: "https://bluerobotics.com/store/thrusters/t100-t200-thrusters/weedless-propeller-set/"
+    nominalDimension: "diameter 112 mm"
+    dimensionTolerance: 0.02           # meters
+
+    referenceImages:
+      - "product images at the source page; the CW and CCW props are mirror images"
+    forwardFeature: "the direction of thrust in forward operation, along the spin axis"
+    visualRequirement: "viewed from 1 m and beyond; blade count, sweep and handedness must be recognizable"
+    materials: "propeller: non-metal, polycarbonate 30% glass-filled"
+    openings: "hub bore"
+    priorities: "1. blade shape and handedness. 2. hub. 3. color"
+    notes: "counter-clockwise; fills the chassis slot motor_port. Same datum and geometry as m200_weedless_prop_cw, mirrored."
