@@ -57,10 +57,11 @@ def catalog():
 
 def kit_config(parts=(), extra=''):
     """
-    The tests' own vehicle: the shipped hull and namespace, every slot filling with its default, plus parts.
+    Return the tests' own vehicle.
 
-    Independent of what the shipped config fits, so these tests follow the
-    assembly rules rather than the current product.
+    The shipped hull and namespace, every slot filling with its default, plus
+    parts. Independent of what the shipped config fits, so these tests follow
+    the assembly rules rather than the current product.
     """
     cfg = yaml.safe_load(DEFAULT_CONFIG)
     cfg['slot_defaults'] = True
