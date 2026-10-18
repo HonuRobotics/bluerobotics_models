@@ -84,14 +84,14 @@ def test_custom_config_flows_to_every_artifact(tmp_path):
     bridge = yaml.safe_load((out / 'ros_gz_bridge.yaml').read_text())
     topics = {e['ros_topic_name'] for e in bridge}
     assert '/blueboat/ping/range' not in topics
-    assert '/blueboat/motor_port/cmd' in topics
+    assert '/blueboat/prop_port/cmd' in topics
 
 
 def test_drivetrain_follows_the_config(tmp_path):
     """A renamed or removed propeller moves or drops its Thruster and bridge topic."""
     cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
-    cfg['parts'] = [{'slot': 'motor_port', 'type': 'none'},
-                    {'slot': 'motor_stbd', 'type': 't200_prop_cw', 'name': 'right'}]
+    cfg['parts'] = [{'slot': 'prop_port', 'type': 'none'},
+                    {'slot': 'prop_stbd', 'type': 't200_prop_cw', 'name': 'right'}]
     config = tmp_path / 'custom.yaml'
     config.write_text(yaml.safe_dump(cfg, sort_keys=False))
     out = configure(config, tmp_path / 'v')
@@ -102,7 +102,7 @@ def test_drivetrain_follows_the_config(tmp_path):
     topics = {e['ros_topic_name'] for e in
               yaml.safe_load((out / 'ros_gz_bridge.yaml').read_text())}
     assert '/blueboat/right/cmd' in topics
-    assert not any(t.endswith('motor_port/cmd') for t in topics)
+    assert not any(t.endswith('prop_port/cmd') for t in topics)
 
 
 def test_base_name_flows_to_the_model(tmp_path):
@@ -171,7 +171,7 @@ def test_name_flows_to_every_artifact(tmp_path):
     # The bridge agrees, so gz and ROS sides stay in sync.
     bridge = yaml.safe_load((out_dir / 'ros_gz_bridge.yaml').read_text())
     gz_topics = {e['gz_topic_name'] for e in bridge}
-    assert any(t.startswith('/boat_b/motor_port/') for t in gz_topics), gz_topics
+    assert any(t.startswith('/boat_b/prop_port/') for t in gz_topics), gz_topics
     assert not any(t.startswith('/blueboat/') for t in gz_topics), gz_topics
 
 
