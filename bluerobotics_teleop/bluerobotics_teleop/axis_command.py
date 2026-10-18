@@ -43,7 +43,7 @@ from gz.transport import Node
 AXES = ('x', 'y', 'z', 'yaw')  # the mixer's Twist order
 RATE_HZ = 10.0
 STOP_SEC = 0.5
-STOP_SIGNALS = (signal.SIGINT, signal.SIGTERM)
+STOP_SIGNALS = (signal.SIGINT, signal.SIGTERM, signal.SIGHUP, signal.SIGQUIT)
 
 
 class _Stop(Exception):
