@@ -171,11 +171,10 @@ The two images below show the resulting graphs for both the transient and steady
 ![](./images/ardu_depth_ss.png)
 
 
-```{important}
-The ArduSub controller gains are considered fixed. Blue Robotics publish none for these loops,
+The approach here is worth considering.   Typically we tune controllers to compensate for the dynamics of a robot.  Here, because we know the controller (from Blue Robotics defaults) we tune the simulated dynamics to match the controller.   So for estimating the parameters, the ArduSub controller gains are considered fixed. Blue Robotics publish none for these loops,
 so the reference is ArduSub's own firmware defaults, written out explicitly
 in the parameter file — see
-[Parameters](parameters.md). 
+[Parameters](parameters.md).  The reason we can use ArduSub's defaults, is because those are also Blue Robotics defaults. 
 ```
 
 ## If a row is wrong
