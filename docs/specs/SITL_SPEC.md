@@ -251,9 +251,9 @@ New: phase 6's headless mission run, repeated in a wave world, asserting the sam
 
 #### Human verification
 
-The reviewer runs both wave providers, Gerstner and FFT, and watches the boat in the viewport — the buoyancy lag between the two is a visual finding before it is a numerical one, and it is the known issue this phase is most likely to surface.
+The reviewer runs just the FFT wave providerand watches the boat in the viewport — the buoyancy lag between the two is a visual finding before it is a numerical one, and it is the known issue this phase is most likely to surface.  Waves can be small, sea state 1 or 2.   Enough to be visual.
 
-Then phase 4's step responses and phase 6's survey mission re-run in a stated sea state, confirming the boat still completes them and degrades gracefully rather than diverging. The sea state and the widened bounds are numbers to pick before the run and write into the page, so the reviewer is checking a claim rather than forming an impression.
+Phase 6's survey mission re-run in a stated sea state, confirming the boat still completes them and degrades gracefully rather than diverging. The sea state and the widened bounds are numbers to pick before the run and write into the page, so the reviewer is checking a claim rather than forming an impression.
 
 This phase also produces the material worth showing: a wave-field run is the demonstration, so capturing video or stills while the reviewer is there costs nothing extra.
 
