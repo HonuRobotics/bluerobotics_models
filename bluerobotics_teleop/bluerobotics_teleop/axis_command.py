@@ -92,6 +92,9 @@ def main(args=None):
 
     node = Node()
     publishers = [(node.advertise(topic, Double), value) for topic, value in commands]
+    invalid = [topic for (pub, _), (topic, _) in zip(publishers, commands) if not pub.valid()]
+    if invalid:
+        parser.error('could not advertise: ' + ', '.join(invalid))
     print(f'{opts.axis} {opts.effort:+g} on /{name}:')
     for topic, value in commands:
         print(f'  {topic}  {value:+.3f}')
@@ -99,10 +102,12 @@ def main(args=None):
           else f'Holding {opts.timeout:g} s (Ctrl+C stops early).')
 
     def send(zero=False):
+        ok = True
         for pub, value in publishers:
             msg = Double()
             msg.data = 0.0 if zero else float(value)
-            pub.publish(msg)
+            ok = pub.publish(msg) and ok
+        return ok
 
     # Set explicitly rather than relying on Python's default, which a process
     # started with SIGINT ignored (a background job, a launcher) inherits off.
@@ -118,11 +123,19 @@ def main(args=None):
     finally:
         for sig in STOP_SIGNALS:
             signal.signal(sig, signal.SIG_IGN)
+        # Publishing to a topic nobody subscribes to succeeds, so a wrong
+        # --name or a sim that is not running would otherwise pass silently.
+        # Checked after the hold, once discovery has had time to connect.
+        if not all(pub.has_connections() for pub, _ in publishers):
+            print('Warning: no subscriber on some thruster topics; '
+                  'is the sim running, and is --name right?')
         stop = time.monotonic() + STOP_SEC
+        stopped = True
         while time.monotonic() < stop:
-            send(zero=True)
+            stopped = send(zero=True) and stopped
             time.sleep(1.0 / RATE_HZ)
-        print('Stopped: all thrusters at 0.')
+        print('Stopped: all thrusters at 0.' if stopped
+              else 'Warning: a zero command failed to publish; thrusters may still be running.')
 
 
 if __name__ == '__main__':
