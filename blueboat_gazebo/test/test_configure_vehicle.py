@@ -40,10 +40,11 @@ def configure(config_path, out_dir):
 
 def kit_config(parts=()):
     """
-    The tests' own vehicle: the shipped hull and namespace, every slot filling with its default, plus parts.
+    Return the tests' own vehicle.
 
-    Independent of what the shipped config fits, so these tests follow the
-    tool's behavior rather than the current product.
+    The shipped hull and namespace, every slot filling with its default, plus
+    parts. Independent of what the shipped config fits, so these tests follow
+    the tool's behavior rather than the current product.
     """
     cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
     cfg['slot_defaults'] = True
@@ -88,7 +89,7 @@ def test_default_config_reproduces_the_installed_artifacts(tmp_path):
 def test_custom_config_flows_to_every_artifact(tmp_path):
     """A different config changes URDF, model and bridge consistently."""
     cfg = kit_config([{'slot': 'ping_mount', 'type': 'none'},
-                    {'slot': 'mast', 'type': 'blueboat_antenna_mast'}])
+                      {'slot': 'mast', 'type': 'blueboat_antenna_mast'}])
     config = tmp_path / 'custom.yaml'
     config.write_text(yaml.safe_dump(cfg, sort_keys=False))
     out = configure(config, tmp_path / 'v')
@@ -104,7 +105,7 @@ def test_custom_config_flows_to_every_artifact(tmp_path):
 def test_drivetrain_follows_the_config(tmp_path):
     """A renamed or removed propeller moves or drops its Thruster and bridge topic."""
     cfg = kit_config([{'slot': 'prop_port', 'type': 'none'},
-                    {'slot': 'prop_stbd', 'type': 't200_prop_cw', 'name': 'right'}])
+                      {'slot': 'prop_stbd', 'type': 't200_prop_cw', 'name': 'right'}])
     config = tmp_path / 'custom.yaml'
     config.write_text(yaml.safe_dump(cfg, sort_keys=False))
     out = configure(config, tmp_path / 'v')
