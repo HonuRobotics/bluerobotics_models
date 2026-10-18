@@ -36,7 +36,7 @@ This spec is the only document that is current about the plan. [SITL_SPEC_CONTEX
 | 4 | Stabilization layer, boat | `bluerobotics_models` | later |
 | 5 | Stabilization layer, ROV | `bluerobotics_models` | later |
 | 6 | Waypoint mission, boat only | `bluerobotics_models` | in review |
-| 7 | Waves, boat only | `bluerobotics_models` | later |
+| 7 | ~~Waves, boat only~~ | — | removed — out of scope |
 | 8 | Documentation and CI | `bluerobotics_models` | later |
 | 9 | Upstream the thruster mode | `gz-maritime`, then `gz-sim` | later |
 
@@ -44,7 +44,7 @@ Each phase states an objective and how it is verified met. The objective is the 
 
 From phase 4 on, each phase states its verification in two parts. **Automated** is what CI and an agent can run unattended: which existing tests become load-bearing for the change, and which new ones the phase writes. **Human** is the instruction to a PR reviewer, and it is usually "follow this page and confirm what it says will happen" — which only works if the page states the development environment, the exact run steps and what a correct result looks like. A phase whose human verification cannot be written as a walkthrough has a documentation gap to close before it is done.
 
-Both vehicles are in scope up to and including phase 5. Phases 0 to 2 were BlueBoat-first because the BlueBoat is the simpler platform and had the published parameter sets to be faithful to; phase 3 brings the BlueROV2 up to the same line, then phase 4 does the stabilization layer for the boat and phase 5 repeats it for the ROV. Phases 6 and 7 are the boat alone, for reasons each states. Where a phase claims both vehicles, a walkthrough that covers only one is an incomplete phase.
+Both vehicles are in scope up to and including phase 5. Phases 0 to 2 were BlueBoat-first because the BlueBoat is the simpler platform and had the published parameter sets to be faithful to; phase 3 brings the BlueROV2 up to the same line, then phase 4 does the stabilization layer for the boat and phase 5 repeats it for the ROV. Phase 6 is the boat alone, for the reasons it states. Where a phase claims both vehicles, a walkthrough that covers only one is an incomplete phase.
 
 ### Prerequisites, assumptions and contraints
 
@@ -237,25 +237,9 @@ New: a static check on the installed mission file in `blueboat_gazebo` — well-
 
 The reviewer follows [Waypoint mission for BlueBoat](../vehicles/blueboat/mission-sitl-boat.md): load the mission file from the installed package, arm, `mode auto`, and watch it run on the MAVProxy map, touching nothing. SITL in lockstep with Gazebo is deterministic, so the page states the figures exactly: each waypoint's arrival time, peak and arrival cross-track error per leg, speed, total mission time and the hold at home. The check is that the reviewer sees those numbers and that track, and that the corner drift reads as the stated finding rather than a surprise.
 
-### Phase 7 — Waves, boat only
+### Phase 7 — Removed
 
-**Objective:** This is a regression test and demonstration for marketing and raising awareness.   We'll repeat the tests of phases 4 and 6 within an active wavefield. Previous tests did not exercise the added wave enfironment effects.   In theory this should work out of the box, but important to test end-to-end to identify regressions.  This is only pertinent to the Boat.  Testing the ROV in near surface waves is out of scope.
-
-Since this is a regression check rather than new capability, the work is mostly in the world and the run rather than in the vehicle: a wave world for the BlueBoat, and the phase 4 and 6 checks pointed at it. If something has to change in the boat to survive a sea state, then we fix.
-
-#### Automated verification
-
-Existing: `gz_waves` carries its own suite in `gz-maritime`, and `blueboat_gazebo`'s launch tests must keep passing once a wave world is an option rather than always flat water.
-
-New: phase 6's headless mission run, repeated in a wave world, asserting the same waypoints are reached and the mission completes — with widened bounds, stated and justified, rather than the flat-water ones. Plus a station-hold run asserting the pose stays bounded and the EKF's innovations stay inside a threshold, which is the check worth most here: the failure mode is slow divergence that a human watching for two minutes will not see.
-
-#### Human verification
-
-The reviewer runs just the FFT wave providerand watches the boat in the viewport — the buoyancy lag between the two is a visual finding before it is a numerical one, and it is the known issue this phase is most likely to surface.  Waves can be small, sea state 1 or 2.   Enough to be visual.
-
-Phase 6's survey mission re-run in a stated sea state, confirming the boat still completes them and degrades gracefully rather than diverging. The sea state and the widened bounds are numbers to pick before the run and write into the page, so the reviewer is checking a claim rather than forming an impression.
-
-This phase also produces the material worth showing: a wave-field run is the demonstration, so capturing video or stills while the reviewer is there costs nothing extra.
+This phase was waves, boat only: repeat phase 6's mission in a wave field. It is removed because the boat cannot respond to waves yet. Buoyancy in gz-maritime acts at the flat z = 0 plane and the waves are only drawn; coupling buoyancy to the wave surface is the planned `gz_waves_buoyancy` consumer, which does not exist yet. Building it is wave modeling, not SITL integration, so it is out of scope here (see below). The number is kept so that references to phases 8 and 9 stay valid.
 
 ### Phase 8 — Documentation and Announce
 
@@ -311,7 +295,7 @@ Closed-loop behaviors beyond the phases above are out of scope: `GUIDED`, `LOITE
 
 Waypoint missions for the BlueROV2 are out of scope, for the reason phase 6 gives: geodetic navigation underwater needs a position source the vehicle is not configured for, and the ROV's closed-loop behavior is fully exercised one layer down in phase 5.
 
-The BlueROV2 in waves is out of scope. Near-surface wave interaction for a submerged vehicle is its own modeling problem, and phase 7 is a regression check on the boat rather than new capability for either vehicle.
+Waves are out of scope for both vehicles. Gazebo vehicles in this workspace float on the flat water level, and the wave field is only drawn; buoyancy that follows the waves is the planned `gz_waves_buoyancy` consumer in gz-maritime, its own wave-modeling effort with its own owner. A SITL run in a wave world today would exercise nothing the flat-water phases do not. For the BlueROV2, near-surface wave interaction for a submerged vehicle is a further modeling problem on top of that.
 
 The Holybro X500 and any other UAV is out of scope for this plan. It is a different vehicle class with a different autopilot binding, it lives in `holybro_models` rather than here, and nothing in these phases is blocked on it. Rebinding it from PX4 is its own effort with its own plan.
 
