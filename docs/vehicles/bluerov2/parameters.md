@@ -58,7 +58,7 @@ Every parameter in the file, where it came from, and whether it agrees with stoc
 | `ATC_RAT_YAW_FF` | 0.0 | — | 0.0 | Default written out. No feedforward, which is why the boat's method of inferring the plant from a published FF does not transfer |
 | `ATC_RAT_YAW_IMAX` | 0.222 | — | same | Default written out |
 | `ATC_RAT_YAW_FLTT` / `_FLTD` | 5.0 / 5.0 | — | same | Default written out |
-| `ATC_ACCEL_Y_MAX` | 1100 | — | same | Default written out, deg/s² |
+| `ATC_ACC_Y_MAX` | 1100 | — | same | Default written out, deg/s² |
 | `PSC_D_POS_P` | 3.0 | — | 3.0 | Default written out. `sub.parm` agrees |
 | `PSC_D_VEL_P` | 8.0 | — | 8.0 | Default written out. `sub.parm` agrees |
 | `PSC_D_ACC_P` | 0.05 | — | 0.05 | Default written out, overriding `sub.parm`'s 0.2 |
