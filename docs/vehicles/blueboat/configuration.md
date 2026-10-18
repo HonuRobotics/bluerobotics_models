@@ -1,9 +1,6 @@
 # Configuration
 
-The BlueBoat needs no configuration: every slot the parts declare fills
-itself with its default. The vehicle config
-(`blueboat_description/config/blueboat.yaml`, or any file passed as
-`config_file:=`) states differences only.
+The vehicle config (`blueboat_description/config/blueboat.yaml`, or any file passed as `config_file:=`) lists the fitted parts. The shipped config sets `slot_defaults: false` and fits the chassis and its two propellers only. With `slot_defaults: true`, or the key left out, every slot fills itself with the default in the table below, and the config states differences only.
 
 ## Hull displacement
 
@@ -24,7 +21,7 @@ config entry each. The fitted options and their topics live in
 
 | Slot | Accepts | Default |
 |---|---|---|
-| `motor_port`, `motor_stbd` | `m200_weedless_prop_ccw`/`_cw`, `t200_prop_ccw`/`_cw` | the M200 weedless props |
+| `prop_port`, `prop_stbd` | `m200_weedless_prop_ccw`/`_cw`, `t200_prop_ccw`/`_cw` | the M200 weedless props |
 | `flag` | `blueboat_flag` | `blueboat_flag` |
 | `mast` | `blueboat_antenna_mast` | none |
 | `payload` | `blueboat_payload_bracket` | none |

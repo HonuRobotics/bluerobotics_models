@@ -8,10 +8,10 @@ following the [Add a part](../../how-to/add-part.md) guide.
 
 ## Available actuators
 
-| Actuator | Part | Slot | Fitted by default |
+| Actuator | Part | Slot | Fitted in the shipped config |
 |---|---|---|---|
-| M200 weedless propellers | `m200_weedless_prop_ccw` / `_cw` | `motor_port`, `motor_stbd` | yes |
-| T200 propellers | `t200_prop_ccw` / `_cw` | `motor_port`, `motor_stbd` | no |
+| M200 weedless propellers | `m200_weedless_prop_ccw` / `_cw` | `prop_port`, `prop_stbd` | yes |
+| T200 propellers | `t200_prop_ccw` / `_cw` | `prop_port`, `prop_stbd` | no |
 
 ## Actuators ROS API
 
@@ -25,8 +25,8 @@ below use, or whatever the boat was spawned as
 
 | ROS Topic | Description | Message type |
 |---|---|---|
-| `/<name>/motor_port/cmd` | Normalized thrust command in [-1, 1]: +1 full ahead, -1 full astern, 0 stop | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
-| `/<name>/motor_stbd/cmd` | Normalized thrust command in [-1, 1]: +1 full ahead, -1 full astern, 0 stop | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
+| `/<name>/prop_port/cmd` | Normalized thrust command in [-1, 1]: +1 full ahead, -1 full astern, 0 stop | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
+| `/<name>/prop_stbd/cmd` | Normalized thrust command in [-1, 1]: +1 full ahead, -1 full astern, 0 stop | [std_msgs/msg/Float64](https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html) |
 
 The command is a fraction of the propeller's own limits, which the model
 takes from the part's drive table - 51.5 N ahead and -40.2 N astern for a
@@ -37,8 +37,8 @@ Equal command drives ahead; differential command yaws (more starboard
 turns to port and vice versa). To manually send thruster commands via ROS:
 
 ```bash
-ros2 topic pub /blueboat/motor_port/cmd std_msgs/msg/Float64 "data: 0.4" -1 &
-ros2 topic pub /blueboat/motor_stbd/cmd std_msgs/msg/Float64 "data: 0.4" -1 &
+ros2 topic pub /blueboat/prop_port/cmd std_msgs/msg/Float64 "data: 0.4" -1 &
+ros2 topic pub /blueboat/prop_stbd/cmd std_msgs/msg/Float64 "data: 0.4" -1 &
 wait
 ```
 
@@ -68,8 +68,8 @@ under the same names), plus a speed feedback per motor:
 | `/<name>/motor_<side>/cmd/ang_vel` | Propeller speed feedback (rad/s) | `gz.msgs.Double` |
 
 ```bash
-gz topic -t /blueboat/motor_port/cmd -m gz.msgs.Double -p 'data: 0.2' &
-gz topic -t /blueboat/motor_stbd/cmd -m gz.msgs.Double -p 'data: 0.2' &
+gz topic -t /blueboat/prop_port/cmd -m gz.msgs.Double -p 'data: 0.2' &
+gz topic -t /blueboat/prop_stbd/cmd -m gz.msgs.Double -p 'data: 0.2' &
 wait
 ```
 
