@@ -38,6 +38,19 @@ def configure(config_path, out_dir):
     return Path(out_dir)
 
 
+def kit_config(parts=()):
+    """
+    The tests' own vehicle: the shipped hull and namespace, every slot filling with its default, plus parts.
+
+    Independent of what the shipped config fits, so these tests follow the
+    tool's behavior rather than the current product.
+    """
+    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
+    cfg['slot_defaults'] = True
+    cfg['parts'] = [dict(p) for p in parts]
+    return cfg
+
+
 def links(urdf_path):
     return {li.get('name') for li in ET.parse(urdf_path).getroot().findall('link')}
 
@@ -74,9 +87,8 @@ def test_default_config_reproduces_the_installed_artifacts(tmp_path):
 
 def test_custom_config_flows_to_every_artifact(tmp_path):
     """A different config changes URDF, model and bridge consistently."""
-    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
-    cfg['parts'] = [{'slot': 'ping_mount', 'type': 'none'},
-                    {'slot': 'mast', 'type': 'blueboat_antenna_mast'}]
+    cfg = kit_config([{'slot': 'ping_mount', 'type': 'none'},
+                    {'slot': 'mast', 'type': 'blueboat_antenna_mast'}])
     config = tmp_path / 'custom.yaml'
     config.write_text(yaml.safe_dump(cfg, sort_keys=False))
     out = configure(config, tmp_path / 'v')
@@ -91,9 +103,8 @@ def test_custom_config_flows_to_every_artifact(tmp_path):
 
 def test_drivetrain_follows_the_config(tmp_path):
     """A renamed or removed propeller moves or drops its Thruster and bridge topic."""
-    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
-    cfg['parts'] = [{'slot': 'prop_port', 'type': 'none'},
-                    {'slot': 'prop_stbd', 'type': 't200_prop_cw', 'name': 'right'}]
+    cfg = kit_config([{'slot': 'prop_port', 'type': 'none'},
+                    {'slot': 'prop_stbd', 'type': 't200_prop_cw', 'name': 'right'}])
     config = tmp_path / 'custom.yaml'
     config.write_text(yaml.safe_dump(cfg, sort_keys=False))
     out = configure(config, tmp_path / 'v')
@@ -127,8 +138,7 @@ def test_base_name_flows_to_the_model(tmp_path):
 
 def test_mismatched_config_fails_with_the_reason(tmp_path):
     """A slot entry that matches nothing fails the tool (and so the launch)."""
-    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
-    cfg['parts'] = [{'slot': 'pingg', 'of': 'ping_mount', 'type': 'none'}]
+    cfg = kit_config([{'slot': 'pingg', 'of': 'ping_mount', 'type': 'none'}])
     config = tmp_path / 'custom.yaml'
     config.write_text(yaml.safe_dump(cfg, sort_keys=False))
     out = subprocess.run([str(TOOL), '--config', str(config), '--out-dir', str(tmp_path / 'v')],
@@ -206,9 +216,8 @@ def test_two_instances_from_one_config_share_no_topic(tmp_path):
     a command for one instance never reaches the other; only the fixed
     /clock remains shared.
     """
-    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
-    cfg['parts'] = [{'slot': 'ping', 'of': 'ping_mount', 'type': 'ping_singlebeam',
-                     'topic': 'sonar'}]
+    cfg = kit_config([{'slot': 'ping', 'of': 'ping_mount', 'type': 'ping_singlebeam',
+                     'topic': 'sonar'}])
     config = tmp_path / 'custom.yaml'
     config.write_text(yaml.safe_dump(cfg, sort_keys=False))
     topics = {}

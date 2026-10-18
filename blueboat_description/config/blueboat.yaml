@@ -34,7 +34,9 @@ slot_defaults: false
 parts:
   - {slot: prop_port, type: m200_weedless_prop_ccw}
   - {slot: prop_stbd, type: m200_weedless_prop_cw}
+  - {type: ping_singlebeam, name: ping, xyz: "0 -0.259 0", rpy: "0 0 0"}   # the Ping where the Ping2 kit puts it, without the bracket
   # - {slot: flag, type: blueboat_flag}
+  # The Ping2 kit instead of the free placed Ping above (remove that entry first):
   # - {slot: ping_mount, type: blueboat_ping_singlebeam_mount}   # Ping2 integration kit bracket
   # - {slot: ping, of: ping_mount, type: ping_singlebeam}         # the Ping in it; topic: sonar renames its topics
   # - {slot: mast, type: blueboat_antenna_mast}
