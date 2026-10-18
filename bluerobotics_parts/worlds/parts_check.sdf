@@ -179,7 +179,7 @@
             </geometry>
           </collision>
           <visual name='blueboat_chassis_visual'>
-            <pose>0 0 0 1.5708 0 0</pose>
+            <pose>0 0 0 1.5708 -5.5511151231257827e-17 1.5708</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
@@ -880,7 +880,7 @@
             </geometry>
           </collision>
           <visual name='m200_weedless_prop_ccw_visual'>
-            <pose>0 0 0 1.5708 0 0</pose>
+            <pose>0 0 0 1.5708 -5.5511151231257827e-17 1.5708</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
@@ -916,7 +916,7 @@
             </geometry>
           </collision>
           <visual name='m200_weedless_prop_cw_visual'>
-            <pose>0 0 0 1.5708 0 0</pose>
+            <pose>0 0 0 1.5708 -5.5511151231257827e-17 1.5708</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
