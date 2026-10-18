@@ -4,10 +4,6 @@ This walkthrough is to confirm that ArduSub's inner control loops (stabilization
 
 [Verify the SITL connection (ROV)](verify-sitl-rov.md) checks the ArduSub connections in MANUAL (open-loop) mode.  This should be done prior to this step to verify that the thruster allocation, channels, arming, etc. are working.  
 
-```{note}
-The expected figures on this page are blank until the hydrodynamic identification is done, because what a correct response looks like depends on the damping being identified. Each is filled in from a published source or from a trial, and nothing here has been run yet.
-```
-
 ## Prerequisites
 
 * Setup and run the drydock + source development environment: [installation_drydock.md](../../getting-started/installation_drydock.md)
