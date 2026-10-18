@@ -164,14 +164,14 @@ def test_default_names_are_the_sim_launch_names():
 
 
 def test_under_puts_a_relative_topic_in_the_instance():
-    assert under('boat_b', 'motor_port/cmd') == '/boat_b/motor_port/cmd'
-    assert under('boat_b', '/motor_port/cmd') == '/boat_b/motor_port/cmd'
+    assert under('boat_b', 'prop_port/cmd') == '/boat_b/prop_port/cmd'
+    assert under('boat_b', '/prop_port/cmd') == '/boat_b/prop_port/cmd'
 
 
 def test_node_params_reads_the_bare_node_key():
     """The launch hands a file's values to the node, whatever its namespace."""
     params = node_params(TELEOP / 'config' / 'blueboat' / 'mixer.yaml', 'twist_to_thrust')
-    assert params['thruster_topics'] == ['motor_port/cmd', 'motor_stbd/cmd']
+    assert params['thruster_topics'] == ['prop_port/cmd', 'prop_stbd/cmd']
     params = node_params(TELEOP / 'config' / 'pad' / 'joystick.config.yaml',
                          'teleop_twist_joy_node')
     assert params['enable_button'] == 5

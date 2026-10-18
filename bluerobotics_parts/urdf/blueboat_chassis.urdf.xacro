@@ -11,8 +11,8 @@
   slots, frames, drive); <part> instantiates the link, its mounting joint
   and its slot / frame links.
   Slots other parts fit into, as frames <name>_<slot>:
-    motor_port: m200_weedless_prop_ccw, t200_prop_ccw; default m200_weedless_prop_ccw
-    motor_stbd: m200_weedless_prop_cw, t200_prop_cw; default m200_weedless_prop_cw
+    prop_port: m200_weedless_prop_ccw, t200_prop_ccw; default m200_weedless_prop_ccw
+    prop_stbd: m200_weedless_prop_cw, t200_prop_cw; default m200_weedless_prop_cw
     mast: blueboat_antenna_mast; default none
     flag: blueboat_flag; default blueboat_flag
     payload: blueboat_payload_bracket; default none
@@ -30,8 +30,8 @@
     <xacro:property name="part_info" scope="parent" value="${dict(
         attach='0 0 0',
         slots=dict(
-            motor_port=dict(xyz='-0.52 0.301 -0.117', rpy='0 0 0', accepts=['m200_weedless_prop_ccw', 't200_prop_ccw'], default='m200_weedless_prop_ccw', joint='continuous', collision=False),
-            motor_stbd=dict(xyz='-0.52 -0.301 -0.117', rpy='0 0 0', accepts=['m200_weedless_prop_cw', 't200_prop_cw'], default='m200_weedless_prop_cw', joint='continuous', collision=False),
+            prop_port=dict(xyz='-0.52 0.301 -0.117', rpy='0 0 0', accepts=['m200_weedless_prop_ccw', 't200_prop_ccw'], default='m200_weedless_prop_ccw', joint='continuous', collision=False),
+            prop_stbd=dict(xyz='-0.52 -0.301 -0.117', rpy='0 0 0', accepts=['m200_weedless_prop_cw', 't200_prop_cw'], default='m200_weedless_prop_cw', joint='continuous', collision=False),
             mast=dict(xyz='-0.298 0 0.147', rpy='0 0 0', accepts=['blueboat_antenna_mast'], default='none'),
             flag=dict(xyz='-0.298 0.2 0.147', rpy='0 0 0', accepts=['blueboat_flag'], default='blueboat_flag'),
             payload=dict(xyz='0.299 0 0.147', rpy='0 0 0', accepts=['blueboat_payload_bracket'], default='none'),

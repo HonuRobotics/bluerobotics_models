@@ -133,17 +133,17 @@ def test_thrusters_follow_the_propeller_parts():
     root, _ = xacro(MODEL_XACRO, DEFAULT_CONFIG)
     thrusters = {t.find('joint_name').text: t
                  for t in plugins(root, 'gz-maritime-thruster-system')}
-    assert set(thrusters) == {'motor_port_joint', 'motor_stbd_joint'}
-    port, stbd = thrusters['motor_port_joint'], thrusters['motor_stbd_joint']
+    assert set(thrusters) == {'prop_port_joint', 'prop_stbd_joint'}
+    port, stbd = thrusters['prop_port_joint'], thrusters['prop_stbd_joint']
     # Counter rotating pair: opposite coefficient signs; same limits.
     assert float(port.find('thrust_coefficient').text) == \
         -float(stbd.find('thrust_coefficient').text)
     assert float(port.find('max_thrust_cmd').text) > 0 > float(port.find('min_thrust_cmd').text)
-    assert port.find('topic').text == 'blueboat/motor_port/cmd'
+    assert port.find('topic').text == 'blueboat/prop_port/cmd'
     # Empty a motor slot and rename the other: the plugins follow.
     cfg = yaml.safe_dump(yaml.safe_load(DEFAULT_CONFIG) | {'parts': [
-        {'slot': 'motor_port', 'type': 'none'},
-        {'slot': 'motor_stbd', 'type': 't200_prop_cw', 'name': 'right', 'topic': 'r'}]},
+        {'slot': 'prop_port', 'type': 'none'},
+        {'slot': 'prop_stbd', 'type': 't200_prop_cw', 'name': 'right', 'topic': 'r'}]},
         sort_keys=False)
     root, _ = xacro(MODEL_XACRO, cfg)
     thrusters = plugins(root, 'gz-maritime-thruster-system')
@@ -479,14 +479,14 @@ def test_ardupilot_channels_command_the_thrusters_topics():
     """
     cfg = DEFAULT_CONFIG.replace('parts: []', (
         'parts:\n'
-        '  - {slot: motor_stbd, type: t200_prop_cw, gz_topic: /fleet/stbd}\n'
-        '  - {slot: motor_port, type: t200_prop_ccw, topic: left}\n'))
+        '  - {slot: prop_stbd, type: t200_prop_cw, gz_topic: /fleet/stbd}\n'
+        '  - {slot: prop_port, type: t200_prop_ccw, topic: left}\n'))
     root, _ = xacro(MODEL_XACRO, cfg, 'ardupilot:=true')
     thrusters = {t.find('joint_name').text: t.find('topic').text
                  for t in plugins(root, 'gz-maritime-thruster-system')}
     controls = {c.find('jointName').text: c.find('cmd_topic').text
                 for c in root.iter('control')}
-    assert controls == {'motor_stbd_joint': '/fleet/stbd/cmd',
-                        'motor_port_joint': '/blueboat/left/cmd'}
+    assert controls == {'prop_stbd_joint': '/fleet/stbd/cmd',
+                        'prop_port_joint': '/blueboat/left/cmd'}
     for joint, topic in controls.items():
         assert topic == '/' + thrusters[joint].lstrip('/')

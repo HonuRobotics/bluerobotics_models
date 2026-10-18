@@ -34,8 +34,8 @@ import yaml
 
 # Keys each kind of config entry may carry. A key outside its set is a typo
 # until proven otherwise; the sets grow with the features.
-TOP_KEYS = {'topic_namespace', 'base', 'parts', 'slots', 'hull_displacement',
-            'buoyancy', 'extra_bridge_topics'}
+TOP_KEYS = {'topic_namespace', 'base', 'slot_defaults', 'parts', 'slots',
+            'hull_displacement', 'buoyancy', 'extra_bridge_topics'}
 BASE_KEYS = {'type', 'name', 'collision'}
 PART_COMMON_KEYS = {'type', 'name', 'xyz', 'rpy', 'collision', 'joint', 'axis',
                     'topic', 'gz_topic', 'ros_topic', 'bridge'}

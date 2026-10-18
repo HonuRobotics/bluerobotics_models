@@ -118,14 +118,14 @@
         <link name='blueboat_chassis'>
           <inertial>
             <pose>0.021265900000000001 0 0.072499800000000003 0 0 0</pose>
-            <mass>12</mass>
+            <mass>16.800000000000001</mass>
             <inertia>
-              <ixx>1.6043000000000001</ixx>
-              <ixy>-1.22202e-18</ixy>
-              <ixz>0.0037280299999999998</ixz>
-              <iyy>0.98831400000000003</iyy>
-              <iyz>4.88808e-18</iyz>
-              <izz>2.5308899999999999</izz>
+              <ixx>1.51</ixx>
+              <ixy>0</ixy>
+              <ixz>0</ixz>
+              <iyy>2.3100000000000001</iyy>
+              <iyz>0</iyz>
+              <izz>3.23</izz>
             </inertia>
           </inertial>
           <collision name='blueboat_chassis_collision'>
@@ -183,7 +183,7 @@
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
-                <uri>model://bluerobotics_parts/models/blueboat_chassis/blueboat_chassis.visual.glb</uri>
+                <uri>model://bluerobotics_parts/models/blueboat_chassis/blueboat_chassis_visual.glb</uri>
               </mesh>
             </geometry>
           </visual>
@@ -194,22 +194,16 @@
         <frame name='blueboat_chassis_flag' attached_to='blueboat_chassis_flag_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
+        <frame name='blueboat_chassis_imu_joint' attached_to='blueboat_chassis'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='blueboat_chassis_imu' attached_to='blueboat_chassis_imu_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
         <frame name='blueboat_chassis_mast_joint' attached_to='blueboat_chassis'>
           <pose>-0.29799999999999999 0 0.14699999999999999 0 0 0</pose>
         </frame>
         <frame name='blueboat_chassis_mast' attached_to='blueboat_chassis_mast_joint'>
-          <pose>0 0 0 0 0 0</pose>
-        </frame>
-        <frame name='blueboat_chassis_motor_port_joint' attached_to='blueboat_chassis'>
-          <pose>-0.52000000000000002 0.30099999999999999 -0.11700000000000001 0 0 0</pose>
-        </frame>
-        <frame name='blueboat_chassis_motor_port' attached_to='blueboat_chassis_motor_port_joint'>
-          <pose>0 0 0 0 0 0</pose>
-        </frame>
-        <frame name='blueboat_chassis_motor_stbd_joint' attached_to='blueboat_chassis'>
-          <pose>-0.52000000000000002 -0.30099999999999999 -0.11700000000000001 0 0 0</pose>
-        </frame>
-        <frame name='blueboat_chassis_motor_stbd' attached_to='blueboat_chassis_motor_stbd_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='blueboat_chassis_payload_joint' attached_to='blueboat_chassis'>
@@ -222,6 +216,18 @@
           <pose>0 -0.25900000000000001 0.01 0 0 0</pose>
         </frame>
         <frame name='blueboat_chassis_ping_mount' attached_to='blueboat_chassis_ping_mount_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='blueboat_chassis_prop_port_joint' attached_to='blueboat_chassis'>
+          <pose>-0.52000000000000002 0.30099999999999999 -0.11700000000000001 0 0 0</pose>
+        </frame>
+        <frame name='blueboat_chassis_prop_port' attached_to='blueboat_chassis_prop_port_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='blueboat_chassis_prop_stbd_joint' attached_to='blueboat_chassis'>
+          <pose>-0.52000000000000002 -0.30099999999999999 -0.11700000000000001 0 0 0</pose>
+        </frame>
+        <frame name='blueboat_chassis_prop_stbd' attached_to='blueboat_chassis_prop_stbd_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
       </model>
@@ -344,14 +350,14 @@
         <link name='bluerov2_chassis'>
           <inertial>
             <pose>0.0097937300000000005 -0.00022557600000000001 0.010999999999999999 0 0 0</pose>
-            <mass>11.229699999999999</mass>
+            <mass>9.4000000000000004</mass>
             <inertia>
-              <ixx>0.16716700000000001</ixx>
-              <ixy>-6.7739100000000003e-06</ixy>
-              <ixz>-0.00060175400000000003</ixz>
-              <iyy>0.208312</iyy>
-              <iyz>2.46933e-05</iyz>
-              <izz>0.26392199999999999</izz>
+              <ixx>0.13992979999999999</ixx>
+              <ixy>-5.6702100000000002e-06</ixy>
+              <ixz>-0.0005037078</ixz>
+              <iyy>0.1743709</iyy>
+              <iyz>2.0669920000000001e-05</iyz>
+              <izz>0.22092010000000001</izz>
             </inertia>
           </inertial>
           <collision name='bluerov2_chassis_collision'>
@@ -456,6 +462,12 @@
         <frame name='bluerov2_chassis_gripper' attached_to='bluerov2_chassis_gripper_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
+        <frame name='bluerov2_chassis_imu_joint' attached_to='bluerov2_chassis'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='bluerov2_chassis_imu' attached_to='bluerov2_chassis_imu_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
         <frame name='bluerov2_chassis_payload_joint' attached_to='bluerov2_chassis'>
           <pose>0 0 -0.17000000000000001 0 0 0</pose>
         </frame>
@@ -499,15 +511,51 @@
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_5_joint' attached_to='bluerov2_chassis'>
-          <pose>0 -0.109 0.076999999999999999 3.1415926535897931 1.5707926536359933 3.1415926535897931</pose>
+          <pose>0.014999999999999999 -0.109 0.050000000000000003 3.1415926535897931 1.5707926536359933 3.1415926535897931</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_5' attached_to='bluerov2_chassis_thruster_5_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_6_joint' attached_to='bluerov2_chassis'>
-          <pose>0 0.109 0.076999999999999999 3.1415926535897931 1.5707926536359933 3.1415926535897931</pose>
+          <pose>0.014999999999999999 0.109 0.050000000000000003 3.1415926535897931 1.5707926536359933 3.1415926535897931</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_6' attached_to='bluerov2_chassis_thruster_6_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='bluerov2_chassis_thruster_body_1_joint' attached_to='bluerov2_chassis'>
+          <pose>0.14000000000000001 -0.091999999999999998 0 0 0 -2.3561999999999999</pose>
+        </frame>
+        <frame name='bluerov2_chassis_thruster_body_1' attached_to='bluerov2_chassis_thruster_body_1_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='bluerov2_chassis_thruster_body_2_joint' attached_to='bluerov2_chassis'>
+          <pose>0.14000000000000001 0.091999999999999998 0 0 0 2.3561999999999999</pose>
+        </frame>
+        <frame name='bluerov2_chassis_thruster_body_2' attached_to='bluerov2_chassis_thruster_body_2_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='bluerov2_chassis_thruster_body_3_joint' attached_to='bluerov2_chassis'>
+          <pose>-0.14999999999999999 -0.091999999999999998 0 0 0 -0.7854000000000001</pose>
+        </frame>
+        <frame name='bluerov2_chassis_thruster_body_3' attached_to='bluerov2_chassis_thruster_body_3_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='bluerov2_chassis_thruster_body_4_joint' attached_to='bluerov2_chassis'>
+          <pose>-0.14999999999999999 0.091999999999999998 0 0 0 0.7854000000000001</pose>
+        </frame>
+        <frame name='bluerov2_chassis_thruster_body_4' attached_to='bluerov2_chassis_thruster_body_4_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='bluerov2_chassis_thruster_body_5_joint' attached_to='bluerov2_chassis'>
+          <pose>0.014999999999999999 -0.109 0.050000000000000003 3.1415926535897931 -1.5707926536359933 3.1415926535897931</pose>
+        </frame>
+        <frame name='bluerov2_chassis_thruster_body_5' attached_to='bluerov2_chassis_thruster_body_5_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='bluerov2_chassis_thruster_body_6_joint' attached_to='bluerov2_chassis'>
+          <pose>0.014999999999999999 0.109 0.050000000000000003 3.1415926535897931 -1.5707926536359933 3.1415926535897931</pose>
+        </frame>
+        <frame name='bluerov2_chassis_thruster_body_6' attached_to='bluerov2_chassis_thruster_body_6_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
       </model>
@@ -517,14 +565,14 @@
         <link name='bluerov2_heavy_chassis'>
           <inertial>
             <pose>0.0097937300000000005 -0.00022557600000000001 0.010999999999999999 0 0 0</pose>
-            <mass>15.1896</mass>
+            <mass>12.75</mass>
             <inertia>
-              <ixx>0.22611899999999999</ixx>
-              <ixy>-9.1623300000000008e-06</ixy>
-              <ixz>-0.00081394599999999996</ixz>
-              <iyy>0.28177400000000002</iyy>
-              <iyz>3.3402100000000003e-05</iyz>
-              <izz>0.35701300000000002</izz>
+              <ixx>0.1898021</ixx>
+              <ixy>-7.6907689999999995e-06</ixy>
+              <ixz>-0.00068321820000000004</ixz>
+              <iyy>0.23651829999999999</iyy>
+              <iyz>2.803739e-05</iyz>
+              <izz>0.29967319999999997</izz>
             </inertia>
           </inertial>
           <collision name='bluerov2_heavy_chassis_collision'>
@@ -695,6 +743,54 @@
         <frame name='bluerov2_heavy_chassis_thruster_8' attached_to='bluerov2_heavy_chassis_thruster_8_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
+        <frame name='bluerov2_heavy_chassis_thruster_body_1_joint' attached_to='bluerov2_heavy_chassis'>
+          <pose>0.14000000000000001 -0.091999999999999998 0 0 0 -2.3561999999999999</pose>
+        </frame>
+        <frame name='bluerov2_heavy_chassis_thruster_body_1' attached_to='bluerov2_heavy_chassis_thruster_body_1_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='bluerov2_heavy_chassis_thruster_body_2_joint' attached_to='bluerov2_heavy_chassis'>
+          <pose>0.14000000000000001 0.091999999999999998 0 0 0 2.3561999999999999</pose>
+        </frame>
+        <frame name='bluerov2_heavy_chassis_thruster_body_2' attached_to='bluerov2_heavy_chassis_thruster_body_2_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='bluerov2_heavy_chassis_thruster_body_3_joint' attached_to='bluerov2_heavy_chassis'>
+          <pose>-0.14999999999999999 -0.091999999999999998 0 0 0 -0.7854000000000001</pose>
+        </frame>
+        <frame name='bluerov2_heavy_chassis_thruster_body_3' attached_to='bluerov2_heavy_chassis_thruster_body_3_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='bluerov2_heavy_chassis_thruster_body_4_joint' attached_to='bluerov2_heavy_chassis'>
+          <pose>-0.14999999999999999 0.091999999999999998 0 0 0 0.7854000000000001</pose>
+        </frame>
+        <frame name='bluerov2_heavy_chassis_thruster_body_4' attached_to='bluerov2_heavy_chassis_thruster_body_4_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='bluerov2_heavy_chassis_thruster_body_5_joint' attached_to='bluerov2_heavy_chassis'>
+          <pose>0.11799999999999999 -0.215 0.064000000000000001 3.1415926535897931 -1.5707926536359933 3.1415926535897931</pose>
+        </frame>
+        <frame name='bluerov2_heavy_chassis_thruster_body_5' attached_to='bluerov2_heavy_chassis_thruster_body_5_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='bluerov2_heavy_chassis_thruster_body_6_joint' attached_to='bluerov2_heavy_chassis'>
+          <pose>0.11799999999999999 0.215 0.064000000000000001 3.1415926535897931 -1.5707926536359933 3.1415926535897931</pose>
+        </frame>
+        <frame name='bluerov2_heavy_chassis_thruster_body_6' attached_to='bluerov2_heavy_chassis_thruster_body_6_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='bluerov2_heavy_chassis_thruster_body_7_joint' attached_to='bluerov2_heavy_chassis'>
+          <pose>-0.11799999999999999 -0.215 0.064000000000000001 3.1415926535897931 -1.5707926536359933 3.1415926535897931</pose>
+        </frame>
+        <frame name='bluerov2_heavy_chassis_thruster_body_7' attached_to='bluerov2_heavy_chassis_thruster_body_7_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
+        <frame name='bluerov2_heavy_chassis_thruster_body_8_joint' attached_to='bluerov2_heavy_chassis'>
+          <pose>-0.11799999999999999 0.215 0.064000000000000001 3.1415926535897931 -1.5707926536359933 3.1415926535897931</pose>
+        </frame>
+        <frame name='bluerov2_heavy_chassis_thruster_body_8' attached_to='bluerov2_heavy_chassis_thruster_body_8_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
       </model>
     <model name='dvl_a50'>
           <static>true</static>
@@ -744,7 +840,7 @@
             </inertia>
           </inertial>
           <visual name='explorehd_camera_visual'>
-            <pose>0 0 0 0 0 0</pose>
+            <pose>0 0 0 0 1.5707963267948966 0</pose>
             <geometry>
               <cylinder>
                 <length>0.12</length>
@@ -788,7 +884,7 @@
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
-                <uri>model://bluerobotics_parts/models/m200_weedless_prop_ccw/m200_weedless_prop_ccw.visual.glb</uri>
+                <uri>model://bluerobotics_parts/models/m200_weedless_prop_ccw/m200_weedless_prop_ccw_visual.glb</uri>
               </mesh>
             </geometry>
           </visual>
@@ -800,7 +896,7 @@
         <link name='m200_weedless_prop_cw'>
           <inertial>
             <pose>0.00033599999999999998 3.0000000000000001e-05 -5.0000000000000004e-06 0 0 0</pose>
-            <mass>0.074471999999999997</mass>
+            <mass>0.01</mass>
             <inertia>
               <ixx>1.41779e-05</ixx>
               <ixy>0</ixy>
@@ -824,7 +920,7 @@
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
-                <uri>model://bluerobotics_parts/models/m200_weedless_prop_cw/m200_weedless_prop_cw.visual.glb</uri>
+                <uri>model://bluerobotics_parts/models/m200_weedless_prop_cw/m200_weedless_prop_cw_visual.glb</uri>
               </mesh>
             </geometry>
           </visual>
@@ -1004,39 +1100,9 @@
           </visual>
         </link>
       </model>
-    <model name='omniscan_450_fs'>
-          <static>true</static>
-          <pose>3.20 -3.20 0.8 0 0 0</pose>
-        <link name='omniscan_450_fs'>
-          <inertial>
-            <pose>0 0 0 0 0 0</pose>
-            <mass>0.44</mass>
-            <inertia>
-              <ixx>0.00015084666666666661</ixx>
-              <ixy>0</ixy>
-              <ixz>0</ixz>
-              <iyy>0.0010381800000000001</iyy>
-              <iyz>0</iyz>
-              <izz>0.0011091666666666669</izz>
-            </inertia>
-          </inertial>
-          <visual name='omniscan_450_fs_visual'>
-            <pose>0 0 0 0 0 0</pose>
-            <geometry>
-              <box>
-                <size>0.16500000000000001 0.055 0.033000000000000002</size>
-              </box>
-            </geometry>
-            <material>
-              <diffuse>0.625 0.625 0.6875 1</diffuse>
-              <ambient>0.625 0.625 0.6875 1</ambient>
-            </material>
-          </visual>
-        </link>
-      </model>
     <model name='omniscan_450_sidescan'>
           <static>true</static>
-          <pose>-3.20 -4.80 0.8 0 0 0</pose>
+          <pose>3.20 -3.20 0.8 0 0 0</pose>
         <link name='omniscan_450_sidescan'>
           <inertial>
             <pose>0 -0.001397 0.019345299999999999 0 0 0</pose>
@@ -1103,7 +1169,7 @@
       </model>
     <model name='payload_skid'>
           <static>true</static>
-          <pose>-1.60 -4.80 0.8 0 0 0</pose>
+          <pose>-3.20 -4.80 0.8 0 0 0</pose>
         <link name='payload_skid'>
           <inertial>
             <pose>0 0 0 0 0 0</pose>
@@ -1133,7 +1199,7 @@
       </model>
     <model name='ping360'>
           <static>true</static>
-          <pose>0.00 -4.80 0.8 0 0 0</pose>
+          <pose>-1.60 -4.80 0.8 0 0 0</pose>
         <link name='ping360'>
           <inertial>
             <pose>0 0 0 0 0 0</pose>
@@ -1160,7 +1226,7 @@
       </model>
     <model name='ping_singlebeam'>
           <static>true</static>
-          <pose>1.60 -4.80 0.8 0 0 0</pose>
+          <pose>0.00 -4.80 0.8 0 0 0</pose>
         <link name='ping_singlebeam'>
           <inertial>
             <pose>-9.9999999999999995e-07 -0.00080216900000000004 0.000201108 0 0 0</pose>
@@ -1211,7 +1277,7 @@
       </model>
     <model name='roof_rack'>
           <static>true</static>
-          <pose>3.20 -4.80 0.8 0 0 0</pose>
+          <pose>1.60 -4.80 0.8 0 0 0</pose>
         <link name='roof_rack'>
           <inertial>
             <pose>0 0 0 0 0 0</pose>
@@ -1241,7 +1307,7 @@
       </model>
     <model name='sediment_sampler'>
           <static>true</static>
-          <pose>-3.20 -6.40 0.8 0 0 0</pose>
+          <pose>3.20 -4.80 0.8 0 0 0</pose>
         <link name='sediment_sampler'>
           <inertial>
             <pose>0 0 0 0 0 0</pose>
@@ -1409,39 +1475,9 @@
           </visual>
         </link>
       </model>
-    <model name='sonoptix_echo'>
-          <static>true</static>
-          <pose>-1.60 -6.40 0.8 0 0 0</pose>
-        <link name='sonoptix_echo'>
-          <inertial>
-            <pose>0 0 0 0 0 0</pose>
-            <mass>0.75</mass>
-            <inertia>
-              <ixx>0.00073525000000000012</ixx>
-              <ixy>0</ixy>
-              <ixz>0</ixz>
-              <iyy>0.0015165000000000001</iyy>
-              <iyz>0</iyz>
-              <izz>0.0020312500000000001</izz>
-            </inertia>
-          </inertial>
-          <visual name='sonoptix_echo_visual'>
-            <pose>0 0 0 0 0 0</pose>
-            <geometry>
-              <box>
-                <size>0.14999999999999999 0.10000000000000001 0.042000000000000003</size>
-              </box>
-            </geometry>
-            <material>
-              <diffuse>0.625 0.625 0.6875 1</diffuse>
-              <ambient>0.625 0.625 0.6875 1</ambient>
-            </material>
-          </visual>
-        </link>
-      </model>
     <model name='surveyor_multibeam'>
           <static>true</static>
-          <pose>0.00 -6.40 0.8 0 0 0</pose>
+          <pose>-3.20 -6.40 0.8 0 0 0</pose>
         <link name='surveyor_multibeam'>
           <inertial>
             <pose>-0.0025521900000000002 -0.000106891 -0.00198043 0 0 0</pose>
@@ -1502,7 +1538,7 @@
       </model>
     <model name='t200_prop_ccw'>
           <static>true</static>
-          <pose>1.60 -6.40 0.8 0 0 0</pose>
+          <pose>-1.60 -6.40 0.8 0 0 0</pose>
         <link name='t200_prop_ccw'>
           <inertial>
             <pose>5.1999999999999997e-05 0 0 0 0 0</pose>
@@ -1538,7 +1574,7 @@
       </model>
     <model name='t200_prop_cw'>
           <static>true</static>
-          <pose>3.20 -6.40 0.8 0 0 0</pose>
+          <pose>0.00 -6.40 0.8 0 0 0</pose>
         <link name='t200_prop_cw'>
           <inertial>
             <pose>5.1999999999999997e-05 0 0 0 0 0</pose>
@@ -1574,18 +1610,18 @@
       </model>
     <model name='t200_thruster'>
           <static>true</static>
-          <pose>-3.20 -8.00 0.8 0 0 0</pose>
+          <pose>1.60 -6.40 0.8 0 0 0</pose>
         <link name='t200_thruster'>
           <inertial>
             <pose>-0.0068830699999999998 0.0028555199999999998 -0.00016627300000000001 0 0 0</pose>
-            <mass>0.34399999999999997</mass>
+            <mass>0.30494660000000001</mass>
             <inertia>
-              <ixx>0.00031312000000000001</ixx>
-              <ixy>-1.3050300000000001e-08</ixy>
-              <ixz>-2.5610200000000003e-07</ixz>
-              <iyy>0.00029150999999999998</iyy>
-              <iyz>-3.5035900000000001e-10</iyz>
-              <izz>0.00029150299999999998</izz>
+              <ixx>0.00027757230000000001</ixx>
+              <ixy>-1.1568729999999999e-08</ixy>
+              <ixz>-2.2702740000000001e-07</ixz>
+              <iyy>0.0002584156</iyy>
+              <iyz>-3.1058370000000002e-10</iyz>
+              <izz>0.0002584094</izz>
             </inertia>
           </inertial>
           <collision name='t200_thruster_collision'>

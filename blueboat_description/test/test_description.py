@@ -32,8 +32,8 @@ WATER_DENSITY = 1025.0
 HULL = yaml.safe_load(DEFAULT_CONFIG)['hull_displacement']
 # What the chassis slots fill with when the config is silent.
 DEFAULT_PARTS = {'base_link': 'blueboat_chassis',
-                 'motor_port': 'm200_weedless_prop_ccw',
-                 'motor_stbd': 'm200_weedless_prop_cw',
+                 'prop_port': 'm200_weedless_prop_ccw',
+                 'prop_stbd': 'm200_weedless_prop_cw',
                  'flag': 'blueboat_flag',
                  'ping_mount': 'blueboat_ping_singlebeam_mount',
                  'ping': 'ping_singlebeam'}
@@ -151,8 +151,8 @@ def test_default_config_yields_the_default_parts():
     assert base.findall('collision'), 'the chassis keeps its delivered contact geometry'
     assert set(DEFAULT_PARTS) <= link_names(root)
     motors = {j.get('name'): j for j in root.findall('joint')
-              if j.get('name') in ('motor_port_joint', 'motor_stbd_joint')}
-    assert set(motors) == {'motor_port_joint', 'motor_stbd_joint'}
+              if j.get('name') in ('prop_port_joint', 'prop_stbd_joint')}
+    assert set(motors) == {'prop_port_joint', 'prop_stbd_joint'}
     for joint in motors.values():
         assert joint.get('type') == 'continuous'
         assert joint.find('axis') is not None
@@ -173,15 +173,15 @@ def test_slot_chains_through_the_parent_part():
     assert table['ping_mount_ping'][0] == 'ping_mount'
     assert table['ping_mount'][0] == 'base_link_ping_mount'
     assert table['base_link_ping_mount'][0] == 'base_link'
-    assert table['motor_port'][0] == 'base_link_motor_port'
+    assert table['prop_port'][0] == 'base_link_prop_port'
     assert table['ping_beam'][0] == 'ping', 'the Ping declares its beam frame'
 
 
 def test_slot_override_picks_another_option():
     """A slot entry swaps the occupant for another accepted type."""
-    root = generate_urdf(make_config([{'slot': 'motor_port', 'type': 't200_prop_ccw'}]))
-    assert manifest(root)['motor_port'] == 't200_prop_ccw'
-    assert manifest(root)['motor_stbd'] == 'm200_weedless_prop_cw'
+    root = generate_urdf(make_config([{'slot': 'prop_port', 'type': 't200_prop_ccw'}]))
+    assert manifest(root)['prop_port'] == 't200_prop_ccw'
+    assert manifest(root)['prop_stbd'] == 'm200_weedless_prop_cw'
 
 
 def test_slot_none_leaves_it_empty():
@@ -221,7 +221,7 @@ def test_manifest_records_every_slot_visited():
     root = generate_urdf(make_config(
         slots=[{'of': 'ping_mount', 'name': 'side', 'xyz': '0 0.05 0'}]))
     visited = assembly.slots(root)
-    assert {('base_link', 'motor_port'), ('base_link', 'ping_mount'),
+    assert {('base_link', 'prop_port'), ('base_link', 'ping_mount'),
             ('ping_mount', 'ping'), ('ping_mount', 'side')} <= visited
 
 
@@ -257,7 +257,7 @@ def test_check_catches_what_the_expansion_cannot():
 
 def test_slot_rejects_parts_that_do_not_fit():
     """A type outside the slot's accepts list fails the expansion."""
-    expect_failure(make_config([{'slot': 'motor_port', 'type': 'blueboat_flag'}]),
+    expect_failure(make_config([{'slot': 'prop_port', 'type': 'blueboat_flag'}]),
                    'does not fit')
 
 
