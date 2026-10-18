@@ -1,4 +1,4 @@
-ap# Architecture
+# Architecture
 
 URDF is the source of truth. A **part** is a URDF xacro macro; a **vehicle**
 is an assembly of parts resolved from a config and the parts' own slot
