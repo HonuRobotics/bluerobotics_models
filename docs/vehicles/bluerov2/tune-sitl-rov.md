@@ -20,7 +20,7 @@ The yaw stabilize is implemented in ArduSub (`ArduSub/mode_stabilize.cpp`; `mode
 
 * **Stick deflected: a rate.** Outside the yaw channel's dead zone, the stick sets a yaw-rate target (stick angle × `ACRO_YAW_P`).  This setupoint is the input to the yaw-rate `ATC_RAT_YAW_*`
 * **Stick released: a bearing.** When the rc command returns to 1500 ± the dead zone (`RC4_DZ`, scaled by the pilot gain), ArduSub commands zero yaw rate for 250 ms to brake the turn, re-reading the heading every cycle. The heading at the end of that window is latched and held. The delay stops the vehicle bouncing back after a fast turn.
-* **Holding the bearing: a cascade.** The heading error goes through `ATC_ANG_YAW_P` alone, a proportional-only outer loop (a square-root controller limited by `ATC_ACCEL_Y_MAX`), which produces a yaw-rate target for the same `ATC_RAT_YAW_*` PID. Any integral action comes from the inner loop's `ATC_RAT_YAW_I`.
+* **Holding the bearing: a cascade.** The heading error goes through `ATC_ANG_YAW_P` alone, a proportional-only outer loop (a square-root controller limited by `ATC_ACC_Y_MAX`), which produces a yaw-rate target for the same `ATC_RAT_YAW_*` PID. Any integral action comes from the inner loop's `ATC_RAT_YAW_I`.
 
 For more detail on the yaw and depth hold controllers (ArduSub builds them from the same libraries as Copter, `AC_AttitudeControl_Sub` and `AC_PosControl`, so Copter's developer pages describe them):
 

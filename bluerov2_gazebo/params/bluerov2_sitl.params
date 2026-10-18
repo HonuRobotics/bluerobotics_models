@@ -80,7 +80,7 @@ ATC_RAT_YAW_FF   0.0        # The Defaults struct sets ff to 0: no feedforward,
 ATC_RAT_YAW_IMAX 0.222      # AC_ATC_SUB_RATE_YAW_IMAX
 ATC_RAT_YAW_FLTT 5.0        # AC_ATC_SUB_RATE_YAW_FILT_HZ, as filt_T_hz
 ATC_RAT_YAW_FLTD 5.0        # AC_ATC_SUB_RATE_YAW_FILT_HZ, as filt_D_hz
-ATC_ACCEL_Y_MAX  1100       # AC_ATC_SUB_ACCEL_Y_MAX_DEGSS, deg/s/s
+ATC_ACC_Y_MAX    1100       # AC_ATC_SUB_ACCEL_Y_MAX_DEGSS, deg/s/s
 
 # ---- Depth control --------------------------------------------------------
 # ArduSub compiled defaults, written out - and here that is not merely
