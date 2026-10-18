@@ -35,7 +35,8 @@
     to parent (default: the base). Their slots fill too.
   * The occupant's joint is the entry's `joint:`, else the slot's, else the
     part's nature: a propeller (a part with a `drive` table) turns on a
-    continuous joint, anything else is fixed.
+    continuous joint, anything else is fixed. Its axis is the entry's
+    `axis:`, else the slot's, else the part's own spin axis.
   * `slots:` declares ad hoc slots on any instance, usable like the part's
     own (accepts and default work the same).
   * `defaults:=false` (a config's `slot_defaults: false`) turns the slot
@@ -123,7 +124,7 @@
                         xyz="${entry.get('xyz', '0 0 0')}" rpy="${entry.get('rpy', '0 0 0')}"
                         collision="${entry.get('collision', spec.get('collision', True))}"
                         joint="${entry.get('joint', spec.get('joint', ''))}"
-                        axis="${entry.get('axis', '')}"
+                        axis="${entry.get('axis', spec.get('axis', ''))}"
                         entries="${entries}" adhoc="${adhoc}" emit="${emit}" emit_slot="${emit_slot}"/>
     </xacro:if>
   </xacro:macro>

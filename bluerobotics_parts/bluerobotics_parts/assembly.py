@@ -42,7 +42,7 @@ PART_COMMON_KEYS = {'type', 'name', 'xyz', 'rpy', 'collision', 'joint', 'axis',
 SLOT_ENTRY_KEYS = PART_COMMON_KEYS | {'slot', 'of'}
 FREE_ENTRY_KEYS = PART_COMMON_KEYS | {'parent'}
 ADHOC_SLOT_KEYS = {'of', 'name', 'xyz', 'rpy', 'accepts', 'default', 'joint',
-                   'collision'}
+                   'axis', 'collision'}
 
 
 def rpy_matrix(r, p, y):

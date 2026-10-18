@@ -26,12 +26,13 @@
        The position is a placeholder at the chassis origin: the real offset
        inside the enclosure has not been measured, and the lever arm only starts
        to matter once accelerations are compared against the real boat. -->
+  <!-- The prop_port / prop_stbd slot poses are taken from the glTF export of the Blender assembly, source_files/blueboat_assembly/blueboat_chassis__ASSEMBLED_NODES.glb (PR #83): the translation and rotation of nodes m200_weedless_prop_ccw.visual and m200_weedless_prop_cw.visual relative to the untransformed chassis node, mapped from glTF axes to these (x = glTF z, y = glTF x, z = glTF y). The 180 degree yaw is the node rotation [0, -1, 0, 0]. Earlier hand set values were -0.52 +-0.301 -0.117, rpy 0 0 0. The yaw points the propeller's own +x aft, so these slots spin the occupant about -1 0 0, keeping the joint axis, and so positive thrust, along +x of base_link (ahead). Whether the M200 export should face aft at all is open with the modeler (PR #83). -->
   <xacro:macro name="blueboat_chassis_info">
     <xacro:property name="part_info" scope="parent" value="${dict(
         attach='0 0 0',
         slots=dict(
-            prop_port=dict(xyz='-0.52 0.301 -0.117', rpy='0 0 0', accepts=['m200_weedless_prop_ccw', 't200_prop_ccw'], default='m200_weedless_prop_ccw', joint='continuous', collision=False),
-            prop_stbd=dict(xyz='-0.52 -0.301 -0.117', rpy='0 0 0', accepts=['m200_weedless_prop_cw', 't200_prop_cw'], default='m200_weedless_prop_cw', joint='continuous', collision=False),
+            prop_port=dict(xyz='-0.5196 0.3016 -0.1268', rpy='0 0 3.1416', accepts=['m200_weedless_prop_ccw', 't200_prop_ccw'], default='m200_weedless_prop_ccw', joint='continuous', axis='-1 0 0', collision=False),
+            prop_stbd=dict(xyz='-0.5196 -0.3016 -0.1270', rpy='0 0 3.1416', accepts=['m200_weedless_prop_cw', 't200_prop_cw'], default='m200_weedless_prop_cw', joint='continuous', axis='-1 0 0', collision=False),
             mast=dict(xyz='-0.298 0 0.147', rpy='0 0 0', accepts=['blueboat_antenna_mast'], default='none'),
             flag=dict(xyz='-0.298 0.2 0.147', rpy='0 0 0', accepts=['blueboat_flag'], default='blueboat_flag'),
             payload=dict(xyz='0.299 0 0.147', rpy='0 0 0', accepts=['blueboat_payload_bracket'], default='none'),
