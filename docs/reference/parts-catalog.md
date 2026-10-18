@@ -80,7 +80,7 @@ for both vehicles:
 | `base` | yes | the root part: `{type, name (default base_link), collision (default true)}` |
 | `slot_defaults` | no (`true`) | `false` leaves every slot without an entry empty, so `parts` lists every fitted part |
 | `parts` | no (`[]`) | slot entries and free placements, see below |
-| `slots` | no | ad hoc slots: `{of (instance, default base_link), name, xyz, rpy (default "0 0 0"), accepts (list, optional), default (type or none), joint}` |
+| `slots` | no | ad hoc slots: `{of (instance, default base_link), name, xyz, rpy (default "0 0 0"), accepts (list, optional), default (type or none), joint, axis}` |
 | `hull_displacement` | BlueBoat | the box pontoons the Gazebo composition places on the `hull_displacement` link: `{length, width, height, x, y, z, segments}` |
 | `buoyancy` | BlueROV2 | `{net_buoyancy (kg), cob_offset, cob_frame (com/base_link), fluid_density, footprint}`, realized as a dedicated displacement link solved from the assembled mass; see [Buoyancy](../design/buoyancy.md) |
 | `extra_bridge_topics` | no | list appended verbatim to the generated ros_gz bridge config (native syntax) |
@@ -95,7 +95,7 @@ A **slot entry** in `parts` (has `slot`):
 | `name` | instance name (default: the slot name); must be unique across the vehicle |
 | `xyz`, `rpy` | offset from the slot pose (default zero) |
 | `joint` | joint type for the occupant (default: the slot's, else `continuous` for a propeller, else `fixed`) |
-| `axis` | joint axis override (default: the part's own spin axis) |
+| `axis` | joint axis override (default: the slot's, else the part's own spin axis) |
 | `collision` | `false` to fit the part without its contact geometry |
 | `topic`, `gz_topic`, `ros_topic`, `bridge` | parts with topics (propellers, sensors): topic base for both sides / one side, under the namespace unless it starts with a slash; native bridge keys merged into the entry |
 

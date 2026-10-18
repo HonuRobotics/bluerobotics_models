@@ -26,6 +26,7 @@
                     default     the type fitted when the config is silent,
                                 or 'none'
                     joint       joint type for the occupant (default fixed)
+                    axis        joint axis for the occupant, in its own frame (default: the part's own spin axis)
                     collision   false to fit occupants without contact
                                 geometry (a propeller spinning inside a
                                 duct or hull volume would grind on it)
