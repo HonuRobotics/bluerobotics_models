@@ -219,13 +219,13 @@
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='blueboat_chassis_prop_port_joint' attached_to='blueboat_chassis'>
-          <pose>-0.52000000000000002 0.30099999999999999 -0.11700000000000001 0 0 0</pose>
+          <pose>-0.51959999999999995 0.30159999999999998 -0.1268 0 0 -3.1415853071795872</pose>
         </frame>
         <frame name='blueboat_chassis_prop_port' attached_to='blueboat_chassis_prop_port_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='blueboat_chassis_prop_stbd_joint' attached_to='blueboat_chassis'>
-          <pose>-0.52000000000000002 -0.30099999999999999 -0.11700000000000001 0 0 0</pose>
+          <pose>-0.51959999999999995 -0.30159999999999998 -0.127 0 0 -3.1415853071795872</pose>
         </frame>
         <frame name='blueboat_chassis_prop_stbd' attached_to='blueboat_chassis_prop_stbd_joint'>
           <pose>0 0 0 0 0 0</pose>
