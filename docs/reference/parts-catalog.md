@@ -43,8 +43,8 @@ after the slot by default.
 
 | Part | Slot | Accepts | Default | Joint |
 |---|---|---|---|---|
-| `blueboat_chassis` | `motor_port` | `m200_weedless_prop_ccw`, `t200_prop_ccw` | `m200_weedless_prop_ccw` | continuous |
-| | `motor_stbd` | `m200_weedless_prop_cw`, `t200_prop_cw` | `m200_weedless_prop_cw` | continuous |
+| `blueboat_chassis` | `prop_port` | `m200_weedless_prop_ccw`, `t200_prop_ccw` | `m200_weedless_prop_ccw` | continuous |
+| | `prop_stbd` | `m200_weedless_prop_cw`, `t200_prop_cw` | `m200_weedless_prop_cw` | continuous |
 | | `flag` | `blueboat_flag` | `blueboat_flag` | fixed |
 | | `mast` | `blueboat_antenna_mast` | none | fixed |
 | | `payload` | `blueboat_payload_bracket` | none | fixed |
@@ -78,6 +78,7 @@ for both vehicles:
 |---|---|---|
 | `topic_namespace` | no (the vehicle name) | prefix of every part topic: `/<name>/<name>/...` |
 | `base` | yes | the root part: `{type, name (default base_link), collision (default true)}` |
+| `slot_defaults` | no (`true`) | `false` leaves every slot without an entry empty, so `parts` lists every fitted part |
 | `parts` | no (`[]`) | slot entries and free placements, see below |
 | `slots` | no | ad hoc slots: `{of (instance, default base_link), name, xyz, rpy (default "0 0 0"), accepts (list, optional), default (type or none), joint}` |
 | `hull_displacement` | BlueBoat | the box pontoons the Gazebo composition places on the `hull_displacement` link: `{length, width, height, x, y, z, segments}` |
@@ -121,8 +122,8 @@ frames follow the fitted parts, with the same naming patterns on both vehicles:
 | Pattern | Kind | Meaning |
 |---|---|---|
 | `base_link` | root link | the chassis part: origin at the mesh centroid, x forward, y left, z up ([REP 103](https://www.ros.org/reps/rep-0103.html)); floats with its origin at the waterline |
-| `<instance>` | link | one frame per fitted part, named after its slot or its `name` (`motor_port`, `thruster_1`, `ping`, `camera`); spinning parts sit on their continuous joint `<instance>_joint` |
-| `<parent>_<slot>` | massless link | one per slot a part declares, whether filled or not (`base_link_motor_port`, `base_link_camera`, `ping_mount_ping`) |
+| `<instance>` | link | one frame per fitted part, named after its slot or its `name` (`prop_port`, `thruster_1`, `ping`, `camera`); spinning parts sit on their continuous joint `<instance>_joint` |
+| `<parent>_<slot>` | massless link | one per slot a part declares, whether filled or not (`base_link_prop_port`, `base_link_camera`, `ping_mount_ping`) |
 | `<instance>_<frame>` | massless link | frames the part itself declares (`ping_beam`, the transducer face); sensor messages carry them as `frame_id`, resolved by TF |
 
 The displacement volume is not in the URDF or TF: each Gazebo package adds

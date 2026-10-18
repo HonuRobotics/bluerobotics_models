@@ -8,18 +8,13 @@ ros2 launch blueboat_gazebo sim.launch.xml
 ```
 
 The simulation starts running, with the camera a few meters off the boat's
-port quarter. The boat is spawned at its static waterline and floats there:
-two hulls, the two outboard propellers, the flag and the Ping2 echosounder
-fitted under the starboard hull. That is the default configuration; no
-configuration was involved.
+port quarter. The boat is spawned at its static waterline and floats there: the chassis and its two outboard propellers, which is what the shipped config lists.
 
-In a second terminal (also sourced), watch the echosounder and spin the
-propellers:
+In a second terminal (also sourced), spin the propellers:
 
 ```bash
-ros2 topic echo /blueboat/ping/range --once
-ros2 topic pub /blueboat/motor_port/cmd std_msgs/msg/Float64 "data: 0.2" -1 &
-ros2 topic pub /blueboat/motor_stbd/cmd std_msgs/msg/Float64 "data: 0.2" -1 &
+ros2 topic pub /blueboat/prop_port/cmd std_msgs/msg/Float64 "data: 0.2" -1 &
+ros2 topic pub /blueboat/prop_stbd/cmd std_msgs/msg/Float64 "data: 0.2" -1 &
 wait
 ```
 
