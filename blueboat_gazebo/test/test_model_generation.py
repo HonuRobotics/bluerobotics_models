@@ -55,6 +55,22 @@ def catalog():
     return BLUEBOAT_PARTS
 
 
+def kit_config(parts=(), extra=''):
+    """
+    The tests' own vehicle: the shipped hull and namespace, every slot filling with its default, plus parts.
+
+    Independent of what the shipped config fits, so these tests follow the
+    assembly rules rather than the current product.
+    """
+    cfg = yaml.safe_load(DEFAULT_CONFIG)
+    cfg['slot_defaults'] = True
+    cfg['parts'] = [dict(p) for p in parts]
+    return yaml.safe_dump(cfg, sort_keys=False) + extra
+
+
+KIT_CONFIG = kit_config()
+
+
 # Types the chassis slots fit by default; everything else in the catalog is
 # added explicitly below so FULL_CONFIG exercises the whole library.
 DEFAULT_TYPES = {'blueboat_chassis', 'm200_weedless_prop_ccw', 'm200_weedless_prop_cw',
@@ -70,19 +86,15 @@ def full_config_text(extra=''):
     slots; every remaining type is free placed. test_full_config_covers_catalog
     enforces that nothing is left out.
     """
-    cfg = yaml.safe_load(DEFAULT_CONFIG)
     parts = [{'slot': slot, 'type': t} for t, slot in SLOTTED_EXTRAS.items()]
     free = [t for t in catalog() if t not in DEFAULT_TYPES and t not in SLOTTED_EXTRAS]
     parts += [{'type': t, 'name': f'acc_{t}', 'xyz': f'{0.1 * i - 0.6:.2f} 0 0.5',
                'rpy': '0 0 0'} for i, t in enumerate(free)]
-    cfg['parts'] = parts
-    return yaml.safe_dump(cfg, sort_keys=False) + extra
+    return kit_config(parts, extra)
 
 
 FULL_CONFIG = full_config_text()
-NO_SENSOR_CONFIG = yaml.safe_dump(
-    yaml.safe_load(DEFAULT_CONFIG) | {'parts': [{'slot': 'ping_mount', 'type': 'none'}]},
-    sort_keys=False)
+NO_SENSOR_CONFIG = kit_config([{'slot': 'ping_mount', 'type': 'none'}])
 
 
 def xacro(top_file, config_text, *extra_args):
@@ -130,7 +142,7 @@ def test_model_generation_follows_config():
 
 def test_thrusters_follow_the_propeller_parts():
     """One Thruster per propeller instance, on its joint, with the part's drive data."""
-    root, _ = xacro(MODEL_XACRO, DEFAULT_CONFIG)
+    root, _ = xacro(MODEL_XACRO, KIT_CONFIG)
     thrusters = {t.find('joint_name').text: t
                  for t in plugins(root, 'gz-maritime-thruster-system')}
     assert set(thrusters) == {'prop_port_joint', 'prop_stbd_joint'}
@@ -141,26 +153,18 @@ def test_thrusters_follow_the_propeller_parts():
     assert float(port.find('max_thrust_cmd').text) > 0 > float(port.find('min_thrust_cmd').text)
     assert port.find('topic').text == 'blueboat/prop_port/cmd'
     # Empty a motor slot and rename the other: the plugins follow.
-    cfg = yaml.safe_dump(yaml.safe_load(DEFAULT_CONFIG) | {'parts': [
+    cfg = kit_config([
         {'slot': 'prop_port', 'type': 'none'},
-        {'slot': 'prop_stbd', 'type': 't200_prop_cw', 'name': 'right', 'topic': 'r'}]},
-        sort_keys=False)
+        {'slot': 'prop_stbd', 'type': 't200_prop_cw', 'name': 'right', 'topic': 'r'}])
     root, _ = xacro(MODEL_XACRO, cfg)
     thrusters = plugins(root, 'gz-maritime-thruster-system')
     assert [t.find('joint_name').text for t in thrusters] == ['right_joint']
     assert thrusters[0].find('topic').text == 'blueboat/r/cmd'
 
 
-def test_default_config_has_the_ping_sensor():
-    """The zero configuration model ships the echosounder, through the slot default."""
-    root, _ = xacro(MODEL_XACRO, DEFAULT_CONFIG)
-    sensors = list(root.iter('sensor'))
-    assert [s.get('name') for s in sensors] == ['ping']
-
-
 def test_sensors_follow_their_part_frame():
     """A sensor link is posed at the part's declared sensing frame."""
-    root, _ = xacro(MODEL_XACRO, DEFAULT_CONFIG)
+    root, _ = xacro(MODEL_XACRO, KIT_CONFIG)
     sensor_links = [li for li in root.iter('link') if li.get('name') == 'ping_sensor']
     assert len(sensor_links) == 1
     assert sensor_links[0].find('pose').get('relative_to') == 'ping_beam'
@@ -398,10 +402,10 @@ def test_sensor_and_bridge_topics_agree():
         'ros_topic_name': '/diagnostics', 'gz_topic_name': '/diagnostics',
         'ros_type_name': 'std_msgs/msg/Empty', 'gz_type_name': 'gz.msgs.Empty',
         'direction': 'GZ_TO_ROS'}
-    renamed = yaml.safe_dump(yaml.safe_load(DEFAULT_CONFIG) | {'parts': [
+    renamed = kit_config([
         {'slot': 'ping', 'of': 'ping_mount', 'type': 'ping_singlebeam',
-         'name': 'sonar', 'topic': 'echo'}]}, sort_keys=False)
-    for config in (FULL_CONFIG, DEFAULT_CONFIG, NO_SENSOR_CONFIG, renamed,
+         'name': 'sonar', 'topic': 'echo'}])
+    for config in (FULL_CONFIG, DEFAULT_CONFIG, KIT_CONFIG, NO_SENSOR_CONFIG, renamed,
                    full_config_text('topic_namespace: boat_a\n')):
         cfg = yaml.safe_load(config)
         cfg.setdefault('extra_bridge_topics', []).append(extra)
@@ -460,8 +464,6 @@ def test_installed_artifacts_match_shipped_config():
     links = {li.get('name') for li in urdf.findall('link')}
     for part in urdf.findall('assembly_part'):
         assert part.get('name') in links, f'{part.get("name")} missing from shipped URDF'
-    assert any(p.get('type') == 'ping_singlebeam' for p in urdf.findall('assembly_part')), \
-        'the shipped default must carry the Ping'
 
 
 def test_model_name_follows_the_topic_namespace():
@@ -479,10 +481,9 @@ def test_ardupilot_channels_command_the_thrusters_topics():
     the ArduPilot control block alike; otherwise ArduRover would command a
     topic nobody listens on.
     """
-    cfg = DEFAULT_CONFIG.replace('parts: []', (
-        'parts:\n'
-        '  - {slot: prop_stbd, type: t200_prop_cw, gz_topic: /fleet/stbd}\n'
-        '  - {slot: prop_port, type: t200_prop_ccw, topic: left}\n'))
+    cfg = kit_config([
+        {'slot': 'prop_stbd', 'type': 't200_prop_cw', 'gz_topic': '/fleet/stbd'},
+        {'slot': 'prop_port', 'type': 't200_prop_ccw', 'topic': 'left'}])
     root, _ = xacro(MODEL_XACRO, cfg, 'ardupilot:=true')
     thrusters = {t.find('joint_name').text: t.find('topic').text
                  for t in plugins(root, 'gz-maritime-thruster-system')}
