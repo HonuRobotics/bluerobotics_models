@@ -32,12 +32,14 @@ parts:
     # For the modeler to read. Not written to the file.
     referenceImages:
       - "product images at the source page"
+      - "docs/vehicles/bluerov2/images/thrusters.png: thruster numbering, top view"
+      - "Blue Robotics BlueROV2 assembly guide, https://bluerobotics.com/learn/bluerov2-assembly/: which thruster gets which propeller"
     forwardFeature: "the camera dome on the electronics enclosure; Forward points from the tail toward the camera dome"
     visualRequirement: "Start simple"
     materials: "frame: non-metal, black plastic. Buoyancy foam: non-metal, R-3318 polyurethane. Electronics and battery enclosures: clear acrylic tubes with anodized aluminum end caps. Fasteners and fittings: metal, stainless steel"
     openings: "none"
     priorities: "1. overall shape and proportions. 2. color. 3. materials"
-    notes: "Standard 6 thruster frame only; the T200 bodies and propellers are separate parts (t200_thruster, t200_prop_cw, t200_prop_ccw) fitted in the thruster_body_N and thruster_N slots, so leave them out of this mesh. Overall dimensions 457 x 338 x 254 mm (L x W x H). The footprint is taken from the chassis alone so the datum does not move when parts are added or changed."
+    notes: "Standard 6 thruster frame only; the T200 bodies and propellers are separate parts (t200_thruster, t200_prop_cw, t200_prop_ccw) fitted in the thruster_body_N and thruster_N slots. Overall dimensions 457 x 338 x 254 mm (L x W x H). The footprint is taken from the chassis alone so the datum does not move when parts are added or changed. Thruster layout, for placing the props in the .blend assembly (numbering and handedness from the Blue Robotics assembly guide and ArduSub's Vectored frame): thruster_1 front right horizontal, CCW; thruster_2 front left horizontal, CCW; thruster_3 rear right horizontal, CW; thruster_4 rear left horizontal, CW; thruster_5 starboard vertical, CCW; thruster_6 port vertical, CW. The horizontals pair front and rear, not port and starboard; the verticals pair port and starboard."
 
   t200_thruster:
     partRole: component
@@ -71,7 +73,7 @@ parts:
     materials: "propeller: non-metal, matte blue polycarbonate"
     openings: "hub bore"
     priorities: "1. blade shape and handedness. 2. hub. 3. color/material"
-    notes: "clockwise (BR-100228-001); fills the chassis slots thruster_3, thruster_4 and thruster_6. Same datum and geometry as t200_prop_ccw, mirrored."
+    notes: "clockwise (BR-100228-001); fills the chassis slots thruster_3 (rear right), thruster_4 (rear left) and thruster_6 (port vertical). Same datum and geometry as t200_prop_ccw, mirrored."
 
   t200_prop_ccw:
     partRole: component
@@ -88,4 +90,4 @@ parts:
     materials: "propeller: non-metal, matte blue polycarbonate"
     openings: "hub bore"
     priorities: "1. blade shape and handedness. 2. hub. 3. color/material"
-    notes: "counter-clockwise (BR-100228-002); fills the chassis slots thruster_1, thruster_2 and thruster_5. Same datum and geometry as t200_prop_cw, mirrored."
+    notes: "counter-clockwise (BR-100228-002); fills the chassis slots thruster_1 (front right), thruster_2 (front left) and thruster_5 (starboard vertical). Same datum and geometry as t200_prop_cw, mirrored."
