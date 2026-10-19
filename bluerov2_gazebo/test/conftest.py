@@ -106,3 +106,24 @@ def launch_sim(request, label, cmd, env, ready, stop=stop_process_group):
             return env
         time.sleep(2)
     fail(f'{label} never became ready')
+
+
+# Tables a test fills in as it runs, printed together at the very end of the
+# session: title -> rows, the first row the header. Printed from the terminal
+# summary so they follow the FAILURES section rather than being buried above
+# it, and appear with or without -s.
+REPORT_TABLES = {}
+
+
+def pytest_terminal_summary(terminalreporter):
+    """Print each report table as aligned columns at the end of the run."""
+    for title, rows in REPORT_TABLES.items():
+        if len(rows) < 2:
+            continue
+        widths = [max(len(r[i]) for r in rows) for i in range(len(rows[0]))]
+        lines = ['  '.join(c.ljust(w) for c, w in zip(r, widths)).rstrip()
+                 for r in rows]
+        lines.insert(1, '  '.join('-' * w for w in widths))
+        terminalreporter.write_sep('=', title)
+        for line in lines:
+            terminalreporter.write_line(line)

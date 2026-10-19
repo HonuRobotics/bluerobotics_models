@@ -1,0 +1,93 @@
+# This covers the bluerov2_chassis, the T200 thruster body and its two propellers for the standard (6 thruster) BlueROV2
+
+commission: bluerov2
+
+creator: Honu Robotics
+rights: "Copyright 2026 Honu Robotics. Licensed under the Apache License, Version 2.0."
+# Where the authoring files (.blend, CAD) are archived. Leave out if they are not.
+authoringSource: ".blend files should be archived in google drive.  Please send the link to the team for reference."
+
+# For the modeler to read. Not written to any file.
+sources:
+  - "https://bluerobotics.com/store/rov/bluerov2/"
+  - "vendor 3D model BLUEROV2-R4, https://cad.bluerobotics.com/BLUEROV2-R4.zip"
+  - "vendor 3D model T200_THRUSTER_BR-100545_BR-100228, https://cad.bluerobotics.com/T200_THRUSTER_BR-100545_BR-100228.zip"
+  - "see docs/vehicles/bluerov2/configuration.md"
+toolchain:
+  blender: "5.2.2 LTS"
+  exporter: "io_scene_gltf2 5.2.40"
+
+# --- One block per part, keyed by the part name (lowercase snake_case) ---
+parts:
+  bluerov2_chassis:
+    # Written to the file's manifest as a part of the workflow
+    partRole: base                      # exactly one base part per vehicle
+    datumPoint: "Center of the base footprint: project the chassis onto the horizontal plane tangent to its lowest point (the bottom of the frame); the datum is the center of the bounding rectangle of that projection, midway between the fore and aft extents and midway between the port and starboard extents, on the bottom plane. This is the base_footprint of ROS REP 105: https://www.ros.org/reps/rep-0105.html"
+    datumTarget: "None - in free space"          
+    source: "vendor 3D model BLUEROV2-R4, https://cad.bluerobotics.com/BLUEROV2-R4.zip; images from https://bluerobotics.com/store/rov/bluerov2/"
+    dimensionSource: "https://bluerobotics.com/store/rov/bluerov2/"
+    nominalDimension: "length overall 0.457 m"
+    dimensionTolerance: 0.01           # meters
+
+    # For the modeler to read. Not written to the file.
+    referenceImages:
+      - "product images at the source page"
+      - "docs/vehicles/bluerov2/images/thrusters.png: thruster numbering, top view"
+      - "Blue Robotics BlueROV2 assembly guide, https://bluerobotics.com/learn/bluerov2-assembly/: which thruster gets which propeller"
+    forwardFeature: "the camera dome on the electronics enclosure; Forward points from the tail toward the camera dome"
+    visualRequirement: "Start simple"
+    materials: "frame: non-metal, black plastic. Buoyancy foam: non-metal, R-3318 polyurethane. Electronics and battery enclosures: clear acrylic tubes with anodized aluminum end caps. Fasteners and fittings: metal, stainless steel"
+    openings: "none"
+    priorities: "1. overall shape and proportions. 2. color. 3. materials"
+    notes: "Standard 6 thruster frame only; the T200 bodies and propellers are separate parts (t200_thruster, t200_prop_cw, t200_prop_ccw) fitted in the thruster_body_N and thruster_N slots. Overall dimensions 457 x 338 x 254 mm (L x W x H). The footprint is taken from the chassis alone so the datum does not move when parts are added or changed. Thruster layout, for placing the props in the .blend assembly (numbering and handedness from the Blue Robotics assembly guide and ArduSub's Vectored frame): thruster_1 front right horizontal, CCW; thruster_2 front left horizontal, CCW; thruster_3 rear right horizontal, CW; thruster_4 rear left horizontal, CW; thruster_5 starboard vertical, CCW; thruster_6 port vertical, CW. The horizontals pair front and rear, not port and starboard; the verticals pair port and starboard."
+
+  t200_thruster:
+    partRole: component
+    datumPoint: "on the spin axis, in the plane where the propeller hub mates to the motor rotor (the same point as the propeller datum)"
+    source: "vendor 3D model T200_THRUSTER_BR-100545_BR-100228, https://cad.bluerobotics.com/T200_THRUSTER_BR-100545_BR-100228.zip"
+    dimensionSource: "https://bluerobotics.com/store/thrusters/t100-t200-thrusters/t200-thruster-r2-rp/"
+    nominalDimension: "length overall 113 mm, diameter 100 mm"
+    dimensionTolerance: 0.01           # meters
+
+    referenceImages:
+      - "product images and the 2D drawing at the source page, https://bluerobotics.com/wp-content/uploads/2021/02/T200-standard-drawing.png"
+    forwardFeature: "the propeller end; forward points along the spin axis from the motor toward the propeller, so forward is in the direction of thrust, for positive rotation of the propeller"
+    visualRequirement: "viewed from 1 m and beyond; nozzle, motor body and mounting base must be recognizable"
+    materials: "body and nozzle: non-metal, matte black polycarbonate. Exposed fasteners: metal, 316 stainless steel"
+    openings: "nozzle is open at both ends"
+    priorities: "1. shape. 2. color. 3. material-plastic"
+    notes: "Thruster body (duct) without the propeller. Forward direction corresponds to the direction of thrust."
+
+  t200_prop_cw:
+    partRole: component
+    datumPoint: "on the spin axis, in the plane where the propeller hub mates to the motor rotor"
+    source: "vendor 3D model T200_THRUSTER_BR-100545_BR-100228, https://cad.bluerobotics.com/T200_THRUSTER_BR-100545_BR-100228.zip"
+    dimensionSource: "https://bluerobotics.com/store/rov/bluerov2-components-spares/t200-thruster-brov2-spare-r1-vp/"
+    nominalDimension: "diameter 76 mm"
+    dimensionTolerance: 0.002           # meters
+
+    referenceImages:
+      - "product images at the source page; the CW and CCW props are mirror images"
+    forwardFeature: "the direction of thrust in forward operation, along the spin axis"
+    visualRequirement: "viewed from 1 m and beyond; blade count, sweep and handedness must be recognizable"
+    materials: "propeller: non-metal, matte blue polycarbonate"
+    openings: "hub bore"
+    priorities: "1. blade shape and handedness. 2. hub. 3. color/material"
+    notes: "clockwise (BR-100228-001); fills the chassis slots thruster_3 (rear right), thruster_4 (rear left) and thruster_6 (port vertical). Same datum and geometry as t200_prop_ccw, mirrored."
+
+  t200_prop_ccw:
+    partRole: component
+    datumPoint: "on the spin axis, in the plane where the propeller hub mates to the motor rotor"
+    source: "vendor 3D model T200_THRUSTER_BR-100545_BR-100228, https://cad.bluerobotics.com/T200_THRUSTER_BR-100545_BR-100228.zip"
+    dimensionSource: "https://bluerobotics.com/store/rov/bluerov2-components-spares/t200-thruster-brov2-spare-r1-vp/"
+    nominalDimension: "diameter 76 mm"
+    dimensionTolerance: 0.002           # meters
+
+    referenceImages:
+      - "product images at the source page; the CW and CCW props are mirror images"
+    forwardFeature: "the direction of thrust in forward operation, along the spin axis"
+    visualRequirement: "viewed from 1 m and beyond; blade count, sweep and handedness must be recognizable"
+    materials: "propeller: non-metal, matte blue polycarbonate"
+    openings: "hub bore"
+    priorities: "1. blade shape and handedness. 2. hub. 3. color/material"
+    notes: "counter-clockwise (BR-100228-002); fills the chassis slots thruster_1 (front right), thruster_2 (front left) and thruster_5 (starboard vertical). Same datum and geometry as t200_prop_cw, mirrored."

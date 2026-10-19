@@ -304,11 +304,12 @@
           gz-maritime's Hydrodynamics (gz_hydrodynamics): the same
           coefficients as gz-sim's, damped against the water rather than
           the ground, so the boat drifts with the world's ocean current.
+          No <water_density>: the plugin never reads it, the coefficients
+          carry their units.
     -->
     <plugin filename="gz-maritime-hydrodynamics-system"
             name="gz::sim::maritime::Hydrodynamics">
       <link_name>${base_name}</link_name>
-      <water_density>1025.0</water_density>
       <xU>0</xU>    <xUabsU>-7.0</xUabsU>  
       <yV>-40</yV>    <yVabsV>-90</yVabsV>  
       <zW>-30</zW>    <zWabsW>-50</zWabsW>  
