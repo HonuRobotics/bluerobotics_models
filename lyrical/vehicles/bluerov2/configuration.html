@@ -21,7 +21,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Verify the SITL connection (ROV)" href="verify-sitl-rov.html" />
+    <link rel="next" title="BlueROV2 Parameters" href="parameters.html" />
     <link rel="prev" title="Sensors" href="sensors.html" /> 
 </head>
 
@@ -77,7 +77,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../getting-started/ardupilot_setup.html#build-the-gazebo-plugin">Build the Gazebo plugin</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../getting-started/ardupilot_setup.html#build-the-ardupilot-firmware">Build the ArduPilot firmware</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../getting-started/ardupilot_setup.html#verify-the-python-environment">Verify the Python environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../getting-started/ardupilot_setup.html#verify-the-python-environment-optional">Verify the Python environment (optional)</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../getting-started/ardupilot_setup.html#environment">Environment</a></li>
@@ -212,6 +212,28 @@
 <li class="toctree-l4"><a class="reference internal" href="#payload">Payload</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="parameters.html">BlueROV2 Parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="parameters.html#what-is-fixed-and-what-is-free">What is fixed and what is free</a></li>
+<li class="toctree-l4"><a class="reference internal" href="parameters.html#the-autopilot-parameter-file">The autopilot parameter file</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="parameters.html#blue-robotics-publish-very-little-and-that-changes-the-claim">Blue Robotics publish very little, and that changes the claim</a></li>
+<li class="toctree-l5"><a class="reference internal" href="parameters.html#line-by-line">Line by line</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="parameters.html#mass">Mass</a></li>
+<li class="toctree-l4"><a class="reference internal" href="parameters.html#thrust">Thrust</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="parameters.html#the-installation-factor">The installation factor</a></li>
+<li class="toctree-l5"><a class="reference internal" href="parameters.html#deadband">Deadband</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="parameters.html#hydrodynamics">Hydrodynamics</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="parameters.html#coarse-identification">Coarse identification</a></li>
+<li class="toctree-l5"><a class="reference internal" href="parameters.html#verifying-the-coarse-identification">Verifying the coarse identification</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="parameters.html#modes">Modes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="parameters.html#open-questions">Open questions</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="verify-sitl-rov.html">Verify the SITL connection (ROV)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="verify-sitl-rov.html#prerequisites">Prerequisites</a></li>
 <li class="toctree-l4"><a class="reference internal" href="verify-sitl-rov.html#walkthrough">Walkthrough</a><ul>
@@ -219,7 +241,18 @@
 <li class="toctree-l5"><a class="reference internal" href="verify-sitl-rov.html#the-autopilot-sitl">The autopilot (SITL)</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="verify-sitl-rov.html#verification-teleop-via-the-autopilot">Verification - teleop via the autopilot.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="verify-sitl-rov.html#verification-teleop-via-the-autopilot">Verification - teleop via the autopilot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tune-sitl-rov.html">Tuning of closed-loop response for BlueROV2</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tune-sitl-rov.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tune-sitl-rov.html#mode-descriptions">Mode descriptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tune-sitl-rov.html#walkthrough">Walkthrough</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="tune-sitl-rov.html#before-either-walkthrough">Before either walkthrough</a></li>
+<li class="toctree-l5"><a class="reference internal" href="tune-sitl-rov.html#walkthrough-1-heading-hold-stabilize">Walkthrough 1: heading hold (<code class="docutils literal notranslate"><span class="pre">STABILIZE</span></code>)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="tune-sitl-rov.html#walkthrough-2-depth-hold-alt-hold">Walkthrough 2: depth hold (<code class="docutils literal notranslate"><span class="pre">ALT_HOLD</span></code>)</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="index.html#the-default-vehicle">The default vehicle</a></li>
@@ -471,7 +504,7 @@ naming the problem.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="sensors.html" class="btn btn-neutral float-left" title="Sensors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="verify-sitl-rov.html" class="btn btn-neutral float-right" title="Verify the SITL connection (ROV)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="parameters.html" class="btn btn-neutral float-right" title="BlueROV2 Parameters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

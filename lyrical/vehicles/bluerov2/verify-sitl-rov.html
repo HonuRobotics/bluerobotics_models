@@ -21,8 +21,8 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="How-to guides" href="../../how-to/index.html" />
-    <link rel="prev" title="Configuration" href="configuration.html" /> 
+    <link rel="next" title="Tuning of closed-loop response for BlueROV2" href="tune-sitl-rov.html" />
+    <link rel="prev" title="BlueROV2 Parameters" href="parameters.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -77,7 +77,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../getting-started/ardupilot_setup.html#build-the-gazebo-plugin">Build the Gazebo plugin</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../getting-started/ardupilot_setup.html#build-the-ardupilot-firmware">Build the ArduPilot firmware</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../getting-started/ardupilot_setup.html#verify-the-python-environment">Verify the Python environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../getting-started/ardupilot_setup.html#verify-the-python-environment-optional">Verify the Python environment (optional)</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../getting-started/ardupilot_setup.html#environment">Environment</a></li>
@@ -212,6 +212,28 @@
 <li class="toctree-l4"><a class="reference internal" href="configuration.html#payload">Payload</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="parameters.html">BlueROV2 Parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="parameters.html#what-is-fixed-and-what-is-free">What is fixed and what is free</a></li>
+<li class="toctree-l4"><a class="reference internal" href="parameters.html#the-autopilot-parameter-file">The autopilot parameter file</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="parameters.html#blue-robotics-publish-very-little-and-that-changes-the-claim">Blue Robotics publish very little, and that changes the claim</a></li>
+<li class="toctree-l5"><a class="reference internal" href="parameters.html#line-by-line">Line by line</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="parameters.html#mass">Mass</a></li>
+<li class="toctree-l4"><a class="reference internal" href="parameters.html#thrust">Thrust</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="parameters.html#the-installation-factor">The installation factor</a></li>
+<li class="toctree-l5"><a class="reference internal" href="parameters.html#deadband">Deadband</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="parameters.html#hydrodynamics">Hydrodynamics</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="parameters.html#coarse-identification">Coarse identification</a></li>
+<li class="toctree-l5"><a class="reference internal" href="parameters.html#verifying-the-coarse-identification">Verifying the coarse identification</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="parameters.html#modes">Modes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="parameters.html#open-questions">Open questions</a></li>
+</ul>
+</li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Verify the SITL connection (ROV)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#walkthrough">Walkthrough</a><ul>
@@ -219,7 +241,18 @@
 <li class="toctree-l5"><a class="reference internal" href="#the-autopilot-sitl">The autopilot (SITL)</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="#verification-teleop-via-the-autopilot">Verification - teleop via the autopilot.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#verification-teleop-via-the-autopilot">Verification - teleop via the autopilot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tune-sitl-rov.html">Tuning of closed-loop response for BlueROV2</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tune-sitl-rov.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tune-sitl-rov.html#mode-descriptions">Mode descriptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tune-sitl-rov.html#walkthrough">Walkthrough</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="tune-sitl-rov.html#before-either-walkthrough">Before either walkthrough</a></li>
+<li class="toctree-l5"><a class="reference internal" href="tune-sitl-rov.html#walkthrough-1-heading-hold-stabilize">Walkthrough 1: heading hold (<code class="docutils literal notranslate"><span class="pre">STABILIZE</span></code>)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="tune-sitl-rov.html#walkthrough-2-depth-hold-alt-hold">Walkthrough 2: depth hold (<code class="docutils literal notranslate"><span class="pre">ALT_HOLD</span></code>)</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="index.html#the-default-vehicle">The default vehicle</a></li>
@@ -421,12 +454,12 @@ See troubleshooting notes in <a class="reference internal" href="../../getting-s
 </section>
 </section>
 <section id="verification-teleop-via-the-autopilot">
-<h2>Verification - teleop via the autopilot.<a class="headerlink" href="#verification-teleop-via-the-autopilot" title="Link to this heading"></a></h2>
+<h2>Verification - teleop via the autopilot<a class="headerlink" href="#verification-teleop-via-the-autopilot" title="Link to this heading"></a></h2>
 <p>One axis at a time, at the MAVProxy prompt in the autopilot shell.</p>
 <p>Forward surge…</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mode</span> <span class="n">manual</span>
 <span class="n">arm</span> <span class="n">throttle</span>
-<span class="n">rc</span> <span class="mi">5</span> <span class="mi">1510</span>
+<span class="n">rc</span> <span class="mi">5</span> <span class="mi">1600</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">&lt;channel&gt;</span> <span class="pre">&lt;microseconds&gt;</span></code> overrides one RC input. Channel 5 is surge, and the channel spans 1100 to 1900; 1500 is neutral.</p>
@@ -477,51 +510,56 @@ See troubleshooting notes in <a class="reference internal" href="../../getting-s
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">5</span> <span class="pre">1510</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">5</span> <span class="pre">1600</span></code></p></td>
 <td><p>surge</p></td>
-<td><p>moves ahead, holds heading and depth</p></td>
+<td><p>moves ahead, without turning or changing depth much</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">5</span> <span class="pre">1490</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">5</span> <span class="pre">1400</span></code></p></td>
 <td><p>surge</p></td>
 <td><p>moves astern</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">6</span> <span class="pre">1510</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">6</span> <span class="pre">1600</span></code></p></td>
 <td><p>sway</p></td>
-<td><p>crabs to starboard (its own right, -y)</p></td>
+<td><p>crabs to starboard (its own right, -y). The sign flips because ArduPilot’s lateral axis is (fwd-right-down) FRD, positive to the right, while REP 103 is positive to the left: a positive lateral command is +y to ArduSub and -y here</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">4</span> <span class="pre">1510</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">4</span> <span class="pre">1600</span></code></p></td>
 <td><p>yaw</p></td>
-<td><p>turns to starboard, clockwise seen from above</p></td>
+<td><p>turns to starboard, clockwise seen from above (negative yaw here). The sign flips for the same reason as sway.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">3</span> <span class="pre">1510</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">3</span> <span class="pre">1600</span></code></p></td>
 <td><p>heave</p></td>
 <td><p>rises</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">3</span> <span class="pre">1490</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">3</span> <span class="pre">1400</span></code></p></td>
 <td><p>heave</p></td>
 <td><p>sinks</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">1</span> <span class="pre">1510</span></code></p></td>
-<td><p>pitch</p></td>
-<td><p>no motion, and that is correct: on the six-thruster standard vehicle the four horizontals carry surge, sway and yaw and the two verticals carry heave and roll, so pitch is not actuated</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">2</span> <span class="pre">1600</span></code></p></td>
+<td><p>roll</p></td>
+<td><p>rolls slightly to starboard (right side down); the two verticals push in opposite directions, and the vehicle’s own stability rights it when released</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">all</span> <span class="pre">1500</span></code></p></td>
 <td><p>—</p></td>
 <td><p>stops</p></td>
 </tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">disarm</span></code></p></td>
+<td><p>—</p></td>
+<td><p>ends the session</p></td>
+</tr>
 </tbody>
 </table>
 <p>The verification passes when each RC channel, commanded on its own, produces the
-motion described above.</p>
+motion described above.  This is similar to the open-loop experiments without Ardu decribed in [parameters.md]</p>
 <p>The sign convention can be confusing, because two coordinate conventions do not agree:</p>
 <ul class="simple">
 <li><p>ArduPilot uses x forward, y <strong>right</strong>, z down - FRD, as in MAVLink’s <a class="reference external" href="https://mavlink.io/en/messages/common.html#MAV_FRAME_BODY_FRD"><code class="docutils literal notranslate"><span class="pre">MAV_FRAME_BODY_FRD</span></code></a>.</p></li>
 <li><p>ROS uses x forward, y <strong>left</strong>, z up - FLU, per <a class="reference external" href="https://www.ros.org/reps/rep-0103.html">REP 103</a>.</p></li>
 </ul>
-<p>The commands are deliberately tiny. 1510 about 2.5% of full stick and it is  enough to see the vehicle move. This is because the actuators and vehicle dynamics have not been tuned yet.  That will happen later in <a class="reference internal" href="../../specs/SITL_SPEC.html"><span class="std std-doc">the spec</span></a></p>
+<p>The exmaple commands are a quarter of full stick, but are just exmples.</p>
 <p>To see what the autopilot is commanding while you move the sticks, echo the thruster topics:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gz<span class="w"> </span>topic<span class="w"> </span>-e<span class="w"> </span>-t<span class="w"> </span>/bluerov2/thruster_1/cmd
 gz<span class="w"> </span>topic<span class="w"> </span>-e<span class="w"> </span>-t<span class="w"> </span>/bluerov2/thruster_5/cmd
+<span class="c1"># etc. </span>
 </pre></div>
 </div>
 </section>
@@ -531,8 +569,8 @@ gz<span class="w"> </span>topic<span class="w"> </span>-e<span class="w"> </span
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="configuration.html" class="btn btn-neutral float-left" title="Configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../../how-to/index.html" class="btn btn-neutral float-right" title="How-to guides" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="parameters.html" class="btn btn-neutral float-left" title="BlueROV2 Parameters" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tune-sitl-rov.html" class="btn btn-neutral float-right" title="Tuning of closed-loop response for BlueROV2" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -33,13 +33,14 @@ cd ~/maritime_ws/thirdparty
 git clone https://github.com/ArduPilot/ardupilot.git
 git -C ardupilot checkout Rover-4.7.1
 git -C ardupilot submodule update --init --recursive
+
 git clone https://github.com/ArduPilot/ardupilot_gazebo.git
 git -C ardupilot_gazebo checkout 082a0fe231f6e63bc8d1598f1cba461d9e2ea7f5
 ```
 
 ## Build the Gazebo plugin
 
-In the container:
+In the drydock container:
 
 ```bash
 cd ~/maritime_ws/thirdparty/ardupilot_gazebo
@@ -55,11 +56,13 @@ The resulting shared libraries are in `build/`, e.g.,  `libArduPilotPlugin.so`.
 
 ## Build the ArduPilot firmware
 
+Also in the drydock container:
+
 ```bash
 cd ~/maritime_ws/thirdparty/ardupilot
 python3 -m venv --system-site-packages venv-ardupilot
 
-DO_PYTHON_VENV_ENV=0 Tools/environment_install/install-prereqs-ubuntu.sh -y
+DO_PYTHON_VENV_ENV=0 Tools/environment_install/install-prereqs-ubuntu.sh
 
 source venv-ardupilot/bin/activate
 ./waf configure --board sitl
@@ -68,11 +71,11 @@ source venv-ardupilot/bin/activate
 ./waf copter
 ```
 
-The script offers to edit your shell login file twice — once to activate its venv in every terminal, once to add `Tools/autotest` to `PATH`. Decline both. `DO_PYTHON_VENV_ENV=0` handles the first; answer `N` to the second if you are prompted, and note that plain `-y` answers `y` to it. Both edits go to the host's `~/.profile` through the bind mount, and both are handled instead by the environment script below.
+ArduPilot's prerequisites installer, `install-prereqs-ubuntu.sh`, asks before each step. Answer yes to the package installs, and `N` when it offers to add `Tools/autotest` to `PATH` in your shell login file. `DO_PYTHON_VENV_ENV=0` already stops its other login edit, activating the venv in every terminal. Both edits would go to the host's `~/.profile` through the bind mount; the environment script below handles both instead.
 
-### Verify the Python environment
+### Verify the Python environment (optional)
 
-The prereq script's single `pip install` can fail part-way without stopping the script. Check, in the venv — every `pip install` on this page goes there, never into the system Python:
+The prereq installer's single `pip install` can fail part-way without stopping the installer. The symptom shows up later: `sim_vehicle.py` stops at `Run MavProxy` with `No such file or directory: 'mavproxy.py'`. If you see that, or want to check now, run this in the venv — every `pip install` on this page goes there, never into the system Python:
 
 ```bash
 source ~/maritime_ws/thirdparty/ardupilot/venv-ardupilot/bin/activate
@@ -151,6 +154,8 @@ sim_vehicle.py -v ArduCopter -f gazebo-iris --model JSON --console --map -w \
 
 The two `--add-param-file` arguments layer the frame's parameter files on top of whatever `sim_vehicle.py` loads for `-f gazebo-iris` model.
 
+If it stops at `Run MavProxy` with `No such file or directory: 'mavproxy.py'`, the venv is missing MAVProxy: see [Verify the Python environment](#verify-the-python-environment-optional).
+
 Then at the MAVProxy prompt (the terminal in which you ran `sim_vehicle.py`):
 
 ```
@@ -207,12 +212,11 @@ Left to itself the script creates `~/venv-ardupilot`, but it looks in the ArduPi
 
 ```{warning}
 For drydock: `$HOME` is bind-mounted into the drydock container at the same path, so
-anything the prereq script writes to your home directory appears on the host
-too. Run with `-y` alone and it answers yes to both of its shell-login
-prompts, appending a venv activation and a `PATH` line to your `~/.profile` —
-so every *host* terminal would then try to activate a venv built against the
-container's Python. `DO_PYTHON_VENV_ENV=0` suppresses the venv one; decline
-the `PATH` one. Set both explicitly in the environment script instead.
+anything the prereq installer writes to your home directory appears on the host
+too. That is why it runs without `-y`: `-y` answers yes to its shell-login
+prompts as well, appending a venv activation and a `PATH` line to your
+`~/.profile`, so every *host* terminal would then try to activate a venv built
+against the container's Python.
 ```
 
 Building `rover` alone is enough for the BlueBoat, and `sub` for the BlueROV2. `./waf copter` as well if you want the Iris smoke test below.

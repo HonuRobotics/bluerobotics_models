@@ -23,7 +23,6 @@ gz sim -v4 -r $(ros2 pkg prefix --share bluerov2_gazebo)/worlds/bluerov2_sitl.sd
 
 If successful, you should see Gazebo sim start with the ROV spawned in a simple underwater environment. 
 
-
 ### The autopilot (SITL)
 
 ```bash
@@ -42,7 +41,7 @@ connects and then roughly once a minute.  This is annoying, but not of concern. 
 See troubleshooting notes in [ArduPilot SITL setup](../../getting-started/ardupilot_setup.md).
 ```
 
-## Verification - teleop via the autopilot. 
+## Verification - teleop via the autopilot
 
 One axis at a time, at the MAVProxy prompt in the autopilot shell. 
 
@@ -50,7 +49,7 @@ Forward surge...
 ```
 mode manual
 arm throttle
-rc 5 1510
+rc 5 1600
 ```
 
 `rc <channel> <microseconds>` overrides one RC input. Channel 5 is surge, and the channel spans 1100 to 1900; 1500 is neutral.
@@ -75,18 +74,19 @@ Directions below are in the vehicle's own frame, [REP 103](https://www.ros.org/r
 
 | Command | Axis | Expected |
 |---|---|---|
-| `rc 5 1510` | surge | moves ahead, holds heading and depth |
-| `rc 5 1490` | surge | moves astern |
-| `rc 6 1510` | sway | crabs to starboard (its own right, -y)|
-| `rc 4 1510` | yaw | turns to starboard, clockwise seen from above |
-| `rc 3 1510` | heave | rises |
-| `rc 3 1490` | heave | sinks |
-| `rc 1 1510` | pitch | no motion, and that is correct: on the six-thruster standard vehicle the four horizontals carry surge, sway and yaw and the two verticals carry heave and roll, so pitch is not actuated |
+| `rc 5 1600` | surge | moves ahead, without turning or changing depth much |
+| `rc 5 1400` | surge | moves astern |
+| `rc 6 1600` | sway | crabs to starboard (its own right, -y). The sign flips because ArduPilot's lateral axis is (fwd-right-down) FRD, positive to the right, while REP 103 is positive to the left: a positive lateral command is +y to ArduSub and -y here |
+| `rc 4 1600` | yaw | turns to starboard, clockwise seen from above (negative yaw here). The sign flips for the same reason as sway. |
+| `rc 3 1600` | heave | rises |
+| `rc 3 1400` | heave | sinks |
+| `rc 2 1600` | roll | rolls slightly to starboard (right side down); the two verticals push in opposite directions, and the vehicle's own stability rights it when released |
 | `rc all 1500` | — | stops |
+| `disarm` | — | ends the session |
 
 
 The verification passes when each RC channel, commanded on its own, produces the
-motion described above.
+motion described above.  This is similar to the open-loop experiments without Ardu decribed in [parameters.md]
 
 The sign convention can be confusing, because two coordinate conventions do not agree:
 
@@ -94,12 +94,13 @@ The sign convention can be confusing, because two coordinate conventions do not 
 * ROS uses x forward, y **left**, z up - FLU, per [REP 103](https://www.ros.org/reps/rep-0103.html).
 
 
-The commands are deliberately tiny. 1510 about 2.5% of full stick and it is  enough to see the vehicle move. This is because the actuators and vehicle dynamics have not been tuned yet.  That will happen later in [the spec](../../specs/SITL_SPEC.md)
+The exmaple commands are a quarter of full stick, but are just exmples. 
 
 To see what the autopilot is commanding while you move the sticks, echo the thruster topics:
 
 ```bash
 gz topic -e -t /bluerov2/thruster_1/cmd
 gz topic -e -t /bluerov2/thruster_5/cmd
+# etc. 
 ```
 

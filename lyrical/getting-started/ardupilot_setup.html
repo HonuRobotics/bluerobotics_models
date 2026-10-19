@@ -77,7 +77,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#build-the-gazebo-plugin">Build the Gazebo plugin</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#build-the-ardupilot-firmware">Build the ArduPilot firmware</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#verify-the-python-environment">Verify the Python environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#verify-the-python-environment-optional">Verify the Python environment (optional)</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#environment">Environment</a></li>
@@ -212,6 +212,28 @@
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/configuration.html#payload">Payload</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/parameters.html">BlueROV2 Parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#what-is-fixed-and-what-is-free">What is fixed and what is free</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#the-autopilot-parameter-file">The autopilot parameter file</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#blue-robotics-publish-very-little-and-that-changes-the-claim">Blue Robotics publish very little, and that changes the claim</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#line-by-line">Line by line</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#mass">Mass</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#thrust">Thrust</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#the-installation-factor">The installation factor</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#deadband">Deadband</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#hydrodynamics">Hydrodynamics</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#coarse-identification">Coarse identification</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#verifying-the-coarse-identification">Verifying the coarse identification</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#modes">Modes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#open-questions">Open questions</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/verify-sitl-rov.html">Verify the SITL connection (ROV)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/verify-sitl-rov.html#prerequisites">Prerequisites</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/verify-sitl-rov.html#walkthrough">Walkthrough</a><ul>
@@ -219,7 +241,18 @@
 <li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/verify-sitl-rov.html#the-autopilot-sitl">The autopilot (SITL)</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/verify-sitl-rov.html#verification-teleop-via-the-autopilot">Verification - teleop via the autopilot.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/verify-sitl-rov.html#verification-teleop-via-the-autopilot">Verification - teleop via the autopilot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/tune-sitl-rov.html">Tuning of closed-loop response for BlueROV2</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/tune-sitl-rov.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/tune-sitl-rov.html#mode-descriptions">Mode descriptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/tune-sitl-rov.html#walkthrough">Walkthrough</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/tune-sitl-rov.html#before-either-walkthrough">Before either walkthrough</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/tune-sitl-rov.html#walkthrough-1-heading-hold-stabilize">Walkthrough 1: heading hold (<code class="docutils literal notranslate"><span class="pre">STABILIZE</span></code>)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/tune-sitl-rov.html#walkthrough-2-depth-hold-alt-hold">Walkthrough 2: depth hold (<code class="docutils literal notranslate"><span class="pre">ALT_HOLD</span></code>)</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/index.html#the-default-vehicle">The default vehicle</a></li>
@@ -431,6 +464,7 @@
 git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ArduPilot/ardupilot.git
 git<span class="w"> </span>-C<span class="w"> </span>ardupilot<span class="w"> </span>checkout<span class="w"> </span>Rover-4.7.1
 git<span class="w"> </span>-C<span class="w"> </span>ardupilot<span class="w"> </span>submodule<span class="w"> </span>update<span class="w"> </span>--init<span class="w"> </span>--recursive
+
 git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ArduPilot/ardupilot_gazebo.git
 git<span class="w"> </span>-C<span class="w"> </span>ardupilot_gazebo<span class="w"> </span>checkout<span class="w"> </span>082a0fe231f6e63bc8d1598f1cba461d9e2ea7f5
 </pre></div>
@@ -439,7 +473,7 @@ git<span class="w"> </span>-C<span class="w"> </span>ardupilot_gazebo<span class
 </section>
 <section id="build-the-gazebo-plugin">
 <h2>Build the Gazebo plugin<a class="headerlink" href="#build-the-gazebo-plugin" title="Link to this heading"></a></h2>
-<p>In the container:</p>
+<p>In the drydock container:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/maritime_ws/thirdparty/ardupilot_gazebo
 
 <span class="nb">export</span><span class="w"> </span><span class="nv">GZ_VERSION</span><span class="o">=</span>jetty
@@ -452,10 +486,11 @@ cmake<span class="w"> </span>--build<span class="w"> </span>build<span class="w"
 </section>
 <section id="build-the-ardupilot-firmware">
 <h2>Build the ArduPilot firmware<a class="headerlink" href="#build-the-ardupilot-firmware" title="Link to this heading"></a></h2>
+<p>Also in the drydock container:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/maritime_ws/thirdparty/ardupilot
 python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>--system-site-packages<span class="w"> </span>venv-ardupilot
 
-<span class="nv">DO_PYTHON_VENV_ENV</span><span class="o">=</span><span class="m">0</span><span class="w"> </span>Tools/environment_install/install-prereqs-ubuntu.sh<span class="w"> </span>-y
+<span class="nv">DO_PYTHON_VENV_ENV</span><span class="o">=</span><span class="m">0</span><span class="w"> </span>Tools/environment_install/install-prereqs-ubuntu.sh
 
 <span class="nb">source</span><span class="w"> </span>venv-ardupilot/bin/activate
 ./waf<span class="w"> </span>configure<span class="w"> </span>--board<span class="w"> </span>sitl
@@ -464,10 +499,10 @@ python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </
 ./waf<span class="w"> </span>copter
 </pre></div>
 </div>
-<p>The script offers to edit your shell login file twice — once to activate its venv in every terminal, once to add <code class="docutils literal notranslate"><span class="pre">Tools/autotest</span></code> to <code class="docutils literal notranslate"><span class="pre">PATH</span></code>. Decline both. <code class="docutils literal notranslate"><span class="pre">DO_PYTHON_VENV_ENV=0</span></code> handles the first; answer <code class="docutils literal notranslate"><span class="pre">N</span></code> to the second if you are prompted, and note that plain <code class="docutils literal notranslate"><span class="pre">-y</span></code> answers <code class="docutils literal notranslate"><span class="pre">y</span></code> to it. Both edits go to the host’s <code class="docutils literal notranslate"><span class="pre">~/.profile</span></code> through the bind mount, and both are handled instead by the environment script below.</p>
-<section id="verify-the-python-environment">
-<h3>Verify the Python environment<a class="headerlink" href="#verify-the-python-environment" title="Link to this heading"></a></h3>
-<p>The prereq script’s single <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> can fail part-way without stopping the script. Check, in the venv — every <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> on this page goes there, never into the system Python:</p>
+<p>ArduPilot’s prerequisites installer, <code class="docutils literal notranslate"><span class="pre">install-prereqs-ubuntu.sh</span></code>, asks before each step. Answer yes to the package installs, and <code class="docutils literal notranslate"><span class="pre">N</span></code> when it offers to add <code class="docutils literal notranslate"><span class="pre">Tools/autotest</span></code> to <code class="docutils literal notranslate"><span class="pre">PATH</span></code> in your shell login file. <code class="docutils literal notranslate"><span class="pre">DO_PYTHON_VENV_ENV=0</span></code> already stops its other login edit, activating the venv in every terminal. Both edits would go to the host’s <code class="docutils literal notranslate"><span class="pre">~/.profile</span></code> through the bind mount; the environment script below handles both instead.</p>
+<section id="verify-the-python-environment-optional">
+<h3>Verify the Python environment (optional)<a class="headerlink" href="#verify-the-python-environment-optional" title="Link to this heading"></a></h3>
+<p>The prereq installer’s single <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> can fail part-way without stopping the installer. The symptom shows up later: <code class="docutils literal notranslate"><span class="pre">sim_vehicle.py</span></code> stops at <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">MavProxy</span></code> with <code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">such</span> <span class="pre">file</span> <span class="pre">or</span> <span class="pre">directory:</span> <span class="pre">'mavproxy.py'</span></code>. If you see that, or want to check now, run this in the venv — every <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> on this page goes there, never into the system Python:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>~/maritime_ws/thirdparty/ardupilot/venv-ardupilot/bin/activate
 <span class="k">for</span><span class="w"> </span>m<span class="w"> </span><span class="k">in</span><span class="w"> </span>future<span class="w"> </span>pymavlink<span class="w"> </span>serial<span class="w"> </span>MAVProxy<span class="w"> </span>em<span class="w"> </span>pexpect<span class="w"> </span>lxml<span class="w"> </span>numpy<span class="w"> </span>psutil<span class="w"> </span>yaml<span class="p">;</span><span class="w"> </span><span class="k">do</span>
 <span class="w">  </span>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import </span><span class="nv">$m</span><span class="s2">"</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"MISSING </span><span class="nv">$m</span><span class="s2">"</span>
@@ -534,6 +569,7 @@ sim_vehicle.py<span class="w"> </span>-v<span class="w"> </span>ArduCopter<span 
 </pre></div>
 </div>
 <p>The two <code class="docutils literal notranslate"><span class="pre">--add-param-file</span></code> arguments layer the frame’s parameter files on top of whatever <code class="docutils literal notranslate"><span class="pre">sim_vehicle.py</span></code> loads for <code class="docutils literal notranslate"><span class="pre">-f</span> <span class="pre">gazebo-iris</span></code> model.</p>
+<p>If it stops at <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">MavProxy</span></code> with <code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">such</span> <span class="pre">file</span> <span class="pre">or</span> <span class="pre">directory:</span> <span class="pre">'mavproxy.py'</span></code>, the venv is missing MAVProxy: see <a class="reference internal" href="#verify-the-python-environment-optional">Verify the Python environment</a>.</p>
 <p>Then at the MAVProxy prompt (the terminal in which you ran <code class="docutils literal notranslate"><span class="pre">sim_vehicle.py</span></code>):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mode</span> <span class="n">guided</span>
 <span class="n">arm</span> <span class="n">throttle</span>
@@ -574,12 +610,11 @@ nobody here has modified.</span><a class="headerlink" href="#id2" title="Link to
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>For drydock: <code class="docutils literal notranslate"><span class="pre">$HOME</span></code> is bind-mounted into the drydock container at the same path, so
-anything the prereq script writes to your home directory appears on the host
-too. Run with <code class="docutils literal notranslate"><span class="pre">-y</span></code> alone and it answers yes to both of its shell-login
-prompts, appending a venv activation and a <code class="docutils literal notranslate"><span class="pre">PATH</span></code> line to your <code class="docutils literal notranslate"><span class="pre">~/.profile</span></code> —
-so every <em>host</em> terminal would then try to activate a venv built against the
-container’s Python. <code class="docutils literal notranslate"><span class="pre">DO_PYTHON_VENV_ENV=0</span></code> suppresses the venv one; decline
-the <code class="docutils literal notranslate"><span class="pre">PATH</span></code> one. Set both explicitly in the environment script instead.</p>
+anything the prereq installer writes to your home directory appears on the host
+too. That is why it runs without <code class="docutils literal notranslate"><span class="pre">-y</span></code>: <code class="docutils literal notranslate"><span class="pre">-y</span></code> answers yes to its shell-login
+prompts as well, appending a venv activation and a <code class="docutils literal notranslate"><span class="pre">PATH</span></code> line to your
+<code class="docutils literal notranslate"><span class="pre">~/.profile</span></code>, so every <em>host</em> terminal would then try to activate a venv built
+against the container’s Python.</p>
 </div>
 <p>Building <code class="docutils literal notranslate"><span class="pre">rover</span></code> alone is enough for the BlueBoat, and <code class="docutils literal notranslate"><span class="pre">sub</span></code> for the BlueROV2. <code class="docutils literal notranslate"><span class="pre">./waf</span> <span class="pre">copter</span></code> as well if you want the Iris smoke test below.</p>
 <p>The two vehicles differ only in what you hand <code class="docutils literal notranslate"><span class="pre">sim_vehicle.py</span></code>; the walkthroughs are <a class="reference internal" href="../vehicles/blueboat/verify-sitl-boat.html"><span class="std std-doc">Verify the SITL connection (Boat)</span></a> for the BlueBoat and <a class="reference internal" href="../vehicles/bluerov2/verify-sitl-rov.html"><span class="std std-doc">Verify the SITL connection (ROV)</span></a> for the BlueROV2.</p>

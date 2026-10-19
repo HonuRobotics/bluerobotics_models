@@ -75,7 +75,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#build-the-gazebo-plugin">Build the Gazebo plugin</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#build-the-ardupilot-firmware">Build the ArduPilot firmware</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../getting-started/ardupilot_setup.html#verify-the-python-environment">Verify the Python environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../getting-started/ardupilot_setup.html#verify-the-python-environment-optional">Verify the Python environment (optional)</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#environment">Environment</a></li>
@@ -210,6 +210,28 @@
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/configuration.html#payload">Payload</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/parameters.html">BlueROV2 Parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#what-is-fixed-and-what-is-free">What is fixed and what is free</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#the-autopilot-parameter-file">The autopilot parameter file</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#blue-robotics-publish-very-little-and-that-changes-the-claim">Blue Robotics publish very little, and that changes the claim</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#line-by-line">Line by line</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#mass">Mass</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#thrust">Thrust</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#the-installation-factor">The installation factor</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#deadband">Deadband</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#hydrodynamics">Hydrodynamics</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#coarse-identification">Coarse identification</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#verifying-the-coarse-identification">Verifying the coarse identification</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#modes">Modes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#open-questions">Open questions</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/verify-sitl-rov.html">Verify the SITL connection (ROV)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/verify-sitl-rov.html#prerequisites">Prerequisites</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/verify-sitl-rov.html#walkthrough">Walkthrough</a><ul>
@@ -217,7 +239,18 @@
 <li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/verify-sitl-rov.html#the-autopilot-sitl">The autopilot (SITL)</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/verify-sitl-rov.html#verification-teleop-via-the-autopilot">Verification - teleop via the autopilot.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/verify-sitl-rov.html#verification-teleop-via-the-autopilot">Verification - teleop via the autopilot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/tune-sitl-rov.html">Tuning of closed-loop response for BlueROV2</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/tune-sitl-rov.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/tune-sitl-rov.html#mode-descriptions">Mode descriptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/tune-sitl-rov.html#walkthrough">Walkthrough</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/tune-sitl-rov.html#before-either-walkthrough">Before either walkthrough</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/tune-sitl-rov.html#walkthrough-1-heading-hold-stabilize">Walkthrough 1: heading hold (<code class="docutils literal notranslate"><span class="pre">STABILIZE</span></code>)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/tune-sitl-rov.html#walkthrough-2-depth-hold-alt-hold">Walkthrough 2: depth hold (<code class="docutils literal notranslate"><span class="pre">ALT_HOLD</span></code>)</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/index.html#the-default-vehicle">The default vehicle</a></li>
@@ -435,7 +468,7 @@
 <tr class="row-even"><td><p>5</p></td>
 <td><p>Stabilization layer, ROV</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code></p></td>
-<td><p>later</p></td>
+<td><p>in review</p></td>
 </tr>
 <tr class="row-odd"><td><p>6</p></td>
 <td><p>Waypoint mission, boat only</p></td>
@@ -579,16 +612,17 @@ both on a 14.8 V nominal pack.</p></li>
 <h3>Phase 5 — Stabilization layer, ROV<a class="headerlink" href="#phase-5-stabilization-layer-rov" title="Link to this heading"></a></h3>
 <p><strong>Objective:</strong> the same exercise as phase 4, for the BlueROV2 under ArduSub, carrying whatever the boat taught. Held separate because the vehicle has more degrees of freedom, a different autopilot and a different set of loops, and because doing the simpler one first is how the pattern gets settled.</p>
 <p>Modes: ArduSub’s <code class="docutils literal notranslate"><span class="pre">STABILIZE</span></code> and <code class="docutils literal notranslate"><span class="pre">ALT_HOLD</span></code>. What they close is attitude and depth — forward and lateral remain direct motor demands, so the ROV’s objective is heading and depth holding rather than a commanded speed. There is no surge-speed loop to exercise.</p>
-<p>The work follows phase 4’s shape: thrust limits from Blue Robotics’ T200 data at the vehicle’s own voltage, an audit of the derived parameter file against the published chain, hydrodynamic identification by the same open-loop-then-validate procedure, and a provenance page. Two things differ and are worth stating in advance.</p>
-<p>First, the ROV’s published bollard figures are a cross-check the boat has no equivalent of: Blue Robotics quote thrust for the assembled vehicle as well as for the thruster on a bench, and the two do not have to agree. Which one the model should carry is a decision for this phase rather than an assumption.</p>
+<p>The work follows phase 4’s shape: thrust limits from Blue Robotics’ T200 data at the vehicle’s own voltage, an audit of the derived parameter file against the published chain, hydrodynamic identification, and a provenance page. Two things differ and are worth stating in advance.</p>
+<p>First, the ROV’s published bollard figures are a cross-check the boat has no equivalent of: Blue Robotics quote thrust for the assembled vehicle as well as for the thruster on a bench, and the two do not have to agree. Decided in this phase: the thruster parts carry the bench figures, and the vehicle applies an installation factor that reproduces the published bollard pull.</p>
 <p>Second, the standard six-thruster vehicle has less authority than the mode names suggest. The <code class="docutils literal notranslate"><span class="pre">Vectored</span></code> frame mixes no pitch at all, and Blue Robotics ship a roll gain of zero, so <code class="docutils literal notranslate"><span class="pre">STABILIZE</span></code> on that vehicle meaningfully closes yaw. The phase should say what it is actually holding rather than what the mode is called.</p>
+<p>Third, as done: Blue Robotics publish no gains for these loops, so the reference is ArduSub’s own firmware defaults, written out in the parameter file. And the hydrodynamics are identified differently from the boat’s: a coarse open-loop estimate, quadratic drag only, from the published bollard thrust and estimated top speeds, judged by whether the vehicle responds as snappily as the real one. Since the ROV runs under ArduSub, the open-loop model may lean toward controllability, with ArduSub’s settings limiting the rates.</p>
 <section id="id1">
 <h4>Automated verification<a class="headerlink" href="#id1" title="Link to this heading"></a></h4>
-<p>The parameter audit and the identification trials from phase 4, pointed at the ROV. The launch tests in <code class="docutils literal notranslate"><span class="pre">bluerov2_gazebo</span></code> become pertinent for the same reason the boat’s do: they derive their commands from the thrust constants.</p>
+<p>An open-loop axis test in <code class="docutils literal notranslate"><span class="pre">bluerov2_gazebo</span></code>: each of surge, sway, heave and yaw commanded in both directions through the teleop mixer’s allocation, checked for direction and for speed within a factor of ten of an expected figure taken from published performance and engineering judgement. It prints a table of every case against its limits for a person to read. It does not exercise ArduSub’s allocation; the walkthroughs do.</p>
 </section>
 <section id="id2">
 <h4>Human verification<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
-<p>The reviewer holds depth and heading in a stabilized mode and confirms the shipped ArduSub gains work unmodified, judged against the same kind of named quantities as the boat’s — settling, overshoot, steady-state error. Same rule: if it needs retuning, the actuator model or the hydrodynamics is wrong, not the gains.</p>
+<p>The reviewer follows the walkthroughs: the open-loop spot check on the parameters page, <code class="docutils literal notranslate"><span class="pre">MANUAL</span></code> under ArduSub to confirm the channels and polarity, then heading hold in <code class="docutils literal notranslate"><span class="pre">STABILIZE</span></code> and depth hold in <code class="docutils literal notranslate"><span class="pre">ALT_HOLD</span></code>, judged against the same kind of named quantities as the boat’s — time to reach the demand, overshoot, settling. Same rule: if it needs retuning, the actuator model or the hydrodynamics is wrong, not the gains.</p>
 </section>
 </section>
 <section id="phase-6-waypoint-mission-boat-only">
