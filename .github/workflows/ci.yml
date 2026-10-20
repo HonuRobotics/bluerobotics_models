@@ -31,15 +31,19 @@ jobs:
       - uses: actions/checkout@v7
         with:
           path: src/bluerobotics_models
-      # gz_thruster is an unreleased sibling package, so rosdep cannot resolve
-      # it. Only that one package is copied in: importing all of gz-maritime
+      # The gz-maritime packages the vehicles load (the thruster, the
+      # hydrodynamics, the ocean current and the library it builds on) are
+      # unreleased, so rosdep cannot resolve them; gz_maritime.repos says why
+      # each is needed. Only those are copied in: importing all of gz-maritime
       # would pull in gz_waves_provider_fft, whose ehukai dependency has no
-      # rosdep key either. Temporary, until the plugin change reaches gz-sim.
+      # rosdep key either.
       - name: Fetch unreleased sources
         run: |
           mkdir -p /tmp/deps
-          vcs import /tmp/deps < src/bluerobotics_models/thruster.repos
-          cp -r /tmp/deps/gz-maritime/gz_thruster src/gz_thruster
+          vcs import /tmp/deps < src/bluerobotics_models/gz_maritime.repos
+          for pkg in gz_thruster gz_hydrodynamics gz_ocean_current gz_marked_shapes; do
+            cp -r /tmp/deps/gz-maritime/$pkg src/$pkg
+          done
       - name: Install dependencies
         run: |
           apt-get update

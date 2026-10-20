@@ -121,13 +121,15 @@ if(BUILD_TESTING)
     TIMEOUT 300)
   ament_add_pytest_test(test_model_generation test/test_model_generation.py
     TIMEOUT 180)
+  # The vehicle in a set ocean current: its Hydrodynamics damps it
+  # against the water, so with no thrust it drifts with it. NOCAPTURE, like
+  # the launch tests below, so its sim output and the drift it measured
+  # reach the test logs.
+  ament_add_pytest_test(test_ocean_current test/test_ocean_current.py
+    TIMEOUT 300 NOCAPTURE)
   # NOCAPTURE so the sim output printed at teardown reaches the test logs
   # even when every assertion passes; the runtime behavior tests watch the
   # vehicle for several seconds each.
-  # The vehicle in a set ocean current: its Hydrodynamics damps it
-  # against the water, so with no thrust it drifts with it.
-  ament_add_pytest_test(test_ocean_current test/test_ocean_current.py
-    TIMEOUT 300 NOCAPTURE)
   ament_add_pytest_test(test_gz_launch test/test_gz_launch.py TIMEOUT 420
     NOCAPTURE)
   ament_add_pytest_test(test_ros_launch test/test_ros_launch.py TIMEOUT 300
