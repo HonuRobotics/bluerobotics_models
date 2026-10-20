@@ -107,6 +107,9 @@ def test_model_generation_follows_config():
     assert len(thrusters) == 8  # heavy
     # one controller per claw joint: gripper jaws + sampler cups
     assert len(plugins(root, 'gz-sim-joint-position-controller-system')) == 4
+    # gz-maritime's Hydrodynamics, which damps against the ocean current.
+    assert len(plugins(root, 'gz-maritime-hydrodynamics-system')) == 1
+    assert not plugins(root, 'gz-sim-hydrodynamics-system')
     by_type = {s.get('type') for s in root.iter('sensor')}
     assert by_type == {'camera', 'rgbd_camera', 'gpu_lidar', 'custom'}
     root, _ = gen_model(default_config())
