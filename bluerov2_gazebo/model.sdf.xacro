@@ -67,7 +67,15 @@
        <topic_base>/cmd, speed feedback on <topic_base>/cmd/ang_vel:
        the plugin prefixes a custom <topic> with its <namespace> (the model
        name unless given), so the namespace is emptied and the topic follows
-       the config like every other part topic, not the spawn name. -->
+       the config like every other part topic, not the spawn name.
+
+       The ROV spec declares bollard pull force values.  These values not consistent
+       with the bench thrust values of the individual thrusters.
+       So we introduce a derived factor to correct for this as a 
+       multiplier on the bench thrust. The Heavy
+       has no published bollard figures and takes the same factor as an
+       assumption. Derivation: docs/vehicles/bluerov2/parameters.md. -->
+  <xacro:property name="thrust_install_factor" value="0.74"/>
   <xacro:macro name="prop_thruster" params="name drive topic_base">
     <plugin filename="gz-maritime-thruster-system"
             name="gz::sim::maritime::Thruster">
@@ -85,8 +93,14 @@
       <fluid_density>1025.0</fluid_density>
       <propeller_diameter>${drive['diameter']}</propeller_diameter>
       <velocity_control>true</velocity_control>
-      <max_thrust_cmd>${drive['max_thrust']}</max_thrust_cmd>
-      <min_thrust_cmd>${drive['min_thrust']}</min_thrust_cmd>
+      <max_thrust_cmd>${drive['max_thrust'] * thrust_install_factor}</max_thrust_cmd>
+      <min_thrust_cmd>${drive['min_thrust'] * thrust_install_factor}</min_thrust_cmd>
+      <!-- Emitted only when the part declares one: the plugin enables the
+           deadband by the element's presence, so a zero would arm a cut that
+           never fires. -->
+      <xacro:if value="${'deadband' in drive and drive['deadband'] > 0}">
+        <deadband>${drive['deadband'] * thrust_install_factor}</deadband>
+      </xacro:if>
     </plugin>
   </xacro:macro>
 
@@ -282,9 +296,11 @@
        claim about geometry rather than a choice. ArduSub assigns
        SERVO1..6 to Motor1..6 automatically from FRAME_CONFIG, and our
        thruster_N slots sit where ArduSub's Vectored frame expects Motor N
-       (AP_Motors6DOF.cpp, SUB_FRAME_VECTORED). test_ardusub_frame.py
-       asserts that correspondence; if a slot moves, it fails there rather
-       than as a vehicle that swims sideways. -->
+       (AP_Motors6DOF.cpp, SUB_FRAME_VECTORED).
+       test_model_generation.py, in
+       test_ardupilot_controls_follow_the_thrusters, asserts that
+       correspondence; if a slot moves, it fails there rather than as a
+       vehicle that swims sideways. -->
   <xacro:macro name="ap_control" params="ptype name parent xyz rpy collision joint axis info">
     <xacro:if value="${'drive' in info and joint != 'fixed'}">
       <xacro:part_entry name="${name}"/>
@@ -422,7 +438,11 @@
               name="gz::sim::systems::DopplerVelocityLogSystem"/>
     </xacro:if>
 
-    <!-- Hydrodynamic damping (Fossen quadratic drag, reference BlueROV2).
+    <!-- Hydrodynamic damping: Fossen quadratic drag only, linear terms zero.
+         Surge, sway, heave and yaw are a coarse identification from the
+         published bollard thrust and top speeds; roll and pitch are not
+         closed on this vehicle and keep their earlier reference value.
+         Derivation: docs/vehicles/bluerov2/parameters.md.
          Added mass (xDotU etc., e.g. von Benzon 2022) is intentionally left at
          zero: the plugin applies it as explicit acceleration feedback, which
          diverges when added mass exceeds rigid mass (heave: 18.68 vs 11.5 kg).
@@ -434,12 +454,12 @@
       <water_density>1025.0</water_density>
       <xU>0</xU>   <yV>0</yV>   <zW>0</zW>
       <kP>0</kP>   <mQ>0</mQ>   <nR>0</nR>
-      <xUabsU>-33.732</xUabsU>
-      <yVabsV>-54.16</yVabsV>
-      <zWabsW>-73.225</zWabsW>
+      <xUabsU>-39.2</xUabsU>
+      <yVabsV>-157.0</yVabsV>
+      <zWabsW>-122.1</zWabsW>
       <kPabsP>-3.992</kPabsP>
       <mQabsQ>-3.992</mQabsQ>
-      <nRabsR>-3.992</nRabsR>
+      <nRabsR>-2.11</nRabsR>
     </plugin>
 
     <!-- Thrusters, sensors and claw controllers: one per matching part
