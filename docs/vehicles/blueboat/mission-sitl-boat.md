@@ -27,7 +27,7 @@ The mission is a fixed file installed with the package, `blueboat_gazebo/mission
 Here is what the waypoints look like in the map.
 ![alt text](images/ardu_map_wps.png)
 
-The waypoints are geodetic (lat/lon/alt), so they make sense where intended against a fixed home location. The walkthrough sets this it with `--custom-location` to ArduPilot's default SITL location, written out so that a change upstream cannot move the mission. Gazebo's +X is east here (`gazeboXYZToNED` in the model), and the boat spawns with its bow along +X, so the first leg starts dead ahead.
+The waypoints are geodetic (lat/lon/alt), so they make sense where intended against a fixed home location. The walkthrough sets it with `--custom-location` to a point in Marina Bay, Singapore, so the map shows open water. Gazebo's +X is east here (`gazeboXYZToNED` in the model), and the boat spawns with its bow along +X, so the first leg starts dead ahead.
 
 Every turn in this mission is sharper than `WP_PIVOT_ANGLE` (45°), so at each waypoint the boat stops and pivots at up to `WP_PIVOT_RATE` (15 deg/s) before setting off down the next leg.
 
@@ -50,7 +50,7 @@ source ~/maritime_ws/install/setup.bash
 source ~/maritime_ws/thirdparty/setup-ardupilot.sh
 AP=$HOME/maritime_ws/thirdparty/ardupilot/Tools/autotest
 sim_vehicle.py -v Rover -f rover-skid --model JSON --console --map -w \
-  --custom-location=-35.363261,149.165230,584,90 \
+  --custom-location=1.287684290,103.856013589,0,90 \
   --add-param-file=$AP/default_params/rover.parm \
   --add-param-file=$(ros2 pkg prefix --share blueboat_gazebo)/params/blueboat_sitl.params
 ```
@@ -89,8 +89,27 @@ mode auto
 
 Then touch nothing. The console reports `Mission: 1 WP`, then `Reached waypoint #1` through `#6`, then `Mission Complete`. The boat then loiters at home (`MIS_DONE_BEHAVE 1`). To stop, `mode manual` and `disarm`.
 
-When running, you should see these windows.   
-![alt text](images/mission-boat-5win.png)
+When running, you should see these windows.
+
+Gazebo, with the boat on the water:
+
+![Gazebo during the mission](images/mission_run_gazebo.png)
+
+The MAVProxy map, with the planned legs and the track flown:
+
+![MAVProxy map during the mission](images/mission_run_map.png)
+
+The MAVProxy console, reporting each waypoint reached:
+
+![MAVProxy console during the mission](images/mission_run_console.png)
+
+The cross-track error graph, `NAV_CONTROLLER_OUTPUT.xtrack_error`:
+
+![Cross-track error graph during the mission](images/mission_run_graph_xtrack.png)
+
+The groundspeed graph, `VFR_HUD.groundspeed`:
+
+![Groundspeed graph during the mission](images/mission_run_graph_speed.png)
 
 **Video** of the full mission is here: [YouTube](https://youtu.be/kcPEiLzBE0k)
 

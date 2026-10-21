@@ -23,7 +23,7 @@ MISSION = (Path(get_package_share_directory('blueboat_gazebo'))
            / 'missions' / 'lawnmower.waypoints')
 
 # The home the walkthrough pins with sim_vehicle.py --custom-location.
-HOME = (-35.363261, 149.165230)
+HOME = (1.287684290, 103.856013589)
 WP_RADIUS = 1.0          # m, blueboat_sitl.params
 WATER_HALF_SIZE = 100.0  # m, the 200 x 200 m water plane in blueboat_sitl.sdf
 MARGIN = 10.0            # m kept clear of the plane's edge
