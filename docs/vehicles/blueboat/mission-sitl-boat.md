@@ -64,7 +64,7 @@ Wait until the console reports `EKF3 IMU0 is using GPS`, about 40 s after start.
 At the MAVProxy prompt (note, you will need to adjust the absolute path to your repo location!):
 
 ```
-wp load /home/bsb/maritime_ws/install/share/blueboat_gazebo/missions/lawnmower.waypoints
+wp load /home/CHANGE_TO_YOUR_USER/maritime_ws/install/share/blueboat_gazebo/missions/lawnmower.waypoints
 wp list
 ```
 Expect `Loaded 7 waypoints`, then `Flight plan received` in the console, and the six legs drawn on the map.
