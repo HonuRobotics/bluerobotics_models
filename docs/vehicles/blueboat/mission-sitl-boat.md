@@ -24,8 +24,11 @@ The mission is a fixed file installed with the package, `blueboat_gazebo/mission
 | 5 | 10 | 10 | 10 m east, after a 90° pivot |
 | 6 | 0 | 0 | 14 m diagonal home, after a 135° pivot |
 
-Here is what the waypoints look like in the map.
-![alt text](images/ardu_map_wps.png)
+```{figure} images/ardu_map_wps.png
+:alt: MAVProxy map of Marina Reservoir, Singapore, with the boat at home
+
+Home is in Marina Reservoir, Singapore. At this zoom the 10 m course is hidden under the boat icon.
+```
 
 The waypoints are geodetic (lat/lon/alt), so they make sense where intended against a fixed home location. The walkthrough sets it with `--custom-location` to a point in Marina Bay, Singapore, so the map shows open water. Gazebo's +X is east here (`gazeboXYZToNED` in the model), and the boat spawns with its bow along +X, so the first leg starts dead ahead.
 
@@ -91,25 +94,43 @@ Then touch nothing. The console reports `Mission: 1 WP`, then `Reached waypoint 
 
 When running, you should see these windows.
 
-Gazebo, with the boat on the water:
+```{figure} images/mission_run_gazebo.png
+:alt: The BlueBoat in the Gazebo viewport
 
-![Gazebo during the mission](images/mission_run_gazebo.png)
+Gazebo: the BlueBoat on the course.
+```
 
-The MAVProxy map, with the planned legs and the track flown:
+```{figure} images/mission_run_map.png
+:alt: MAVProxy map with the six legs and the track flown so far
 
-![MAVProxy map during the mission](images/mission_run_map.png)
+Map: the planned legs in white, the track flown in yellow, heading for waypoint 4.
+```
 
-The MAVProxy console, reporting each waypoint reached:
+```{figure} images/mission_run_console.png
+:alt: MAVProxy console mid-mission
 
-![MAVProxy console during the mission](images/mission_run_console.png)
+Console: GPS lock, flight plan received, armed, `AUTO`, waypoints 1 to 3 reached.
+```
 
-The cross-track error graph, `NAV_CONTROLLER_OUTPUT.xtrack_error`:
+```{figure} images/mission_run_graph_xtrack.png
+:alt: Graph of NAV_CONTROLLER_OUTPUT.xtrack_error
 
-![Cross-track error graph during the mission](images/mission_run_graph_xtrack.png)
+Cross-track error [m] over the last 20 s.
+```
 
-The groundspeed graph, `VFR_HUD.groundspeed`:
+```{figure} images/mission_run_graph_speed.png
+:alt: Graph of VFR_HUD.groundspeed
 
-![Groundspeed graph during the mission](images/mission_run_graph_speed.png)
+Groundspeed [m/s] over the last 20 s, dropping to zero for the pivot at a waypoint.
+```
+
+At the end of the mission:
+
+```{figure} images/mission_run_console_done.png
+:alt: MAVProxy console at the end of the mission
+
+Console: all six waypoints reached, then `Mission Complete`.
+```
 
 **Video** of the full mission is here: [YouTube](https://youtu.be/kcPEiLzBE0k)
 
