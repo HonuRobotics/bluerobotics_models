@@ -5,7 +5,7 @@
       <visual name="bluerov2_chassis_visual">
         <geometry>
           <mesh>
-            <uri>bluerov2_chassis.visual.glb</uri>
+            <uri>bluerov2_chassis_visual.glb</uri>
           </mesh>
         </geometry>
       </visual>
