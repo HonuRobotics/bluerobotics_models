@@ -5,7 +5,7 @@
       <visual name="t200_prop_ccw_visual">
         <geometry>
           <mesh>
-            <uri>t200_prop_ccw.visual.glb</uri>
+            <uri>t200_prop_ccw_visual.glb</uri>
           </mesh>
         </geometry>
       </visual>
