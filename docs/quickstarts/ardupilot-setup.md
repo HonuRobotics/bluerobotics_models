@@ -1,4 +1,4 @@
-# ArduPilot SITL setup
+# Set up ArduPilot SITL
 
 Setting up ArduPilot optional.
 
@@ -6,11 +6,11 @@ Not necessary to simuate many robots, but ArduPilot is the default for many low-
 
 Set up ArduPilot SITL and the Gazebo plugin, so a vehicle in these models can be driven by the same autopilot firmware it runs on the water. 
 
-This walkthrough has only been tested using [drydock](https://github.com/HonuRobotics/drydock)'s `maritime` container, and that is the only environment this page officially supports.
+This quickstart has only been tested using [drydock](https://github.com/HonuRobotics/drydock)'s `maritime` container, and that is the only environment this page officially supports.
 
 ## Prerequisites
 
-- Setup the drydock + source development environment: [installation_drydock.md](../getting-started/installation_drydock.md)
+[Set up the drydock workspace](setup.md).
 
 ## Install 
 
@@ -221,4 +221,4 @@ against the container's Python.
 
 Building `rover` alone is enough for the BlueBoat, and `sub` for the BlueROV2. `./waf copter` as well if you want the Iris smoke test below.
 
-The two vehicles differ only in what you hand `sim_vehicle.py`; the walkthroughs are [Verify the SITL connection (Boat)](../vehicles/blueboat/verify-sitl-boat.md) for the BlueBoat and [Verify the SITL connection (ROV)](../vehicles/bluerov2/verify-sitl-rov.md) for the BlueROV2.
+The two vehicles differ only in what you hand `sim_vehicle.py`; the next quickstarts are [Drive the BlueBoat with ArduRover](sitl-blueboat.md) for the BlueBoat and [Dive the BlueROV2 with ArduSub](sitl-bluerov2.md) for the BlueROV2.

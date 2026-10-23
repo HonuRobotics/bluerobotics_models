@@ -1,7 +1,3 @@
----
-orphan: true
----
-
 # SITL spec
 
 Experimenting with spec-driven development.
@@ -55,14 +51,14 @@ Both vehicles are in scope up to and including phase 5. Phases 0 to 2 were BlueB
 
 **Objective:** have `ardupilot_gazebo` and the ArduPilot firmware building and running inside drydock, and a setup document written alongside the work rather than after it. Nothing of ours is involved — this establishes the toolchain and proves the loop closes on a vehicle somebody else wrote.
 
-*Verified by* the procedure in [ArduPilot SITL setup](../getting-started/ardupilot_setup.md)
+*Verified by* the procedure in [Set up ArduPilot SITL](../../quickstarts/ardupilot-setup.md)
 
 
 ### Phase 1 — BlueBoat under ArduRover, newtons interface
 
 **Objective:** have the BlueBoat moving under ArduRover, on the newtons interface exactly as it stood, so the plumbing and the channel mapping are proven without waiting on phase 2. `MANUAL` only, so that no low-level stabilization has to be configured to get a result. Includes a documentation walkthrough complete enough that a PR reviewer can exercise the whole path end to end.
 
-*Verified by* the walkthrough in [Verify the SITL connection (Boat)](../vehicles/blueboat/verify-sitl-boat.md), by hand. `mode manual`, `arm throttle`, then `rc` overrides at the MAVProxy prompt, each with a stated expectation and a stated meaning if it fails:
+*Verified by* the walkthrough in [Drive the BlueBoat with ArduRover](../../quickstarts/sitl-blueboat.md), by hand. `mode manual`, `arm throttle`, then `rc` overrides at the MAVProxy prompt, each with a stated expectation and a stated meaning if it fails:
 
 ### Phase 2 — Normalized command mode on the thruster
 
@@ -113,7 +109,7 @@ Some comments in the source now name the wrong phase:
 
 Use the ArduSub configuration from BlueRobotics so that Ardu config matches the ROV.  This is also a good check that the way we've modelled the ROV is consistent with the Ardu config - which it should be.  
 
-*To be verified by* a walkthrough written alongside the work, in the shape of [Verify the SITL connection (Boat)](../vehicles/blueboat/verify-sitl-boat.md) but per axis: in `MANUAL`, arm, then command surge, sway, heave and yaw one at a time and confirm each produces that motion and no other. A cross-coupled response means the allocation is wrong; a reversed one means a thruster or a channel is. Magnitudes are not trusted yet, exactly as in phase 1.
+*To be verified by* a walkthrough written alongside the work, in the shape of [Drive the BlueBoat with ArduRover](../../quickstarts/sitl-blueboat.md) but per axis: in `MANUAL`, arm, then command surge, sway, heave and yaw one at a time and confirm each produces that motion and no other. A cross-coupled response means the allocation is wrong; a reversed one means a thruster or a channel is. Magnitudes are not trusted yet, exactly as in phase 1.
 
 
 
@@ -235,7 +231,7 @@ New: a static check on the installed mission file in `blueboat_gazebo` — well-
 
 #### Human verification
 
-The reviewer follows [Waypoint mission for BlueBoat](../vehicles/blueboat/mission-sitl-boat.md): load the mission file from the installed package, arm, `mode auto`, and watch it run on the MAVProxy map, touching nothing. SITL in lockstep with Gazebo is deterministic, so the page states the figures exactly: each waypoint's arrival time, peak and arrival cross-track error per leg, speed, total mission time and the hold at home. The check is that the reviewer sees those numbers and that track, and that the corner drift reads as the stated finding rather than a surprise.
+The reviewer follows [Waypoint mission for BlueBoat](../../walkthroughs/mission-sitl-boat.md): load the mission file from the installed package, arm, `mode auto`, and watch it run on the MAVProxy map, touching nothing. SITL in lockstep with Gazebo is deterministic, so the page states the figures exactly: each waypoint's arrival time, peak and arrival cross-track error per leg, speed, total mission time and the hold at home. The check is that the reviewer sees those numbers and that track, and that the corner drift reads as the stated finding rather than a surprise.
 
 ### Phase 7 — Removed
 

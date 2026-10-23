@@ -65,4 +65,4 @@ them; each part's file header says which it is.
 converted to SDF exactly as the vehicle is) as its own static model; the
 Gazebo entity menu toggles collisions, inertia and center of mass against
 the mesh. The step by step acceptance list is in
-[Add a part](../how-to/add-part.md).
+[Add a part](../add-part.md).

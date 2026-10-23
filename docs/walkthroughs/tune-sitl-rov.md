@@ -2,13 +2,11 @@
 
 This walkthrough is to confirm that ArduSub's inner control loops (stabilization layer) drive the simulated BlueROV2 the way the hardware behaves. `STABILIZE` holds heading, `ALT_HOLD` adds depth.
 
-[Verify the SITL connection (ROV)](verify-sitl-rov.md) checks the ArduSub connections in MANUAL (open-loop) mode.  This should be done prior to this step to verify that the thruster allocation, channels, arming, etc. are working.  
+[Dive the BlueROV2 with ArduSub](../quickstarts/sitl-bluerov2.md) checks the ArduSub connections in MANUAL (open-loop) mode.  This should be done prior to this step to verify that the thruster allocation, channels, arming, etc. are working.  
 
 ## Prerequisites
 
-* Setup and run the drydock + source development environment: [installation_drydock.md](../../getting-started/installation_drydock.md)
-* [ArduPilot SITL setup](../../getting-started/ardupilot_setup.md); (the rest of this page assumes the Iris smoke test passed.)
-* [Verify the SITL connection (ROV) for MANUAl ](verify-sitl-rov.md) passes.
+[Dive the BlueROV2 with ArduSub](../quickstarts/sitl-bluerov2.md) passes.
 
 ## Mode descriptions
 
@@ -30,9 +28,8 @@ For more detail on the yaw and depth hold controllers (ArduSub builds them from 
 * Source at the pinned tag: [`ArduSub/mode_stabilize.cpp`](https://github.com/ArduPilot/ardupilot/blob/Sub-4.7.1/ArduSub/mode_stabilize.cpp) and [`mode_althold.cpp`](https://github.com/ArduPilot/ardupilot/blob/Sub-4.7.1/ArduSub/mode_althold.cpp).
 
 
-## Walkthrough
-
-All commands are issued within the drydock dev container. Two shells, as in the verification walkthrough.
+## Steps
+All commands are issued within the drydock dev container. Two shells, as in the SITL quickstart.
 
 First, the simulation:
 
@@ -53,11 +50,11 @@ sim_vehicle.py -v ArduSub -f gazebo-bluerov2 --model JSON --console -w \
   --add-param-file=$(ros2 pkg prefix --share bluerov2_gazebo)/params/bluerov2_sitl.params
 ```
 
-### Before either walkthrough
+### Before either part
 
-Each walkthrough excites one hold loop with `rc` overrides at the MAVProxy prompt and graphs that loop's internals while it responds. What to watch is the transient, not a standing offset: both loops carry an integrator, which drives steady-state error to zero whether or not the plant is right, so a loop that settles on target says little, and the time to reach the demand, overshoot and settling time say everything.
+Each part excites one hold loop with `rc` overrides at the MAVProxy prompt and graphs that loop's internals while it responds. What to watch is the transient, not a standing offset: both loops carry an integrator, which drives steady-state error to zero whether or not the plant is right, so a loop that settles on target says little, and the time to reach the demand, overshoot and settling time say everything.
 
-`GCS_PID_MASK` selects which loop the autopilot reports on, in `PID_TUNING` messages. One bit per walkthrough:
+`GCS_PID_MASK` selects which loop the autopilot reports on, in `PID_TUNING` messages. One bit per part:
 
 | Bit | Value | Loop reported |
 |---|---|---|
@@ -66,9 +63,9 @@ Each walkthrough excites one hold loop with `rc` overrides at the MAVProxy promp
 
 Set one bit at a time: every enabled loop sends the same message, so with two bits set the graph interleaves two loops and neither reads cleanly. (Bit 3 is read by `send_pid_tuning` in `ArduSub/GCS_MAVLink_Sub.cpp`, but the parameter's `@Bitmask` metadata in `ArduSub/Parameters.cpp` does not list it, so it cannot be found from ArduPilot's published parameter reference.)
 
-Send `rc all 1500` before each walkthrough. In both modes the sticks that are not under test pass straight through, so any channel left off neutral moves the vehicle.
+Send `rc all 1500` before each part. In both modes the sticks that are not under test pass straight through, so any channel left off neutral moves the vehicle.
 
-### Walkthrough 1: heading hold (`STABILIZE`)
+### Part 1: heading hold (`STABILIZE`)
 
 1. Graph the yaw rate loop and the heading:
 
@@ -121,7 +118,7 @@ rc 6 1550
 
 Now, with heading regulated, the ROV should translate in the y direction withtout changing heading.
 
-### Walkthrough 2: depth hold (`ALT_HOLD`)
+### Part 2: depth hold (`ALT_HOLD`)
 
 The vehicle starts at 2 m depth, with the seabed at 5 m and the surface above, so keep the steps short.
 
@@ -137,7 +134,7 @@ The vehicle starts at 2 m depth, with the seabed at 5 m and the surface above, s
 
    These two are vertical acceleration with gravity removed, not depth, and they have mismatched units like the yaw pair: `desired` is the acceleration target in m/s² × 0.01, positive down (NED), while `achieved` is in m/s², positive up. Multiplying by −100 puts both in m/s², positive up. (Not yet confirmed in a run.) `VFR_HUD.alt` is the depth reading, negative below the surface.
 
-2. Enter the mode and arm (skip `arm throttle` if still armed from the first walkthrough):
+2. Enter the mode and arm (skip `arm throttle` if still armed from the first part):
 
    ```
    mode alt_hold
@@ -174,7 +171,7 @@ The two images below show the resulting graphs for both the transient and steady
 The approach here is worth considering.   Typically we tune controllers to compensate for the dynamics of a robot.  Here, because we know the controller (from Blue Robotics defaults) we tune the simulated dynamics to match the controller.   So for estimating the parameters, the ArduSub controller gains are considered fixed. Blue Robotics publish none for these loops,
 so the reference is ArduSub's own firmware defaults, written out explicitly
 in the parameter file — see
-[Parameters](parameters.md).  The reason we can use ArduSub's defaults, is because those are also Blue Robotics defaults. 
+[Parameters](../vehicles/bluerov2/parameters.md).  The reason we can use ArduSub's defaults, is because those are also Blue Robotics defaults. 
 ```
 
 ## If a row is wrong
@@ -183,7 +180,7 @@ Each symptom belongs to a layer, and the point of the table is to send you to th
 
 | Symptom | Layer that owns it | Where to look |
 |---|---|---|
-| No motion at all on an axis | the frame, not a fault | `Vectored` mixes no pitch, and roll has no angle gain. Confirm the axis is one the vehicle closes before treating it as broken — see [Parameters](parameters.md) |
+| No motion at all on an axis | the frame, not a fault | `Vectored` mixes no pitch, and roll has no angle gain. Confirm the axis is one the vehicle closes before treating it as broken — see [Parameters](../vehicles/bluerov2/parameters.md) |
 | Response settles, but too slowly | damping too high | `nRabsR` for yaw, `zWabsW` for heave |
 | Response overshoots and rings | damping too low | the same two coefficients, from the other side |
 | Demand is met but the vehicle is sluggish reaching it | thrust limits | the `drive` endpoints on `t200_prop_cw` / `t200_prop_ccw`. If `PID_TUNING` shows the output pinned, the loop is asking for thrust the model does not have |

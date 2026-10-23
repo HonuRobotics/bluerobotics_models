@@ -19,13 +19,13 @@ Our approach in defining the BlueBoat parameters is as follows:
 
 ## Set via reference 
 
-See {download}`parameter_refs.ods <../../reference/parameter_refs.ods>` for the raw calculations.  This spreadsheet is the raw calculations, provided here as a reference and to transparently show how we derived the first estimates of physical paramters.   Many of those parameters then had to be tuned via testing, i.e., selected in test, so the spreadsheet shows the background, this document describes the process and the final values are in the URDF values.  
+See {download}`parameter_refs.ods <../../developers/parameter_refs.ods>` for the raw calculations.  This spreadsheet is the raw calculations, provided here as a reference and to transparently show how we derived the first estimates of physical paramters.   Many of those parameters then had to be tuned via testing, i.e., selected in test, so the spreadsheet shows the background, this document describes the process and the final values are in the URDF values.  
 
 | | Source | Value | Destination|
 |---|---|---|---|
-| Mass | [BlueBoat spec sheets](https://bluerobotics.com/store/boat/blueboat/blueboat/) Boat chassis + 2 batteries | see {download}`parameter_refs.ods <../../reference/parameter_refs.ods>`  | blueboat_chassis.urdf.xacro |
-| Inertia tensor | Estimated based on uniform box and L, W, H dimensions BR specs. Consistent with original values. | see {download}`parameter_refs.ods <../../reference/parameter_refs.ods>` |  blueboat_chassis.urdf.xacro |
-| Thrust limits | Deduced from [thruster performance](https://bluerobotics.com/store/thrusters/t100-t200-thrusters/m200-motor/?attribute_cable-variant=BlueBoat+-+0.71+meter+cable+length+%2B+M14+WLP) at 16 V and max forward total thrust value from [blueboat specs](https://bluerobotics.com/store/boat/blueboat/blueboat/) | see {download}`parameter_refs.ods <../../reference/parameter_refs.ods>` | bluerobotics_parts/urdf/m200_weedless_prop_ccw.urdf.xacro and bluerobotics_parts/urdf/m200_weedless_prop_cw.urdf.xacro (known issue that they are repeated)
+| Mass | [BlueBoat spec sheets](https://bluerobotics.com/store/boat/blueboat/blueboat/) Boat chassis + 2 batteries | see {download}`parameter_refs.ods <../../developers/parameter_refs.ods>`  | blueboat_chassis.urdf.xacro |
+| Inertia tensor | Estimated based on uniform box and L, W, H dimensions BR specs. Consistent with original values. | see {download}`parameter_refs.ods <../../developers/parameter_refs.ods>` |  blueboat_chassis.urdf.xacro |
+| Thrust limits | Deduced from [thruster performance](https://bluerobotics.com/store/thrusters/t100-t200-thrusters/m200-motor/?attribute_cable-variant=BlueBoat+-+0.71+meter+cable+length+%2B+M14+WLP) at 16 V and max forward total thrust value from [blueboat specs](https://bluerobotics.com/store/boat/blueboat/blueboat/) | see {download}`parameter_refs.ods <../../developers/parameter_refs.ods>` | bluerobotics_parts/urdf/m200_weedless_prop_ccw.urdf.xacro and bluerobotics_parts/urdf/m200_weedless_prop_cw.urdf.xacro (known issue that they are repeated)
 | Deadband | Approximated from the graph for the [m200](https://bluerobotics.com/store/thrusters/t100-t200-thrusters/m200-motor/?attribute_cable-variant=BlueBoat+-+0.71+meter+cable+length+%2B+M14+WLP) and engineering judgement. Small deadband.  Can be tuned out with PWM settings per vessel. | | bluerobotics_parts/urdf/m200_weedless_prop_ccw.urdf.xacro
 
 
@@ -36,13 +36,13 @@ Derive estimates of the linear and quadratic drag based on published maximum vel
 #### Surge
 
 ##### Estimate
-From blueboat specs, max speed is 3 m/s and the max static thrust is 8.2 kgf.   The Fossen drag implementation has both a linear and quadratic terms.  We neglect the linear term and estimate the quadratic coefficient - see {download}`parameter_refs.ods <../../reference/parameter_refs.ods>` 
+From blueboat specs, max speed is 3 m/s and the max static thrust is 8.2 kgf.   The Fossen drag implementation has both a linear and quadratic terms.  We neglect the linear term and estimate the quadratic coefficient - see {download}`parameter_refs.ods <../../developers/parameter_refs.ods>` 
 
 ##### Test - Open-loop surge response
 
 Run a test to command full forward thrust and measure the steady state speed.  Compare the the 3 m/s target.
 
-Run the scenario for the open-loop (`MANUAL`) test - [Verify the SITL connection (Boat)](verify-sitl-boat.md)
+Run the scenario for the open-loop (`MANUAL`) test - [Drive the BlueBoat with ArduRover](../../quickstarts/sitl-blueboat.md)
 
 Verify the speed of the USV two ways (do both, to make sure the simulated model state agrees with the state the autopilot senses):
 
