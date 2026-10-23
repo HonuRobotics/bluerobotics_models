@@ -1,4 +1,4 @@
-# Troubleshooting / FAQ
+# Troubleshooting
 
 ## xacro fails with "ASSEMBLY ERROR: ..."
 
@@ -42,7 +42,7 @@ once something subscribes on the ROS side.
 Its `.glb` was exported Z-up. glTF is Y-up by specification; RViz converts
 on load and Gazebo does not. Convert the file once with
 `ros2 run bluerobotics_parts gltf_to_yup.py <part>.visual.glb` (see
-[Parts](../design/parts.md)).
+[Parts](../developers/design/parts.md)).
 
 ## "Cannot locate rosdep definition"
 

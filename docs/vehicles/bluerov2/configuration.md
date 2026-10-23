@@ -36,7 +36,7 @@ trim directly instead of asking you to tune volumes:
 
 The Gazebo composition realizes the declaration as a dedicated
 displacement volume solved from the assembled mass, so the declared trim
-holds when the config changes ([Buoyancy](../../design/buoyancy.md)).
+holds when the config changes ([Buoyancy](../../developers/design/buoyancy.md)).
 
 ## Payload
 
