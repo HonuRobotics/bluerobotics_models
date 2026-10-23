@@ -15,7 +15,9 @@ Overall the approach is as follows:
 - Docker OS: Uses the [drydock](https://github.com/HonuRobotics/drydock) project, `maritime` container to create a portable base envionment with Ubuntu, Gazebo, ROS and many build an run-time utilities.
 - ROS workspace install: Install the repositories of this project all in a single workspace: `maritime_ws`.
 
-This source install puts things in specific places, sometimes for specific reasons (all in a workspace) and sometimes just because we have to have a detailed example to make the environment and naming consistent to aid in debugging.
+```{note}
+These docs use `~/maritime_ws` as the workspace path, with `src/`, `tools/` and `thirdparty/` inside it, and every command on every page is written against that layout. New users should follow the convention so that commands copy and paste as written. The location is a local decision: experienced users can put the workspace anywhere and substitute their own path.
+```
 
 ## On Host: Setup workspace, clone drydock source, and build image
 
