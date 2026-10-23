@@ -2,7 +2,7 @@
 
 A part is one file, `bluerobotics_parts/urdf/<part>.urdf.xacro`, holding a
 metadata macro (`<part>_info`) and the macro that instantiates it; the full
-contract is in [Parts](../design/parts.md). Write it by hand, starting from
+contract is in [Parts](design/parts.md). Write it by hand, starting from
 an existing part or from this minimal one, a 10 cm box of 0.5 kg with one
 slot on top:
 
@@ -57,7 +57,7 @@ Then:
 
 1. If the part has a real mesh, put it at
    `models/<part>/<part>.visual.glb` (Y-up, PBR materials embedded; see
-   the mesh conventions in [Parts](../design/parts.md)) and point the
+   the mesh conventions in [Parts](design/parts.md)) and point the
    visual at it with
    `<xacro:part_visual mesh="package://bluerobotics_parts/models/<part>/<part>.visual.glb"/>`.
 2. Add the include line to `urdf/parts.xacro` (alphabetical) and, if the

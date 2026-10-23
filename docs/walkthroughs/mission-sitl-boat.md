@@ -6,9 +6,7 @@ This walkthrough flies one waypoint mission on the simulated BlueBoat in ArduRov
 
 ## Prerequisites
 
-* Setup and run the drydock + source development environment: [installation_drydock.md](../../getting-started/installation_drydock.md)
-* [ArduPilot SITL setup](../../getting-started/ardupilot_setup.md);
-* [Verify the SITL connection (Boat)](verify-sitl-boat.md) and [Tuning of closed-loop response](tune-sitl-boat.md) pass. If a mission does not run correctly, it is likely issues with the lower feedback control loops.
+[Drive the BlueBoat with ArduRover](../quickstarts/sitl-blueboat.md) and [Tuning of closed-loop response](tune-sitl-boat.md) pass. If a mission does not run correctly, it is likely issues with the lower feedback control loops.
 
 ## The mission
 
@@ -34,9 +32,8 @@ The waypoints are geodetic (lat/lon/alt), so they make sense where intended agai
 
 Every turn in this mission is sharper than `WP_PIVOT_ANGLE` (45°), so at each waypoint the boat stops and pivots at up to `WP_PIVOT_RATE` (15 deg/s) before setting off down the next leg.
 
-## Walkthrough
-
-All commands are issued within the drydock dev container. Two shells, as in the verification walkthrough.
+## Steps
+All commands are issued within the drydock dev container. Two shells, as in the SITL quickstart.
 
 First, the simulation:
 

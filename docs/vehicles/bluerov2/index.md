@@ -5,6 +5,8 @@ The BlueROV2 is a vectored thruster ROV, assembled from the
 (8 thruster) configurations, with camera, sonar, DVL and manipulator
 parts.
 
+To dive it under ArduSub start from [Dive the BlueROV2 with ArduSub](../../quickstarts/sitl-bluerov2.md); how its parameters were derived is in [BlueROV2 parameters](parameters.md).
+
 ```{toctree}
 :maxdepth: 1
 
@@ -12,9 +14,6 @@ running
 actuators
 sensors
 configuration
-parameters
-verify-sitl-rov
-tune-sitl-rov
 ```
 
 ## The default vehicle

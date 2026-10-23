@@ -1,4 +1,4 @@
-# Running the simulation
+# Launch and worlds
 
 ```bash
 ros2 launch blueboat_gazebo sim.launch.xml
@@ -13,14 +13,14 @@ is expected and harmless.
 
 To run a custom vehicle instead, pass its config with `config_file:=`;
 the [configuration page](configuration.md) lists the slots and
-[Change the fitted parts](../../how-to/change-parts.md) walks through writing one.
+[Change the fitted parts](../../walkthroughs/change-parts.md) walks through writing one.
 
 ## Launch arguments
 
 | Argument | Default | Meaning |
 |---|---|---|
 | `config_file` | the shipped config | Vehicle config, expanded at launch. |
-| `name` | `blueboat` | Instance name: the Gazebo model name and the topic namespace (`/<name>/...`); letters, digits and underscores. The worlds here float only the default name; see [Several vehicles](../../how-to/namespaces.md). |
+| `name` | `blueboat` | Instance name: the Gazebo model name and the topic namespace (`/<name>/...`); letters, digits and underscores. The worlds here float only the default name; see [Several vehicles](../../walkthroughs/namespaces.md). |
 | `x`, `y`, `z` | `0`, `0`, the water default | Spawn position (m); the default sits at the waterline. |
 | `roll`, `pitch`, `yaw` | `0` | Spawn orientation (rad). |
 | `world` | the water world | Vehicle free world SDF to spawn into. |
@@ -33,7 +33,7 @@ By default the boat is spawned into the open water world
 (`blueboat_water.sdf`: graded buoyancy, a seabed at 3 m and a visual
 surface). The `world:=` argument swaps the environment without changing
 anything else about the simulation: pass any vehicle free world SDF
-([Run in your own world](../../how-to/own-world.md)):
+([Run in your own world](../../walkthroughs/own-world.md)):
 
 ```bash
 ros2 launch blueboat_gazebo sim.launch.xml world:=/path/my_world.sdf
