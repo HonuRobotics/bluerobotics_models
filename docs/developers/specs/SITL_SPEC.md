@@ -244,7 +244,7 @@ This phase was waves, boat only: repeat phase 6's mission in a wave field. It is
 1. to demonstrate to a user the capability 
 2. to support development as end-to-end testing of the new feature while the feature is being developed and as a regression test for later. 
 
-This documentation will have been built incrementally in the previous phases.  This phase is simply to clean that up that documenation for consistency and make a public announcement about the features of this spec. 
+This documentation will have been built incrementally in the previous phases.  This phase is simply to clean up that documentation for consistency. Announcing the features of this spec is out of scope.
 
 
 Packaging and binary distribution are deliberately not here. Everything in this plan is source-built in the drydock container, and ArduPilot in particular is cloned into `thirdparty/` rather than installed, because it has no rosdep key and is pinned by hand. Deciding where these packages are meant to land is its own effort with its own owner, and putting it on this plan's critical path would couple a simulation milestone to a distribution decision. The one thing this plan owes that effort is a flag: `thruster.repos` pins an unreleased sibling package, which is exactly the kind of thing packaging trips over, and it goes away when the thruster mode reaches gz-sim upstream in phase 9.
@@ -257,7 +257,7 @@ CI is left out of the plan and discussion on CI in Issue #66 so we are tracking.
 
 Existing: the `docs / docs` job already builds the site with warnings as errors, so a broken cross-reference fails the PR. The full `colcon test` across the workspace is the other half.
 
-New: a link check over the documentation, and whatever headless subset of the SITL path the phase concludes is worth running in CI — that conclusion is itself a deliverable, including "none of it, and here is why".
+New: a link check over the documentation. Running any part of the SITL path in CI is out of scope (Issue #66).
 
 #### Human verification
 
