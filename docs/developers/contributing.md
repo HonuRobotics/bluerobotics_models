@@ -7,6 +7,7 @@ Thanks for improving the Blue Robotics vehicle models.
 The project standard is the merged install layout, the same command CI runs:
 
 ```bash
+cd ~/maritime_ws
 colcon build --merge-install
 colcon test --merge-install
 colcon test-result --verbose
