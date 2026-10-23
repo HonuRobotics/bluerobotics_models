@@ -168,6 +168,22 @@
 <li class="toctree-l4"><a class="reference internal" href="tune-sitl-boat.html#summary">Summary</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="mission-sitl-boat.html">Waypoint mission for BlueBoat</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="mission-sitl-boat.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mission-sitl-boat.html#the-mission">The mission</a></li>
+<li class="toctree-l4"><a class="reference internal" href="mission-sitl-boat.html#walkthrough">Walkthrough</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="mission-sitl-boat.html#load-the-mission">Load the mission</a></li>
+<li class="toctree-l5"><a class="reference internal" href="mission-sitl-boat.html#graph-the-navigation">Graph the navigation</a></li>
+<li class="toctree-l5"><a class="reference internal" href="mission-sitl-boat.html#fly-it">Fly it</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="mission-sitl-boat.html#what-a-correct-run-looks-like">What a correct run looks like</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="mission-sitl-boat.html#assessment">Assessment</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="mission-sitl-boat.html#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="visual_asset_commission.html">Commissioning materials for visual assets</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="visual_asset_commission.html#blueboat-chassis">blueboat_chassis</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="visual_asset_commission.html#datum-location">datum location</a></li>
@@ -530,7 +546,7 @@
 <section id="the-autopilot-parameter-file">
 <h2>The autopilot parameter file<a class="headerlink" href="#the-autopilot-parameter-file" title="Link to this heading"></a></h2>
 <p>This section is about the <em>autopilot’s</em> configuration.</p>
-<p>The file is <code class="docutils literal notranslate"><span class="pre">blueboat_gazebo/params/blueboat_sitl.params</span></code>. It is derived from Blue Robotics’ dump off a vehicle, <code class="docutils literal notranslate"><span class="pre">params/ardupilot/ArduRover/4.7/Navigator/BlueBoat120.params</span></code> in <a class="reference external" href="https://github.com/bluerobotics/Blueos-Parameter-Repository">Blueos-Parameter-Repository</a>, whose header reads <em>Vehicle: Surface Boat / Platform: navigator / Version: 4.7.0-BETA</em>. That dump is 951 lines, most of it one unit’s accelerometer calibration, radio setup and logging. Ours carries only the subset that describes the vehicle — frame, outputs, motor limits, control gains, speeds — plus the deltas simulation requires. Every value is the shipped one unless a <code class="docutils literal notranslate"><span class="pre">DELTA</span></code> comment beside it says otherwise.</p>
+<p>The file is <code class="docutils literal notranslate"><span class="pre">blueboat_gazebo/params/blueboat_sitl.params</span></code>. It is derived from Blue Robotics’ dump off a vehicle, <code class="docutils literal notranslate"><span class="pre">params/ardupilot/ArduRover/4.7/Navigator/BlueBoat120.params</span></code> in <a class="reference external" href="https://github.com/bluerobotics/Blueos-Parameter-Repository">Blueos-Parameter-Repository</a>, whose header reads <em>Vehicle: Surface Boat / Platform: navigator / Version: 4.7.0-BETA</em>. That dump is 951 lines, most of it one unit’s accelerometer calibration, radio setup and logging. Ours carries only the subset that describes the vehicle — frame, outputs, motor limits, control gains, speeds, waypoint navigation — plus the deltas simulation requires. Every value is the shipped one unless a <code class="docutils literal notranslate"><span class="pre">DELTA</span></code> comment beside it says otherwise.</p>
 <p>It is loaded last. <code class="docutils literal notranslate"><span class="pre">-f</span> <span class="pre">rover-skid</span></code> makes <code class="docutils literal notranslate"><span class="pre">sim_vehicle.py</span></code> load ArduPilot’s own <code class="docutils literal notranslate"><span class="pre">rover.parm</span></code> and <code class="docutils literal notranslate"><span class="pre">rover-skid.parm</span></code> first, which supply the SITL side (fake accelerometer calibration so pre-arm passes, <code class="docutils literal notranslate"><span class="pre">SIM_PIN_MASK</span></code>, the mode slots) but also set <code class="docutils literal notranslate"><span class="pre">SERVO1/3_MIN/MAX</span></code> to 1000/2000 and <code class="docutils literal notranslate"><span class="pre">SERVO1_FUNCTION</span> <span class="pre">73</span></code> / <code class="docutils literal notranslate"><span class="pre">SERVO3_FUNCTION</span> <span class="pre">74</span></code> — the reverse of the shipped boat. Our file sets each of those again, and the last file wins.</p>
 <section id="provenance-three-descriptions-and-they-disagree">
 <h3>Provenance: three descriptions, and they disagree<a class="headerlink" href="#provenance-three-descriptions-and-they-disagree" title="Link to this heading"></a></h3>

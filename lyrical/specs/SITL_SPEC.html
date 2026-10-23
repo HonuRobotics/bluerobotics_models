@@ -166,6 +166,22 @@
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/tune-sitl-boat.html#summary">Summary</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/mission-sitl-boat.html">Waypoint mission for BlueBoat</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/mission-sitl-boat.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/mission-sitl-boat.html#the-mission">The mission</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/mission-sitl-boat.html#walkthrough">Walkthrough</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/blueboat/mission-sitl-boat.html#load-the-mission">Load the mission</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/blueboat/mission-sitl-boat.html#graph-the-navigation">Graph the navigation</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/blueboat/mission-sitl-boat.html#fly-it">Fly it</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/mission-sitl-boat.html#what-a-correct-run-looks-like">What a correct run looks like</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/blueboat/mission-sitl-boat.html#assessment">Assessment</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/mission-sitl-boat.html#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/visual_asset_commission.html">Commissioning materials for visual assets</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/visual_asset_commission.html#blueboat-chassis">blueboat_chassis</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="../vehicles/blueboat/visual_asset_commission.html#datum-location">datum location</a></li>
@@ -421,7 +437,6 @@
 <li><p><strong>Spec and source together.</strong> The plan and its implementation change at once. This is for what the plan did not anticipate, an unexpected issue or a technical detail too small to be worth a standalone spec revision and review, but significant enough that leaving the spec alone would make it false.</p></li>
 </ul>
 <p>The unit of work and of review is a phase: one phase, one pull request.</p>
-<p>Status values: <strong>done</strong> (merged), <strong>in review</strong>, <strong>next</strong>, <strong>later</strong>.</p>
 <p>This spec is the only document that is current about the plan. <a class="reference internal" href="SITL_SPEC_CONTEXT.html"><span class="std std-doc">SITL_SPEC_CONTEXT.md</span></a> is the original static roadmap, kept for the reasoning behind these decisions.</p>
 </section>
 <section id="phases">
@@ -431,70 +446,58 @@
 <tr class="row-odd"><th class="head"><p>Phase</p></th>
 <th class="head"><p>Deliverable</p></th>
 <th class="head"><p>Repository</p></th>
-<th class="head"><p>Status</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>0</p></td>
 <td><p>Toolchain and a setup document</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code>, <code class="docutils literal notranslate"><span class="pre">drydock</span></code></p></td>
-<td><p>done — <a class="reference external" href="https://github.com/HonuRobotics/bluerobotics_models/pull/43">#43</a></p></td>
 </tr>
 <tr class="row-odd"><td><p>1</p></td>
 <td><p>BlueBoat under ArduRover, newtons interface</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code></p></td>
-<td><p>done — <a class="reference external" href="https://github.com/HonuRobotics/bluerobotics_models/pull/44">#44</a></p></td>
 </tr>
 <tr class="row-even"><td><p>2</p></td>
 <td><p>Normalized command mode on the thruster</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">gz-maritime</span></code>, <code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code></p></td>
-<td><p>done — <a class="reference external" href="https://github.com/HonuRobotics/gz-maritime/pull/18">gz-maritime#18</a>, <a class="reference external" href="https://github.com/HonuRobotics/bluerobotics_models/pull/53">#53</a></p></td>
 </tr>
 <tr class="row-odd"><td><p>2.999</p></td>
 <td><p>Pin the ArduPilot versions</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code></p></td>
-<td><p>next</p></td>
 </tr>
 <tr class="row-even"><td><p>3</p></td>
 <td><p>BlueROV2 under ArduSub</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code></p></td>
-<td><p>later</p></td>
 </tr>
 <tr class="row-odd"><td><p>4</p></td>
 <td><p>Stabilization layer, boat</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code></p></td>
-<td><p>later</p></td>
 </tr>
 <tr class="row-even"><td><p>5</p></td>
 <td><p>Stabilization layer, ROV</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code></p></td>
-<td><p>in review</p></td>
 </tr>
 <tr class="row-odd"><td><p>6</p></td>
 <td><p>Waypoint mission, boat only</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code></p></td>
-<td><p>later</p></td>
 </tr>
 <tr class="row-even"><td><p>7</p></td>
-<td><p>Waves, boat only</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code></p></td>
-<td><p>later</p></td>
+<td><p>~~Waves, boat only~~</p></td>
+<td><p>—</p></td>
 </tr>
 <tr class="row-odd"><td><p>8</p></td>
 <td><p>Documentation and CI</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">bluerobotics_models</span></code></p></td>
-<td><p>later</p></td>
 </tr>
 <tr class="row-even"><td><p>9</p></td>
 <td><p>Upstream the thruster mode</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">gz-maritime</span></code>, then <code class="docutils literal notranslate"><span class="pre">gz-sim</span></code></p></td>
-<td><p>later</p></td>
 </tr>
 </tbody>
 </table>
 <p>Each phase states an objective and how it is verified met. The objective is the clarification of intent — what this phase is for and what it deliberately leaves to a later one — and the verification is the checks actually run to decide it is done, automated where they can be and by hand where they cannot.</p>
 <p>From phase 4 on, each phase states its verification in two parts. <strong>Automated</strong> is what CI and an agent can run unattended: which existing tests become load-bearing for the change, and which new ones the phase writes. <strong>Human</strong> is the instruction to a PR reviewer, and it is usually “follow this page and confirm what it says will happen” — which only works if the page states the development environment, the exact run steps and what a correct result looks like. A phase whose human verification cannot be written as a walkthrough has a documentation gap to close before it is done.</p>
-<p>Both vehicles are in scope up to and including phase 5. Phases 0 to 2 were BlueBoat-first because the BlueBoat is the simpler platform and had the published parameter sets to be faithful to; phase 3 brings the BlueROV2 up to the same line, then phase 4 does the stabilization layer for the boat and phase 5 repeats it for the ROV. Phases 6 and 7 are the boat alone, for reasons each states. Where a phase claims both vehicles, a walkthrough that covers only one is an incomplete phase.</p>
+<p>Both vehicles are in scope up to and including phase 5. Phases 0 to 2 were BlueBoat-first because the BlueBoat is the simpler platform and had the published parameter sets to be faithful to; phase 3 brings the BlueROV2 up to the same line, then phase 4 does the stabilization layer for the boat and phase 5 repeats it for the ROV. Phase 6 is the boat alone, for the reasons it states. Where a phase claims both vehicles, a walkthrough that covers only one is an incomplete phase.</p>
 <section id="prerequisites-assumptions-and-contraints">
 <h3>Prerequisites, assumptions and contraints<a class="headerlink" href="#prerequisites-assumptions-and-contraints" title="Link to this heading"></a></h3>
 <ul class="simple">
@@ -627,42 +630,31 @@ both on a 14.8 V nominal pack.</p></li>
 </section>
 <section id="phase-6-waypoint-mission-boat-only">
 <h3>Phase 6 — Waypoint mission, boat only<a class="headerlink" href="#phase-6-waypoint-mission-boat-only" title="Link to this heading"></a></h3>
-<p><strong>Objective:</strong> demonstrate one standard waypoint mission on the BlueBoat, flown unattended in <code class="docutils literal notranslate"><span class="pre">AUTO</span></code> with the failsafes in the loop. This is the autopilot layer above the phase 4 stabilization layer.  It is also the broader test of the transfer claim, because the parameters governing it were tuned on the water.</p>
-<p>The inner loops are inherited unchanged: the waypoint controller produces a turn rate and a speed, and those go to the same <code class="docutils literal notranslate"><span class="pre">ATC_STR_RAT_*</span></code> and <code class="docutils literal notranslate"><span class="pre">ATC_SPEED_*</span></code> controllers phase 4 validated. One loop is new — <code class="docutils literal notranslate"><span class="pre">ATC_STR_ANG_P</span></code>, the heading controller, which a boat reaches on arriving at a waypoint and on pivot turns between legs. That is the only control gain this phase puts under test for the first time, and it is worth naming so it does not arrive as a surprise.</p>
+<p><strong>Objective:</strong> demonstrate one standard waypoint mission on the BlueBoat, flown unattended in <code class="docutils literal notranslate"><span class="pre">AUTO</span></code>. This is the autopilot layer above the phase 4 stabilization layer, kept to the minimum that shows it works: one small mission, completed, with the track judged against figures stated beforehand. It is also the broader test of the transfer claim, because the parameters governing it were tuned on the water.</p>
+<p>The inner loops are inherited unchanged: the waypoint controller produces a turn rate and a speed, and those go to the same <code class="docutils literal notranslate"><span class="pre">ATC_STR_RAT_*</span></code> and <code class="docutils literal notranslate"><span class="pre">ATC_SPEED_*</span></code> controllers phase 4 validated. One loop is new — <code class="docutils literal notranslate"><span class="pre">ATC_STR_ANG_P</span></code>, the heading controller, which a boat reaches on pivot turns at waypoints. That is the only control gain this phase puts under test for the first time, and it is worth naming so it does not arrive as a surprise.</p>
 <ul class="simple">
-<li><p>One mission, held in the repository rather than typed in per run: a lawnmower survey pattern, in <code class="docutils literal notranslate"><span class="pre">blueboat_gazebo/missions/</span></code> and installed with the package, in the QGC WPL format both MAVProxy’s <code class="docutils literal notranslate"><span class="pre">wp</span> <span class="pre">load</span></code> and QGroundControl read.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">WP_SPEED</span></code>, <code class="docutils literal notranslate"><span class="pre">WP_RADIUS</span></code> and <code class="docutils literal notranslate"><span class="pre">TURN_RADIUS</span></code> from the factory parameters.</p></li>
+<li><p>One mission, held in the repository rather than typed in per run: a small lawnmower — 10 m legs, 5 m steps, back to the start — in <code class="docutils literal notranslate"><span class="pre">blueboat_gazebo/missions/</span></code> and installed with the package, in the QGC WPL format both MAVProxy’s <code class="docutils literal notranslate"><span class="pre">wp</span> <span class="pre">load</span></code> and QGroundControl read.</p></li>
+<li><p>A pinned SITL home, passed to <code class="docutils literal notranslate"><span class="pre">sim_vehicle.py</span></code> with <code class="docutils literal notranslate"><span class="pre">--custom-location</span></code>, because geodetic waypoints only land where intended against a fixed home.</p></li>
+<li><p>The waypoint navigation parameters from the factory dump: <code class="docutils literal notranslate"><span class="pre">WP_SPEED</span></code>, <code class="docutils literal notranslate"><span class="pre">WP_RADIUS</span></code>, <code class="docutils literal notranslate"><span class="pre">TURN_RADIUS</span></code>, and also <code class="docutils literal notranslate"><span class="pre">WP_PIVOT_*</span></code>, <code class="docutils literal notranslate"><span class="pre">WP_ACCEL</span></code>, <code class="docutils literal notranslate"><span class="pre">WP_JERK</span></code>, <code class="docutils literal notranslate"><span class="pre">MIS_DONE_BEHAVE</span></code> and the <code class="docutils literal notranslate"><span class="pre">PSC_*</span></code> position controller, which ArduRover’s waypoint navigator runs through. Without the <code class="docutils literal notranslate"><span class="pre">WP_PIVOT_*</span></code> lines the firmware default disables pivot turns and the boat arcs through corners it would stop and turn at.</p></li>
 </ul>
-<p>One mission, not a family of them. It is a fixed artifact so that the automated run, the walkthrough and any later regression all exercise the same waypoints — a mission that changes between runs is not a regression test. Anything beyond it is more mission rather than more evidence.</p>
+<p>One mission, not a family of them. It is a fixed artifact so that the walkthrough, a later automated run and any regression all exercise the same waypoints — a mission that changes between runs is not a regression test. Anything beyond it is more mission rather than more evidence.</p>
+<p>Failsafes (GCS loss, low battery, a failing arming check) and a headless mission test are deferred, not dropped. Both need a MAVLink client the workspace does not declare, and phase 4 made the same call for the same reason. The run used to write the walkthrough’s figures was scripted with ArduPilot’s own pymavlink and is the starting point for that test when it is picked up.</p>
 <p><strong>The BlueROV2 is not in this phase.</strong> Geodetic waypoint navigation asks for something the vehicle does not have: underwater there is no GNSS, so a position fix has to come from DVL dead reckoning or an acoustic system, and the BlueROV2 as configured is not set up for that. It is not where ArduSub is strongest either, and it is not what the VRX application needs. The ROV’s closed-loop behavior is fully exercised one layer down, in phase 5.</p>
 <p>If a guidance result disappoints, the first question is whether phase 4 is actually finished. Splitting the phases exists to make that question answerable: with the inner loops validated and the hydrodynamics identified separately, a bad track points at the navigation parameters rather than at everything at once.</p>
+<p>Found in this phase, and an example of exactly that: pivots drift. A steering-only command does not cancel in surge on this model — the published forward/reverse thrust ratio is 2.0 and the shipped <code class="docutils literal notranslate"><span class="pre">MOT_THST_ASYM</span></code> compensates for 1.6 — so the boat moves forward at a few tenths of a metre per second while it pivots and starts each leg 1 to 2 m off the line. That is the phase 4 <code class="docutils literal notranslate"><span class="pre">MOT_THST_ASYM</span></code> cross-check showing up one layer higher. It is stated in the walkthrough as a result, and neither the thrust numbers nor the navigation gains are moved to hide it.</p>
 <p>Other closed-loop behaviors are out of scope, as listed below — <code class="docutils literal notranslate"><span class="pre">GUIDED</span></code>, <code class="docutils literal notranslate"><span class="pre">LOITER</span></code>, <code class="docutils literal notranslate"><span class="pre">HOLD</span></code> and station keeping, follow and line- or path-following modes. They are more capability on the same loops rather than a different thing to prove.</p>
 <section id="id3">
 <h4>Automated verification<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
-<p>New: a headless run of the repository’s mission file — upload it over MAVLink, fly it, and assert each waypoint is reached within a radius and the mission completes. Failsafes scripted the same way: trigger GCS loss, low battery and a failing arming check, and assert the response rather than the parameter.</p>
-<p>The test loads the same file the walkthrough tells a reviewer to load. This is the one place where the automated check and the human one are the same procedure, only unattended — which is the argument for the mission being a versioned artifact rather than a set of instructions.</p>
+<p>New: a static check on the installed mission file in <code class="docutils literal notranslate"><span class="pre">blueboat_gazebo</span></code> — well-formed, home at the pinned location, every waypoint on the water, consecutive waypoints further apart than twice <code class="docutils literal notranslate"><span class="pre">WP_RADIUS</span></code>. No autopilot is involved. Existing: <code class="docutils literal notranslate"><span class="pre">blueboat_gazebo</span></code>’s tests keep passing with the waypoint parameters added.</p>
 </section>
 <section id="id4">
 <h4>Human verification<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
-<p>The reviewer loads the mission file from the installed package, then watches it run on the MAVProxy map or in QGroundControl, touching nothing. Checked against <code class="docutils literal notranslate"><span class="pre">CRUISE_SPEED</span></code> 1 m/s and <code class="docutils literal notranslate"><span class="pre">TURN_RADIUS</span></code> 0.1 m. Cross-track error and achieved turn radius are the quantities to judge against, and the page states the expected figures beforehand.</p>
-<p>Then each failsafe triggered deliberately, with the expected response stated in the page before the reviewer triggers it.</p>
+<p>The reviewer follows <a class="reference internal" href="../vehicles/blueboat/mission-sitl-boat.html"><span class="std std-doc">Waypoint mission for BlueBoat</span></a>: load the mission file from the installed package, arm, <code class="docutils literal notranslate"><span class="pre">mode</span> <span class="pre">auto</span></code>, and watch it run on the MAVProxy map, touching nothing. SITL in lockstep with Gazebo is deterministic, so the page states the figures exactly: each waypoint’s arrival time, peak and arrival cross-track error per leg, speed, total mission time and the hold at home. The check is that the reviewer sees those numbers and that track, and that the corner drift reads as the stated finding rather than a surprise.</p>
 </section>
 </section>
-<section id="phase-7-waves-boat-only">
-<h3>Phase 7 — Waves, boat only<a class="headerlink" href="#phase-7-waves-boat-only" title="Link to this heading"></a></h3>
-<p><strong>Objective:</strong> This is a regression test and demonstration for marketing and raising awareness.   We’ll repeat the tests of phases 4 and 6 within an active wavefield. Previous tests did not exercise the added wave enfironment effects.   In theory this should work out of the box, but important to test end-to-end to identify regressions.  This is only pertinent to the Boat.  Testing the ROV in near surface waves is out of scope.</p>
-<p>Since this is a regression check rather than new capability, the work is mostly in the world and the run rather than in the vehicle: a wave world for the BlueBoat, and the phase 4 and 6 checks pointed at it. If something has to change in the boat to survive a sea state, then we fix.</p>
-<section id="id5">
-<h4>Automated verification<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
-<p>Existing: <code class="docutils literal notranslate"><span class="pre">gz_waves</span></code> carries its own suite in <code class="docutils literal notranslate"><span class="pre">gz-maritime</span></code>, and <code class="docutils literal notranslate"><span class="pre">blueboat_gazebo</span></code>’s launch tests must keep passing once a wave world is an option rather than always flat water.</p>
-<p>New: phase 6’s headless mission run, repeated in a wave world, asserting the same waypoints are reached and the mission completes — with widened bounds, stated and justified, rather than the flat-water ones. Plus a station-hold run asserting the pose stays bounded and the EKF’s innovations stay inside a threshold, which is the check worth most here: the failure mode is slow divergence that a human watching for two minutes will not see.</p>
-</section>
-<section id="id6">
-<h4>Human verification<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
-<p>The reviewer runs both wave providers, Gerstner and FFT, and watches the boat in the viewport — the buoyancy lag between the two is a visual finding before it is a numerical one, and it is the known issue this phase is most likely to surface.</p>
-<p>Then phase 4’s step responses and phase 6’s survey mission re-run in a stated sea state, confirming the boat still completes them and degrades gracefully rather than diverging. The sea state and the widened bounds are numbers to pick before the run and write into the page, so the reviewer is checking a claim rather than forming an impression.</p>
-<p>This phase also produces the material worth showing: a wave-field run is the demonstration, so capturing video or stills while the reviewer is there costs nothing extra.</p>
-</section>
+<section id="phase-7-removed">
+<h3>Phase 7 — Removed<a class="headerlink" href="#phase-7-removed" title="Link to this heading"></a></h3>
+<p>This phase was waves, boat only: repeat phase 6’s mission in a wave field. It is removed because the boat cannot respond to waves yet. Buoyancy in gz-maritime acts at the flat z = 0 plane and the waves are only drawn; coupling buoyancy to the wave surface is the planned <code class="docutils literal notranslate"><span class="pre">gz_waves_buoyancy</span></code> consumer, which does not exist yet. Building it is wave modeling, not SITL integration, so it is out of scope here (see below). The number is kept so that references to phases 8 and 9 stay valid.</p>
 </section>
 <section id="phase-8-documentation-and-announce">
 <h3>Phase 8 — Documentation and Announce<a class="headerlink" href="#phase-8-documentation-and-announce" title="Link to this heading"></a></h3>
@@ -674,13 +666,13 @@ both on a 14.8 V nominal pack.</p></li>
 <p>This documentation will have been built incrementally in the previous phases.  This phase is simply to clean that up that documenation for consistency and make a public announcement about the features of this spec.</p>
 <p>Packaging and binary distribution are deliberately not here. Everything in this plan is source-built in the drydock container, and ArduPilot in particular is cloned into <code class="docutils literal notranslate"><span class="pre">thirdparty/</span></code> rather than installed, because it has no rosdep key and is pinned by hand. Deciding where these packages are meant to land is its own effort with its own owner, and putting it on this plan’s critical path would couple a simulation milestone to a distribution decision. The one thing this plan owes that effort is a flag: <code class="docutils literal notranslate"><span class="pre">thruster.repos</span></code> pins an unreleased sibling package, which is exactly the kind of thing packaging trips over, and it goes away when the thruster mode reaches gz-sim upstream in phase 9.</p>
 <p>CI is left out of the plan and discussion on CI in Issue #66 so we are tracking.</p>
-<section id="id7">
-<h4>Automated verification<a class="headerlink" href="#id7" title="Link to this heading"></a></h4>
+<section id="id5">
+<h4>Automated verification<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
 <p>Existing: the <code class="docutils literal notranslate"><span class="pre">docs</span> <span class="pre">/</span> <span class="pre">docs</span></code> job already builds the site with warnings as errors, so a broken cross-reference fails the PR. The full <code class="docutils literal notranslate"><span class="pre">colcon</span> <span class="pre">test</span></code> across the workspace is the other half.</p>
 <p>New: a link check over the documentation, and whatever headless subset of the SITL path the phase concludes is worth running in CI — that conclusion is itself a deliverable, including “none of it, and here is why”.</p>
 </section>
-<section id="id8">
-<h4>Human verification<a class="headerlink" href="#id8" title="Link to this heading"></a></h4>
+<section id="id6">
+<h4>Human verification<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
 <p>The reviewer starts from a clean workspace and follows the documentation end to end, reaching both a driving boat and a diving ROV without asking anyone a question. Every place they have to guess, ask, or read source is a defect to file against this phase.</p>
 </section>
 </section>
@@ -688,12 +680,12 @@ both on a 14.8 V nominal pack.</p></li>
 <h3>Phase 9 — Upstream the thruster mode<a class="headerlink" href="#phase-9-upstream-the-thruster-mode" title="Link to this heading"></a></h3>
 <p><strong>Objective:</strong> have the normalized mode in Gazebo itself and the fork gone. It is a liability while it lasts — a divergence from a <code class="docutils literal notranslate"><span class="pre">Thruster</span></code> that is not frozen, plus a <code class="docutils literal notranslate"><span class="pre">.repos</span></code> pin and a plugin name that exist only because the mode is not upstream yet. The delta is kept tiny so the eventual pull request stays readable.</p>
 <p>Timing matters: prepare it for <code class="docutils literal notranslate"><span class="pre">gz-sim</span></code> only once the mode has stopped changing. Then, once it is released in Gazebo, delete the local implementation along with the <code class="docutils literal notranslate"><span class="pre">.repos</span></code> pin that fetches it and the models’ reference to the forked plugin name.</p>
-<section id="id9">
-<h4>Automated verification<a class="headerlink" href="#id9" title="Link to this heading"></a></h4>
+<section id="id7">
+<h4>Automated verification<a class="headerlink" href="#id7" title="Link to this heading"></a></h4>
 <p>The <code class="docutils literal notranslate"><span class="pre">gz_thruster</span></code> tests go upstream with the plugin. Locally, the whole workspace suite must pass with <code class="docutils literal notranslate"><span class="pre">gz_thruster</span></code> deleted and the models naming <code class="docutils literal notranslate"><span class="pre">gz-sim-thruster-system</span></code> — that is the check that the fork left nothing behind.</p>
 </section>
-<section id="id10">
-<h4>Human verification<a class="headerlink" href="#id10" title="Link to this heading"></a></h4>
+<section id="id8">
+<h4>Human verification<a class="headerlink" href="#id8" title="Link to this heading"></a></h4>
 <p>The reviewer re-runs the phase 2 walkthrough on the stock plugin and gets the same results, and confirms nothing in the workspace still pins a branch or names the forked library.</p>
 </section>
 </section>
@@ -708,7 +700,7 @@ both on a 14.8 V nominal pack.</p></li>
 <p>Stated so they are not quietly re-entered: PWM as the plugin’s interface; thrust curves, rotor dynamics or advance-ratio work; arbitration between competing commanders; hardware in the loop; forking the firmware; pull requests to <code class="docutils literal notranslate"><span class="pre">SITL_Models</span></code>; building Gazebo from source; any change to <code class="docutils literal notranslate"><span class="pre">gz_waves</span></code> or <code class="docutils literal notranslate"><span class="pre">ehukai</span></code>.</p>
 <p>Closed-loop behaviors beyond the phases above are out of scope: <code class="docutils literal notranslate"><span class="pre">GUIDED</span></code>, <code class="docutils literal notranslate"><span class="pre">LOITER</span></code>, <code class="docutils literal notranslate"><span class="pre">HOLD</span></code> and station keeping, follow modes, and line- or path-following. Each is more capability riding on the same stabilization and guidance loops rather than a different thing to prove, so exercising them adds review burden without adding evidence. They become interesting once the transfer claim is settled.</p>
 <p>Waypoint missions for the BlueROV2 are out of scope, for the reason phase 6 gives: geodetic navigation underwater needs a position source the vehicle is not configured for, and the ROV’s closed-loop behavior is fully exercised one layer down in phase 5.</p>
-<p>The BlueROV2 in waves is out of scope. Near-surface wave interaction for a submerged vehicle is its own modeling problem, and phase 7 is a regression check on the boat rather than new capability for either vehicle.</p>
+<p>Waves are out of scope for both vehicles. Gazebo vehicles in this workspace float on the flat water level, and the wave field is only drawn; buoyancy that follows the waves is the planned <code class="docutils literal notranslate"><span class="pre">gz_waves_buoyancy</span></code> consumer in gz-maritime, its own wave-modeling effort with its own owner. A SITL run in a wave world today would exercise nothing the flat-water phases do not. For the BlueROV2, near-surface wave interaction for a submerged vehicle is a further modeling problem on top of that.</p>
 <p>The Holybro X500 and any other UAV is out of scope for this plan. It is a different vehicle class with a different autopilot binding, it lives in <code class="docutils literal notranslate"><span class="pre">holybro_models</span></code> rather than here, and nothing in these phases is blocked on it. Rebinding it from PX4 is its own effort with its own plan.</p>
 <p>PX4 is community supported and deliberately not designed out. The normalized command is what a PX4 actuator output produces too, so the interface fits; we keep the design open to it and do not test it.</p>
 <p>Packaging: this set of features all too new and too unstable to dedicated cycles to packaging (and debugging packaging) at this point. Also, It is not overt in our SOW that we have to do anything specific. Since we are over budget and behind schedule, it seems like being conservative with scope is the way.</p>
