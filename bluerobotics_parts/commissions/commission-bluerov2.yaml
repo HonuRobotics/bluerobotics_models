@@ -33,6 +33,7 @@ parts:
     referenceImages:
       - "product images at the source page"
       - "docs/vehicles/bluerov2/images/thrusters.png: thruster numbering, top view"
+      - "docs/vehicles/bluerov2/images/base_footprint.png: the datum (base_footprint), the ground plane at the bottom of the frame and the footprint rectangle that encloses the chassis"
       - "Blue Robotics BlueROV2 assembly guide, https://bluerobotics.com/learn/bluerov2-assembly/: which thruster gets which propeller"
     forwardFeature: "the camera dome on the electronics enclosure; Forward points from the tail toward the camera dome"
     visualRequirement: "Start simple"
