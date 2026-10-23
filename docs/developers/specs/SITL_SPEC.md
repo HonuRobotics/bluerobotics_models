@@ -31,7 +31,7 @@ This spec is the only document that is current about the plan. [SITL_SPEC_CONTEX
 | 5 | Stabilization layer, ROV | `bluerobotics_models` |
 | 6 | Waypoint mission, boat only | `bluerobotics_models` |
 | 7 | ~~Waves, boat only~~ | — |
-| 8 | Documentation and CI | `bluerobotics_models` |
+| 8 | Documentation | `bluerobotics_models` |
 | 9 | Upstream the thruster mode | `gz-maritime`, then `gz-sim` |
 
 Each phase states an objective and how it is verified met. The objective is the clarification of intent — what this phase is for and what it deliberately leaves to a later one — and the verification is the checks actually run to decide it is done, automated where they can be and by hand where they cannot.
@@ -237,7 +237,7 @@ The reviewer follows [Waypoint mission for BlueBoat](../../walkthroughs/mission-
 
 This phase was waves, boat only: repeat phase 6's mission in a wave field. It is removed because the boat cannot respond to waves yet. Buoyancy in gz-maritime acts at the flat z = 0 plane and the waves are only drawn; coupling buoyancy to the wave surface is the planned `gz_waves_buoyancy` consumer, which does not exist yet. Building it is wave modeling, not SITL integration, so it is out of scope here (see below). The number is kept so that references to phases 8 and 9 stay valid.
 
-### Phase 8 — Documentation and Announce
+### Phase 8 — Documentation
 
 **Objective:** The user-facing documention should be in the form of walkthroughs that simultaneously serve two purposes: 
 
