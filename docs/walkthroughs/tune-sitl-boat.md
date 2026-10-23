@@ -6,13 +6,10 @@ This closed-loop mode is Ardu's `ACRO` mode where R/C channel 3 is a speed comma
 
 ## Prerequisites
 
-* Setup and run the drydock + source development environment: [installation_drydock.md](../../getting-started/installation_drydock.md)
-* [ArduPilot SITL setup](../../getting-started/ardupilot_setup.md); (the rest of this page assumes the Iris smoke test passed.)
-* [Verify the SITL connection (Boat)](verify-sitl-boat.md) passes.
+[Drive the BlueBoat with ArduRover](../quickstarts/sitl-blueboat.md) passes.
 
-## Walkthrough
-
-All commands are issued within the drydock dev container. Two shells, as in the verification walkthrough.
+## Steps
+All commands are issued within the drydock dev container. Two shells, as in the SITL quickstart.
 
 First, the simulation:
 
@@ -118,4 +115,4 @@ and with linear damping the plant gain is `G = k / nR`. Setting `G = 1/FF` gives
 
 ## Summary
 
-This walkthrough demonstrates and verifies the tuning of the various boat and autopilot parameters to achieve the desired closed-loop performance in `ACRO` mode that mimics the closed-loop behavior of the hardware.   Because there are many more model parameters than test cases, we have many "colinear regressors" and an infinite number of parameter sets equally "correct" in terms of closed-loop behavior.  Our approach, discussed more in [Parameters](parameters.md), is to leave fixed what we know (a few physical parameters, thruster characteristics and autopilot settings) to modify the unknowns (hydrodynamic parameters) to design the closed-loop response. 
+This walkthrough demonstrates and verifies the tuning of the various boat and autopilot parameters to achieve the desired closed-loop performance in `ACRO` mode that mimics the closed-loop behavior of the hardware.   Because there are many more model parameters than test cases, we have many "colinear regressors" and an infinite number of parameter sets equally "correct" in terms of closed-loop behavior.  Our approach, discussed more in [Parameters](../vehicles/blueboat/parameters.md), is to leave fixed what we know (a few physical parameters, thruster characteristics and autopilot settings) to modify the unknowns (hydrodynamic parameters) to design the closed-loop response. 

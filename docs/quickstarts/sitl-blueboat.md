@@ -1,15 +1,13 @@
-# Verify the SITL connection (Boat)
+# Drive the BlueBoat with ArduRover
 
-This walkthrough is to confirm that ArduRover in SITL is driving the simulated BlueBoat correctly. 
+This quickstart is to confirm that ArduRover in SITL is driving the simulated BlueBoat correctly. 
 
 ## Prerequisites
 
-* Setup and run the drydock + source development environment: [installation_drydock.md](../../getting-started/installation_drydock.md)
-* [ArduPilot SITL setup](../../getting-started/ardupilot_setup.md); (the rest of this page assumes the Iris smoke test passed.)
+[Set up ArduPilot SITL](ardupilot-setup.md), through the Iris smoke test.
 
 
-## Walkthrough
-
+## Steps
 You will start two shells. Both need the colcon workspace and then the ArduPilot environment, in that order.  All commands are issued within the drydock dev container.
 
 First, the simulation:
@@ -38,7 +36,7 @@ reset: `ardupilot_gazebo` keeps ArduPilot's 32-bit frame counter in a
 `uint16_t`, so it wraps about every 66 seconds at 1000 Hz and the plugin
 reads the wrap as a restart. The fix is open upstream as
 [ardupilot_gazebo#174](https://github.com/ArduPilot/ardupilot_gazebo/pull/174);
-see the troubleshooting notes in [ArduPilot SITL setup](../../getting-started/ardupilot_setup.md).
+see the troubleshooting notes in [Set up ArduPilot SITL](ardupilot-setup.md).
 ```
 
 ### Verify that the boat drives in the correct directions and polarity.  

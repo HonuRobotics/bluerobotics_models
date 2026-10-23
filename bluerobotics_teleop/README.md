@@ -13,4 +13,4 @@ The stack binds to one vehicle instance, `<name>`, and runs under `/<name>`;
 the default is the vehicle's own name.
 
 Documentation:
-[Teleoperate with a gamepad](https://honurobotics.github.io/bluerobotics_models/lyrical/how-to/teleop.html).
+[Teleoperate with a gamepad](https://honurobotics.github.io/bluerobotics_models/lyrical/walkthroughs/teleop.html).

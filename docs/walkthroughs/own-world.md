@@ -37,7 +37,7 @@ gz topic -t /world/blueboat_water/ocean_current/set -m gz.msgs.Param \
 
 A world running gz-maritime's buoyancy system needs no `<enable>` entry:
 the displacement collisions are marked, so the vehicle floats under any
-spawn name ([Marked for any world](../design/buoyancy.md#marked-for-any-world)).
+spawn name ([Marked for any world](../developers/design/buoyancy.md#marked-for-any-world)).
 
 ## Include the default model
 
@@ -76,4 +76,4 @@ Generate the model first and point at it instead of the installed one:
 ros2 run blueboat_gazebo configure_vehicle.py --config my_vehicle.yaml --out-dir ~/my_models/blueboat
 ```
 
-See [Configure an installed vehicle](installed-vehicle.md).
+See [Configure an installed vehicle](../developers/binary-install.md).

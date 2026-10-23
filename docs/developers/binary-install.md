@@ -1,12 +1,35 @@
-# Configure an installed vehicle
+# Binary install (future)
+
+Parked for later. Binary packages are a work in progress and are not part of the tested workflow while the repositories are changing quickly; the supported path is the source build in [Set up the drydock workspace](../quickstarts/setup.md).
+
+## Install from ROS packages (debs)
+
+Binary packages (`ros-<distro>-blueboat-gazebo`, `ros-<distro>-bluerov2-gazebo`,
+the `*-description` packages, `ros-<distro>-bluerobotics-parts`, ...) are
+planned for the ROS build farm and are not published yet. When they are,
+installation is one package per vehicle you want:
+
+```bash
+sudo apt install ros-lyrical-blueboat-gazebo ros-lyrical-bluerov2-gazebo
+source /opt/ros/lyrical/setup.bash
+ros2 launch blueboat_gazebo sim.launch.xml    # the boat
+ros2 launch bluerov2_gazebo sim.launch.xml    # or the ROV
+```
+
+Nothing under `/opt/ros` is meant to be edited. The default vehicle is baked
+into the packages; a custom config is a YAML file anywhere on disk passed
+to the launch (`config_file:=`), which regenerates every artifact at launch
+time. See [Configure an installed vehicle](#configure-an-installed-vehicle).
+
+## Configure an installed vehicle
 
 From a binary (deb) install nothing under `/opt/ros` should be edited, and
 there is no workspace to rebuild. The vehicle is still fully configurable:
 every artifact (URDF, composed Gazebo model, ros_gz bridge config) is
 generated from a config file on demand, by the same tools the build uses
-(writing the config: [Change the fitted parts](change-parts.md)).
+(writing the config: [Change the fitted parts](../walkthroughs/change-parts.md)).
 
-## The launch does it for you
+### The launch does it for you
 
 ```bash
 ros2 launch blueboat_gazebo sim.launch.xml config_file:=/path/my_vehicle.yaml
@@ -17,7 +40,7 @@ ros2 launch blueboat_description display.launch.xml config_file:=/path/my_vehicl
 start, spawns that model and starts the bridge on that config. The default
 (no argument) is the baked default vehicle.
 
-## Generate the artifacts yourself
+### Generate the artifacts yourself
 
 For anything beyond the stock launch (your own world and launch files, a
 model to hand to somebody else):
@@ -43,7 +66,7 @@ Start the bridge on the generated config
 and `robot_state_publisher` on the generated URDF. The three files come from
 one resolution of the config, so they agree with each other.
 
-## Overlay workspace
+### Overlay workspace
 
 The third option, for anything long lived: an overlay workspace that builds
 only `blueboat_description` with your edited `config/blueboat.yaml` on top

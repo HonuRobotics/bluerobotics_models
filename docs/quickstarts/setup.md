@@ -1,4 +1,12 @@
-# Installation - Drydock
+# Set up the drydock workspace
+
+| | Supported |
+|---|---|
+| OS | Ubuntu 26.04 |
+| ROS 2 | [Lyrical](https://docs.ros.org/en/lyrical/) |
+| Gazebo | [Jetty](https://gazebosim.org/docs/jetty), installed as ROS 2 Lyrical's `ros_gz` dependency (the default pairing); no separate Gazebo install needed |
+
+The [drydock](https://github.com/HonuRobotics/drydock) project is the standard, repeatable, documented development environment for the [gz-maritime](https://github.com/HonuRobotics/gz-maritime) project and hence this project. It is the only environment these quickstarts are written and tested against.
 
 These step-by-step instructions are intended to be complete and unambiguous so that a user can set up a repeatable development envirnment locally.
 
@@ -61,6 +69,14 @@ source install/setup.bash
 
 The build should finish cleanly.  There may be cmake deprecation warnings that can (usually?) be ignored.
 
-Next step is to run a simulation. 
+The project standard is `colcon build --merge-install` (one deb style prefix,
+the layout users get from binary installs). The default isolated layout also
+works if you prefer it.
 
+The build generates the default vehicle artifacts from each vehicle's config
+(the URDF, the composed Gazebo model, the ros_gz bridge config); see
+[Design](../developers/design/architecture.md) for what is generated where.
 
+If you need an additional shell, join the running container with `./drydock join maritime` (see `./drydock -h` for more options).
+
+Next: [First simulation](first-simulation.md).
