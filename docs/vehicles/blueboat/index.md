@@ -19,9 +19,4 @@ visual_asset_commission
 
 ## The default vehicle
 
-The default configuration is the chassis (pontoons, crossbeams, hatches and the
-outboard thruster bodies) with its two M200 weedless propellers, the flag
-on the aft crossbeam and the Ping2 echosounder on its integration kit
-bracket, face below the waterline. Everything else in the catalog can be
-fitted, and the defaults swapped or left off
-([Configuration](configuration.md)).
+The shipped config fits the chassis (pontoons, crossbeams, hatches and the outboard thruster bodies) and its two M200 weedless propellers, nothing else. With `slot_defaults: true` the slots fill with their own defaults as well: the flag on the aft crossbeam and the Ping2 echosounder on its integration kit bracket, face below the waterline. Everything else in the catalog can be fitted ([Configuration](configuration.md)).
