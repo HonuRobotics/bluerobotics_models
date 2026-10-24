@@ -10,7 +10,7 @@
         </geometry>
       </visual>
       <collision name="t200_thruster_collider_cylinder">
-        <pose>0.002945 -0.002682 0.048543 0.0 -0.0 1.570796</pose>
+        <pose>9.4e-05 -0.00857 -0.000255 0.0 -0.0 1.570796</pose>
         <geometry>
           <cylinder>
             <radius>0.021814</radius>
@@ -19,7 +19,7 @@
         </geometry>
       </collision>
       <collision name="t200_thruster_collider_cylinder_1">
-        <pose>0.00293 0.009015 0.048857 0.0 -0.0 1.570796</pose>
+        <pose>7.9e-05 0.003127 5.9e-05 0.0 -0.0 1.570796</pose>
         <geometry>
           <cylinder>
             <radius>0.051596</radius>
