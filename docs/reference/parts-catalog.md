@@ -31,8 +31,9 @@ parts too: an assembly is a chassis plus whatever its slots carry.
 | `omniscan_450_sidescan` | Cerulean Omniscan 450 side scan sonar | [link](https://bluerobotics.com/store/the-reef/cerulean-sidescan-sonar/) | geometry only |
 | `surveyor_multibeam` | Cerulean Surveyor 240-16 multibeam | [link](https://bluerobotics.com/store/sonars/echosounders/cerulean-surveyor-240-16-multibeam-echosounder/) | geometry only |
 
-Parts whose final mesh has not landed yet use placeholder geometry; a
+Parts whose final mesh has not been delivered yet use placeholder geometry; a
 `type` marked pending delivery cannot be fitted until its macro lands.
+The BlueROV2 sensor parts (`explorehd_camera`, `ping360`, `dvl_a50`) carry no visual for now: accessory visuals are out of scope, and each sensor works from its part's frame.
 
 ## Slots
 
@@ -43,8 +44,8 @@ after the slot by default.
 
 | Part | Slot | Accepts | Default | Joint |
 |---|---|---|---|---|
-| `blueboat_chassis` | `motor_port` | `m200_weedless_prop_ccw`, `t200_prop_ccw` | `m200_weedless_prop_ccw` | continuous |
-| | `motor_stbd` | `m200_weedless_prop_cw`, `t200_prop_cw` | `m200_weedless_prop_cw` | continuous |
+| `blueboat_chassis` | `prop_port` | `m200_weedless_prop_ccw`, `t200_prop_ccw` | `m200_weedless_prop_ccw` | continuous |
+| | `prop_stbd` | `m200_weedless_prop_cw`, `t200_prop_cw` | `m200_weedless_prop_cw` | continuous |
 | | `flag` | `blueboat_flag` | `blueboat_flag` | fixed |
 | | `mast` | `blueboat_antenna_mast` | none | fixed |
 | | `payload` | `blueboat_payload_bracket` | none | fixed |
@@ -78,8 +79,9 @@ for both vehicles:
 |---|---|---|
 | `topic_namespace` | no (the vehicle name) | prefix of every part topic: `/<name>/<name>/...` |
 | `base` | yes | the root part: `{type, name (default base_link), collision (default true)}` |
+| `slot_defaults` | no (`true`) | `false` leaves every slot without an entry empty, so `parts` lists every fitted part |
 | `parts` | no (`[]`) | slot entries and free placements, see below |
-| `slots` | no | ad hoc slots: `{of (instance, default base_link), name, xyz, rpy (default "0 0 0"), accepts (list, optional), default (type or none), joint}` |
+| `slots` | no | ad hoc slots: `{of (instance, default base_link), name, xyz, rpy (default "0 0 0"), accepts (list, optional), default (type or none), joint, axis}` |
 | `hull_displacement` | BlueBoat | the box pontoons the Gazebo composition places on the `hull_displacement` link: `{length, width, height, x, y, z, segments}` |
 | `buoyancy` | BlueROV2 | `{net_buoyancy (kg), cob_offset, cob_frame (com/base_link), fluid_density, footprint}`, realized as a dedicated displacement link solved from the assembled mass; see [Buoyancy](../design/buoyancy.md) |
 | `extra_bridge_topics` | no | list appended verbatim to the generated ros_gz bridge config (native syntax) |
@@ -94,7 +96,7 @@ A **slot entry** in `parts` (has `slot`):
 | `name` | instance name (default: the slot name); must be unique across the vehicle |
 | `xyz`, `rpy` | offset from the slot pose (default zero) |
 | `joint` | joint type for the occupant (default: the slot's, else `continuous` for a propeller, else `fixed`) |
-| `axis` | joint axis override (default: the part's own spin axis) |
+| `axis` | joint axis override (default: the slot's, else the part's own spin axis) |
 | `collision` | `false` to fit the part without its contact geometry |
 | `topic`, `gz_topic`, `ros_topic`, `bridge` | parts with topics (propellers, sensors): topic base for both sides / one side, under the namespace unless it starts with a slash; native bridge keys merged into the entry |
 
@@ -121,8 +123,8 @@ frames follow the fitted parts, with the same naming patterns on both vehicles:
 | Pattern | Kind | Meaning |
 |---|---|---|
 | `base_link` | root link | the chassis part: origin at the mesh centroid, x forward, y left, z up ([REP 103](https://www.ros.org/reps/rep-0103.html)); floats with its origin at the waterline |
-| `<instance>` | link | one frame per fitted part, named after its slot or its `name` (`motor_port`, `thruster_1`, `ping`, `camera`); spinning parts sit on their continuous joint `<instance>_joint` |
-| `<parent>_<slot>` | massless link | one per slot a part declares, whether filled or not (`base_link_motor_port`, `base_link_camera`, `ping_mount_ping`) |
+| `<instance>` | link | one frame per fitted part, named after its slot or its `name` (`prop_port`, `thruster_1`, `ping`, `camera`); spinning parts sit on their continuous joint `<instance>_joint` |
+| `<parent>_<slot>` | massless link | one per slot a part declares, whether filled or not (`base_link_prop_port`, `base_link_camera`, `ping_mount_ping`) |
 | `<instance>_<frame>` | massless link | frames the part itself declares (`ping_beam`, the transducer face); sensor messages carry them as `frame_id`, resolved by TF |
 
 The displacement volume is not in the URDF or TF: each Gazebo package adds

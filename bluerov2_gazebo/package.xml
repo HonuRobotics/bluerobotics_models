@@ -31,6 +31,7 @@
   <exec_depend>gz_thruster</exec_depend>
   <exec_depend>bluerobotics_common</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz2</exec_depend>
   <exec_depend>ros_gz_sim</exec_depend>
   <exec_depend>ros_gz_bridge</exec_depend>
   <!-- ROS msg types the bridge maps the sensors + claw commands to -->

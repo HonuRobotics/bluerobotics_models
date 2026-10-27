@@ -26,6 +26,7 @@
                     default     the type fitted when the config is silent,
                                 or 'none'
                     joint       joint type for the occupant (default fixed)
+                    axis        joint axis for the occupant, in its own frame (default: the part's own spin axis)
                     collision   false to fit occupants without contact
                                 geometry (a propeller spinning inside a
                                 duct or hull volume would grind on it)
@@ -61,8 +62,10 @@
      and emitting one link (inertia, visual via part_visual, optional
      collision), the mounting joint (part_joint), and its slots and frames as
      massless links named <name>_<slot> / <name>_<frame> (part_slots,
-     part_frames). They show up in TF and are lumped away in Gazebo, where
-     they survive as frames of the same name.
+     part_frames), or the entry's `link` where a frame needs a conventional
+     name (the chassis's base_footprint, REP 105), used only when the part is
+     the assembly root (root:=True), so a second instance cannot clash. They show up in TF and are
+     lumped away in Gazebo, where they survive as frames of the same name.
 
   The URDF xacro is the part. It may be bootstrapped from a modeler's SDF
   with scripts/sdf_to_part.py or written by hand; nothing downstream knows
@@ -81,10 +84,13 @@
   <xacro:arg name="gltf_up" default="y"/>
   <xacro:property name="gltf_visual_rpy" value="${'1.5708 0 0' if '$(arg gltf_up)' == 'z' else '0 0 0'}"/>
 
-  <!-- A part's visual mesh, with the glTF up axis handling above. -->
-  <xacro:macro name="part_visual" params="mesh xyz:='0 0 0'">
+  <!-- axes="gltf": a delivery in the Honu glTF Asset Profile's axes (+x left, +y up, +z forward; profile Axes section), rotated into ISO 9787 / REP 103 as in gltf-robotics docs/walkthroughs/coordinate_orientation_demo.md: roll 90 then yaw 90 for Gazebo (and RViz before Lyrical), which add nothing on load; yaw 90 only for RViz from Lyrical on, which adds the roll itself. New deliveries use it; axes="legacy" (the default) keeps the rotation above for the earlier exports. -->
+  <xacro:property name="gltf_profile_rpy" value="${'1.5708 0 1.5708' if '$(arg gltf_up)' == 'z' else '0 0 1.5708'}"/>
+
+  <!-- A part's visual mesh, with the glTF axes handling above. -->
+  <xacro:macro name="part_visual" params="mesh xyz:='0 0 0' axes:='legacy'">
     <visual>
-      <origin xyz="${xyz}" rpy="${gltf_visual_rpy}"/>
+      <origin xyz="${xyz}" rpy="${gltf_profile_rpy if axes == 'gltf' else gltf_visual_rpy}"/>
       <geometry>
         <mesh filename="${mesh}"/>
       </geometry>
@@ -136,15 +142,15 @@
 
   <!-- All of a part's slots (or frames: same thing to the URDF) from its
        part_info table (xacro has no loop; recurse over list(table.items())). -->
-  <xacro:macro name="part_slots" params="name items">
+  <xacro:macro name="part_slots" params="name items root:=False">
     <xacro:if value="${len(items) > 0}">
-      <xacro:part_slot name="${name}_${items[0][0]}" parent="${name}"
+      <xacro:part_slot name="${items[0][1]['link'] if root and 'link' in items[0][1] else name + '_' + items[0][0]}" parent="${name}"
                        xyz="${items[0][1]['xyz']}" rpy="${items[0][1].get('rpy', '0 0 0')}"/>
-      <xacro:part_slots name="${name}" items="${items[1:]}"/>
+      <xacro:part_slots name="${name}" items="${items[1:]}" root="${root}"/>
     </xacro:if>
   </xacro:macro>
-  <xacro:macro name="part_frames" params="name items">
-    <xacro:part_slots name="${name}" items="${items}"/>
+  <xacro:macro name="part_frames" params="name items root:=False">
+    <xacro:part_slots name="${name}" items="${items}" root="${root}"/>
   </xacro:macro>
 
   <!-- ===== catalog =====

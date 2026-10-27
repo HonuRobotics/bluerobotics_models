@@ -1,9 +1,6 @@
 # Configuration
 
-The BlueROV2 needs no configuration: every slot the parts declare fills
-itself with its default. The vehicle config
-(`bluerov2_description/config/bluerov2.yaml`, or any file passed as
-`config_file:=`) states differences only.
+The vehicle config (`bluerov2_description/config/bluerov2.yaml`, or any file passed as `config_file:=`) lists the fitted parts. The shipped config sets `slot_defaults: false` and fits the chassis, its six propellers and their T200 bodies, and the exploreHD camera. With `slot_defaults: true`, or the key left out, every slot fills itself with the default in the table below, and the config states differences only.
 
 ## Variants
 
@@ -53,6 +50,8 @@ config entry each. The fitted options and their topics live in
 | `gripper` | `newton_gripper`, `sediment_sampler` | empty |
 | `payload` | `payload_skid` | empty |
 | `rack` | `roof_rack` | empty |
+
+Subsea manipulation is out of scope for now, so the `gripper` slot stays empty.
 
 Slot entries, free placements, ad hoc slots and topic overrides follow
 the same schema as the BlueBoat

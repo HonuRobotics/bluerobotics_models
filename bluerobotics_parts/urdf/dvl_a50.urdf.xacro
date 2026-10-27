@@ -2,9 +2,7 @@
 <!--
   dvl_a50 part macro: a Water Linked DVL A50 doppler velocity log.
 
-  Ported from the BlueROV2 accessory macros; a sized cylinder placeholder until a
-  real mesh is delivered. Visual only, like the accessory it replaces (the
-  chassis carries the vehicle's contact geometry).
+  Ported from the BlueROV2 accessory macros. No visual: accessory visuals are out of scope until a glTF part is commissioned, so the part is its link, inertia and frame, and bluerov2_gazebo hangs the sensor on that frame. Mass and inertia are a cylinder over the device envelope; the chassis carries the vehicle's contact geometry.
 
   Contract (see parts.xacro): <part>_info exports the metadata (attach,
   slots, frames, drive); <part> instantiates the link, its mounting joint
@@ -35,10 +33,6 @@
                  iyy="${_m/12.0 * (3*_r**2 + _l**2)}" iyz="0"
                  izz="${_m/2.0 * _r**2}"/>
       </inertial>
-      <visual>
-        <geometry><cylinder radius="${_r}" length="${_l}"/></geometry>
-        <material name="${name}_mat"><color rgba="0.5 0.5 0.55 1"/></material>
-      </visual>
     </link>
 
     <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"

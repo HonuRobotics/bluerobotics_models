@@ -141,10 +141,10 @@ def test_model_loaded(sim):
 
 def test_interfaces_advertised(sim):
     """Motor commands, speed feedback and the world clock are advertised."""
-    needed = ('/blueboat/motor_port/cmd',
-              '/blueboat/motor_stbd/cmd',
-              '/blueboat/motor_port/cmd/ang_vel',
-              '/blueboat/motor_stbd/cmd/ang_vel',
+    needed = ('/blueboat/prop_port/cmd',
+              '/blueboat/prop_stbd/cmd',
+              '/blueboat/prop_port/cmd/ang_vel',
+              '/blueboat/prop_stbd/cmd/ang_vel',
               f'/world/{WORLD_NAME}/clock')
     poll_until(
         lambda: all(t in gz(sim, 'topic', '-l')[1] for t in needed), 30,

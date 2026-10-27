@@ -38,6 +38,20 @@ def configure(config_path, out_dir):
     return Path(out_dir)
 
 
+def kit_config(parts=()):
+    """
+    Return the tests' own vehicle.
+
+    The shipped hull and namespace, every slot filling with its default, plus
+    parts. Independent of what the shipped config fits, so these tests follow
+    the tool's behavior rather than the current product.
+    """
+    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
+    cfg['slot_defaults'] = True
+    cfg['parts'] = [dict(p) for p in parts]
+    return cfg
+
+
 def links(urdf_path):
     return {li.get('name') for li in ET.parse(urdf_path).getroot().findall('link')}
 
@@ -67,14 +81,15 @@ def test_default_config_reproduces_the_installed_artifacts(tmp_path):
                if v.find('geometry/mesh') is not None}
     ros_rpys = {v.find('origin').get('rpy') for v in ros_root.iter('visual')
                 if v.find('geometry/mesh') is not None}
-    assert ros_rpys == {'0 0 0'} and gz_rpys == {'1.5708 0 0'}
+    # legacy exports, and profile axes deliveries (axes="gltf" in part_visual)
+    assert ros_rpys <= {'0 0 0', '0 0 1.5708'}
+    assert gz_rpys <= {'1.5708 0 0', '1.5708 0 1.5708'}
 
 
 def test_custom_config_flows_to_every_artifact(tmp_path):
     """A different config changes URDF, model and bridge consistently."""
-    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
-    cfg['parts'] = [{'slot': 'ping_mount', 'type': 'none'},
-                    {'slot': 'mast', 'type': 'blueboat_antenna_mast'}]
+    cfg = kit_config([{'slot': 'ping_mount', 'type': 'none'},
+                      {'slot': 'mast', 'type': 'blueboat_antenna_mast'}])
     config = tmp_path / 'custom.yaml'
     config.write_text(yaml.safe_dump(cfg, sort_keys=False))
     out = configure(config, tmp_path / 'v')
@@ -84,14 +99,13 @@ def test_custom_config_flows_to_every_artifact(tmp_path):
     bridge = yaml.safe_load((out / 'ros_gz_bridge.yaml').read_text())
     topics = {e['ros_topic_name'] for e in bridge}
     assert '/blueboat/ping/range' not in topics
-    assert '/blueboat/motor_port/cmd' in topics
+    assert '/blueboat/prop_port/cmd' in topics
 
 
 def test_drivetrain_follows_the_config(tmp_path):
     """A renamed or removed propeller moves or drops its Thruster and bridge topic."""
-    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
-    cfg['parts'] = [{'slot': 'motor_port', 'type': 'none'},
-                    {'slot': 'motor_stbd', 'type': 't200_prop_cw', 'name': 'right'}]
+    cfg = kit_config([{'slot': 'prop_port', 'type': 'none'},
+                      {'slot': 'prop_stbd', 'type': 't200_prop_cw', 'name': 'right'}])
     config = tmp_path / 'custom.yaml'
     config.write_text(yaml.safe_dump(cfg, sort_keys=False))
     out = configure(config, tmp_path / 'v')
@@ -102,7 +116,7 @@ def test_drivetrain_follows_the_config(tmp_path):
     topics = {e['ros_topic_name'] for e in
               yaml.safe_load((out / 'ros_gz_bridge.yaml').read_text())}
     assert '/blueboat/right/cmd' in topics
-    assert not any(t.endswith('motor_port/cmd') for t in topics)
+    assert not any(t.endswith('prop_port/cmd') for t in topics)
 
 
 def test_base_name_flows_to_the_model(tmp_path):
@@ -125,8 +139,7 @@ def test_base_name_flows_to_the_model(tmp_path):
 
 def test_mismatched_config_fails_with_the_reason(tmp_path):
     """A slot entry that matches nothing fails the tool (and so the launch)."""
-    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
-    cfg['parts'] = [{'slot': 'pingg', 'of': 'ping_mount', 'type': 'none'}]
+    cfg = kit_config([{'slot': 'pingg', 'of': 'ping_mount', 'type': 'none'}])
     config = tmp_path / 'custom.yaml'
     config.write_text(yaml.safe_dump(cfg, sort_keys=False))
     out = subprocess.run([str(TOOL), '--config', str(config), '--out-dir', str(tmp_path / 'v')],
@@ -171,7 +184,7 @@ def test_name_flows_to_every_artifact(tmp_path):
     # The bridge agrees, so gz and ROS sides stay in sync.
     bridge = yaml.safe_load((out_dir / 'ros_gz_bridge.yaml').read_text())
     gz_topics = {e['gz_topic_name'] for e in bridge}
-    assert any(t.startswith('/boat_b/motor_port/') for t in gz_topics), gz_topics
+    assert any(t.startswith('/boat_b/prop_port/') for t in gz_topics), gz_topics
     assert not any(t.startswith('/blueboat/') for t in gz_topics), gz_topics
 
 
@@ -204,9 +217,8 @@ def test_two_instances_from_one_config_share_no_topic(tmp_path):
     a command for one instance never reaches the other; only the fixed
     /clock remains shared.
     """
-    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
-    cfg['parts'] = [{'slot': 'ping', 'of': 'ping_mount', 'type': 'ping_singlebeam',
-                     'topic': 'sonar'}]
+    cfg = kit_config([{'slot': 'ping', 'of': 'ping_mount', 'type': 'ping_singlebeam',
+                     'topic': 'sonar'}])
     config = tmp_path / 'custom.yaml'
     config.write_text(yaml.safe_dump(cfg, sort_keys=False))
     topics = {}

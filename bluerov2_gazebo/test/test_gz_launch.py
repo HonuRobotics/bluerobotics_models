@@ -257,8 +257,20 @@ def test_physics_steps(sim):
     poll_until(advancing, 30, 'sim iterations did not advance')
 
 
+def shipped_has_camera():
+    """Whether the installed (shipped config) URDF fits a camera."""
+    urdf = Path(get_package_share_directory('bluerov2_description')) / 'urdf' / 'bluerov2.urdf'
+    return '<link name="camera">' in urdf.read_text()
+
+
 def test_camera_renders(sim):
-    """The default configuration's camera streams frames at its configured size."""
+    """
+    The shipped configuration's camera streams frames at its configured size.
+
+    Skipped when the shipped config fits no camera.
+    """
+    if not shipped_has_camera():
+        pytest.skip('the shipped config fits no camera')
     code, out, err = gz(sim, 'topic', '-e', '-t', '/bluerov2/camera/image',
                         '-n', '1', timeout=30)
     assert code == 0 and 'data' in out, (

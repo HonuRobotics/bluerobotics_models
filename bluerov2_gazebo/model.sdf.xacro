@@ -466,8 +466,8 @@
          the assembly resolves to. No manifest: that lives in the merged
          URDF. -->
     <xacro:assemble base="${cfg['base']}" parts="${cfg.get('parts') or []}"
-                    slots="${cfg.get('slots') or []}" emit="gz_part" emit_slot="gz_no_slot"
-                    manifest="false"/>
+                    slots="${cfg.get('slots') or []}" defaults="${cfg.get('slot_defaults', True)}"
+                    emit="gz_part" emit_slot="gz_no_slot" manifest="false"/>
 
     <!-- ===================== ArduPilot SITL =====================
          Only when ardupilot:=true. Everything above is unchanged, so the
@@ -524,8 +524,8 @@
           gets correct blocks with no edit here.
         -->
         <xacro:assemble base="${cfg['base']}" parts="${cfg.get('parts') or []}"
-                        slots="${cfg.get('slots') or []}" emit="ap_control"
-                        emit_slot="gz_no_slot" manifest="false"/>
+                        slots="${cfg.get('slots') or []}" defaults="${cfg.get('slot_defaults', True)}"
+                        emit="ap_control" emit_slot="gz_no_slot" manifest="false"/>
       </plugin>
 
     </xacro:if>

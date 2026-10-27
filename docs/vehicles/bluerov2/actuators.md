@@ -8,7 +8,7 @@ following the [Add a part](../../how-to/add-part.md) guide.
 
 ## Available actuators
 
-| Actuator | Part | Slot | Fitted by default |
+| Actuator | Part | Slot | Fitted in the shipped config |
 |---|---|---|---|
 | T200 thrusters, vectored horizontals | `t200_prop_ccw` / `t200_prop_cw` | `thruster_1` .. `thruster_4` | yes |
 | T200 thrusters, verticals | `t200_prop_ccw` / `t200_prop_cw` | `thruster_5`, `thruster_6` | yes |

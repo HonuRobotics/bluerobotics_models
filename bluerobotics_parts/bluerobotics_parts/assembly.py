@@ -34,15 +34,15 @@ import yaml
 
 # Keys each kind of config entry may carry. A key outside its set is a typo
 # until proven otherwise; the sets grow with the features.
-TOP_KEYS = {'topic_namespace', 'base', 'parts', 'slots', 'hull_displacement',
-            'buoyancy', 'extra_bridge_topics'}
+TOP_KEYS = {'topic_namespace', 'base', 'slot_defaults', 'parts', 'slots',
+            'hull_displacement', 'buoyancy', 'extra_bridge_topics'}
 BASE_KEYS = {'type', 'name', 'collision'}
 PART_COMMON_KEYS = {'type', 'name', 'xyz', 'rpy', 'collision', 'joint', 'axis',
                     'topic', 'gz_topic', 'ros_topic', 'bridge'}
 SLOT_ENTRY_KEYS = PART_COMMON_KEYS | {'slot', 'of'}
 FREE_ENTRY_KEYS = PART_COMMON_KEYS | {'parent'}
 ADHOC_SLOT_KEYS = {'of', 'name', 'xyz', 'rpy', 'accepts', 'default', 'joint',
-                   'collision'}
+                   'axis', 'collision'}
 
 
 def rpy_matrix(r, p, y):

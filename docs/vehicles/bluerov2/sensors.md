@@ -7,9 +7,11 @@ sensors can be added following the
 [Add a sensor part](../../how-to/add-sensor-part.md) guide. The grippers
 live with the [actuators](actuators.md).
 
+The sensors have no visual: the camera, sonar and DVL work from their part frames, and the parts will gain glTF visuals when they are commissioned.
+
 ## Available sensors
 
-| Sensor | Part | Slot | Fitted by default |
+| Sensor | Part | Slot | Fitted in the shipped config |
 |---|---|---|---|
 | exploreHD camera | `explorehd_camera` | `camera` | yes |
 | MarineSitu C3 stereo camera | `marinesitu_c3` | `camera` | no |
