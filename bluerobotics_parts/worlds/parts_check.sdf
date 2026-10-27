@@ -444,6 +444,12 @@
             </geometry>
           </visual>
         </link>
+        <frame name='base_footprint_joint' attached_to='bluerov2_chassis'>
+          <pose>0.013605000000000001 0 -0.18784600000000001 0 0 0</pose>
+        </frame>
+        <frame name='base_footprint' attached_to='base_footprint_joint'>
+          <pose>0 0 0 0 0 0</pose>
+        </frame>
         <frame name='bluerov2_chassis_camera_joint' attached_to='bluerov2_chassis'>
           <pose>0.22 0 0.050000000000000003 0 0 0</pose>
         </frame>
@@ -454,12 +460,6 @@
           <pose>-0.12 0 -0.14000000000000001 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_dvl' attached_to='bluerov2_chassis_dvl_joint'>
-          <pose>0 0 0 0 0 0</pose>
-        </frame>
-        <frame name='bluerov2_chassis_footprint_joint' attached_to='bluerov2_chassis'>
-          <pose>0.013605000000000001 0 -0.18784600000000001 0 0 0</pose>
-        </frame>
-        <frame name='bluerov2_chassis_footprint' attached_to='bluerov2_chassis_footprint_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_gripper_joint' attached_to='bluerov2_chassis'>

@@ -31,7 +31,7 @@
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <!-- The delivered chassis mesh has its origin on the commissioned datum (commissions/commission-bluerov2.yaml): the center of the frame's footprint on its bottom plane, the base_footprint of REP 105. That point is the footprint frame. base_link stays at the main tube's center, (-0.013605, 0, 0.187846) from the datum, so the visual is placed by the opposite offset: gz-sim's Hydrodynamics samples the link origin's velocity but applies its wrench at the CoM, and with base_link on the datum, 0.19 m below the CoM, roll couples into sway (the axis test measured sway 31 degrees off axis).
+  <!-- The delivered chassis mesh has its origin on the commissioned datum (commissions/commission-bluerov2.yaml): the center of the frame's footprint on its bottom plane, the base_footprint of REP 105. That point is the base_footprint frame. base_link stays at the main tube's center, (-0.013605, 0, 0.187846) from the datum, so the visual is placed by the opposite offset: gz-sim's Hydrodynamics samples the link origin's velocity but applies its wrench at the CoM, and with base_link on the datum, 0.19 m below the CoM, roll couples into sway (the axis test measured sway 31 degrees off axis).
 
        The thruster_N and thruster_body_N poses are taken from the Blender assembly bluerov2_chassis.blend (the chassis file with t200_thruster, t200_prop_cw and t200_prop_ccw linked in): each instance's translation and rotation relative to the untransformed chassis, mapped from Blender axes to these (x = -Blender y, y = Blender x, z = Blender z) and moved by the datum offset above. A body and its prop share one pose, as their datums are the same point.
 
@@ -70,7 +70,7 @@
         ),
         frames=dict(
             imu=dict(xyz='0 0 0', rpy='0 0 0'),
-            footprint=dict(xyz='0.013605 0 -0.187846', rpy='0 0 0'),
+            footprint=dict(xyz='0.013605 0 -0.187846', rpy='0 0 0', link='base_footprint'),
         ))}"/>
   </xacro:macro>
 
@@ -156,7 +156,8 @@
     <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
                       joint="${joint}" axis="${axis}" attach="${part_info['attach']}"/>
     <xacro:part_slots name="${name}" items="${list(part_info['slots'].items())}"/>
-    <xacro:part_frames name="${name}" items="${list(part_info['frames'].items())}"/>
+    <xacro:part_frames name="${name}" items="${list(part_info['frames'].items())}"
+                       root="${parent == ''}"/>
 
   </xacro:macro>
 
