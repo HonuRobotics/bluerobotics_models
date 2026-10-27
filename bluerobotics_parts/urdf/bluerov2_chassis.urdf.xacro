@@ -16,13 +16,12 @@
   Contract (see parts.xacro): <part>_info exports the metadata (attach,
   slots, frames, drive); <part> instantiates the link, its mounting joint
   and its slot / frame links.
-  Slots other parts fit into, as frames <name>_<slot> (thruster slot +x is
-  the thrust axis; ArduSub vectored frame convention preserved):
+  Slots other parts fit into, as frames <name>_<slot> (the thrust axis is
+  thruster slot +x, or -x where the slot sets axis -1 0 0; ArduSub vectored
+  frame convention preserved):
     thruster_1 .. thruster_4: vectored horizontals (1 FR ccw, 2 FL ccw,
       3 RR cw, 4 RL cw); default the matching t200 prop
-    thruster_5, thruster_6: verticals (5 starboard ccw, 6 port cw), at
-      x 0.015 / z 0.05, centered in the well between the artist foam
-      blocks (x -0.032 .. +0.061) with the props just below its top
+    thruster_5, thruster_6: verticals (5 starboard ccw, 6 port cw)
     camera: explorehd_camera (default) or marinesitu_c3
     sonar: ping360; default none
     dvl: dvl_a50; default none
@@ -32,9 +31,13 @@
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <!-- Body slots: +x faces the propeller, so the motor bulk trails away
-       from the prop plane (downward pointing verticals: motor below,
-       inside the chassis; only the duct ring shows at the foam).
+  <!-- The delivered chassis mesh has its origin on the commissioned datum (commissions/commission-bluerov2.yaml): the center of the frame's footprint on its bottom plane, the base_footprint of REP 105. That point is the footprint frame. base_link stays at the main tube's center, (-0.013605, 0, 0.187846) from the datum, so the visual is placed by the opposite offset: gz-sim's Hydrodynamics samples the link origin's velocity but applies its wrench at the CoM, and with base_link on the datum, 0.19 m below the CoM, roll couples into sway (the axis test measured sway 31 degrees off axis).
+
+       The thruster_N and thruster_body_N poses are taken from the Blender assembly bluerov2_chassis.blend (the chassis file with t200_thruster, t200_prop_cw and t200_prop_ccw linked in): each instance's translation and rotation relative to the untransformed chassis, mapped from Blender axes to these (x = -Blender y, y = Blender x, z = Blender z) and moved by the datum offset above. A body and its prop share one pose, as their datums are the same point.
+
+       Two corrections keep each thruster's positive thrust where ArduSub's Vectored frame puts it (AP_Motors6DOF.cpp, SUB_FRAME_VECTORED). The four horizontals are turned 90 degrees about z from the assembly, so +x lies along ArduSub's direction for that motor (1 aft starboard, 2 aft port, 3 fore starboard, 4 fore port); in the assembly they face the other diagonal, which is open with the modeler. The two verticals face up in the assembly, so their prop slots spin the occupant about -1 0 0 and positive thrust pushes down, as ArduSub's throttle factor of -1 expects.
+
+       The camera, sonar, dvl, gripper, payload and rack positions, the inertial origin and the collisions predate the assembly; they are refit in a later increment.
 
        The imu frame is where the flight controller senses attitude. Declared
        as a frame rather than a part because nothing about its mass or
@@ -46,27 +49,28 @@
     <xacro:property name="part_info" scope="parent" value="${dict(
         attach='0 0 0',
         slots=dict(
-            thruster_1=dict(xyz='0.14 -0.092 0.0', rpy='0 0 -2.3562', accepts=['t200_prop_ccw'], default='t200_prop_ccw', collision=False),
-            thruster_2=dict(xyz='0.14 0.092 0.0', rpy='0 0 2.3562', accepts=['t200_prop_ccw'], default='t200_prop_ccw', collision=False),
-            thruster_3=dict(xyz='-0.15 -0.092 0.0', rpy='0 0 -0.7854', accepts=['t200_prop_cw'], default='t200_prop_cw', collision=False),
-            thruster_4=dict(xyz='-0.15 0.092 0.0', rpy='0 0 0.7854', accepts=['t200_prop_cw'], default='t200_prop_cw', collision=False),
-            thruster_5=dict(xyz='0.015 -0.109 0.05', rpy='0 1.5708 0', accepts=['t200_prop_ccw'], default='t200_prop_ccw', collision=False),
-            thruster_6=dict(xyz='0.015 0.109 0.05', rpy='0 1.5708 0', accepts=['t200_prop_cw'], default='t200_prop_cw', collision=False),
+            thruster_1=dict(xyz='0.156505 -0.091 -0.059546', rpy='0 3.1416 0.7854', accepts=['t200_prop_ccw'], default='t200_prop_ccw', collision=False),
+            thruster_2=dict(xyz='0.156505 0.091 -0.059546', rpy='0 3.1416 -0.7854', accepts=['t200_prop_ccw'], default='t200_prop_ccw', collision=False),
+            thruster_3=dict(xyz='-0.144495 -0.0895 -0.059546', rpy='-3.1416 0 -0.7854', accepts=['t200_prop_cw'], default='t200_prop_cw', collision=False),
+            thruster_4=dict(xyz='-0.144495 0.0895 -0.059546', rpy='-3.1416 0 0.7854', accepts=['t200_prop_cw'], default='t200_prop_cw', collision=False),
+            thruster_5=dict(xyz='0.016805 -0.111 0.001954', rpy='-1.5708 -1.5708 0', accepts=['t200_prop_ccw'], default='t200_prop_ccw', axis='-1 0 0', collision=False),
+            thruster_6=dict(xyz='0.013905 0.111 -0.004746', rpy='1.5708 -1.5708 0', accepts=['t200_prop_cw'], default='t200_prop_cw', axis='-1 0 0', collision=False),
             camera=dict(xyz='0.22 0 0.05', rpy='0 0 0', accepts=['explorehd_camera', 'marinesitu_c3'], default='explorehd_camera'),
             sonar=dict(xyz='0.16 0 0.13', rpy='0 0 0', accepts=['ping360'], default='none'),
             dvl=dict(xyz='-0.12 0 -0.14', rpy='0 0 0', accepts=['dvl_a50'], default='none'),
             gripper=dict(xyz='0.28 0 -0.08', rpy='0 0 0', accepts=['newton_gripper', 'sediment_sampler'], default='none'),
             payload=dict(xyz='0 0 -0.17', rpy='0 0 0', accepts=['payload_skid'], default='none'),
             rack=dict(xyz='0 0 0.17', rpy='0 0 0', accepts=['roof_rack'], default='none'),
-            thruster_body_1=dict(xyz='0.14 -0.092 0.0', rpy='0 0 -2.3562', accepts=['t200_thruster'], default='t200_thruster', collision=False),
-            thruster_body_2=dict(xyz='0.14 0.092 0.0', rpy='0 0 2.3562', accepts=['t200_thruster'], default='t200_thruster', collision=False),
-            thruster_body_3=dict(xyz='-0.15 -0.092 0.0', rpy='0 0 -0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
-            thruster_body_4=dict(xyz='-0.15 0.092 0.0', rpy='0 0 0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
-            thruster_body_5=dict(xyz='0.015 -0.109 0.05', rpy='0 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
-            thruster_body_6=dict(xyz='0.015 0.109 0.05', rpy='0 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_1=dict(xyz='0.156505 -0.091 -0.059546', rpy='0 3.1416 0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_2=dict(xyz='0.156505 0.091 -0.059546', rpy='0 3.1416 -0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_3=dict(xyz='-0.144495 -0.0895 -0.059546', rpy='-3.1416 0 -0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_4=dict(xyz='-0.144495 0.0895 -0.059546', rpy='-3.1416 0 0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_5=dict(xyz='0.016805 -0.111 0.001954', rpy='-1.5708 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_6=dict(xyz='0.013905 0.111 -0.004746', rpy='1.5708 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
         ),
         frames=dict(
             imu=dict(xyz='0 0 0', rpy='0 0 0'),
+            footprint=dict(xyz='0.013605 0 -0.187846', rpy='0 0 0'),
         ))}"/>
   </xacro:macro>
 
@@ -90,7 +94,7 @@
                  iyy="1.743709e-01" iyz="2.066992e-05"
                  izz="2.209201e-01"/>
       </inertial>
-      <xacro:part_visual mesh="package://bluerobotics_parts/models/bluerov2_chassis/bluerov2_chassis.visual.glb"/>
+      <xacro:part_visual mesh="package://bluerobotics_parts/models/bluerov2_chassis/bluerov2_chassis_visual.glb" xyz="0.013605 0 -0.187846" axes="gltf"/>
       <xacro:if value="${collision}">
         <collision>
           <origin xyz="0.009119 0 0" rpy="-0 1.5708 0"/>
