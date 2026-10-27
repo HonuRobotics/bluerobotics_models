@@ -4,12 +4,7 @@
 # composed Gazebo model AND the ros_gz bridge config. To try a config without
 # rebuilding, pass config_file:=<your.yaml> to the launches.
 #
-# The default BlueBoat needs nothing here: every slot of every part fills
-# itself with its default (the chassis fits its two outboards, the flag and
-# the Ping2 integration kit; the kit's bracket fits the Ping). The entries
-# below are how to change that. See bluerobotics_parts/urdf/assembly.xacro
-# for the full rules and the site (vehicles/blueboat/configuration) for the slots
-# and the catalog.
+# The BlueBoat is exactly what parts: lists, because slot_defaults is false: a slot with no entry stays empty, including the slots of fitted parts (the Ping2 kit's bracket brings no Ping unless the Ping is listed too). With slot_defaults true, or left out, every unlisted slot fills with its default instead: the chassis fits its two propellers, the flag and the Ping2 integration kit, and the kit's bracket fits the Ping. See bluerobotics_parts/urdf/assembly.xacro for the full rules and the site (vehicles/blueboat/configuration) for the slots and the catalog.
 #
 # Topic namespace: sensor topics default to /<topic_namespace>/<name>/...
 topic_namespace: blueboat
@@ -20,7 +15,10 @@ topic_namespace: blueboat
 # since graded buoyancy reads only boxes and spheres (docs: design/buoyancy).
 base: {type: blueboat_chassis, name: base_link}
 
-# parts: overrides and additions. A slot entry picks what goes in a slot
+# slot_defaults: false fits only the slots listed under parts; true fills every unlisted slot with its default part.
+slot_defaults: false
+
+# parts: what is fitted. A slot entry picks what goes in a slot
 # (slot: the slot name, of: the instance carrying it, default base_link;
 # type: an accepted part type, or none to leave it empty). An entry without
 # slot: is a free placement: type, name, xyz/rpy relative to parent (default
@@ -33,13 +31,17 @@ base: {type: blueboat_chassis, name: base_link}
 #   which is then used as given (and shared by every instance).
 #   bridge:    dict of NATIVE ros_gz_bridge keys merged into that part's
 #              generated bridge entries
-parts: []
-  # - {slot: ping_mount, type: none}                          # no Ping2 kit
-  # - {slot: motor_port, type: t200_prop_ccw}                 # the other propeller option
-  # - {slot: motor_stbd, type: t200_prop_cw}
-  # - {slot: mast, type: blueboat_antenna_mast}               # slots with no default
+parts:
+  - {slot: prop_port, type: m200_weedless_prop_ccw}
+  - {slot: prop_stbd, type: m200_weedless_prop_cw}
+  - {type: ping_singlebeam, name: ping, xyz: "0 -0.259 0", rpy: "0 0 0"}   # the Ping where the Ping2 kit puts it, without the bracket
+  # - {slot: flag, type: blueboat_flag}
+  # The Ping2 kit instead of the free placed Ping above (remove that entry first):
+  # - {slot: ping_mount, type: blueboat_ping_singlebeam_mount}   # Ping2 integration kit bracket
+  # - {slot: ping, of: ping_mount, type: ping_singlebeam}         # the Ping in it; topic: sonar renames its topics
+  # - {slot: mast, type: blueboat_antenna_mast}
   # - {slot: payload, type: blueboat_payload_bracket}
-  # - {slot: ping, of: ping_mount, type: ping_singlebeam, topic: sonar}   # rename the Ping topics
+  # T200 propellers instead of the M200s: type: t200_prop_ccw / t200_prop_cw on the two prop_ slots above
   # - {type: basestation_antenna,   name: radio,     xyz: "-0.35 0 0.5",    rpy: "0 0 0"}
   # - {type: omniscan_450_sidescan, name: sidescan,  xyz: "0.2 0.22 -0.03", rpy: "0 0 0"}
   # - {type: surveyor_multibeam,    name: multibeam, xyz: "0.35 0 -0.08",   rpy: "0 0 0"}

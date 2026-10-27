@@ -13,7 +13,7 @@
 
       base: {type: blueboat_chassis, name: base_link}
       parts:
-        - {slot: motor_port, type: t200_prop_ccw}          # another option for a slot
+        - {slot: prop_port, type: t200_prop_ccw}          # another option for a slot
         - {slot: ping_mount, type: none}                   # leave a slot empty
         - {slot: mast, type: blueboat_antenna_mast}        # fill a slot that has no default
         - {slot: ping, of: ping_mount, type: ping_singlebeam, topic: sonar}   # a slot of another part
@@ -35,9 +35,13 @@
     to parent (default: the base). Their slots fill too.
   * The occupant's joint is the entry's `joint:`, else the slot's, else the
     part's nature: a propeller (a part with a `drive` table) turns on a
-    continuous joint, anything else is fixed.
+    continuous joint, anything else is fixed. Its axis is the entry's
+    `axis:`, else the slot's, else the part's own spin axis.
   * `slots:` declares ad hoc slots on any instance, usable like the part's
     own (accepts and default work the same).
+  * `defaults:=false` (a config's `slot_defaults: false`) turns the slot
+    defaults off: a slot with no config entry stays empty, so the config
+    lists every part that is fitted, the base's and the deeper ones alike.
   * Mistakes the expansion can see fail it loudly: an unknown slot on the
     base, a type a slot does not accept, a slot configured twice, a bare
     `on:` key. An unknown part type fails as "unknown macro name". What
@@ -110,7 +114,8 @@
       <xacro:assembly_fail message="slot '${slot}' of '${inst}' is configured ${len(matches)} times"/>
     </xacro:if>
     <xacro:property name="entry" value="${matches[0] if matches else dict()}"/>
-    <xacro:property name="chosen" value="${entry.get('type', spec.get('default', 'none'))}"/>
+    <xacro:property name="chosen"
+                    value="${entry.get('type', spec.get('default', 'none') if slot_defaults else 'none')}"/>
     <xacro:if value="${chosen != 'none'}">
       <xacro:if value="${'accepts' in spec and chosen not in spec['accepts']}">
         <xacro:assembly_fail message="'${chosen}' does not fit slot '${slot}' of '${inst}' (accepts ${spec['accepts']})"/>
@@ -119,7 +124,7 @@
                         xyz="${entry.get('xyz', '0 0 0')}" rpy="${entry.get('rpy', '0 0 0')}"
                         collision="${entry.get('collision', spec.get('collision', True))}"
                         joint="${entry.get('joint', spec.get('joint', ''))}"
-                        axis="${entry.get('axis', '')}"
+                        axis="${entry.get('axis', spec.get('axis', ''))}"
                         entries="${entries}" adhoc="${adhoc}" emit="${emit}" emit_slot="${emit_slot}"/>
     </xacro:if>
   </xacro:macro>
@@ -185,8 +190,9 @@
   </xacro:macro>
 
   <xacro:macro name="assemble"
-               params="base parts slots:='' emit:=emit_part emit_slot:=part_slot manifest:=true">
+               params="base parts slots:='' emit:=emit_part emit_slot:=part_slot manifest:=true defaults:=true">
     <xacro:property name="base_name" value="${base.get('name', 'base_link')}"/>
+    <xacro:property name="slot_defaults" value="${defaults}"/>
     <xacro:property name="adhoc" value="${slots if slots else []}"/>
     <!-- A bare `on:` key parses as the YAML boolean true; the key is `of:`. -->
     <xacro:if value="${len([e for e in list(parts) + list(adhoc) if True in e]) > 0}">

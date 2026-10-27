@@ -26,6 +26,7 @@
                     default     the type fitted when the config is silent,
                                 or 'none'
                     joint       joint type for the occupant (default fixed)
+                    axis        joint axis for the occupant, in its own frame (default: the part's own spin axis)
                     collision   false to fit occupants without contact
                                 geometry (a propeller spinning inside a
                                 duct or hull volume would grind on it)
@@ -81,10 +82,13 @@
   <xacro:arg name="gltf_up" default="y"/>
   <xacro:property name="gltf_visual_rpy" value="${'1.5708 0 0' if '$(arg gltf_up)' == 'z' else '0 0 0'}"/>
 
-  <!-- A part's visual mesh, with the glTF up axis handling above. -->
-  <xacro:macro name="part_visual" params="mesh xyz:='0 0 0'">
+  <!-- axes="gltf": a delivery in the Honu glTF Asset Profile's axes (+x left, +y up, +z forward; profile Axes section), rotated into ISO 9787 / REP 103 as in gltf-robotics docs/walkthroughs/coordinate_orientation_demo.md: roll 90 then yaw 90 for Gazebo (and RViz before Lyrical), which add nothing on load; yaw 90 only for RViz from Lyrical on, which adds the roll itself. New deliveries use it; axes="legacy" (the default) keeps the rotation above for the earlier exports. -->
+  <xacro:property name="gltf_profile_rpy" value="${'1.5708 0 1.5708' if '$(arg gltf_up)' == 'z' else '0 0 1.5708'}"/>
+
+  <!-- A part's visual mesh, with the glTF axes handling above. -->
+  <xacro:macro name="part_visual" params="mesh xyz:='0 0 0' axes:='legacy'">
     <visual>
-      <origin xyz="${xyz}" rpy="${gltf_visual_rpy}"/>
+      <origin xyz="${xyz}" rpy="${gltf_profile_rpy if axes == 'gltf' else gltf_visual_rpy}"/>
       <geometry>
         <mesh filename="${mesh}"/>
       </geometry>
