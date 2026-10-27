@@ -1,7 +1,3 @@
----
-orphan: true
----
-
 # SITL spec
 
 Experimenting with spec-driven development.
@@ -35,7 +31,7 @@ This spec is the only document that is current about the plan. [SITL_SPEC_CONTEX
 | 5 | Stabilization layer, ROV | `bluerobotics_models` |
 | 6 | Waypoint mission, boat only | `bluerobotics_models` |
 | 7 | ~~Waves, boat only~~ | — |
-| 8 | Documentation and CI | `bluerobotics_models` |
+| 8 | Documentation | `bluerobotics_models` |
 | 9 | Upstream the thruster mode | `gz-maritime`, then `gz-sim` |
 
 Each phase states an objective and how it is verified met. The objective is the clarification of intent — what this phase is for and what it deliberately leaves to a later one — and the verification is the checks actually run to decide it is done, automated where they can be and by hand where they cannot.
@@ -55,14 +51,14 @@ Both vehicles are in scope up to and including phase 5. Phases 0 to 2 were BlueB
 
 **Objective:** have `ardupilot_gazebo` and the ArduPilot firmware building and running inside drydock, and a setup document written alongside the work rather than after it. Nothing of ours is involved — this establishes the toolchain and proves the loop closes on a vehicle somebody else wrote.
 
-*Verified by* the procedure in [ArduPilot SITL setup](../getting-started/ardupilot_setup.md)
+*Verified by* the procedure in [Set up ArduPilot SITL](../../quickstarts/ardupilot-setup.md)
 
 
 ### Phase 1 — BlueBoat under ArduRover, newtons interface
 
 **Objective:** have the BlueBoat moving under ArduRover, on the newtons interface exactly as it stood, so the plumbing and the channel mapping are proven without waiting on phase 2. `MANUAL` only, so that no low-level stabilization has to be configured to get a result. Includes a documentation walkthrough complete enough that a PR reviewer can exercise the whole path end to end.
 
-*Verified by* the walkthrough in [Verify the SITL connection (Boat)](../vehicles/blueboat/verify-sitl-boat.md), by hand. `mode manual`, `arm throttle`, then `rc` overrides at the MAVProxy prompt, each with a stated expectation and a stated meaning if it fails:
+*Verified by* the walkthrough in [Drive the BlueBoat with ArduRover](../../quickstarts/sitl-blueboat.md), by hand. `mode manual`, `arm throttle`, then `rc` overrides at the MAVProxy prompt, each with a stated expectation and a stated meaning if it fails:
 
 ### Phase 2 — Normalized command mode on the thruster
 
@@ -113,7 +109,7 @@ Some comments in the source now name the wrong phase:
 
 Use the ArduSub configuration from BlueRobotics so that Ardu config matches the ROV.  This is also a good check that the way we've modelled the ROV is consistent with the Ardu config - which it should be.  
 
-*To be verified by* a walkthrough written alongside the work, in the shape of [Verify the SITL connection (Boat)](../vehicles/blueboat/verify-sitl-boat.md) but per axis: in `MANUAL`, arm, then command surge, sway, heave and yaw one at a time and confirm each produces that motion and no other. A cross-coupled response means the allocation is wrong; a reversed one means a thruster or a channel is. Magnitudes are not trusted yet, exactly as in phase 1.
+*To be verified by* a walkthrough written alongside the work, in the shape of [Drive the BlueBoat with ArduRover](../../quickstarts/sitl-blueboat.md) but per axis: in `MANUAL`, arm, then command surge, sway, heave and yaw one at a time and confirm each produces that motion and no other. A cross-coupled response means the allocation is wrong; a reversed one means a thruster or a channel is. Magnitudes are not trusted yet, exactly as in phase 1.
 
 
 
@@ -235,20 +231,20 @@ New: a static check on the installed mission file in `blueboat_gazebo` — well-
 
 #### Human verification
 
-The reviewer follows [Waypoint mission for BlueBoat](../vehicles/blueboat/mission-sitl-boat.md): load the mission file from the installed package, arm, `mode auto`, and watch it run on the MAVProxy map, touching nothing. SITL in lockstep with Gazebo is deterministic, so the page states the figures exactly: each waypoint's arrival time, peak and arrival cross-track error per leg, speed, total mission time and the hold at home. The check is that the reviewer sees those numbers and that track, and that the corner drift reads as the stated finding rather than a surprise.
+The reviewer follows [Waypoint mission for BlueBoat](../../walkthroughs/mission-sitl-boat.md): load the mission file from the installed package, arm, `mode auto`, and watch it run on the MAVProxy map, touching nothing. SITL in lockstep with Gazebo is deterministic, so the page states the figures exactly: each waypoint's arrival time, peak and arrival cross-track error per leg, speed, total mission time and the hold at home. The check is that the reviewer sees those numbers and that track, and that the corner drift reads as the stated finding rather than a surprise.
 
 ### Phase 7 — Removed
 
 This phase was waves, boat only: repeat phase 6's mission in a wave field. It is removed because the boat cannot respond to waves yet. Buoyancy in gz-maritime acts at the flat z = 0 plane and the waves are only drawn; coupling buoyancy to the wave surface is the planned `gz_waves_buoyancy` consumer, which does not exist yet. Building it is wave modeling, not SITL integration, so it is out of scope here (see below). The number is kept so that references to phases 8 and 9 stay valid.
 
-### Phase 8 — Documentation and Announce
+### Phase 8 — Documentation
 
 **Objective:** The user-facing documention should be in the form of walkthroughs that simultaneously serve two purposes: 
 
 1. to demonstrate to a user the capability 
 2. to support development as end-to-end testing of the new feature while the feature is being developed and as a regression test for later. 
 
-This documentation will have been built incrementally in the previous phases.  This phase is simply to clean that up that documenation for consistency and make a public announcement about the features of this spec. 
+This documentation will have been built incrementally in the previous phases.  This phase is simply to clean up that documentation for consistency. Announcing the features of this spec is out of scope.
 
 
 Packaging and binary distribution are deliberately not here. Everything in this plan is source-built in the drydock container, and ArduPilot in particular is cloned into `thirdparty/` rather than installed, because it has no rosdep key and is pinned by hand. Deciding where these packages are meant to land is its own effort with its own owner, and putting it on this plan's critical path would couple a simulation milestone to a distribution decision. The one thing this plan owes that effort is a flag: `thruster.repos` pins an unreleased sibling package, which is exactly the kind of thing packaging trips over, and it goes away when the thruster mode reaches gz-sim upstream in phase 9.
@@ -261,7 +257,7 @@ CI is left out of the plan and discussion on CI in Issue #66 so we are tracking.
 
 Existing: the `docs / docs` job already builds the site with warnings as errors, so a broken cross-reference fails the PR. The full `colcon test` across the workspace is the other half.
 
-New: a link check over the documentation, and whatever headless subset of the SITL path the phase concludes is worth running in CI — that conclusion is itself a deliverable, including "none of it, and here is why".
+New: a link check over the documentation. Running any part of the SITL path in CI is out of scope (Issue #66).
 
 #### Human verification
 

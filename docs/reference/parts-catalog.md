@@ -81,7 +81,7 @@ for both vehicles:
 | `parts` | no (`[]`) | slot entries and free placements, see below |
 | `slots` | no | ad hoc slots: `{of (instance, default base_link), name, xyz, rpy (default "0 0 0"), accepts (list, optional), default (type or none), joint}` |
 | `hull_displacement` | BlueBoat | the box pontoons the Gazebo composition places on the `hull_displacement` link: `{length, width, height, x, y, z, segments}` |
-| `buoyancy` | BlueROV2 | `{net_buoyancy (kg), cob_offset, cob_frame (com/base_link), fluid_density, footprint}`, realized as a dedicated displacement link solved from the assembled mass; see [Buoyancy](../design/buoyancy.md) |
+| `buoyancy` | BlueROV2 | `{net_buoyancy (kg), cob_offset, cob_frame (com/base_link), fluid_density, footprint}`, realized as a dedicated displacement link solved from the assembled mass; see [Buoyancy](../developers/design/buoyancy.md) |
 | `extra_bridge_topics` | no | list appended verbatim to the generated ros_gz bridge config (native syntax) |
 
 A **slot entry** in `parts` (has `slot`):
@@ -108,7 +108,7 @@ A **free placement** (no `slot`):
 | `joint`, `axis`, `collision`, topic keys | as above |
 
 Resolution rules, including how defaults fill, are in
-[Slots and assembly](../design/slots.md). Errors name the problem and fail
+[Slots and assembly](../developers/design/slots.md). Errors name the problem and fail
 the build or launch; a key outside these tables is reported as a typo.
 Avoid the other YAML 1.1 boolean words (`yes`, `no`, `off`, `y`, `n`) as
 bare values too, or quote them.
@@ -130,7 +130,7 @@ it to the composed model as a dedicated link (`hull_displacement` on the
 boat, `buoyancy_displacement` on the ROV). In Gazebo every fixed joint is
 lumped into `base_link`; the names survive as SDF frames, which is how
 sensors are placed. See
-[Gazebo composition](../design/gazebo-composition.md).
+[Gazebo composition](../developers/design/gazebo-composition.md).
 
 Slot poses, accepted types and defaults live in each part's `<part>_info`
 macro (`bluerobotics_parts/urdf/<part>.urdf.xacro`); this page mirrors them.

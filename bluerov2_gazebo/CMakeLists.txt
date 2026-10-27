@@ -114,7 +114,7 @@ install(FILES ${stamped_sdf} model.config
 # ardupilot:=true, which adds an IMU sensor and the ArduPilotPlugin. A second
 # model rather than a wrapper because <include merge="true"> does not nest and
 # the composed model already merge-includes its URDF; see
-# docs/specs/SITL_SPEC_CONTEXT.md.
+# docs/developers/specs/SITL_SPEC_CONTEXT.md.
 #
 # It goes through generate_model.py like the default one, because the buoyancy
 # solve needs the assembled mass properties either way. Not stamped: the specs

@@ -1,10 +1,10 @@
 # Sensors
 
 Sensors are parts fitted into slots. The concepts live in
-[Slots and assembly](../../design/slots.md), the vehicle's slots and their
+[Slots and assembly](../../developers/design/slots.md), the vehicle's slots and their
 accepted types in the [configuration page](configuration.md), and new
 sensors can be added following the
-[Add a sensor part](../../how-to/add-sensor-part.md) guide.
+[Add a sensor part](../../developers/add-sensor-part.md) walkthrough.
 
 ## Available sensors
 
@@ -30,7 +30,7 @@ ros2 topic echo /blueboat/ping/range --once
 ```
 
 `<name>` is the instance name, `blueboat` for the default instance, or
-whatever the boat was spawned as ([Several vehicles](../../how-to/namespaces.md)).
+whatever the boat was spawned as ([Several vehicles](../../walkthroughs/namespaces.md)).
 A part topic follows the part's own name (`ping` above), so a part renamed
 or removed in the config moves or drops its topics
 ([Configuration](configuration.md)). Sensor messages carry a frame the

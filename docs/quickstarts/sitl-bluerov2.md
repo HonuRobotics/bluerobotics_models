@@ -1,14 +1,12 @@
-# Verify the SITL connection (ROV)
+# Dive the BlueROV2 with ArduSub
 
 Confirm that ArduSub in SITL is driving the simulated BlueROV2 (standard configuration, not "heavy") in `MANUAL` mode, which means surge, yaw, sway and heave commands are provided via RC channels and ArduSub maps from commands in the body frame to individual thruster commands.  
 
 ## Prerequisites
 
-* Setup and run the drydock + source development environment: [installation_drydock.md](../../getting-started/installation_drydock.md)
-* [ArduPilot SITL setup](../../getting-started/ardupilot_setup.md); (the rest of this page assumes the Iris smoke test passed.)
+[Set up ArduPilot SITL](ardupilot-setup.md), through the Iris smoke test.
 
-## Walkthrough
-
+## Steps
 All commands are issued within the drydock dev container.
 
 ### The simulation
@@ -38,7 +36,7 @@ sim_vehicle.py -v ArduSub -f gazebo-bluerov2 --model JSON --console -w \
 Gazebo prints `ArduPilot controller has reset` once shortly after SITL
 connects and then roughly once a minute.  This is annoying, but not of concern. (The fix is open upstream as
 [ardupilot_gazebo#174](https://github.com/ArduPilot/ardupilot_gazebo/pull/174).)
-See troubleshooting notes in [ArduPilot SITL setup](../../getting-started/ardupilot_setup.md).
+See troubleshooting notes in [Set up ArduPilot SITL](ardupilot-setup.md).
 ```
 
 ## Verification - teleop via the autopilot

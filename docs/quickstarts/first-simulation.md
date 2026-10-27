@@ -1,5 +1,7 @@
 # First simulation
 
+Prerequisite: [Set up the drydock workspace](setup.md), with a shell open in the container.
+
 Bring up the BlueBoat with the full ROS stack (Gazebo server, ros_gz bridge,
 robot_state_publisher and the Gazebo GUI):
 
@@ -28,7 +30,7 @@ which spawns the ROV hovering near the surface of its pool.
 
 Next: [drive it](../vehicles/blueboat/actuators.md), then
 [change what is fitted](../vehicles/blueboat/configuration.md). Each
-vehicle's Running page
+vehicle's Launch and worlds page
 ([BlueBoat](../vehicles/blueboat/running.md),
 [BlueROV2](../vehicles/bluerov2/running.md)) covers worlds, custom
 configs and RViz.

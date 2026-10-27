@@ -14,7 +14,7 @@ positions `x`/`y`/`z`, and `segments`) which the Gazebo composition
 realizes as a dedicated displacement link. Splitting each pontoon into
 segments models a pitched waterplane, and the boat self settles to a
 draft of roughly `mass / (water_density * 2 * length * width)`
-([Buoyancy](../../design/buoyancy.md)).
+([Buoyancy](../../developers/design/buoyancy.md)).
 
 ## Payload
 
@@ -32,6 +32,6 @@ config entry each. The fitted options and their topics live in
 
 Slot entries, free placements, ad hoc slots and topic overrides are
 described in the [Configuration keys](../../reference/parts-catalog.md#configuration-keys) and
-walked through in [Change the fitted parts](../../how-to/change-parts.md); the
+walked through in [Change the fitted parts](../../walkthroughs/change-parts.md); the
 instance key is `of:`, not `on:`. Mistakes fail the build or the launch
 with a message naming the problem.

@@ -35,7 +35,7 @@ The shipped mapping is two files in the package: [joystick.config.yaml](https://
 - Sway: right stick left and right (BlueROV2)
 - EPA: D pad up and down, 10% per click
 
-Edit those files by hand, or let `joy_map` write them: an interactive walkthrough in the terminal that captures a no touch baseline, then detects each stick and button as you move it, refusing double assignments. Map in the state you will drive in; the walkthrough warns when a stick lands on the D pad's axes.
+Edit those files by hand, or let `joy_map` write them: an interactive mapping session in the terminal that captures a no touch baseline, then detects each stick and button as you move it, refusing double assignments. Map in the state you will drive in; the walkthrough warns when a stick lands on the D pad's axes.
 
 ```bash
 ros2 run bluerobotics_teleop joy_map
@@ -43,12 +43,12 @@ ros2 run bluerobotics_teleop joy_map
 
 If nothing is publishing Joy messages, the tool starts its own `joy_node`
 (with the autorepeat the baseline capture needs) and stops it on exit,
-however the walkthrough ends, so there is no background node to forget.
-Running the walkthrough next to a live teleop session also works: its
+however the session ends, so there is no background node to forget.
+Running the session next to a live teleop session also works: its
 `joy_node` publishes on `/<name>/joy`, and the tool finds and reads that
 topic instead of starting a second one.
 
-One walkthrough maps every function (surge, sway, heave, yaw, deadman,
+One session maps every function (surge, sway, heave, yaw, deadman,
 EPA) for every vehicle at once: the mapping describes the pad, not a
 vehicle, and a vehicle without a motion zeroes it in its mixer gains.
 
