@@ -30,6 +30,20 @@ TOOL = (Path(get_package_prefix('bluerov2_gazebo')) / 'lib' / 'bluerov2_gazebo'
 DEFAULT_CONFIG = DESC_SHARE / 'config' / 'bluerov2.yaml'
 
 
+def kit_config(parts=()):
+    """
+    Return the tests' own vehicle.
+
+    The shipped hull, namespace and buoyancy, every slot filling with its
+    default, plus parts. Independent of what the shipped config fits, so these
+    tests follow the tool's behavior rather than the current product.
+    """
+    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
+    cfg['slot_defaults'] = True
+    cfg['parts'] = [dict(p) for p in parts]
+    return cfg
+
+
 def configure(config_path, out_dir):
     """Run the tool; fail the test with its stderr."""
     out = subprocess.run([str(TOOL), '--config', str(config_path), '--out-dir', str(out_dir)],
@@ -74,9 +88,8 @@ def test_default_config_reproduces_the_installed_artifacts(tmp_path):
 
 def test_custom_config_flows_to_every_artifact(tmp_path):
     """A different config changes URDF, model and bridge consistently."""
-    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
-    cfg['parts'] = [{'slot': 'camera', 'type': 'none'},
-                    {'slot': 'dvl', 'type': 'dvl_a50'}]
+    cfg = kit_config([{'slot': 'camera', 'type': 'none'},
+                      {'slot': 'dvl', 'type': 'dvl_a50'}])
     config = tmp_path / 'custom.yaml'
     config.write_text(yaml.safe_dump(cfg, sort_keys=False))
     out = configure(config, tmp_path / 'v')
@@ -97,8 +110,7 @@ def test_custom_config_flows_to_every_artifact(tmp_path):
 
 def test_drivetrain_follows_the_config(tmp_path):
     """An emptied thruster slot drops its Thruster plugin and bridge topic."""
-    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
-    cfg['parts'] = [{'slot': 'thruster_5', 'type': 'none'}]
+    cfg = kit_config([{'slot': 'thruster_5', 'type': 'none'}])
     config = tmp_path / 'custom.yaml'
     config.write_text(yaml.safe_dump(cfg, sort_keys=False))
     out = configure(config, tmp_path / 'v')
@@ -114,7 +126,7 @@ def test_drivetrain_follows_the_config(tmp_path):
 
 def test_heavy_variant_flows_to_the_model(tmp_path):
     """The heavy base yields eight thrusters and the wider footprint works."""
-    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
+    cfg = kit_config()
     cfg['base'] = {'type': 'bluerov2_heavy_chassis', 'name': 'base_link'}
     cfg['buoyancy']['footprint'] = '0.457 0.575'
     config = tmp_path / 'custom.yaml'
@@ -129,8 +141,7 @@ def test_heavy_variant_flows_to_the_model(tmp_path):
 
 def test_mismatched_config_fails_with_the_reason(tmp_path):
     """A slot entry that matches nothing fails the tool (and so the launch)."""
-    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
-    cfg['parts'] = [{'slot': 'dvll', 'type': 'none'}]
+    cfg = kit_config([{'slot': 'dvll', 'type': 'none'}])
     config = tmp_path / 'custom.yaml'
     config.write_text(yaml.safe_dump(cfg, sort_keys=False))
     out = subprocess.run([str(TOOL), '--config', str(config), '--out-dir', str(tmp_path / 'v')],
@@ -214,8 +225,7 @@ def test_two_instances_from_one_config_share_no_topic(tmp_path):
     a command for one instance never reaches the other; only the fixed
     /clock remains shared.
     """
-    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
-    cfg['parts'] = [{'slot': 'camera', 'type': 'explorehd_camera', 'topic': 'eye'}]
+    cfg = kit_config([{'slot': 'camera', 'type': 'explorehd_camera', 'topic': 'eye'}])
     config = tmp_path / 'custom.yaml'
     config.write_text(yaml.safe_dump(cfg, sort_keys=False))
     topics = {}

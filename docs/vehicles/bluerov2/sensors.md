@@ -11,7 +11,7 @@ The sensors have no visual: the camera, sonar and DVL work from their part frame
 
 ## Available sensors
 
-| Sensor | Part | Slot | Fitted by default |
+| Sensor | Part | Slot | Fitted in the shipped config |
 |---|---|---|---|
 | exploreHD camera | `explorehd_camera` | `camera` | yes |
 | MarineSitu C3 stereo camera | `marinesitu_c3` | `camera` | no |

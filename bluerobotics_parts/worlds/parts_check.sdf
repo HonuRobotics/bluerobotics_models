@@ -814,19 +814,6 @@
               <izz>9.2565000000000019e-05</izz>
             </inertia>
           </inertial>
-          <visual name='dvl_a50_visual'>
-            <pose>0 0 0 0 0 0</pose>
-            <geometry>
-              <cylinder>
-                <length>0.025000000000000001</length>
-                <radius>0.033000000000000002</radius>
-              </cylinder>
-            </geometry>
-            <material>
-              <diffuse>0.625 0.625 0.6875 1</diffuse>
-              <ambient>0.625 0.625 0.6875 1</ambient>
-            </material>
-          </visual>
         </link>
       </model>
     <model name='explorehd_camera'>
@@ -845,19 +832,6 @@
               <izz>1.521e-05</izz>
             </inertia>
           </inertial>
-          <visual name='explorehd_camera_visual'>
-            <pose>0 0 0 0 1.5707963267948966 0</pose>
-            <geometry>
-              <cylinder>
-                <length>0.12</length>
-                <radius>0.0195</radius>
-              </cylinder>
-            </geometry>
-            <material>
-              <diffuse>0.625 0.625 0.6875 1</diffuse>
-              <ambient>0.625 0.625 0.6875 1</ambient>
-            </material>
-          </visual>
         </link>
       </model>
     <model name='m200_weedless_prop_ccw'>
@@ -1219,15 +1193,6 @@
               <izz>0.00036099999999999999</izz>
             </inertia>
           </inertial>
-          <visual name='ping360_visual'>
-            <pose>0 0 0 0 0 0</pose>
-            <geometry>
-              <mesh>
-                <scale>0.01 0.01 0.01</scale>
-                <uri>model://bluerobotics_parts/models/ping360/ping360.dae</uri>
-              </mesh>
-            </geometry>
-          </visual>
         </link>
       </model>
     <model name='ping_singlebeam'>
