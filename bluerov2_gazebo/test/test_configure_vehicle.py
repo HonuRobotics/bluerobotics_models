@@ -46,7 +46,7 @@ def test_default_config_reproduces_the_installed_artifacts(tmp_path):
     """Run on the shipped config, the tool regenerates what the build installed."""
     out = configure(DEFAULT_CONFIG, tmp_path / 'v')
     for name in ('bluerov2.urdf', 'bluerov2.gazebo.urdf', 'model.sdf', 'model.config',
-                 'ros_gz_bridge.yaml', 'robot_description.yaml'):
+                 'ros_gz_bridge.yaml', 'robot_description.yaml', 'bluerov2.rviz'):
         assert (out / name).is_file(), f'{name} not generated'
     assert links(out / 'bluerov2.urdf') == links(DESC_SHARE / 'urdf' / 'bluerov2.urdf')
     assert yaml.safe_load((out / 'ros_gz_bridge.yaml').read_text()) == \
@@ -177,6 +177,12 @@ def test_name_flows_to_every_artifact(tmp_path):
     gz_topics = {e['gz_topic_name'] for e in bridge}
     assert any(t.startswith('/boat_b/thruster_1/') for t in gz_topics), gz_topics
     assert not any(t.startswith('/bluerov2/') for t in gz_topics), gz_topics
+    # RViz looks at the instance's frames.
+    rviz = yaml.safe_load((out_dir / 'bluerov2.rviz').read_text())['Visualization Manager']
+    assert rviz['Global Options']['Fixed Frame'] == 'boat_b/base_link'
+    assert rviz['Views']['Current']['Target Frame'] == 'boat_b/base_link'
+    robot = [d for d in rviz['Displays'] if d['Class'] == 'rviz_default_plugins/RobotModel']
+    assert robot and all(d['TF Prefix'] == 'boat_b' for d in robot)
 
 
 def test_name_gives_each_instance_its_own_cache_directory():
