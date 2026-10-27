@@ -54,6 +54,8 @@ config entry each. The fitted options and their topics live in
 | `payload` | `payload_skid` | empty |
 | `rack` | `roof_rack` | empty |
 
+Subsea manipulation is out of scope for now, so the `gripper` slot stays empty.
+
 Slot entries, free placements, ad hoc slots and topic overrides follow
 the same schema as the BlueBoat
 ([Configuration keys](../../reference/parts-catalog.md#configuration-keys)); the instance key is

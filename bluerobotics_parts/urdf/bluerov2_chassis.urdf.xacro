@@ -37,7 +37,7 @@
 
        Two corrections keep each thruster's positive thrust where ArduSub's Vectored frame puts it (AP_Motors6DOF.cpp, SUB_FRAME_VECTORED). The four horizontals are turned 90 degrees about z from the assembly, so +x lies along ArduSub's direction for that motor (1 aft starboard, 2 aft port, 3 fore starboard, 4 fore port); in the assembly they face the other diagonal, which is open with the modeler. The two verticals face up in the assembly, so their prop slots spin the occupant about -1 0 0 and positive thrust pushes down, as ArduSub's throttle factor of -1 expects.
 
-       The camera, sonar, dvl, gripper, payload and rack positions, the inertial origin and the collisions predate the assembly; they are refit in a later increment.
+       The camera, sonar, dvl, gripper, payload and rack positions and the inertial origin predate the assembly. The collisions were checked against the new chassis in Gazebo. Accessory visuals are out of scope: the camera, sonar and dvl parts carry no visual and work from their frames, and the gripper (subsea manipulation) is not yet in scope.
 
        The imu frame is where the flight controller senses attitude. Declared
        as a frame rather than a part because nothing about its mass or
