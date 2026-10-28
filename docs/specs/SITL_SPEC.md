@@ -36,7 +36,6 @@ This spec is the only document that is current about the plan. [SITL_SPEC_CONTEX
 | 6 | Waypoint mission, boat only | `bluerobotics_models` |
 | 7 | ~~Waves, boat only~~ | — |
 | 8 | Documentation and CI | `bluerobotics_models` |
-| 9 | Upstream the thruster mode | `gz-maritime`, then `gz-sim` |
 
 Each phase states an objective and how it is verified met. The objective is the clarification of intent — what this phase is for and what it deliberately leaves to a later one — and the verification is the checks actually run to decide it is done, automated where they can be and by hand where they cannot.
 
@@ -239,7 +238,7 @@ The reviewer follows [Waypoint mission for BlueBoat](../vehicles/blueboat/missio
 
 ### Phase 7 — Removed
 
-This phase was waves, boat only: repeat phase 6's mission in a wave field. It is removed because the boat cannot respond to waves yet. Buoyancy in gz-maritime acts at the flat z = 0 plane and the waves are only drawn; coupling buoyancy to the wave surface is the planned `gz_waves_buoyancy` consumer, which does not exist yet. Building it is wave modeling, not SITL integration, so it is out of scope here (see below). The number is kept so that references to phases 8 and 9 stay valid.
+This phase was waves, boat only: repeat phase 6's mission in a wave field. It is removed because the boat cannot respond to waves yet. Buoyancy in gz-maritime acts at the flat z = 0 plane and the waves are only drawn; coupling buoyancy to the wave surface is the planned `gz_waves_buoyancy` consumer, which does not exist yet. Building it is wave modeling, not SITL integration, so it is out of scope here (see below). The number is kept so that references to phase 8 stay valid.
 
 ### Phase 8 — Documentation and Announce
 
@@ -251,7 +250,7 @@ This phase was waves, boat only: repeat phase 6's mission in a wave field. It is
 This documentation will have been built incrementally in the previous phases.  This phase is simply to clean that up that documenation for consistency and make a public announcement about the features of this spec. 
 
 
-Packaging and binary distribution are deliberately not here. Everything in this plan is source-built in the drydock container, and ArduPilot in particular is cloned into `thirdparty/` rather than installed, because it has no rosdep key and is pinned by hand. Deciding where these packages are meant to land is its own effort with its own owner, and putting it on this plan's critical path would couple a simulation milestone to a distribution decision. The one thing this plan owes that effort is a flag: `thruster.repos` pins an unreleased sibling package, which is exactly the kind of thing packaging trips over, and it goes away when the thruster mode reaches gz-sim upstream in phase 9.
+Packaging and binary distribution are deliberately not here. Everything in this plan is source-built in the drydock container, and ArduPilot in particular is cloned into `thirdparty/` rather than installed, because it has no rosdep key and is pinned by hand. Deciding where these packages are meant to land is its own effort with its own owner, and putting it on this plan's critical path would couple a simulation milestone to a distribution decision. The one thing this plan owes that effort is a flag: `thruster.repos` pins an unreleased sibling package, which is exactly the kind of thing packaging trips over, and it goes away when the thruster mode reaches gz-sim upstream, which is deferred beyond this plan (see below).
 
 CI is left out of the plan and discussion on CI in Issue #66 so we are tracking.
 
@@ -266,20 +265,6 @@ New: a link check over the documentation, and whatever headless subset of the SI
 #### Human verification
 
 The reviewer starts from a clean workspace and follows the documentation end to end, reaching both a driving boat and a diving ROV without asking anyone a question. Every place they have to guess, ask, or read source is a defect to file against this phase.
-
-### Phase 9 — Upstream the thruster mode
-
-**Objective:** have the normalized mode in Gazebo itself and the fork gone. It is a liability while it lasts — a divergence from a `Thruster` that is not frozen, plus a `.repos` pin and a plugin name that exist only because the mode is not upstream yet. The delta is kept tiny so the eventual pull request stays readable.
-
-Timing matters: prepare it for `gz-sim` only once the mode has stopped changing. Then, once it is released in Gazebo, delete the local implementation along with the `.repos` pin that fetches it and the models' reference to the forked plugin name.
-
-#### Automated verification
-
-The `gz_thruster` tests go upstream with the plugin. Locally, the whole workspace suite must pass with `gz_thruster` deleted and the models naming `gz-sim-thruster-system` — that is the check that the fork left nothing behind.
-
-#### Human verification
-
-The reviewer re-runs the phase 2 walkthrough on the stock plugin and gets the same results, and confirms nothing in the workspace still pins a branch or names the forked library.
 
 ## What the phases are protecting
 
@@ -298,6 +283,8 @@ Waypoint missions for the BlueROV2 are out of scope, for the reason phase 6 give
 Waves are out of scope for both vehicles. Gazebo vehicles in this workspace float on the flat water level, and the wave field is only drawn; buoyancy that follows the waves is the planned `gz_waves_buoyancy` consumer in gz-maritime, its own wave-modeling effort with its own owner. A SITL run in a wave world today would exercise nothing the flat-water phases do not. For the BlueROV2, near-surface wave interaction for a submerged vehicle is a further modeling problem on top of that.
 
 The Holybro X500 and any other UAV is out of scope for this plan. It is a different vehicle class with a different autopilot binding, it lives in `holybro_models` rather than here, and nothing in these phases is blocked on it. Rebinding it from PX4 is its own effort with its own plan.
+
+Upstreaming the normalized thruster mode to `gz-sim` is deferred, not dropped. It was phase 9; the mode should stop changing before a pull request is prepared, and until it does, the fork in `gz-maritime` and the `thruster.repos` pin stay as they are.
 
 PX4 is community supported and deliberately not designed out. The normalized command is what a PX4 actuator output produces too, so the interface fits; we keep the design open to it and do not test it.
 
