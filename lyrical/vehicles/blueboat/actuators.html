@@ -278,6 +278,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../how-to/index.html">How-to guides</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../how-to/change-parts.html">Change the fitted parts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/change-parts.html#fit-the-ping2-kit">Fit the Ping2 kit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/change-parts.html#fit-the-other-propellers">Fit the other propellers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/change-parts.html#leave-the-ping2-kit-off">Leave the Ping2 kit off</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/change-parts.html#add-the-antenna-mast-or-the-payload-bracket">Add the antenna mast or the payload bracket</a></li>
@@ -441,18 +442,18 @@ following the <a class="reference internal" href="../../how-to/add-part.html"><s
 <tr class="row-odd"><th class="head"><p>Actuator</p></th>
 <th class="head"><p>Part</p></th>
 <th class="head"><p>Slot</p></th>
-<th class="head"><p>Fitted by default</p></th>
+<th class="head"><p>Fitted in the shipped config</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>M200 weedless propellers</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">m200_weedless_prop_ccw</span></code> / <code class="docutils literal notranslate"><span class="pre">_cw</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">motor_port</span></code>, <code class="docutils literal notranslate"><span class="pre">motor_stbd</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">prop_port</span></code>, <code class="docutils literal notranslate"><span class="pre">prop_stbd</span></code></p></td>
 <td><p>yes</p></td>
 </tr>
 <tr class="row-odd"><td><p>T200 propellers</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">t200_prop_ccw</span></code> / <code class="docutils literal notranslate"><span class="pre">_cw</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">motor_port</span></code>, <code class="docutils literal notranslate"><span class="pre">motor_stbd</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">prop_port</span></code>, <code class="docutils literal notranslate"><span class="pre">prop_stbd</span></code></p></td>
 <td><p>no</p></td>
 </tr>
 </tbody>
@@ -475,11 +476,11 @@ below use, or whatever the boat was spawned as
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/motor_port/cmd</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/prop_port/cmd</span></code></p></td>
 <td><p>Normalized thrust command in [-1, 1]: +1 full ahead, -1 full astern, 0 stop</p></td>
 <td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html">std_msgs/msg/Float64</a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/motor_stbd/cmd</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/prop_stbd/cmd</span></code></p></td>
 <td><p>Normalized thrust command in [-1, 1]: +1 full ahead, -1 full astern, 0 stop</p></td>
 <td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/std_msgs/interfaces/msg/Float64.html">std_msgs/msg/Float64</a></p></td>
 </tr>
@@ -491,8 +492,8 @@ T200 at 16 V. The two directions scale independently, so +0.5 and -0.5 are
 equal command and unequal force. Values outside [-1, 1] are clamped.</p>
 <p>Equal command drives ahead; differential command yaws (more starboard
 turns to port and vice versa). To manually send thruster commands via ROS:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>topic<span class="w"> </span>pub<span class="w"> </span>/blueboat/motor_port/cmd<span class="w"> </span>std_msgs/msg/Float64<span class="w"> </span><span class="s2">"data: 0.4"</span><span class="w"> </span>-1<span class="w"> </span><span class="p">&amp;</span>
-ros2<span class="w"> </span>topic<span class="w"> </span>pub<span class="w"> </span>/blueboat/motor_stbd/cmd<span class="w"> </span>std_msgs/msg/Float64<span class="w"> </span><span class="s2">"data: 0.4"</span><span class="w"> </span>-1<span class="w"> </span><span class="p">&amp;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>topic<span class="w"> </span>pub<span class="w"> </span>/blueboat/prop_port/cmd<span class="w"> </span>std_msgs/msg/Float64<span class="w"> </span><span class="s2">"data: 0.4"</span><span class="w"> </span>-1<span class="w"> </span><span class="p">&amp;</span>
+ros2<span class="w"> </span>topic<span class="w"> </span>pub<span class="w"> </span>/blueboat/prop_stbd/cmd<span class="w"> </span>std_msgs/msg/Float64<span class="w"> </span><span class="s2">"data: 0.4"</span><span class="w"> </span>-1<span class="w"> </span><span class="p">&amp;</span>
 <span class="nb">wait</span>
 </pre></div>
 </div>
@@ -531,8 +532,8 @@ under the same names), plus a speed feedback per motor:</p>
 </tr>
 </tbody>
 </table>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gz<span class="w"> </span>topic<span class="w"> </span>-t<span class="w"> </span>/blueboat/motor_port/cmd<span class="w"> </span>-m<span class="w"> </span>gz.msgs.Double<span class="w"> </span>-p<span class="w"> </span><span class="s1">'data: 0.2'</span><span class="w"> </span><span class="p">&amp;</span>
-gz<span class="w"> </span>topic<span class="w"> </span>-t<span class="w"> </span>/blueboat/motor_stbd/cmd<span class="w"> </span>-m<span class="w"> </span>gz.msgs.Double<span class="w"> </span>-p<span class="w"> </span><span class="s1">'data: 0.2'</span><span class="w"> </span><span class="p">&amp;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gz<span class="w"> </span>topic<span class="w"> </span>-t<span class="w"> </span>/blueboat/prop_port/cmd<span class="w"> </span>-m<span class="w"> </span>gz.msgs.Double<span class="w"> </span>-p<span class="w"> </span><span class="s1">'data: 0.2'</span><span class="w"> </span><span class="p">&amp;</span>
+gz<span class="w"> </span>topic<span class="w"> </span>-t<span class="w"> </span>/blueboat/prop_stbd/cmd<span class="w"> </span>-m<span class="w"> </span>gz.msgs.Double<span class="w"> </span>-p<span class="w"> </span><span class="s1">'data: 0.2'</span><span class="w"> </span><span class="p">&amp;</span>
 <span class="nb">wait</span>
 </pre></div>
 </div>

@@ -636,6 +636,7 @@ window.runMermaid = runMermaid;</script>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../how-to/index.html">How-to guides</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../how-to/change-parts.html">Change the fitted parts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#fit-the-ping2-kit">Fit the Ping2 kit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#fit-the-other-propellers">Fit the other propellers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#leave-the-ping2-kit-off">Leave the Ping2 kit off</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#add-the-antenna-mast-or-the-payload-bracket">Add the antenna mast or the payload bracket</a></li>
@@ -794,8 +795,8 @@ goes; the Ping declares the frame its beam leaves from.</p>
 <pre  class="mermaid">
         flowchart TB
   C[&quot;blueboat_chassis&quot;]
-  C --&gt;|&quot;slot motor_port&lt;br/&gt;accepts M200 ccw, T200 ccw&lt;br/&gt;default M200 ccw, continuous&quot;| MP[&quot;m200_weedless_prop_ccw&quot;]
-  C --&gt;|&quot;slot motor_stbd&lt;br/&gt;default M200 cw, continuous&quot;| MS[&quot;m200_weedless_prop_cw&quot;]
+  C --&gt;|&quot;slot prop_port&lt;br/&gt;accepts M200 ccw, T200 ccw&lt;br/&gt;default M200 ccw, continuous&quot;| MP[&quot;m200_weedless_prop_ccw&quot;]
+  C --&gt;|&quot;slot prop_stbd&lt;br/&gt;default M200 cw, continuous&quot;| MS[&quot;m200_weedless_prop_cw&quot;]
   C --&gt;|&quot;slot flag&lt;br/&gt;default blueboat_flag&quot;| F[&quot;blueboat_flag&quot;]
   C --&gt;|&quot;slot mast&lt;br/&gt;accepts antenna mast&lt;br/&gt;default none&quot;| M((&quot;empty&quot;))
   C --&gt;|&quot;slot payload&lt;br/&gt;accepts payload bracket&lt;br/&gt;default none&quot;| P((&quot;empty&quot;))
@@ -809,7 +810,7 @@ goes; the Ping declares the frame its beam leaves from.</p>
         flowchart TD
   A[&quot;instantiate the base part&quot;] --&gt; B[&quot;for each slot of the instance&lt;br/&gt;(its own, plus ad hoc slots from the config)&quot;]
   B --&gt; C{&quot;config entry&lt;br/&gt;for this slot?&quot;}
-  C -- &quot;none&quot; --&gt; D[&quot;fit the slot's default&lt;br/&gt;(nothing if default is none)&quot;]
+  C -- &quot;none&quot; --&gt; D[&quot;fit the slot's default&lt;br/&gt;(nothing if default is none&lt;br/&gt;or slot_defaults is false)&quot;]
   C -- &quot;type: none&quot; --&gt; E[&quot;leave it empty;&lt;br/&gt;the slot frame stays&quot;]
   C -- &quot;type: X&quot; --&gt; F{&quot;X in accepts?&quot;}
   F -- &quot;no&quot; --&gt; G[&quot;ASSEMBLY ERROR&quot;]
@@ -821,10 +822,8 @@ goes; the Ping declares the frame its beam leaves from.</p>
     </pre><p>Rules, in words:</p>
 <ul class="simple">
 <li><p>The <strong>base</strong> part is the root; its link is the named root link (no joint).</p></li>
-<li><p>Every slot fills itself with its <strong>default</strong>, recursively, unless the
-config has an entry for it. An entry names the slot (<code class="docutils literal notranslate"><span class="pre">slot:</span></code>), the
-instance carrying it (<code class="docutils literal notranslate"><span class="pre">of:</span></code>, default the base), and <code class="docutils literal notranslate"><span class="pre">type:</span></code> an accepted
-part or <code class="docutils literal notranslate"><span class="pre">none</span></code>. The occupant’s instance name defaults to the slot name.</p></li>
+<li><p>Every slot fills itself with its <strong>default</strong>, recursively, unless the config has an entry for it. An entry names the slot (<code class="docutils literal notranslate"><span class="pre">slot:</span></code>), the instance carrying it (<code class="docutils literal notranslate"><span class="pre">of:</span></code>, default the base), and <code class="docutils literal notranslate"><span class="pre">type:</span></code> an accepted part or <code class="docutils literal notranslate"><span class="pre">none</span></code>. The occupant’s instance name defaults to the slot name.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">slot_defaults:</span> <span class="pre">false</span></code> in the config turns the defaults off: a slot with no entry stays empty, so the config lists every fitted part, including the deeper ones (the Ping in the kit’s bracket needs its own entry).</p></li>
 <li><p><strong>Free placements</strong> (no <code class="docutils literal notranslate"><span class="pre">slot:</span></code>) give <code class="docutils literal notranslate"><span class="pre">type</span></code>, <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">xyz</span></code>/<code class="docutils literal notranslate"><span class="pre">rpy</span></code> relative
 to <code class="docutils literal notranslate"><span class="pre">parent</span></code>.</p></li>
 <li><p><strong>Ad hoc slots</strong> declared under <code class="docutils literal notranslate"><span class="pre">slots:</span></code> on any instance behave like the

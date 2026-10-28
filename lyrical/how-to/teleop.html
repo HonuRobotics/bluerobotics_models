@@ -636,6 +636,7 @@ window.runMermaid = runMermaid;</script>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">How-to guides</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="change-parts.html">Change the fitted parts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="change-parts.html#fit-the-ping2-kit">Fit the Ping2 kit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="change-parts.html#fit-the-other-propellers">Fit the other propellers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="change-parts.html#leave-the-ping2-kit-off">Leave the Ping2 kit off</a></li>
 <li class="toctree-l3"><a class="reference internal" href="change-parts.html#add-the-antenna-mast-or-the-payload-bracket">Add the antenna mast or the payload bracket</a></li>
@@ -792,7 +793,7 @@ normalized <code class="docutils literal notranslate"><span class="pre">cmd_vel<
 into per thruster thrust commands through a per vehicle gain matrix. The
 stack binds to one vehicle instance, <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code>: its three nodes and their
 topics run under <code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;</span></code>, and the mixer’s thruster topics, relative in
-its config, land on <code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/motor_port/cmd</span></code> and the like. Those are the
+its config, land on <code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/prop_port/cmd</span></code> and the like. Those are the
 topics documented in each vehicle’s Actuators page
 (<a class="reference internal" href="../vehicles/blueboat/actuators.html"><span class="std std-doc">BlueBoat</span></a>,
 <a class="reference internal" href="../vehicles/bluerov2/actuators.html"><span class="std std-doc">BlueROV2</span></a>), so the same launch works
@@ -904,11 +905,11 @@ stack each, on two gamepads:</p>
 </pre></div>
 </div>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>/boat_a/cmd_vel
-/boat_a/motor_port/cmd
-/boat_a/motor_stbd/cmd
+/boat_a/prop_port/cmd
+/boat_a/prop_stbd/cmd
 /boat_b/cmd_vel
-/boat_b/motor_port/cmd
-/boat_b/motor_stbd/cmd
+/boat_b/prop_port/cmd
+/boat_b/prop_stbd/cmd
 </pre></div>
 </div>
 </section>

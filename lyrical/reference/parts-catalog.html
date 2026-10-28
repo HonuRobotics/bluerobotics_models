@@ -278,6 +278,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../how-to/index.html">How-to guides</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../how-to/change-parts.html">Change the fitted parts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#fit-the-ping2-kit">Fit the Ping2 kit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#fit-the-other-propellers">Fit the other propellers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#leave-the-ping2-kit-off">Leave the Ping2 kit off</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#add-the-antenna-mast-or-the-payload-bracket">Add the antenna mast or the payload bracket</a></li>
@@ -574,13 +575,13 @@ after the slot by default.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">blueboat_chassis</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">motor_port</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">prop_port</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">m200_weedless_prop_ccw</span></code>, <code class="docutils literal notranslate"><span class="pre">t200_prop_ccw</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">m200_weedless_prop_ccw</span></code></p></td>
 <td><p>continuous</p></td>
 </tr>
 <tr class="row-odd"><td><p></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">motor_stbd</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">prop_stbd</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">m200_weedless_prop_cw</span></code>, <code class="docutils literal notranslate"><span class="pre">t200_prop_cw</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">m200_weedless_prop_cw</span></code></p></td>
 <td><p>continuous</p></td>
@@ -706,23 +707,27 @@ for both vehicles:</p>
 <td><p>yes</p></td>
 <td><p>the root part: <code class="docutils literal notranslate"><span class="pre">{type,</span> <span class="pre">name</span> <span class="pre">(default</span> <span class="pre">base_link),</span> <span class="pre">collision</span> <span class="pre">(default</span> <span class="pre">true)}</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">parts</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">slot_defaults</span></code></p></td>
+<td><p>no (<code class="docutils literal notranslate"><span class="pre">true</span></code>)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">false</span></code> leaves every slot without an entry empty, so <code class="docutils literal notranslate"><span class="pre">parts</span></code> lists every fitted part</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">parts</span></code></p></td>
 <td><p>no (<code class="docutils literal notranslate"><span class="pre">[]</span></code>)</p></td>
 <td><p>slot entries and free placements, see below</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">slots</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">slots</span></code></p></td>
 <td><p>no</p></td>
-<td><p>ad hoc slots: <code class="docutils literal notranslate"><span class="pre">{of</span> <span class="pre">(instance,</span> <span class="pre">default</span> <span class="pre">base_link),</span> <span class="pre">name,</span> <span class="pre">xyz,</span> <span class="pre">rpy</span> <span class="pre">(default</span> <span class="pre">&quot;0</span> <span class="pre">0</span> <span class="pre">0&quot;),</span> <span class="pre">accepts</span> <span class="pre">(list,</span> <span class="pre">optional),</span> <span class="pre">default</span> <span class="pre">(type</span> <span class="pre">or</span> <span class="pre">none),</span> <span class="pre">joint}</span></code></p></td>
+<td><p>ad hoc slots: <code class="docutils literal notranslate"><span class="pre">{of</span> <span class="pre">(instance,</span> <span class="pre">default</span> <span class="pre">base_link),</span> <span class="pre">name,</span> <span class="pre">xyz,</span> <span class="pre">rpy</span> <span class="pre">(default</span> <span class="pre">&quot;0</span> <span class="pre">0</span> <span class="pre">0&quot;),</span> <span class="pre">accepts</span> <span class="pre">(list,</span> <span class="pre">optional),</span> <span class="pre">default</span> <span class="pre">(type</span> <span class="pre">or</span> <span class="pre">none),</span> <span class="pre">joint,</span> <span class="pre">axis}</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">hull_displacement</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">hull_displacement</span></code></p></td>
 <td><p>BlueBoat</p></td>
 <td><p>the box pontoons the Gazebo composition places on the <code class="docutils literal notranslate"><span class="pre">hull_displacement</span></code> link: <code class="docutils literal notranslate"><span class="pre">{length,</span> <span class="pre">width,</span> <span class="pre">height,</span> <span class="pre">x,</span> <span class="pre">y,</span> <span class="pre">z,</span> <span class="pre">segments}</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">buoyancy</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">buoyancy</span></code></p></td>
 <td><p>BlueROV2</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">{net_buoyancy</span> <span class="pre">(kg),</span> <span class="pre">cob_offset,</span> <span class="pre">cob_frame</span> <span class="pre">(com/base_link),</span> <span class="pre">fluid_density,</span> <span class="pre">footprint}</span></code>, realized as a dedicated displacement link solved from the assembled mass; see <a class="reference internal" href="../design/buoyancy.html"><span class="std std-doc">Buoyancy</span></a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">extra_bridge_topics</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">extra_bridge_topics</span></code></p></td>
 <td><p>no</p></td>
 <td><p>list appended verbatim to the generated ros_gz bridge config (native syntax)</p></td>
 </tr>
@@ -755,7 +760,7 @@ for both vehicles:</p>
 <td><p>joint type for the occupant (default: the slot’s, else <code class="docutils literal notranslate"><span class="pre">continuous</span></code> for a propeller, else <code class="docutils literal notranslate"><span class="pre">fixed</span></code>)</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">axis</span></code></p></td>
-<td><p>joint axis override (default: the part’s own spin axis)</p></td>
+<td><p>joint axis override (default: the slot’s, else the part’s own spin axis)</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">collision</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">false</span></code> to fit the part without its contact geometry</p></td>
@@ -811,11 +816,11 @@ frames follow the fitted parts, with the same naming patterns on both vehicles:<
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;instance&gt;</span></code></p></td>
 <td><p>link</p></td>
-<td><p>one frame per fitted part, named after its slot or its <code class="docutils literal notranslate"><span class="pre">name</span></code> (<code class="docutils literal notranslate"><span class="pre">motor_port</span></code>, <code class="docutils literal notranslate"><span class="pre">thruster_1</span></code>, <code class="docutils literal notranslate"><span class="pre">ping</span></code>, <code class="docutils literal notranslate"><span class="pre">camera</span></code>); spinning parts sit on their continuous joint <code class="docutils literal notranslate"><span class="pre">&lt;instance&gt;_joint</span></code></p></td>
+<td><p>one frame per fitted part, named after its slot or its <code class="docutils literal notranslate"><span class="pre">name</span></code> (<code class="docutils literal notranslate"><span class="pre">prop_port</span></code>, <code class="docutils literal notranslate"><span class="pre">thruster_1</span></code>, <code class="docutils literal notranslate"><span class="pre">ping</span></code>, <code class="docutils literal notranslate"><span class="pre">camera</span></code>); spinning parts sit on their continuous joint <code class="docutils literal notranslate"><span class="pre">&lt;instance&gt;_joint</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;parent&gt;_&lt;slot&gt;</span></code></p></td>
 <td><p>massless link</p></td>
-<td><p>one per slot a part declares, whether filled or not (<code class="docutils literal notranslate"><span class="pre">base_link_motor_port</span></code>, <code class="docutils literal notranslate"><span class="pre">base_link_camera</span></code>, <code class="docutils literal notranslate"><span class="pre">ping_mount_ping</span></code>)</p></td>
+<td><p>one per slot a part declares, whether filled or not (<code class="docutils literal notranslate"><span class="pre">base_link_prop_port</span></code>, <code class="docutils literal notranslate"><span class="pre">base_link_camera</span></code>, <code class="docutils literal notranslate"><span class="pre">ping_mount_ping</span></code>)</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;instance&gt;_&lt;frame&gt;</span></code></p></td>
 <td><p>massless link</p></td>

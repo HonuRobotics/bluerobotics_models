@@ -278,6 +278,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../how-to/index.html">How-to guides</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../how-to/change-parts.html">Change the fitted parts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/change-parts.html#fit-the-ping2-kit">Fit the Ping2 kit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/change-parts.html#fit-the-other-propellers">Fit the other propellers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/change-parts.html#leave-the-ping2-kit-off">Leave the Ping2 kit off</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/change-parts.html#add-the-antenna-mast-or-the-payload-bracket">Add the antenna mast or the payload bracket</a></li>
@@ -481,8 +482,8 @@ see the troubleshooting notes in <a class="reference internal" href="../../getti
 | <code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">3</span> <span class="pre">1300</span></code> | drives astern |
 | <code class="docutils literal notranslate"><span class="pre">rc</span> <span class="pre">all</span> <span class="pre">1500</span></code> | stops |</p>
 <p>To see what the autopilot is actually commanding while you move the sticks, echo the same topics:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gz<span class="w"> </span>topic<span class="w"> </span>-e<span class="w"> </span>-t<span class="w"> </span>/blueboat/motor_port/cmd
-gz<span class="w"> </span>topic<span class="w"> </span>-e<span class="w"> </span>-t<span class="w"> </span>/blueboat/motor_stbd/cmd
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gz<span class="w"> </span>topic<span class="w"> </span>-e<span class="w"> </span>-t<span class="w"> </span>/blueboat/prop_port/cmd
+gz<span class="w"> </span>topic<span class="w"> </span>-e<span class="w"> </span>-t<span class="w"> </span>/blueboat/prop_stbd/cmd
 </pre></div>
 </div>
 </section>

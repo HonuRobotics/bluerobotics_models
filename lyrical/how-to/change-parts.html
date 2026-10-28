@@ -278,6 +278,7 @@
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">How-to guides</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Change the fitted parts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fit-the-ping2-kit">Fit the Ping2 kit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#fit-the-other-propellers">Fit the other propellers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#leave-the-ping2-kit-off">Leave the Ping2 kit off</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#add-the-antenna-mast-or-the-payload-bracket">Add the antenna mast or the payload bracket</a></li>
@@ -436,16 +437,27 @@ the full key list is in <a class="reference internal" href="../reference/parts-c
 </pre></div>
 </div>
 <p>and try it without rebuilding: <code class="docutils literal notranslate"><span class="pre">ros2</span> <span class="pre">launch</span> <span class="pre">blueboat_gazebo</span> <span class="pre">sim.launch.xml</span> <span class="pre">config_file:=$PWD/my_vehicle.yaml</span></code>.</p>
+<p>The shipped config sets <code class="docutils literal notranslate"><span class="pre">slot_defaults:</span> <span class="pre">false</span></code>, so the vehicle is exactly its <code class="docutils literal notranslate"><span class="pre">parts:</span></code> list and each recipe below adds entries to it. With <code class="docutils literal notranslate"><span class="pre">slot_defaults:</span> <span class="pre">true</span></code> every unlisted slot fills with its default instead, and <code class="docutils literal notranslate"><span class="pre">type:</span> <span class="pre">none</span></code> is how a part is left off.</p>
+<section id="fit-the-ping2-kit">
+<h2>Fit the Ping2 kit<a class="headerlink" href="#fit-the-ping2-kit" title="Link to this heading"></a></h2>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">parts</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="nv">ping_mount</span><span class="p p-Indicator">,</span><span class="nt"> type</span><span class="p">:</span><span class="w"> </span><span class="nv">blueboat_ping_singlebeam_mount</span><span class="p p-Indicator">}</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="nv">ping</span><span class="p p-Indicator">,</span><span class="nt"> of</span><span class="p">:</span><span class="w"> </span><span class="nv">ping_mount</span><span class="p p-Indicator">,</span><span class="nt"> type</span><span class="p">:</span><span class="w"> </span><span class="nv">ping_singlebeam</span><span class="p p-Indicator">}</span>
+</pre></div>
+</div>
+<p>The Ping fills a slot of the bracket, so with <code class="docutils literal notranslate"><span class="pre">slot_defaults:</span> <span class="pre">false</span></code> it needs its own entry.</p>
+</section>
 <section id="fit-the-other-propellers">
 <h2>Fit the other propellers<a class="headerlink" href="#fit-the-other-propellers" title="Link to this heading"></a></h2>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">parts</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="nv">motor_port</span><span class="p p-Indicator">,</span><span class="nt"> type</span><span class="p">:</span><span class="w"> </span><span class="nv">t200_prop_ccw</span><span class="p p-Indicator">}</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="nv">motor_stbd</span><span class="p p-Indicator">,</span><span class="nt"> type</span><span class="p">:</span><span class="w"> </span><span class="nv">t200_prop_cw</span><span class="p p-Indicator">}</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="nv">prop_port</span><span class="p p-Indicator">,</span><span class="nt"> type</span><span class="p">:</span><span class="w"> </span><span class="nv">t200_prop_ccw</span><span class="p p-Indicator">}</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="nv">prop_stbd</span><span class="p p-Indicator">,</span><span class="nt"> type</span><span class="p">:</span><span class="w"> </span><span class="nv">t200_prop_cw</span><span class="p p-Indicator">}</span>
 </pre></div>
 </div>
 </section>
 <section id="leave-the-ping2-kit-off">
 <h2>Leave the Ping2 kit off<a class="headerlink" href="#leave-the-ping2-kit-off" title="Link to this heading"></a></h2>
+<p>With <code class="docutils literal notranslate"><span class="pre">slot_defaults:</span> <span class="pre">true</span></code>:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">parts</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="nv">ping_mount</span><span class="p p-Indicator">,</span><span class="nt"> type</span><span class="p">:</span><span class="w"> </span><span class="nv">none</span><span class="p p-Indicator">}</span>
 </pre></div>

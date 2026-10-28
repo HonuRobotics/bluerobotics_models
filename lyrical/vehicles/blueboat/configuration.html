@@ -278,6 +278,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../how-to/index.html">How-to guides</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../how-to/change-parts.html">Change the fitted parts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/change-parts.html#fit-the-ping2-kit">Fit the Ping2 kit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/change-parts.html#fit-the-other-propellers">Fit the other propellers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/change-parts.html#leave-the-ping2-kit-off">Leave the Ping2 kit off</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/change-parts.html#add-the-antenna-mast-or-the-payload-bracket">Add the antenna mast or the payload bracket</a></li>
@@ -429,10 +430,7 @@
              
   <section id="configuration">
 <h1>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h1>
-<p>The BlueBoat needs no configuration: every slot the parts declare fills
-itself with its default. The vehicle config
-(<code class="docutils literal notranslate"><span class="pre">blueboat_description/config/blueboat.yaml</span></code>, or any file passed as
-<code class="docutils literal notranslate"><span class="pre">config_file:=</span></code>) states differences only.</p>
+<p>The vehicle config (<code class="docutils literal notranslate"><span class="pre">blueboat_description/config/blueboat.yaml</span></code>, or any file passed as <code class="docutils literal notranslate"><span class="pre">config_file:=</span></code>) lists the fitted parts. The shipped config sets <code class="docutils literal notranslate"><span class="pre">slot_defaults:</span> <span class="pre">false</span></code> and fits the chassis and its two propellers only. With <code class="docutils literal notranslate"><span class="pre">slot_defaults:</span> <span class="pre">true</span></code>, or the key left out, every slot fills itself with the default in the table below, and the config states differences only.</p>
 <section id="hull-displacement">
 <h2>Hull displacement<a class="headerlink" href="#hull-displacement" title="Link to this heading"></a></h2>
 <p>The boat floats on graded buoyancy acting on a declared displacement,
@@ -457,7 +455,7 @@ config entry each. The fitted options and their topics live in
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">motor_port</span></code>, <code class="docutils literal notranslate"><span class="pre">motor_stbd</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">prop_port</span></code>, <code class="docutils literal notranslate"><span class="pre">prop_stbd</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">m200_weedless_prop_ccw</span></code>/<code class="docutils literal notranslate"><span class="pre">_cw</span></code>, <code class="docutils literal notranslate"><span class="pre">t200_prop_ccw</span></code>/<code class="docutils literal notranslate"><span class="pre">_cw</span></code></p></td>
 <td><p>the M200 weedless props</p></td>
 </tr>

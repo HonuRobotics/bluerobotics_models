@@ -278,6 +278,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../how-to/index.html">How-to guides</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../how-to/change-parts.html">Change the fitted parts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../how-to/change-parts.html#fit-the-ping2-kit">Fit the Ping2 kit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/change-parts.html#fit-the-other-propellers">Fit the other propellers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/change-parts.html#leave-the-ping2-kit-off">Leave the Ping2 kit off</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../how-to/change-parts.html#add-the-antenna-mast-or-the-payload-bracket">Add the antenna mast or the payload bracket</a></li>
@@ -438,6 +439,10 @@ config, into a directory under <code class="docutils literal notranslate"><span 
 <code class="docutils literal notranslate"><span class="pre">blueboat</span></code> into the water world and the ROS bridge comes up with it. A
 <code class="docutils literal notranslate"><span class="pre">[kdl_parser]</span> <span class="pre">root</span> <span class="pre">link</span> <span class="pre">...</span> <span class="pre">inertia</span></code> warning from <code class="docutils literal notranslate"><span class="pre">robot_state_publisher</span></code>
 is expected and harmless.</p>
+<p>This image shows the visualization of the base_link coordinate system to verify that the visual model has the correct placement and orientation, that the base_link coordinate system origin is located at the correct place, as specified by the datum specification in the part model (see commissioning) and that the orientation of the coordinate system relative the semantic front-left-up convention of ISO and ROS-REP.
+<img alt="Blueboat in gz with base frame" src="../../_images/blueboat_gz_base_cs.png" /></p>
+<p>This image shows the same scenario with botht the base_link and the base_link_visual coordinate systems.   You can see that the base_link_visual coordinate system complies with the gltf 2.0 convention.
+<img alt="Blueboat in gz with base and visual" src="../../_images/bleuboat_gz_baseviz_cs.png" /></p>
 <p>To run a custom vehicle instead, pass its config with <code class="docutils literal notranslate"><span class="pre">config_file:=</span></code>;
 the <a class="reference internal" href="configuration.html"><span class="std std-doc">configuration page</span></a> lists the slots and
 <a class="reference internal" href="../../how-to/change-parts.html"><span class="std std-doc">Change the fitted parts</span></a> walks through writing one.</p>
@@ -507,6 +512,8 @@ custom config needs no rebuild. In a simulation the frames carry the instance na
 and joint states arrive as <code class="docutils literal notranslate"><span class="pre">/blueboat/joint_states</span></code>, so RViz next to
 <code class="docutils literal notranslate"><span class="pre">sim.launch.xml</span></code> needs its fixed frame, its RobotModel TF prefix and its
 joint states pointed at the instance.</p>
+<p>Image showing expected RVIZ results with TF frames visualied to show that transforms from gltf 2.0 to RVIZ have resulted in geometry consistent with ISO/ROS-REP coordinate convention.
+<img alt="BB in rviz" src="../../_images/blueboat_rviz_cs.png" /></p>
 </section>
 </section>
 

@@ -636,6 +636,7 @@ window.runMermaid = runMermaid;</script>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../how-to/index.html">How-to guides</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../how-to/change-parts.html">Change the fitted parts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#fit-the-ping2-kit">Fit the Ping2 kit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#fit-the-other-propellers">Fit the other propellers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#leave-the-ping2-kit-off">Leave the Ping2 kit off</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../how-to/change-parts.html#add-the-antenna-mast-or-the-payload-bracket">Add the antenna mast or the payload bracket</a></li>
@@ -795,7 +796,7 @@ converts formats at runtime, and ROS and Gazebo see the same geometry.</p>
   GLB[&quot;models/part.visual.glb&quot;]
   PART[&quot;urdf/part.urdf.xacro&lt;br/&gt;the part: link, inertia, visual, collision,&lt;br/&gt;attach, slots, frames&quot;]
   GLB -. &quot;referenced by the visual&quot; .-&gt; PART
-  CFG[&quot;config/blueboat.yaml&lt;br/&gt;base, overrides, hull displacement&quot;] --&gt; ASM[&quot;assembly.xacro&lt;br/&gt;slots fill with defaults,&lt;br/&gt;config overrides and adds&quot;]
+  CFG[&quot;config/blueboat.yaml&lt;br/&gt;base, overrides, hull displacement&quot;] --&gt; ASM[&quot;assembly.xacro&lt;br/&gt;slots fill from the config&lt;br/&gt;and their defaults&quot;]
   PART --&gt; ASM
   ASM --&gt; URDF[&quot;blueboat.urdf&lt;br/&gt;+ assembly_part manifest&quot;]
   URDF --&gt; ROS[&quot;ROS: robot_state_publisher, RViz, TF&quot;]
@@ -841,7 +842,7 @@ through a merge include, so both sides always see identical geometry.</p>
 “standalone” vehicle and a separate programmatic path and declared them
 deliberately out of sync. Slots with defaults remove the split: the zero
 configuration vehicle and the configurable one are the same resolution,
-with an empty config.</p>
+with an empty config. A config can instead turn the defaults off (<code class="docutils literal notranslate"><span class="pre">slot_defaults:</span> <span class="pre">false</span></code>) and list every fitted part.</p>
 <p><strong>The structure is Clearpath’s.</strong> <a class="reference external" href="https://github.com/clearpathrobotics/clearpath_common"><code class="docutils literal notranslate"><span class="pre">clearpath_common</span></code></a>
 is the closest analogue, a family of configurable robots for ROS and Gazebo
 built from a shared parts library plus a YAML driven generator. The
