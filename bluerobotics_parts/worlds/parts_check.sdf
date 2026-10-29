@@ -350,7 +350,7 @@
         <link name='bluerov2_chassis'>
           <inertial>
             <pose>0.0097937300000000005 -0.00022557600000000001 0.010999999999999999 0 0 0</pose>
-            <mass>9.4000000000000004</mass>
+            <mass>9.3599999999999994</mass>
             <inertia>
               <ixx>0.13992979999999999</ixx>
               <ixy>-5.6702100000000002e-06</ixy>
@@ -435,11 +435,11 @@
             </geometry>
           </collision>
           <visual name='bluerov2_chassis_visual'>
-            <pose>0 0 0 1.5708 0 0</pose>
+            <pose>0.0032599999999999999 0 -0.18784999999999999 1.5708 -5.5511151231257827e-17 1.5708</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
-                <uri>model://bluerobotics_parts/models/bluerov2_chassis/bluerov2_chassis.visual.glb</uri>
+                <uri>model://bluerobotics_parts/models/bluerov2_chassis/bluerov2_chassis_visual.glb</uri>
               </mesh>
             </geometry>
           </visual>
@@ -1562,11 +1562,11 @@
             </geometry>
           </collision>
           <visual name='t200_prop_ccw_visual'>
-            <pose>0 0 0 1.5708 0 0</pose>
+            <pose>0 0 0 1.5708 -5.5511151231257827e-17 1.5708</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
-                <uri>model://bluerobotics_parts/models/t200_prop_ccw/t200_prop_ccw.visual.glb</uri>
+                <uri>model://bluerobotics_parts/models/t200_prop_ccw/t200_prop_ccw_visual.glb</uri>
               </mesh>
             </geometry>
           </visual>
@@ -1598,11 +1598,11 @@
             </geometry>
           </collision>
           <visual name='t200_prop_cw_visual'>
-            <pose>0 0 0 1.5708 0 0</pose>
+            <pose>0 0 0 1.5708 -5.5511151231257827e-17 1.5708</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
-                <uri>model://bluerobotics_parts/models/t200_prop_cw/t200_prop_cw.visual.glb</uri>
+                <uri>model://bluerobotics_parts/models/t200_prop_cw/t200_prop_cw_visual.glb</uri>
               </mesh>
             </geometry>
           </visual>
@@ -1643,11 +1643,11 @@
             </geometry>
           </collision>
           <visual name='t200_thruster_visual'>
-            <pose>0 0 0 1.5708 0 0</pose>
+            <pose>0 0 0 1.5708 -5.5511151231257827e-17 1.5708</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
-                <uri>model://bluerobotics_parts/models/t200_thruster/t200_thruster.visual.glb</uri>
+                <uri>model://bluerobotics_parts/models/t200_thruster/t200_thruster_visual.glb</uri>
               </mesh>
             </geometry>
           </visual>
