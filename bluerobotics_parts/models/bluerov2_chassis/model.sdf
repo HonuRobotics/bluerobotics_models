@@ -11,7 +11,7 @@
         </geometry>
       </visual>
       <collision name="center-tank_collider_cylinder">
-        <pose>-0.0 -0.007861 0.187846 1.570796 -1.570796 0.0</pose>
+        <pose>0.017301 0.000000 0.187846 0.000000 1.570796 0.000000</pose>
         <geometry>
           <cylinder>
             <radius>0.057041</radius>
@@ -20,7 +20,7 @@
         </geometry>
       </collision>
       <collision name="center-tank_collider_cylinder.001">
-        <pose>-0.0 -0.010544 0.072859 1.570796 -1.570796 0.0</pose>
+        <pose>0.019984 0.000000 0.072859 0.000000 1.570796 0.000000</pose>
         <geometry>
           <cylinder>
             <radius>0.050417</radius>
@@ -29,7 +29,7 @@
         </geometry>
       </collision>
       <collision name="tanks_collider_box">
-        <pose>-0.109491 -0.129627 0.207821 0.0 0.0 -1.570796</pose>
+        <pose>0.139067 -0.109491 0.207821 0.000000 0.000000 0.000000</pose>
         <geometry>
           <box>
             <size>0.163831 0.100479 0.085132</size>
@@ -37,7 +37,7 @@
         </geometry>
       </collision>
       <collision name="tanks_collider_box.001">
-        <pose>0.108931 -0.129627 0.207821 0.0 0.0 -1.570796</pose>
+        <pose>0.139067 0.108931 0.207821 0.000000 0.000000 0.000000</pose>
         <geometry>
           <box>
             <size>0.163831 0.100479 0.085132</size>
@@ -45,7 +45,7 @@
         </geometry>
       </collision>
       <collision name="tanks_collider_box.002">
-        <pose>-0.109491 0.128961 0.207821 0.0 0.0 -1.570796</pose>
+        <pose>-0.119521 -0.109491 0.207821 0.000000 0.000000 0.000000</pose>
         <geometry>
           <box>
             <size>0.166789 0.100479 0.085132</size>
@@ -53,7 +53,7 @@
         </geometry>
       </collision>
       <collision name="tanks_collider_box.003">
-        <pose>0.108931 0.128961 0.207821 0.0 0.0 -1.570796</pose>
+        <pose>-0.119521 0.108931 0.207821 0.000000 0.000000 0.000000</pose>
         <geometry>
           <box>
             <size>0.166789 0.100479 0.085132</size>
@@ -61,7 +61,7 @@
         </geometry>
       </collision>
       <collision name="botttom-frame_collider_box">
-        <pose>-0.0 0.001639 0.017466 0.0 0.0 -1.570796</pose>
+        <pose>0.007801 0.000000 0.017466 0.000000 0.000000 0.000000</pose>
         <geometry>
           <box>
             <size>0.249045 0.318974 0.01207</size>
@@ -69,7 +69,7 @@
         </geometry>
       </collision>
       <collision name="center-tank_collider_cylinder_collider_box">
-        <pose>-0.163294 0.003418 0.131695 1.570796 1.570796 0.0</pose>
+        <pose>0.006022 -0.163294 0.131695 0.000000 1.570796 0.000000</pose>
         <geometry>
           <box>
             <size>0.242382 0.011872 0.456697</size>
@@ -77,7 +77,7 @@
         </geometry>
       </collision>
       <collision name="center-tank_collider_cylinder_collider_box.001">
-        <pose>0.163326 0.003418 0.131695 1.570796 1.570796 0.0</pose>
+        <pose>0.006022 0.163326 0.131695 0.000000 1.570796 0.000000</pose>
         <geometry>
           <box>
             <size>0.242382 0.011872 0.456697</size>
@@ -85,18 +85,5 @@
         </geometry>
       </collision>
     </link>
-    <light type="directional" name="Sun">
-      <pose>0.110226 -0.160163 0.027974 0.0 -0.303211 1.570796</pose>
-      <intensity>1.0</intensity>
-      <diffuse>(1.0, 1.0, 1.0, 1.0)</diffuse>
-      <cast_shadows>True</cast_shadows>
-      <specular>1.0, 1.0, 1.0</specular>
-      <attenuation>
-        <range>10</range>
-        <linear>0.0</linear>
-        <constant>1.0</constant>
-        <quadratic>1.0</quadratic>
-      </attenuation>
-    </light>
   </model>
 </sdf>
