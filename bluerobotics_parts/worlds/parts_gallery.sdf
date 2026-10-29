@@ -65,10 +65,6 @@
       <ambient>0.6 0.6 0.6</ambient>
       <background>0.25 0.27 0.30</background>
       <grid>true</grid>
-      <sky>
-        <cubemap_uri>autumn_field_puresky.jpg</cubemap_uri>
-      </sky>
-
     </scene>
 
     <light type="directional" name="sun">
