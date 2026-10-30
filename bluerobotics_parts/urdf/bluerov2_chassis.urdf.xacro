@@ -90,7 +90,16 @@
                  iyy="1.743709e-01" iyz="2.066992e-05"
                  izz="2.209201e-01"/>
       </inertial>
-      <xacro:part_visual mesh="package://bluerobotics_parts/models/bluerov2_chassis/bluerov2_chassis.visual.glb"/>
+      <!-- The delivery follows the glTF profile, with its origin on the
+           commission's datum: the centre of the frame's footprint, on the
+           bottom of the frame. This link keeps the frame of the earlier
+           export, which the slots, collisions and inertia in this file were
+           tuned in: on the electronics tube axis, 187.85 mm above the datum
+           and 3.26 mm aft of it. xyz places the datum in this link, so the
+           hull renders where it did. Moving the link onto the datum is a
+           separate change, because base_link moves with it. -->
+      <xacro:part_visual mesh="package://bluerobotics_parts/models/bluerov2_chassis/bluerov2_chassis_visual.glb"
+                         xyz="0.00326 0 -0.18785" axes="gltf"/>
       <xacro:if value="${collision}">
         <collision>
           <origin xyz="0.009119 0 0" rpy="-0 1.5708 0"/>
