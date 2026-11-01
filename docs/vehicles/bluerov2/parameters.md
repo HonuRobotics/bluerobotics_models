@@ -82,6 +82,8 @@ The mass is not set in one place: the model adds up every part. The six T200 thr
 
 The chassis inertia tensor was scaled to an earlier 9.4 kg; at 9.36 kg the difference is under 0.5% and it is left as is. [Practice]
 
+The Heavy is built up from the standard model rather than taken from the published figure. Blue Robotics list the assembled Heavy at 11.5 kg in air with ballast ([Heavy retrofit kit](https://bluerobotics.com/store/rov/bluerov2-upgrade-kits/brov2-heavy-retrofit/)), the same as the standard vehicle's midpoint, although the kit adds two thrusters, the guards, buoyancy blocks and fairings, and three ballast weights. The heavy chassis (`bluerobotics_parts/urdf/bluerov2_heavy_chassis.urdf.xacro`) is the standard 9.36 kg plus the kit: 0.85 kg of guards, brackets, blocks and fairings (from the vendor 3D model volumes) and 0.6 kg of ballast, **10.81 kg**. With its eight T200 bodies, eight propellers and the camera (2.832 kg) the vehicle is **13.64 kg**. Its tensor and CoM are the standard hull's composed with the kit parts at their places. [Practice]
+
 ## Thrust
 
 Blue Robotics publish two different things, and they do not agree:
@@ -161,7 +163,7 @@ source ~/maritime_ws/install/setup.bash
 cd ~/maritime_ws/src/bluerobotics_models/bluerov2_gazebo
 python3 -m pytest -s test/test_gz_launch.py -k axis
 ```
-(BTW, the same test can be run with 
+(BTW, the same test can be run with
 `colcon test --packages-select bluerov2_gazebo` which the same output to `log/latest_test/bluerov2_gazebo/stdout.log`.
 
 

@@ -21,5 +21,5 @@ tune-sitl-rov
 
 The default configuration is the standard chassis with its six T200 propellers
 and the exploreHD camera, trimmed 2 g positively buoyant. The chassis
-visual is the delivered art; the heavy chassis still uses a placeholder
-mesh.
+visual is the delivered art, and so is the heavy chassis' (the standard
+chassis with the Heavy kit's guards, buoyancy blocks and fairings fitted).

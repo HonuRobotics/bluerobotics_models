@@ -3,12 +3,8 @@ Copyright 2026 Honu Robotics
 
 Licensed under the Apache License, Version 2.0 (see LICENSE).
 
-This repository redistributes third-party mesh assets, reused as temporary
-placeholders until original art replaces them:
-
-- bluerobotics_parts/models/bluerov2_heavy_chassis/bluerov2_heavy.dae
-  From Project DAVE (https://github.com/IOES-Lab/dave, ros2 branch).
-  License: Apache-2.0.
+This repository redistributes a third-party mesh asset, reused as a temporary
+placeholder until original art replaces it:
 
 - bluerobotics_parts/models/ping360/ping360.dae
   From CentraleNantesROV/bluerov2
