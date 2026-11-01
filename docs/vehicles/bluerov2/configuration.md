@@ -15,7 +15,18 @@ base: {type: bluerov2_chassis, name: base_link}        # standard
 base: {type: bluerov2_heavy_chassis, name: base_link}  # heavy
 ```
 
-With the heavy hull, widen the buoyancy footprint to `"0.457 0.575"`.
+With the heavy hull, widen the buoyancy footprint to `"0.457 0.575"`. With
+`slot_defaults: false`, also list the two extra verticals and their bodies:
+
+```yaml
+  - {slot: thruster_7, type: t200_prop_cw}        # rear right vertical
+  - {slot: thruster_8, type: t200_prop_ccw}       # rear left vertical
+  - {slot: thruster_body_7, type: t200_thruster}
+  - {slot: thruster_body_8, type: t200_thruster}
+```
+
+On the heavy hull, thruster_5 and thruster_6 are the front right and front
+left corner verticals.
 
 ## Buoyancy
 
