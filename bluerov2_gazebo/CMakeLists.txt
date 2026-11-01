@@ -134,6 +134,46 @@ add_custom_command(
 add_custom_target(${PROJECT_NAME}_ardupilot_model ALL DEPENDS ${ap_sdf})
 install(FILES ${ap_sdf} models/bluerov2_with_ardupilot/model.config
   DESTINATION share/${PROJECT_NAME}/models/bluerov2_with_ardupilot)
+# The Heavy: the same pipeline on the shipped heavy config, installed as
+# models/bluerov2_heavy, i.e. model://bluerov2_heavy. Its Gazebo flavoured URDF
+# is both the file the model merges and the source of its mass properties,
+# which do not depend on gltf_up. The model keeps the name and topic namespace
+# bluerov2, as the teleop's bluerov2_heavy vehicle expects.
+set(heavy_config ${bluerov2_description_DIR}/../config/bluerov2_heavy.yaml)
+set(heavy_urdf ${CMAKE_CURRENT_BINARY_DIR}/heavy/bluerov2_heavy.urdf)
+set(heavy_raw_sdf ${CMAKE_CURRENT_BINARY_DIR}/heavy/raw/model.sdf)
+set(heavy_sdf ${CMAKE_CURRENT_BINARY_DIR}/heavy/model.sdf)
+add_custom_command(
+  OUTPUT ${heavy_urdf}
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/heavy
+  COMMAND ${XACRO_EXECUTABLE} ${desc_xacro}
+          config_file:=${heavy_config} gltf_up:=z -o ${heavy_urdf}
+  DEPENDS ${desc_xacro} ${heavy_config} ${desc_urdf}
+  COMMENT "Expanding the Gazebo flavoured bluerov2_heavy.urdf (gltf_up:=z)")
+add_custom_command(
+  OUTPUT ${heavy_raw_sdf}
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/heavy/raw
+  COMMAND Python3::Interpreter
+          ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_model.py
+          ${heavy_config} ${heavy_urdf}
+          ${CMAKE_CURRENT_SOURCE_DIR}/model.sdf.xacro ${heavy_raw_sdf}
+          model://bluerov2_heavy/bluerov2_heavy.urdf
+  DEPENDS ${heavy_config} ${heavy_urdf}
+          ${CMAKE_CURRENT_SOURCE_DIR}/model.sdf.xacro
+          ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_model.py
+  COMMENT "Generating the Heavy model.sdf from bluerov2_heavy.yaml")
+add_custom_command(
+  OUTPUT ${heavy_sdf}
+  COMMAND Python3::Interpreter ${stamper}
+          --urdf ${heavy_urdf}
+          --config ${heavy_config}
+          --stamp ${heavy_raw_sdf}
+          --out ${heavy_sdf}
+  DEPENDS ${heavy_raw_sdf} ${heavy_urdf} ${heavy_config} ${stamper}
+  COMMENT "Stamping the Heavy model.sdf with model specs")
+add_custom_target(${PROJECT_NAME}_heavy_model ALL DEPENDS ${heavy_sdf})
+install(FILES ${heavy_sdf} ${heavy_urdf} models/bluerov2_heavy/model.config
+  DESTINATION share/${PROJECT_NAME}/models/bluerov2_heavy)
 install(FILES model.sdf.xacro DESTINATION share/${PROJECT_NAME})
 install(PROGRAMS
   scripts/generate_bridge_config.py
