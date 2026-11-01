@@ -1,0 +1,87 @@
+# BlueROV2 Heavy build time configuration: the same vehicle as bluerov2.yaml
+# on the heavy chassis, with its eight thrusters.
+#
+# Edit this file and rebuild (colcon build) to regenerate the composed Heavy
+# Gazebo model (model://bluerov2_heavy). To run it, pass
+# config_file:=$(ros2 pkg prefix --share bluerov2_description)/config/bluerov2_heavy.yaml
+# to the launches.
+#
+# The BlueROV2 Heavy is exactly what parts: lists, because slot_defaults is false: a slot with no entry stays empty. With slot_defaults true, or left out, every unlisted slot fills with its default instead (the chassis fits its eight propellers, their T200 bodies and the exploreHD camera). See bluerobotics_parts/urdf/assembly.xacro for the full rules and the site (vehicles/bluerov2/configuration) for the slots and the catalog.
+#
+# Topic namespace: part topics default to /<topic_namespace>/<name>/...
+topic_namespace: bluerov2
+
+# base: the part whose link is the assembly root, base_link. The type picks
+# the variant: bluerov2_chassis (standard, 6 thrusters) or
+# bluerov2_heavy_chassis (Heavy kit, 8).
+base: {type: bluerov2_heavy_chassis, name: base_link}
+
+# slot_defaults: false fits only the slots listed under parts; true fills every unlisted slot with its default part.
+slot_defaults: false
+
+# parts: what is fitted. A slot entry picks what goes in a slot
+# (slot: the slot name, of: the instance carrying it, default base_link;
+# type: an accepted part type, or none to leave it empty). An entry without
+# slot: is a free placement: type, name, xyz/rpy relative to parent
+# (default base_link). Optional per part topic overrides for parts with
+# topics (bases; the per part suffix such as /image is appended):
+#   topic:     base for BOTH the Gazebo and ROS sides
+#   gz_topic:  Gazebo side base   (overrides `topic`)
+#   ros_topic: ROS side base      (overrides `topic`)
+#   A base goes under /<topic_namespace>/ unless it starts with a slash,
+#   which is then used as given (and shared by every instance).
+#   bridge:    dict of NATIVE ros_gz_bridge keys merged into that part's
+#              generated bridge entries
+# The heavy chassis adds thruster_7 / thruster_8 (cw / ccw) and their bodies.
+parts:
+  - {slot: thruster_1, type: t200_prop_ccw}       # front right
+  - {slot: thruster_2, type: t200_prop_ccw}       # front left
+  - {slot: thruster_3, type: t200_prop_cw}        # rear right
+  - {slot: thruster_4, type: t200_prop_cw}        # rear left
+  - {slot: thruster_5, type: t200_prop_ccw}       # front right vertical
+  - {slot: thruster_6, type: t200_prop_cw}        # front left vertical
+  - {slot: thruster_7, type: t200_prop_cw}        # rear right vertical
+  - {slot: thruster_8, type: t200_prop_ccw}       # rear left vertical
+  - {slot: thruster_body_1, type: t200_thruster}
+  - {slot: thruster_body_2, type: t200_thruster}
+  - {slot: thruster_body_3, type: t200_thruster}
+  - {slot: thruster_body_4, type: t200_thruster}
+  - {slot: thruster_body_5, type: t200_thruster}
+  - {slot: thruster_body_6, type: t200_thruster}
+  - {slot: thruster_body_7, type: t200_thruster}
+  - {slot: thruster_body_8, type: t200_thruster}
+  - {slot: camera, type: explorehd_camera}        # sensor only, no visual
+  # - {slot: camera, type: marinesitu_c3}         # the stereo option
+  # - {slot: sonar, type: ping360}                # sensor only, no visual
+  # - {slot: dvl, type: dvl_a50}                  # sensor only, no visual
+  # - {slot: payload, type: payload_skid}
+  # - {slot: rack, type: roof_rack}
+  # Subsea manipulation is out of scope for now: newton_gripper and sediment_sampler fit the gripper slot.
+
+# slots: ad hoc slots on any instance, usable like the parts' own. (The
+# instance key is of:, not on:, which YAML would read as the boolean true.)
+# slots:
+#   - {of: base_link, name: light, xyz: "0.2 0.1 0.1", rpy: "0 0 0"}
+
+# Buoyancy declaration, realized by the Gazebo composition as a dedicated
+# buoyancy_displacement link (an analytic box the world's buoyancy plugin is
+# enabled on; the parts' own collisions are contact geometry and never
+# displace). The box is solved at generation time from the assembled mass:
+#   fluid_density * volume = total_mass + net_buoyancy
+#
+#   net_buoyancy   net buoyancy as displaced mass, kg. Positive floats up.
+#                  The shipped 0.0 holds depth; a real vehicle is trimmed a
+#                  little positive (0.002 or so) so a dead one surfaces.
+#   cob_offset     "x y z" (m): center of buoyancy, relative to cob_frame.
+#   cob_frame      com (default; preserves righting stiffness across
+#                  configurations) or base_link (pins the CoB like the hull).
+#   fluid_density  kg/m^3; MUST match the world's buoyancy plugin (a test
+#                  enforces it for the shipped world).
+#   footprint      "x y" (m): the box footprint; height is solved. The
+#                  default matches the standard hull; use "0.457 0.575"
+#                  for the heavy chassis.
+buoyancy: {net_buoyancy: 0.0, cob_offset: "0 0 0.046", cob_frame: com, fluid_density: 1025.0, footprint: "0.457 0.575"}
+
+# extra_bridge_topics: optional top level list, appended VERBATIM to the
+# generated bridge config in native ros_gz_bridge syntax. Never hand edit
+# the generated ros_gz_bridge.yaml; it is overwritten on rebuild.
