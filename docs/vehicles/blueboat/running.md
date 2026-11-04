@@ -11,6 +11,12 @@ config, into a directory under `$ROS_HOME`), the model is spawned as
 `[kdl_parser] root link ... inertia` warning from `robot_state_publisher`
 is expected and harmless.
 
+This image shows the visualization of the base_link coordinate system to verify that the visual model has the correct placement and orientation, that the base_link coordinate system origin is located at the correct place, as specified by the datum specification in the part model (see commissioning) and that the orientation of the coordinate system relative the semantic front-left-up convention of ISO and ROS-REP.
+![Blueboat in gz with base frame](./images/blueboat_gz_base_cs.png)
+
+This image shows the same scenario with botht the base_link and the base_link_visual coordinate systems.   You can see that the base_link_visual coordinate system complies with the gltf 2.0 convention. 
+![Blueboat in gz with base and visual](./images/bleuboat_gz_baseviz_cs.png)
+
 To run a custom vehicle instead, pass its config with `config_file:=`;
 the [configuration page](configuration.md) lists the slots and
 [Change the fitted parts](../../how-to/change-parts.md) walks through writing one.
@@ -39,6 +45,9 @@ anything else about the simulation: pass any vehicle free world SDF
 ros2 launch blueboat_gazebo sim.launch.xml world:=/path/my_world.sdf
 ```
 
+
+
+
 ## In RViz
 
 To see the model in RViz:
@@ -55,3 +64,6 @@ custom config needs no rebuild. In a simulation the frames carry the instance na
 and joint states arrive as `/blueboat/joint_states`, so RViz next to
 `sim.launch.xml` needs its fixed frame, its RobotModel TF prefix and its
 joint states pointed at the instance.
+
+Image showing expected RVIZ results with TF frames visualied to show that transforms from gltf 2.0 to RVIZ have resulted in geometry consistent with ISO/ROS-REP coordinate convention.
+![BB in rviz](./images/blueboat_rviz_cs.png)

@@ -19,6 +19,7 @@ install(DIRECTORY
   launch
   worlds
   params
+  missions
   DESTINATION share/${PROJECT_NAME})
 
 # ros_gz bridge config is GENERATED from the vehicle config plus the
@@ -127,6 +128,8 @@ if(BUILD_TESTING)
   # reach the test logs.
   ament_add_pytest_test(test_ocean_current test/test_ocean_current.py
     TIMEOUT 300 NOCAPTURE)
+  ament_add_pytest_test(test_mission_file test/test_mission_file.py
+    TIMEOUT 60)
   # NOCAPTURE so the sim output printed at teardown reaches the test logs
   # even when every assertion passes; the runtime behavior tests watch the
   # vehicle for several seconds each.

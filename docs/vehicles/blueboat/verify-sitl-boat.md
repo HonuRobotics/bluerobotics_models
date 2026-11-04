@@ -62,8 +62,8 @@ rc 3 1700
 To see what the autopilot is actually commanding while you move the sticks, echo the same topics:
 
 ```bash
-gz topic -e -t /blueboat/motor_port/cmd
-gz topic -e -t /blueboat/motor_stbd/cmd
+gz topic -e -t /blueboat/prop_port/cmd
+gz topic -e -t /blueboat/prop_stbd/cmd
 ```
 
 

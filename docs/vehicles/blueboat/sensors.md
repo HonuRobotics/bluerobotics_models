@@ -8,9 +8,9 @@ sensors can be added following the
 
 ## Available sensors
 
-| Sensor | Part | Slot | Fitted by default |
+| Sensor | Part | Slot | Fitted in the shipped config |
 |---|---|---|---|
-| Ping2 echosounder | `ping_singlebeam` | `ping` (on the integration kit bracket, itself in the chassis `ping_mount` slot) | yes |
+| Ping2 echosounder | `ping_singlebeam` | `ping` (on the integration kit bracket, itself in the chassis `ping_mount` slot) | no |
 
 ## Sensors ROS API
 

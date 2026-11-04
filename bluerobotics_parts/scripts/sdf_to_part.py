@@ -33,7 +33,7 @@ handles the Gazebo side.
 
     sdf_to_part.py models/t200_thruster --mass 0.344 --axis "1 0 0"
     sdf_to_part.py models/blueboat_chassis --mass 12
-        --slot "motor_port=-0.52,0.301,-0.117;accepts=m200_weedless_prop_ccw;
+        --slot "prop_port=-0.52,0.301,-0.117;accepts=m200_weedless_prop_ccw;
                 default=m200_weedless_prop_ccw;joint=continuous"
     sdf_to_part.py models/ping_singlebeam --frame beam=0,0,-0.044
     sdf_to_part.py --all models            # first version of every delivered part

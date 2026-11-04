@@ -12,15 +12,29 @@ cp $(ros2 pkg prefix --share blueboat_description)/config/blueboat.yaml my_vehic
 
 and try it without rebuilding: `ros2 launch blueboat_gazebo sim.launch.xml config_file:=$PWD/my_vehicle.yaml`.
 
+The shipped config sets `slot_defaults: false`, so the vehicle is exactly its `parts:` list and each recipe below adds entries to it. With `slot_defaults: true` every unlisted slot fills with its default instead, and `type: none` is how a part is left off.
+
+## Fit the Ping2 kit
+
+```yaml
+parts:
+  - {slot: ping_mount, type: blueboat_ping_singlebeam_mount}
+  - {slot: ping, of: ping_mount, type: ping_singlebeam}
+```
+
+The Ping fills a slot of the bracket, so with `slot_defaults: false` it needs its own entry.
+
 ## Fit the other propellers
 
 ```yaml
 parts:
-  - {slot: motor_port, type: t200_prop_ccw}
-  - {slot: motor_stbd, type: t200_prop_cw}
+  - {slot: prop_port, type: t200_prop_ccw}
+  - {slot: prop_stbd, type: t200_prop_cw}
 ```
 
 ## Leave the Ping2 kit off
+
+With `slot_defaults: true`:
 
 ```yaml
 parts:

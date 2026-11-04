@@ -75,7 +75,7 @@ def test_joint_states_flow(sim):
     """Motor joint states cross the bridge under the instance name, for RViz."""
     code, out, err = ros(sim, 'topic', 'echo', '/blueboat/joint_states', '--once',
                          timeout=30)
-    assert code == 0 and 'motor_port_joint' in out, f'no joint states\n{err}'
+    assert code == 0 and 'prop_port_joint' in out, f'no joint states\n{err}'
 
 
 def test_tf_frames_carry_the_instance_name(sim):
@@ -88,8 +88,8 @@ def test_tf_frames_carry_the_instance_name(sim):
 
 def test_thruster_and_ping_topics_bridged(sim):
     """The thrust command and echosounder topics exist on the ROS graph."""
-    needed = ('/blueboat/motor_port/cmd',
-              '/blueboat/motor_stbd/cmd',
+    needed = ('/blueboat/prop_port/cmd',
+              '/blueboat/prop_stbd/cmd',
               '/blueboat/ping/range')
     poll_until(
         lambda: all(t in ros(sim, 'topic', 'list')[1] for t in needed), 30,

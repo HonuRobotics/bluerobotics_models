@@ -9,8 +9,8 @@ goes; the Ping declares the frame its beam leaves from.
 ```{mermaid}
 flowchart TB
   C["blueboat_chassis"]
-  C -->|"slot motor_port<br/>accepts M200 ccw, T200 ccw<br/>default M200 ccw, continuous"| MP["m200_weedless_prop_ccw"]
-  C -->|"slot motor_stbd<br/>default M200 cw, continuous"| MS["m200_weedless_prop_cw"]
+  C -->|"slot prop_port<br/>accepts M200 ccw, T200 ccw<br/>default M200 ccw, continuous"| MP["m200_weedless_prop_ccw"]
+  C -->|"slot prop_stbd<br/>default M200 cw, continuous"| MS["m200_weedless_prop_cw"]
   C -->|"slot flag<br/>default blueboat_flag"| F["blueboat_flag"]
   C -->|"slot mast<br/>accepts antenna mast<br/>default none"| M(("empty"))
   C -->|"slot payload<br/>accepts payload bracket<br/>default none"| P(("empty"))
@@ -27,7 +27,7 @@ flowchart TB
 flowchart TD
   A["instantiate the base part"] --> B["for each slot of the instance<br/>(its own, plus ad hoc slots from the config)"]
   B --> C{"config entry<br/>for this slot?"}
-  C -- "none" --> D["fit the slot's default<br/>(nothing if default is none)"]
+  C -- "none" --> D["fit the slot's default<br/>(nothing if default is none<br/>or slot_defaults is false)"]
   C -- "type: none" --> E["leave it empty;<br/>the slot frame stays"]
   C -- "type: X" --> F{"X in accepts?"}
   F -- "no" --> G["ASSEMBLY ERROR"]
@@ -41,10 +41,8 @@ flowchart TD
 Rules, in words:
 
 - The **base** part is the root; its link is the named root link (no joint).
-- Every slot fills itself with its **default**, recursively, unless the
-  config has an entry for it. An entry names the slot (`slot:`), the
-  instance carrying it (`of:`, default the base), and `type:` an accepted
-  part or `none`. The occupant's instance name defaults to the slot name.
+- Every slot fills itself with its **default**, recursively, unless the config has an entry for it. An entry names the slot (`slot:`), the instance carrying it (`of:`, default the base), and `type:` an accepted part or `none`. The occupant's instance name defaults to the slot name.
+- `slot_defaults: false` in the config turns the defaults off: a slot with no entry stays empty, so the config lists every fitted part, including the deeper ones (the Ping in the kit's bracket needs its own entry).
 - **Free placements** (no `slot:`) give `type`, `name`, `xyz`/`rpy` relative
   to `parent`.
 - **Ad hoc slots** declared under `slots:` on any instance behave like the

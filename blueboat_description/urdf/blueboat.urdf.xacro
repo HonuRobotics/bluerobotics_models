@@ -23,6 +23,7 @@
   <!-- Chassis as the root; its slots (and theirs) fill with their defaults,
        the config overrides and adds. -->
   <xacro:assemble base="${cfg['base']}" parts="${cfg.get('parts') or []}"
-                  slots="${cfg.get('slots') or []}"/>
+                  slots="${cfg.get('slots') or []}"
+                  defaults="${cfg.get('slot_defaults', True)}"/>
 
 </robot>

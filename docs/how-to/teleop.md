@@ -6,7 +6,7 @@ normalized `cmd_vel`, and the `twist_to_thrust` mixer turns that Twist
 into per thruster thrust commands through a per vehicle gain matrix. The
 stack binds to one vehicle instance, `<name>`: its three nodes and their
 topics run under `/<name>`, and the mixer's thruster topics, relative in
-its config, land on `/<name>/motor_port/cmd` and the like. Those are the
+its config, land on `/<name>/prop_port/cmd` and the like. Those are the
 topics documented in each vehicle's Actuators page
 ([BlueBoat](../vehicles/blueboat/actuators.md),
 [BlueROV2](../vehicles/bluerov2/actuators.md)), so the same launch works
@@ -124,11 +124,11 @@ ros2 topic list | grep cmd
 
 ```text
 /boat_a/cmd_vel
-/boat_a/motor_port/cmd
-/boat_a/motor_stbd/cmd
+/boat_a/prop_port/cmd
+/boat_a/prop_stbd/cmd
 /boat_b/cmd_vel
-/boat_b/motor_port/cmd
-/boat_b/motor_stbd/cmd
+/boat_b/prop_port/cmd
+/boat_b/prop_stbd/cmd
 ```
 
 ## Safety behavior

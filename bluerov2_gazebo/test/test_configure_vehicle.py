@@ -67,7 +67,9 @@ def test_default_config_reproduces_the_installed_artifacts(tmp_path):
                if v.find('geometry/mesh') is not None}
     ros_rpys = {v.find('origin').get('rpy') for v in ros_root.iter('visual')
                 if v.find('geometry/mesh') is not None}
-    assert ros_rpys == {'0 0 0'} and gz_rpys == {'1.5708 0 0'}
+    # legacy exports, and profile axes deliveries (axes="gltf" in part_visual)
+    assert ros_rpys <= {'0 0 0', '0 0 1.5708'}
+    assert gz_rpys <= {'1.5708 0 0', '1.5708 0 1.5708'}
 
 
 def test_custom_config_flows_to_every_artifact(tmp_path):

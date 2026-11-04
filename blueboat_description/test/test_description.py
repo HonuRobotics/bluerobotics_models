@@ -30,13 +30,6 @@ DEFAULT_CONFIG = (SHARE / 'config' / 'blueboat.yaml').read_text()
 
 WATER_DENSITY = 1025.0
 HULL = yaml.safe_load(DEFAULT_CONFIG)['hull_displacement']
-# What the chassis slots fill with when the config is silent.
-DEFAULT_PARTS = {'base_link': 'blueboat_chassis',
-                 'motor_port': 'm200_weedless_prop_ccw',
-                 'motor_stbd': 'm200_weedless_prop_cw',
-                 'flag': 'blueboat_flag',
-                 'ping_mount': 'blueboat_ping_singlebeam_mount',
-                 'ping': 'ping_singlebeam'}
 # The Ping2 transducer face sits this far below the part origin (delivered mesh).
 PING_FACE_BELOW_ORIGIN = 0.044
 
@@ -58,7 +51,13 @@ def catalog():
 
 
 def make_config(parts=(), slots=(), hull=True):
-    """Vehicle config yaml: chassis base, overrides/additions, hull displacement."""
+    """
+    Vehicle config yaml: chassis base, overrides/additions, hull displacement.
+
+    The tests' own vehicle, independent of the shipped config: no
+    slot_defaults key, so every slot fills with its default (the M200 props,
+    the flag, the Ping2 kit and its Ping) unless an entry says otherwise.
+    """
     cfg = {'base': {'type': 'blueboat_chassis', 'name': 'base_link',
                     'collision': False},
            'parts': [dict(p) for p in parts]}
@@ -142,17 +141,17 @@ def position_in_base(root, link):
     return pos
 
 
-def test_default_config_yields_the_default_parts():
-    """With no parts configured, the slots fill with their defaults."""
-    root = generate_urdf(DEFAULT_CONFIG)
-    assert manifest(root) == DEFAULT_PARTS
+def test_props_spin_and_the_chassis_keeps_contact():
+    """Propellers turn on continuous joints; contact stays the chassis's own."""
+    cfg = yaml.safe_load(make_config())
+    cfg['base']['collision'] = True
+    root = generate_urdf(yaml.safe_dump(cfg, sort_keys=False))
     assert 'hull_displacement' not in link_names(root), 'displacement belongs to the Gazebo side'
     base = next(li for li in root.findall('link') if li.get('name') == 'base_link')
     assert base.findall('collision'), 'the chassis keeps its delivered contact geometry'
-    assert set(DEFAULT_PARTS) <= link_names(root)
     motors = {j.get('name'): j for j in root.findall('joint')
-              if j.get('name') in ('motor_port_joint', 'motor_stbd_joint')}
-    assert set(motors) == {'motor_port_joint', 'motor_stbd_joint'}
+              if j.get('name') in ('prop_port_joint', 'prop_stbd_joint')}
+    assert set(motors) == {'prop_port_joint', 'prop_stbd_joint'}
     for joint in motors.values():
         assert joint.get('type') == 'continuous'
         assert joint.find('axis') is not None
@@ -160,7 +159,7 @@ def test_default_config_yields_the_default_parts():
 
 def test_manifest_names_are_links():
     """Every manifest instance exists as a link (and vice versa for parts)."""
-    root = generate_urdf(DEFAULT_CONFIG)
+    root = generate_urdf(make_config())
     links = link_names(root)
     for name in manifest(root):
         assert name in links
@@ -168,20 +167,20 @@ def test_manifest_names_are_links():
 
 def test_slot_chains_through_the_parent_part():
     """Slot occupants hang off the slot frame of the instance carrying it."""
-    table = joints_by_child(generate_urdf(DEFAULT_CONFIG))
+    table = joints_by_child(generate_urdf(make_config()))
     assert table['ping'][0] == 'ping_mount_ping'
     assert table['ping_mount_ping'][0] == 'ping_mount'
     assert table['ping_mount'][0] == 'base_link_ping_mount'
     assert table['base_link_ping_mount'][0] == 'base_link'
-    assert table['motor_port'][0] == 'base_link_motor_port'
+    assert table['prop_port'][0] == 'base_link_prop_port'
     assert table['ping_beam'][0] == 'ping', 'the Ping declares its beam frame'
 
 
 def test_slot_override_picks_another_option():
     """A slot entry swaps the occupant for another accepted type."""
-    root = generate_urdf(make_config([{'slot': 'motor_port', 'type': 't200_prop_ccw'}]))
-    assert manifest(root)['motor_port'] == 't200_prop_ccw'
-    assert manifest(root)['motor_stbd'] == 'm200_weedless_prop_cw'
+    root = generate_urdf(make_config([{'slot': 'prop_port', 'type': 't200_prop_ccw'}]))
+    assert manifest(root)['prop_port'] == 't200_prop_ccw'
+    assert manifest(root)['prop_stbd'] == 'm200_weedless_prop_cw'
 
 
 def test_slot_none_leaves_it_empty():
@@ -221,7 +220,7 @@ def test_manifest_records_every_slot_visited():
     root = generate_urdf(make_config(
         slots=[{'of': 'ping_mount', 'name': 'side', 'xyz': '0 0.05 0'}]))
     visited = assembly.slots(root)
-    assert {('base_link', 'motor_port'), ('base_link', 'ping_mount'),
+    assert {('base_link', 'prop_port'), ('base_link', 'ping_mount'),
             ('ping_mount', 'ping'), ('ping_mount', 'side')} <= visited
 
 
@@ -257,7 +256,7 @@ def test_check_catches_what_the_expansion_cannot():
 
 def test_slot_rejects_parts_that_do_not_fit():
     """A type outside the slot's accepts list fails the expansion."""
-    expect_failure(make_config([{'slot': 'motor_port', 'type': 'blueboat_flag'}]),
+    expect_failure(make_config([{'slot': 'prop_port', 'type': 'blueboat_flag'}]),
                    'does not fit')
 
 
@@ -311,7 +310,7 @@ def test_catalog_completeness():
 
 def test_mesh_assets_resolve():
     """Every mesh the URDF references ships in bluerobotics_parts."""
-    root = generate_urdf(DEFAULT_CONFIG)
+    root = generate_urdf(make_config())
     meshes = list(root.iter('mesh'))
     assert meshes, 'the parts based model must reference the delivered meshes'
     prefix = 'package://bluerobotics_parts/'
@@ -334,20 +333,26 @@ def test_check_urdf_accepts_generated():
         f'--- stdout ---\n{out.stdout}\n--- stderr ---\n{out.stderr}')
 
 
-def test_echosounder_mounted_below_waterline():
+@pytest.mark.parametrize('config', ['kit', 'shipped'])
+def test_echosounder_mounted_below_waterline(config):
     """
-    The default Ping transducer is submerged at rest.
+    A fitted Ping transducer is submerged at rest.
 
     The gpu_lidar returns seabed ranges from anywhere, so a transducer in the
     air fails silently; lock its face below the static waterline computed from
-    mass and waterplane area.
+    mass and waterplane area. Checked on the Ping2 kit (the slot default) and
+    on whatever the shipped config fits, if it fits a Ping at all.
     """
-    root = generate_urdf(DEFAULT_CONFIG)
-    face_z = position_in_base(root, 'ping')[2] - PING_FACE_BELOW_ORIGIN
-    assert position_in_base(root, 'ping_beam')[2] == pytest.approx(face_z, abs=1e-6)
+    root = generate_urdf(make_config() if config == 'kit' else DEFAULT_CONFIG)
+    pings = [name for name, ptype in manifest(root).items() if ptype == 'ping_singlebeam']
+    if not pings:
+        pytest.skip(f'the {config} config fits no Ping')
     area = 2 * HULL['length'] * HULL['width']
     draft = total_mass(root) / (WATER_DENSITY * area)
     waterline_z = HULL['z'] - HULL['height'] / 2 + draft
-    assert face_z < waterline_z - 0.02, (
-        f'ping transducer face at z {face_z:.3f} is not below the static '
-        f'waterline {waterline_z:.3f}')
+    for ping in pings:
+        face_z = position_in_base(root, ping)[2] - PING_FACE_BELOW_ORIGIN
+        assert position_in_base(root, f'{ping}_beam')[2] == pytest.approx(face_z, abs=1e-6)
+        assert face_z < waterline_z - 0.02, (
+            f'{ping} transducer face at z {face_z:.3f} is not below the static '
+            f'waterline {waterline_z:.3f}')
