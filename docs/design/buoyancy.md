@@ -81,7 +81,10 @@ edit.
 ## Constraints
 
 - URDF cannot express `<fluid_added_mass>`; added mass stays out of the
-  description (the Gazebo hydrodynamics plugin is where it would go).
+  description. The hydrodynamics plugin's coefficients (`<xDotU>` and the
+  rest) are where it would go, kept well below the rigid mass, since the
+  plugin applies it as acceleration feedback; `<fluid_added_mass>` is no
+  alternative, as only DART implements it.
 - Graded buoyancy accepts only box and sphere collisions; both vehicles
   therefore realize displacement as boxes on a dedicated enabled link,
   separate from the parts' contact geometry. Displacement has to be
