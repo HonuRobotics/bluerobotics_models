@@ -516,8 +516,8 @@ launch.</p>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">windage</span></code> link</p></td>
 <td><p>one box per hull marked <code class="docutils literal notranslate"><span class="pre">gz:wind=&quot;true&quot;</span></code>, on its own link so the buoyancy <code class="docutils literal notranslate"><span class="pre">&lt;enable&gt;</span></code> never floats it</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gz-sim-hydrodynamics-system</span></code></p></td>
-<td><p>placeholder USV damping coefficients, to be identified</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gz-maritime-hydrodynamics-system</span></code></p></td>
+<td><p>gz-maritime’s Hydrodynamics: damping coefficients (surge and yaw identified, the rest placeholders) against the water, so the boat drifts with the world’s ocean current</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gz-maritime-thruster-system</span></code>, one per propeller</p></td>
 <td><p>on <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;_joint</span></code>, normalized command scaled onto the limits from the part’s <code class="docutils literal notranslate"><span class="pre">drive</span></code> table (T200 16 V placeholders today), counter rotating</p></td>

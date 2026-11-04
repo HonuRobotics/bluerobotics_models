@@ -518,7 +518,10 @@ edit.</p>
 <h2>Constraints<a class="headerlink" href="#constraints" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>URDF cannot express <code class="docutils literal notranslate"><span class="pre">&lt;fluid_added_mass&gt;</span></code>; added mass stays out of the
-description (the Gazebo hydrodynamics plugin is where it would go).</p></li>
+description. The hydrodynamics plugin’s coefficients (<code class="docutils literal notranslate"><span class="pre">&lt;xDotU&gt;</span></code> and the
+rest) are where it would go, kept well below the rigid mass, since the
+plugin applies it as acceleration feedback; <code class="docutils literal notranslate"><span class="pre">&lt;fluid_added_mass&gt;</span></code> is no
+alternative, as only DART implements it.</p></li>
 <li><p>Graded buoyancy accepts only box and sphere collisions; both vehicles
 therefore realize displacement as boxes on a dedicated enabled link,
 separate from the parts’ contact geometry. Displacement has to be

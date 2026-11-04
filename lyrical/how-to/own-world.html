@@ -441,6 +441,23 @@ vehicle’s water world, which holds both plugin blocks
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span><span class="k">$(</span>ros2<span class="w"> </span>pkg<span class="w"> </span>prefix<span class="w"> </span>--share<span class="w"> </span>blueboat_gazebo<span class="k">)</span>/worlds/blueboat_water.sdf<span class="w"> </span>my_world.sdf
 </pre></div>
 </div>
+<p>For a current, add gz-maritime’s ocean current system. The vehicles’ damping
+is gz-maritime’s Hydrodynamics, which damps against the water, so they drift
+with it; without the system the water is slack and nothing changes:</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;plugin</span><span class="w"> </span><span class="na">filename=</span><span class="s">"gz-maritime-ocean-current-system"</span>
+<span class="w">        </span><span class="na">name=</span><span class="s">"gz::sim::maritime::OceanCurrent"</span><span class="nt">&gt;</span>
+<span class="w">  </span><span class="nt">&lt;speed&gt;</span>0.5<span class="nt">&lt;/speed&gt;</span>
+<span class="w">  </span><span class="nt">&lt;direction&gt;</span>90<span class="nt">&lt;/direction&gt;</span>
+<span class="nt">&lt;/plugin&gt;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">&lt;speed&gt;</span></code> is in m/s and <code class="docutils literal notranslate"><span class="pre">&lt;direction&gt;</span></code> is the direction it sets towards, in
+degrees clockwise from north: 90 sets east. Change it while the world runs on
+<code class="docutils literal notranslate"><span class="pre">/world/&lt;world&gt;/ocean_current/set</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gz<span class="w"> </span>topic<span class="w"> </span>-t<span class="w"> </span>/world/blueboat_water/ocean_current/set<span class="w"> </span>-m<span class="w"> </span>gz.msgs.Param<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="s1">'params { key: "direction" value { type: DOUBLE double_value: 0 } }'</span>
+</pre></div>
+</div>
 <p>A world running gz-maritime’s buoyancy system needs no <code class="docutils literal notranslate"><span class="pre">&lt;enable&gt;</span></code> entry:
 the displacement collisions are marked, so the vehicle floats under any
 spawn name (<a class="reference internal" href="../design/buoyancy.html#marked-for-any-world"><span class="std std-ref">Marked for any world</span></a>).</p>
