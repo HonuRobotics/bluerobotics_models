@@ -1,0 +1,44 @@
+# This covers the bluerov2_heavy_chassis, the BlueROV2 chassis with the Heavy Configuration Retrofit Kit fitted (8 thrusters). The T200 thruster body and its two propellers are the parts commissioned in commission-bluerov2.yaml and are reused as delivered.
+
+commission: bluerov2_heavy
+
+creator: Honu Robotics
+rights: "Copyright 2026 Honu Robotics. Licensed under the Apache License, Version 2.0."
+# Where the authoring files (.blend, CAD) are archived. Leave out if they are not.
+authoringSource: ".blend files should be archived in google drive.  Please send the link to the team for reference."
+
+# For the modeler to read. Not written to any file.
+sources:
+  - "https://bluerobotics.com/store/rov/bluerov2-upgrade-kits/brov2-heavy-retrofit/"
+  - "vendor 3D model BROV2-HEAVY-FILES (buoyancy block, fairing, thruster guard), https://cad.bluerobotics.com/BROV2-HEAVY-FILES.zip"
+  - "vendor 2D drawing of the BlueROV2 Heavy, http://docs.bluerobotics.com/brov2-heavy/cad/2d-drawing-heavy-2018.png"
+  - "Blue Robotics Heavy retrofit installation guide, https://bluerobotics.com/learn/bluerov2-heavy-configuration-retrofit-kit-installation/"
+  - "the delivered bluerov2_chassis_visual.glb (commission-bluerov2.yaml), which the kit is fitted to"
+  - "see docs/vehicles/bluerov2/configuration.md"
+toolchain:
+  blender: "5.2.2 LTS"
+  exporter: "io_scene_gltf2 5.2.40"
+
+# --- One block per part, keyed by the part name (lowercase snake_case) ---
+parts:
+  bluerov2_heavy_chassis:
+    # Written to the file's manifest as a part of the workflow
+    partRole: base                      # exactly one base part per vehicle
+    datumPoint: "Center of the base footprint: project the chassis onto the horizontal plane tangent to its lowest point (the bottom of the frame); the datum is the center of the bounding rectangle of that projection, midway between the fore and aft extents and midway between the port and starboard extents, on the bottom plane. This is the base_footprint of ROS REP 105: https://www.ros.org/reps/rep-0105.html. The guards widen the footprint symmetrically and stay inside its length and above its bottom, so the point is the standard chassis' datum."
+    datumTarget: "None - in free space"
+    source: "the delivered bluerov2_chassis_visual.glb; vendor 3D model BROV2-HEAVY-FILES, https://cad.bluerobotics.com/BROV2-HEAVY-FILES.zip; vendor 2D drawing, http://docs.bluerobotics.com/brov2-heavy/cad/2d-drawing-heavy-2018.png"
+    dimensionSource: "http://docs.bluerobotics.com/brov2-heavy/cad/2d-drawing-heavy-2018.png"
+    nominalDimension: "width overall 0.575 m"
+    dimensionTolerance: 0.01           # meters
+
+    # For the modeler to read. Not written to the file.
+    referenceImages:
+      - "the vendor 2D drawing: top, front and side views; vertical thrusters 240.0 mm apart fore and aft and 436.1 mm apart across, width overall 575.0 mm, length 457.1 mm, height 253.9 mm"
+      - "product images at the retrofit kit page"
+      - "docs/vehicles/bluerov2/images/thrusters.png: thruster numbering, top view"
+    forwardFeature: "the camera dome on the electronics enclosure, as for bluerov2_chassis; the guards' shorter leading edge faces forward"
+    visualRequirement: "Start simple"
+    materials: "as bluerov2_chassis, plus: guards and guard brackets: non-metal, black HDPE. Heavy buoyancy blocks: non-metal, R-3318 polyurethane foam, as the standard blocks. Heavy fairings: non-metal, blue plastic, as the standard fairings"
+    openings: "none"
+    priorities: "1. overall shape and proportions. 2. thruster guards. 3. color. 4. materials"
+    notes: "The standard chassis with the kit fitted: the two heavy buoyancy blocks and their fairings fill the well where the standard vehicle's thrusters 5 and 6 sat (flat sides parallel to the vehicle's sides, fairings over the blocks, fastened to the standard fairings), and a thruster guard on four guard brackets stands off the outside of each side panel. The T200 bodies and propellers are separate parts (t200_thruster, t200_prop_cw, t200_prop_ccw) fitted in the thruster_body_N and thruster_N slots. Thruster layout, for placing the props in the .blend assembly (numbering and handedness from the Blue Robotics retrofit guide and ArduSub's Vectored 6DOF frame): thruster_1 to thruster_4 the standard vectored horizontals (1 front right CCW, 2 front left CCW, 3 rear right CW, 4 rear left CW); thruster_5 front right vertical, CCW; thruster_6 front left vertical, CW; thruster_7 rear right vertical, CW; thruster_8 rear left vertical, CCW. The verticals mount on the outside of the side panels, propellers up, each duct inside its guard's arc."

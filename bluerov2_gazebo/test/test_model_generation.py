@@ -279,6 +279,25 @@ def test_installed_artifacts_match_shipped_config():
     assert 'model specs' in installed_sdf, 'installed model.sdf is not stamped'
 
 
+def test_installed_heavy_model_matches_its_config():
+    """model://bluerov2_heavy is the shipped heavy config, stamped and complete."""
+    cfg = yaml.safe_load((DESC_SHARE / 'config' / 'bluerov2_heavy.yaml').read_text())
+    model_dir = GZ_SHARE / 'models' / 'bluerov2_heavy'
+    urdf = ET.parse(model_dir / 'bluerov2_heavy.urdf').getroot()
+    props = [n for t, n, _ in assembly.instances(urdf) if t.startswith('t200_prop')]
+    text = (model_dir / 'model.sdf').read_text()
+    root = ET.fromstring(text)
+    assert 'model specs' in text, 'installed heavy model.sdf is not stamped'
+    assert root.find('model').get('name') == cfg['topic_namespace']
+    assert root.find('.//include/uri').text == 'model://bluerov2_heavy/bluerov2_heavy.urdf'
+    assert len(props) == 8
+    assert len(plugins(root, 'gz-maritime-thruster-system')) == len(props)
+    size = [float(v) for v in
+            root.find('.//link[@name="buoyancy_displacement"]//box/size').text.split()]
+    fx, fy = (float(v) for v in str(cfg['buoyancy']['footprint']).split())
+    assert size[0] == pytest.approx(fx) and size[1] == pytest.approx(fy)
+
+
 def test_world_fluid_density_matches_the_description():
     """The worlds' buoyancy density equals the config's declaration."""
     declared = yaml.safe_load(kit_config())['buoyancy']

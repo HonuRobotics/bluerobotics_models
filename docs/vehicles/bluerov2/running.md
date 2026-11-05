@@ -9,6 +9,14 @@ full simulation is generated at start (URDF, composed model, bridge
 config, into a directory under `$ROS_HOME`), the model is spawned as
 `bluerov2` into the pool world and the ROS bridge comes up with it.
 
+The Heavy ships as a second config; pass it to run the eight thruster
+vehicle:
+
+```bash
+ros2 launch bluerov2_gazebo sim.launch.xml \
+  config_file:=$(ros2 pkg prefix --share bluerov2_description)/config/bluerov2_heavy.yaml
+```
+
 To run a custom vehicle instead, pass its config with `config_file:=`;
 the [configuration page](configuration.md) lists the slots and
 [Change the fitted parts](../../how-to/change-parts.md) walks through writing one.
