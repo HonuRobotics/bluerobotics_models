@@ -435,7 +435,7 @@
             </geometry>
           </collision>
           <visual name='bluerov2_chassis_visual'>
-            <pose>0.013605000000000001 0 -0.18784600000000001 1.5708 -5.5511151231257827e-17 1.5708</pose>
+            <pose>0.0032599999999999999 0 -0.18784999999999999 1.5708 -5.5511151231257827e-17 1.5708</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
@@ -445,7 +445,7 @@
           </visual>
         </link>
         <frame name='base_footprint_joint' attached_to='bluerov2_chassis'>
-          <pose>0.013605000000000001 0 -0.18784600000000001 0 0 0</pose>
+          <pose>0.0032599999999999999 0 -0.18784999999999999 0 0 0</pose>
         </frame>
         <frame name='base_footprint' attached_to='base_footprint_joint'>
           <pose>0 0 0 0 0 0</pose>
