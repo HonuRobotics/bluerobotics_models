@@ -13,9 +13,11 @@
   as "bluerov2". With use_composition (default), gz_server, the bridge and
   robot_state_publisher run as composable nodes in ONE container process;
   the Gazebo GUI runs as a separate process. The simulation starts running and the
-  vehicle settles at its declared trim.
+  vehicle settles at its declared trim. rviz:=true opens RViz on the instance's
+  frames.
 
       ros2 launch bluerov2_gazebo sim.launch.xml
+      ros2 launch bluerov2_gazebo sim.launch.xml rviz:=true
       ros2 launch bluerov2_gazebo sim.launch.xml config_file:=/path/my_vehicle.yaml
 -->
 <launch>
@@ -25,6 +27,8 @@
   <arg name="use_composition" default="true"
        description="Run gz_server, bridge and robot_state_publisher in one process."/>
   <arg name="gui" default="true" description="Launch the Gazebo GUI."/>
+  <arg name="rviz" default="false"
+       description="Launch RViz on the instance's frames."/>
   <arg name="config_file"
        default="$(find-pkg-share bluerov2_description)/config/bluerov2.yaml"
        description="Vehicle vehicle config, expanded at launch."/>
@@ -86,5 +90,12 @@
     <param name="frame_prefix" value="$(var name)/"/>
     <param name="use_sim_time" value="true"/>
     <remap from="joint_states" to="/$(var name)/joint_states"/>
+  </node>
+
+  <!-- RViz with the packaged config, its fixed frame and RobotModel TF
+       prefix set to the instance. -->
+  <node pkg="rviz2" exec="rviz2" name="rviz2" if="$(var rviz)"
+        args="-d $(var vehicle_dir)/bluerov2.rviz">
+    <param name="use_sim_time" value="true"/>
   </node>
 </launch>

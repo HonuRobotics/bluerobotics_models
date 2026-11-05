@@ -4,11 +4,7 @@
 # composed Gazebo model AND the ros_gz bridge config. To try a config
 # without rebuilding, pass config_file:=<your.yaml> to the launches.
 #
-# The default BlueROV2 needs nothing here: every slot of every part fills
-# itself with its default (the chassis fits its six propellers and the
-# exploreHD camera). The entries below are how to change that. See
-# bluerobotics_parts/urdf/assembly.xacro for the full rules and the site
-# (vehicles/bluerov2/configuration) for the slots and the catalog.
+# The BlueROV2 is exactly what parts: lists, because slot_defaults is false: a slot with no entry stays empty. With slot_defaults true, or left out, every unlisted slot fills with its default instead (the chassis fits its six propellers, their T200 bodies and the exploreHD camera). See bluerobotics_parts/urdf/assembly.xacro for the full rules and the site (vehicles/bluerov2/configuration) for the slots and the catalog.
 #
 # Topic namespace: part topics default to /<topic_namespace>/<name>/...
 topic_namespace: bluerov2
@@ -18,7 +14,10 @@ topic_namespace: bluerov2
 # bluerov2_heavy_chassis (Heavy kit, 8).
 base: {type: bluerov2_chassis, name: base_link}
 
-# parts: overrides and additions. A slot entry picks what goes in a slot
+# slot_defaults: false fits only the slots listed under parts; true fills every unlisted slot with its default part.
+slot_defaults: false
+
+# parts: what is fitted. A slot entry picks what goes in a slot
 # (slot: the slot name, of: the instance carrying it, default base_link;
 # type: an accepted part type, or none to leave it empty). An entry without
 # slot: is a free placement: type, name, xyz/rpy relative to parent
@@ -31,15 +30,27 @@ base: {type: bluerov2_chassis, name: base_link}
 #   which is then used as given (and shared by every instance).
 #   bridge:    dict of NATIVE ros_gz_bridge keys merged into that part's
 #              generated bridge entries
-parts: []
-  # - {slot: camera, type: marinesitu_c3}                    # the stereo option
-  # - {slot: camera, type: none}                             # bare hull
-  # - {slot: sonar, type: ping360}                           # slots with no default
-  # - {slot: dvl, type: dvl_a50}
-  # - {slot: gripper, type: newton_gripper}
-  # - {slot: gripper, type: sediment_sampler}
+# The heavy chassis adds thruster_7 / thruster_8 (cw / ccw) and their bodies.
+parts:
+  - {slot: thruster_1, type: t200_prop_ccw}       # front right
+  - {slot: thruster_2, type: t200_prop_ccw}       # front left
+  - {slot: thruster_3, type: t200_prop_cw}        # rear right
+  - {slot: thruster_4, type: t200_prop_cw}        # rear left
+  - {slot: thruster_5, type: t200_prop_ccw}       # starboard vertical
+  - {slot: thruster_6, type: t200_prop_cw}        # port vertical
+  - {slot: thruster_body_1, type: t200_thruster}
+  - {slot: thruster_body_2, type: t200_thruster}
+  - {slot: thruster_body_3, type: t200_thruster}
+  - {slot: thruster_body_4, type: t200_thruster}
+  - {slot: thruster_body_5, type: t200_thruster}
+  - {slot: thruster_body_6, type: t200_thruster}
+  - {slot: camera, type: explorehd_camera}        # sensor only, no visual
+  # - {slot: camera, type: marinesitu_c3}         # the stereo option
+  # - {slot: sonar, type: ping360}                # sensor only, no visual
+  # - {slot: dvl, type: dvl_a50}                  # sensor only, no visual
   # - {slot: payload, type: payload_skid}
   # - {slot: rack, type: roof_rack}
+  # Subsea manipulation is out of scope for now: newton_gripper and sediment_sampler fit the gripper slot.
 
 # slots: ad hoc slots on any instance, usable like the parts' own. (The
 # instance key is of:, not on:, which YAML would read as the boolean true.)

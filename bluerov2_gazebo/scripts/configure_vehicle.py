@@ -18,8 +18,8 @@ Generate every artifact of a BlueROV2 configuration from one config file.
 Writes into an output directory the URDF, its Gazebo flavoured copy (glTF
 visuals pre-rotated, merged by the model), the composed Gazebo model
 (model.sdf plus model.config, so the directory works as a model:// root on
-GZ_SIM_RESOURCE_PATH) and the ros_gz bridge config, all derived from the
-same config through the same generators the build uses. This is what lets a
+GZ_SIM_RESOURCE_PATH), the ros_gz bridge config and an RViz config, all
+derived from the same config through the same generators the build uses. This is what lets a
 vehicle be reconfigured without rebuilding, also from a binary install:
 
     ros2 run bluerov2_gazebo configure_vehicle.py --config my_vehicle.yaml --out-dir ~/my_bluerov2
@@ -97,8 +97,25 @@ def run(cmd, what):
     return out.stdout
 
 
+def rviz_config(template, name):
+    """
+    Return the packaged RViz config pointed at one instance.
+
+    The instance's frames carry its name (`<name>/base_link`), so the fixed
+    frame, the view's target frame and the RobotModel's TF prefix take it too.
+    """
+    cfg = yaml.safe_load(pathlib.Path(template).read_text())
+    manager = cfg['Visualization Manager']
+    manager['Global Options']['Fixed Frame'] = f'{name}/base_link'
+    manager['Views']['Current']['Target Frame'] = f'{name}/base_link'
+    for display in manager['Displays']:
+        if display['Class'] == 'rviz_default_plugins/RobotModel':
+            display['TF Prefix'] = name
+    return yaml.safe_dump(cfg, sort_keys=False)
+
+
 def configure(config, out_dir, name=None):
-    """Generate urdf, model.sdf, model.config and ros_gz_bridge.yaml into out_dir."""
+    """Generate urdf, model.sdf, model.config, bridge config and bluerov2.rviz into out_dir."""
     desc = pathlib.Path(get_package_share_directory('bluerov2_description'))
     gz = pathlib.Path(get_package_share_directory('bluerov2_gazebo'))
     gz_lib = pathlib.Path(get_package_prefix('bluerov2_gazebo')) / 'lib' / 'bluerov2_gazebo'
@@ -133,6 +150,8 @@ def configure(config, out_dir, name=None):
     run([sys.executable, str(gz_lib / 'generate_bridge_config.py'),
          str(config), str(urdf), str(out_dir / 'ros_gz_bridge.yaml')],
         'bridge config generation')
+    (out_dir / 'bluerov2.rviz').write_text(
+        rviz_config(desc / 'rviz' / 'bluerov2.rviz', instance_name(config_text)))
     return out_dir
 
 
@@ -160,7 +179,7 @@ def main(argv=None):
         sys.stdout.write(str(out_dir))
     else:
         print(f'wrote vehicle.yaml, bluerov2.urdf, bluerov2.gazebo.urdf, model.sdf, model.config, '
-              f'ros_gz_bridge.yaml, robot_description.yaml to {out_dir}')
+              f'ros_gz_bridge.yaml, robot_description.yaml, bluerov2.rviz to {out_dir}')
 
 
 if __name__ == '__main__':

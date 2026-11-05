@@ -62,8 +62,10 @@
      and emitting one link (inertia, visual via part_visual, optional
      collision), the mounting joint (part_joint), and its slots and frames as
      massless links named <name>_<slot> / <name>_<frame> (part_slots,
-     part_frames). They show up in TF and are lumped away in Gazebo, where
-     they survive as frames of the same name.
+     part_frames), or the entry's `link` where a frame needs a conventional
+     name (the chassis's base_footprint, REP 105), used only when the part is
+     the assembly root (root:=True), so a second instance cannot clash. They show up in TF and are
+     lumped away in Gazebo, where they survive as frames of the same name.
 
   The URDF xacro is the part. It may be bootstrapped from a modeler's SDF
   with scripts/sdf_to_part.py or written by hand; nothing downstream knows
@@ -140,15 +142,15 @@
 
   <!-- All of a part's slots (or frames: same thing to the URDF) from its
        part_info table (xacro has no loop; recurse over list(table.items())). -->
-  <xacro:macro name="part_slots" params="name items">
+  <xacro:macro name="part_slots" params="name items root:=False">
     <xacro:if value="${len(items) > 0}">
-      <xacro:part_slot name="${name}_${items[0][0]}" parent="${name}"
+      <xacro:part_slot name="${items[0][1]['link'] if root and 'link' in items[0][1] else name + '_' + items[0][0]}" parent="${name}"
                        xyz="${items[0][1]['xyz']}" rpy="${items[0][1].get('rpy', '0 0 0')}"/>
-      <xacro:part_slots name="${name}" items="${items[1:]}"/>
+      <xacro:part_slots name="${name}" items="${items[1:]}" root="${root}"/>
     </xacro:if>
   </xacro:macro>
-  <xacro:macro name="part_frames" params="name items">
-    <xacro:part_slots name="${name}" items="${items}"/>
+  <xacro:macro name="part_frames" params="name items root:=False">
+    <xacro:part_slots name="${name}" items="${items}" root="${root}"/>
   </xacro:macro>
 
   <!-- ===== catalog =====

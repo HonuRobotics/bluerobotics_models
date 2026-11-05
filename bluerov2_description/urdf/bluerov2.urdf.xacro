@@ -22,9 +22,11 @@
              default="$(find bluerov2_description)/config/bluerov2.yaml"/>
   <xacro:property name="cfg" value="${xacro.load_yaml('$(arg config_file)')}"/>
 
-  <!-- Chassis as the root; its slots fill with their defaults, the config
-       overrides and adds. -->
+  <!-- Chassis as the root; the config lists what is fitted (slot_defaults:
+       false), or its slots fill with their defaults and the config overrides
+       and adds. -->
   <xacro:assemble base="${cfg['base']}" parts="${cfg.get('parts') or []}"
-                  slots="${cfg.get('slots') or []}"/>
+                  slots="${cfg.get('slots') or []}"
+                  defaults="${cfg.get('slot_defaults', True)}"/>
 
 </robot>
