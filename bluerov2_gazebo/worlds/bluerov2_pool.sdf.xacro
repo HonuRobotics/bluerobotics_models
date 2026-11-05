@@ -232,6 +232,18 @@
       <enable>bluerov2::buoyancy_displacement</enable>
     </plugin>
 
+    <!-- gz-maritime's ocean current (gz_ocean_current): slack water here,
+         <speed> in m/s and the <direction> it sets towards, in degrees
+         clockwise from north, changed while running on the topic
+         /world/<world>/ocean_current/set. The vehicle's Hydrodynamics damps
+         against it, so the vehicle drifts with it. A world without it is
+         slack water, and the vehicle behaves as it always did. -->
+    <plugin filename="gz-maritime-ocean-current-system"
+            name="gz::sim::maritime::OceanCurrent">
+      <speed>0</speed>
+      <direction>0</direction>
+    </plugin>
+
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
       <pose>0 0 10 0 0 0</pose>
