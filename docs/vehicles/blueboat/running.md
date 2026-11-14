@@ -45,6 +45,40 @@ anything else about the simulation: pass any vehicle free world SDF
 ros2 launch blueboat_gazebo sim.launch.xml world:=/path/my_world.sdf
 ```
 
+### On the waves
+
+`blueboat_waves.sdf` puts the boat on gz-maritime's wave field instead of
+flat water:
+
+```bash
+ros2 launch blueboat_gazebo sim.launch.xml \
+  world:=$(ros2 pkg prefix --share blueboat_gazebo)/worlds/blueboat_waves.sdf
+```
+
+- **Buoyancy follows the waves.** The world runs gz-maritime's wave buoyancy
+  (`gz_waves_buoyancy`) in place of gz-sim's graded buoyancy. Each marked
+  pontoon segment is floated by the water under the wave surface right above
+  it, so the boat heaves, pitches and rolls with the waves.
+- **The water moves with the waves.** The boat's own hydrodynamics damps
+  against the waves' water velocity as well as the current, so the boat is
+  carried back and forth by them. Nothing in the vehicle changes.
+- **The sea is a WMO sea state.** It starts at 3 (slight) and can be changed
+  while running:
+
+  ```bash
+  gz service -s /world/blueboat_waves/wave/set_parameters \
+    --reqtype gz.msgs.Param --reptype gz.msgs.Boolean --timeout 2000 \
+    --req 'params { key: "sea_state" value { type: INT32 int_value: 5 } }'
+  ```
+
+  At sea state 0 the water is still and the boat rests at its static draft,
+  as in `blueboat_water.sdf`. Past sea state 6 the waves come out smaller
+  than the state says (the wave field's default tile is too short for them).
+
+It needs gz-maritime's `gz_waves_provider_fft`, `gz_waves_rendering` and
+`gz_waves_buoyancy` built and on the plugin path. `test_waves` checks the
+static draft on still water and the ride at sea state 4.
+
 
 
 
