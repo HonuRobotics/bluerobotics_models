@@ -23,7 +23,6 @@ the [configuration page](configuration.md) lists the slots and
 | `roll`, `pitch`, `yaw` | `0` | Spawn orientation (rad). |
 | `world` | the pool world | Vehicle free world SDF to spawn into. |
 | `gui` | `true` | Launch the Gazebo GUI. |
-| `rviz` | `false` | Start RViz on the instance's frames. |
 | `use_composition` | `true` | Run the server, the bridge and `robot_state_publisher` in one process. |
 
 ## Choosing the world
@@ -41,16 +40,7 @@ ros2 launch bluerov2_gazebo sim.launch.xml world:=$(ros2 pkg prefix --share blue
 
 ## In RViz
 
-To watch the simulation in RViz, ask the sim launch for it:
-
-```bash
-ros2 launch bluerov2_gazebo sim.launch.xml rviz:=true
-```
-
-The frames carry the instance name (`<name>/base_link`), so this RViz has
-its fixed frame and its RobotModel TF prefix set to the instance.
-
-To see the model in RViz without Gazebo:
+To see the model in RViz:
 
 ```bash
 ros2 launch bluerov2_description display.launch.xml
@@ -60,5 +50,7 @@ Starts `robot_state_publisher`, `joint_state_publisher_gui` (sliders to
 spin the propellers) and RViz with the packaged config, showing the model
 and its frames (parts, slots, the camera and sonar frames). It takes the
 same `config_file:=` argument, and the xacro is expanded at launch time,
-so a custom config needs no rebuild. This launch stands alone: it runs a
-state publisher of its own, so do not run it next to `sim.launch.xml`.
+so a custom config needs no rebuild. In a simulation the frames carry the instance name (`bluerov2/base_link`)
+and joint states arrive as `/bluerov2/joint_states`, so RViz next to
+`sim.launch.xml` needs its fixed frame, its RobotModel TF prefix and its
+joint states pointed at the instance.

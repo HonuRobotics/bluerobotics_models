@@ -430,7 +430,10 @@
              
   <section id="configuration">
 <h1>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h1>
-<p>The vehicle config (<code class="docutils literal notranslate"><span class="pre">bluerov2_description/config/bluerov2.yaml</span></code>, or any file passed as <code class="docutils literal notranslate"><span class="pre">config_file:=</span></code>) lists the fitted parts. The shipped config sets <code class="docutils literal notranslate"><span class="pre">slot_defaults:</span> <span class="pre">false</span></code> and fits the chassis, its six propellers and their T200 bodies, and the exploreHD camera. With <code class="docutils literal notranslate"><span class="pre">slot_defaults:</span> <span class="pre">true</span></code>, or the key left out, every slot fills itself with the default in the table below, and the config states differences only.</p>
+<p>The BlueROV2 needs no configuration: every slot the parts declare fills
+itself with its default. The vehicle config
+(<code class="docutils literal notranslate"><span class="pre">bluerov2_description/config/bluerov2.yaml</span></code>, or any file passed as
+<code class="docutils literal notranslate"><span class="pre">config_file:=</span></code>) states differences only.</p>
 <section id="variants">
 <h2>Variants<a class="headerlink" href="#variants" title="Link to this heading"></a></h2>
 <p>The vehicle comes in two variants. The <strong>standard</strong> BlueROV2 carries six
@@ -505,7 +508,6 @@ config entry each. The fitted options and their topics live in
 </tr>
 </tbody>
 </table>
-<p>Subsea manipulation is out of scope for now, so the <code class="docutils literal notranslate"><span class="pre">gripper</span></code> slot stays empty.</p>
 <p>Slot entries, free placements, ad hoc slots and topic overrides follow
 the same schema as the BlueBoat
 (<a class="reference internal" href="../../reference/parts-catalog.html#configuration-keys"><span class="std std-ref">Configuration keys</span></a>); the instance key is
