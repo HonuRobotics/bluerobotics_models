@@ -1,0 +1,1016 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Architecture &mdash; BlueRobotics Models lyrical documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/honu.css?v=44af46ee" />
+
+  
+    <link rel="shortcut icon" href="../../_static/honu-robotics-favicon.svg"/>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=46f74c5b"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = "pre.mermaid {\n    /* Same as .mermaid-container > pre */\n    display: block;\n    width: 100%;\n}\n\npre.mermaid > svg {\n    /* Same as .mermaid-container > pre > svg */\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}";
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = ".mermaid-container {\n    position: relative;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n}\n\n.mermaid-container > pre {\n    display: block;\n    width: 100%;\n}\n\n.mermaid-container > pre > svg {\n    height: 500px;\n    width: 100%;\n    max-width: 100% !important;\n}\n\n.mermaid-fullscreen-btn {\n    position: absolute;\n    width: 28px;\n    height: 28px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.3);\n    border-radius: 4px;\n    cursor: pointer;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    transition: all 0.2s;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n    font-size: 14px;\n    line-height: 1;\n    padding: 0;\n    color: #333;\n}\n\n.mermaid-fullscreen-btn:hover {\n    opacity: 100% !important;\n    background: rgba(255, 255, 255, 1);\n    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-btn.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.3);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-btn.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal {\n    display: none;\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    width: 95vw;\n    height: 100vh;\n    background: rgba(255, 255, 255, 0.98);\n    z-index: 9999;\n    padding: 20px;\n    overflow: auto;\n}\n\n.mermaid-fullscreen-modal.dark-theme {\n    background: rgba(0, 0, 0, 0.98);\n}\n\n.mermaid-fullscreen-modal.active {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen {\n    position: relative;\n    width: 95vw;\n    height: 90vh;\n    max-width: 95vw;\n    max-height: 90vh;\n    background: white;\n    border-radius: 8px;\n    padding: 20px;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen.dark-theme {\n    background: #1a1a1a;\n    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);\n}\n\n.mermaid-container-fullscreen pre.mermaid {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.mermaid-container-fullscreen .mermaid svg {\n    height: 100% !important;\n    width: 100% !important;\n    cursor: grab;\n}\n\n.mermaid-fullscreen-close {\n    position: fixed !important;\n    top: 20px !important;\n    right: 20px !important;\n    width: 40px;\n    height: 40px;\n    background: rgba(255, 255, 255, 0.95);\n    border: 1px solid rgba(0, 0, 0, 0.2);\n    border-radius: 50%;\n    cursor: pointer;\n    z-index: 10000;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\n    transition: all 0.2s;\n    font-size: 24px;\n    line-height: 1;\n    color: #333;\n}\n\n.mermaid-fullscreen-close:hover {\n    background: white;\n    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);\n    transform: scale(1.1);\n}\n\n.mermaid-fullscreen-close.dark-theme {\n    background: rgba(50, 50, 50, 0.95);\n    border: 1px solid rgba(255, 255, 255, 0.2);\n    color: #e0e0e0;\n}\n\n.mermaid-fullscreen-close.dark-theme:hover {\n    background: rgba(60, 60, 60, 1);\n    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);\n}\n\n.mermaid-fullscreen-modal .mermaid-fullscreen-btn {\n    display: none !important;\n}";
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+let _lazyObserver = null;
+let _renderQueue = Promise.resolve();
+let closeModal = () => {};
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+        closeModal();
+    }
+});
+
+// Apply d3 zoom to each SVG. Idempotent: an SVG already wrapped is skipped,
+// so this is safe to call both for the initial batch and for diagrams that
+// render lazily once they become visible.
+const addZoomToSvgs = (svgs) => {
+    svgs.each(function() {
+        if (this.getAttribute('data-zoom-applied') === 'true') return;
+        var svg = d3.select(this);
+        svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+        var inner = svg.select("g");
+        var zoom = d3.zoom().on("zoom", function(event) {
+            inner.attr("transform", event.transform);
+        });
+        svg.call(zoom);
+        this.setAttribute('data-zoom-applied', 'true');
+    });
+};
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        // Disconnect any previous lazy rendering observer
+        if (_lazyObserver) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        }
+
+        all_mermaids.forEach((el) => {
+            el.removeAttribute('data-mermaid-deferred');
+            el.removeAttribute('data-mermaid-render-failed');
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+
+        // Separate visible and hidden elements. Mermaid's layout engine measures
+        // text dimensions via the DOM, which fails for elements hidden by a parent
+        // (e.g., Reveal.js non-active slides, sphinx-design unopened tabs),
+        // producing broken SVGs. Render visible elements now, defer hidden ones.
+        const visible = [];
+        const hidden = [];
+        all_mermaids.forEach((el) => {
+            // offsetParent is null for display:none ancestors.
+            // getClientRects().length > 0 catches position:fixed elements
+            // (which also have null offsetParent but are still visible).
+            if (el.offsetParent !== null || el.getClientRects().length > 0) {
+                visible.push(el);
+            } else {
+                hidden.push(el);
+                el.setAttribute('data-mermaid-deferred', 'true');
+            }
+        });
+
+        if (visible.length > 0) {
+            try {
+                await mermaid.run({ nodes: visible });
+            } catch (e) {
+                console.error("Mermaid rendering failed:", e);
+            }
+        }
+
+        // Lazily render hidden elements when they become visible.
+        // Uses a promise chain (_renderQueue) to serialize rendering,
+        // since IntersectionObserver may report multiple entries at once
+        // and mermaid.run() is not safe to call concurrently.
+        if (hidden.length > 0) {
+            if (typeof IntersectionObserver === 'undefined') {
+                console.warn("IntersectionObserver not available; hidden mermaid diagrams will not render.");
+            } else {
+                _renderQueue = Promise.resolve();
+                _lazyObserver = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.isIntersecting && entry.target.getAttribute("data-processed") !== "true") {
+                            _lazyObserver.unobserve(entry.target);
+                            const el = entry.target;
+                            _renderQueue = _renderQueue.then(async () => {
+                                try {
+                                    await mermaid.run({ nodes: [el] });
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    // Apply zoom to the now-rendered diagram, matching
+                                    // the decoration visible diagrams receive.
+                                    if (false) {
+                                        addZoomToSvgs(d3.selectAll("").select(function() {
+                                            return this.querySelector("svg");
+                                        }));
+                                    }
+                                } catch (e) {
+                                    console.error("Mermaid deferred rendering failed:", e);
+                                    el.removeAttribute('data-mermaid-deferred');
+                                    el.setAttribute('data-mermaid-render-failed', 'true');
+                                }
+                            });
+                        }
+                    }
+                });
+                hidden.forEach((el) => _lazyObserver.observe(el));
+            }
+        }
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    // Exclude deferred (hidden) and render-failed elements from completion checks
+    const mermaids_active = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])");
+    const mermaids_processed = document.querySelectorAll(".mermaid:not([data-mermaid-deferred]):not([data-mermaid-render-failed])[data-processed='true']");
+
+    if (false) {
+        const mermaids_to_add_zoom = 0 === -1 ? mermaids_active.length : 0;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("").select(function() {
+                return this.querySelector("svg");
+            });
+            // Wait until every active (visible) diagram has rendered. Deferred
+            // diagrams are excluded, so a fixed d3_node_count that counts a
+            // hidden diagram no longer loops forever waiting for its SVG.
+            if(mermaids_active.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            }
+            addZoomToSvgs(svgs);
+        }
+    } else if(mermaids_active.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if (!true) return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = "\u26f6";
+        fullscreenBtn.style.opacity = "50%";
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scrollX, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.display = 'block';
+
+                if (false) {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+
+
+const load = async () => {
+    initStyles();
+
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...{"startOnLoad": false},
+                ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...{"startOnLoad": false},
+    ...{ darkMode: darkTheme, theme: darkTheme ? "dark" : "default" },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Parts" href="parts.html" />
+    <link rel="prev" title="Design" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            BlueRobotics Models
+              <img src="../../_static/honu-robotics-white-logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Users</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstarts/index.html">Quickstarts</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstarts/setup.html">Set up the drydock workspace</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../quickstarts/setup.html#on-host-setup-workspace-clone-drydock-source-and-build-image">On Host: Setup workspace, clone drydock source, and build image</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../quickstarts/setup.html#on-host-clone-source-for-this-project">On Host: Clone source for this project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../quickstarts/setup.html#on-host-start-bash-session-within-drydock-maritime-container">On Host: Start bash session within drydock maritime container</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../quickstarts/setup.html#in-container-build-the-project">In Container: Build the project</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstarts/first-simulation.html">First simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstarts/ardupilot-setup.html">Set up ArduPilot SITL</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../quickstarts/ardupilot-setup.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../quickstarts/ardupilot-setup.html#install">Install</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../quickstarts/ardupilot-setup.html#source-repo-clones">Source repo clones</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../quickstarts/ardupilot-setup.html#build-the-gazebo-plugin">Build the Gazebo plugin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../quickstarts/ardupilot-setup.html#build-the-ardupilot-firmware">Build the ArduPilot firmware</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../quickstarts/ardupilot-setup.html#verify-the-python-environment-optional">Verify the Python environment (optional)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../quickstarts/ardupilot-setup.html#environment">Environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../quickstarts/ardupilot-setup.html#smoke-test-iris-uav">Smoke test - Iris UAV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../quickstarts/ardupilot-setup.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../quickstarts/ardupilot-setup.html#reference">Reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../quickstarts/ardupilot-setup.html#why-a-venv">Why a venv, and why not to skip it</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstarts/sitl-blueboat.html">Drive the BlueBoat with ArduRover</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../quickstarts/sitl-blueboat.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../quickstarts/sitl-blueboat.html#steps">Steps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../quickstarts/sitl-blueboat.html#verify-that-the-boat-drives-in-the-correct-directions-and-polarity">Verify that the boat drives in the correct directions and polarity.</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../quickstarts/sitl-bluerov2.html">Dive the BlueROV2 with ArduSub</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../quickstarts/sitl-bluerov2.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../quickstarts/sitl-bluerov2.html#steps">Steps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../quickstarts/sitl-bluerov2.html#the-simulation">The simulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../quickstarts/sitl-bluerov2.html#the-autopilot-sitl">The autopilot (SITL)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../quickstarts/sitl-bluerov2.html#verification-teleop-via-the-autopilot">Verification - teleop via the autopilot</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../walkthroughs/index.html">Walkthroughs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../walkthroughs/tune-sitl-boat.html">Tuning of closed-loop response for BlueBoat</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/tune-sitl-boat.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/tune-sitl-boat.html#steps">Steps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../walkthroughs/tune-sitl-boat.html#test-closed-loop-response">Test closed-loop response</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../walkthroughs/tune-sitl-boat.html#surge-control">Surge control</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../walkthroughs/tune-sitl-boat.html#yaw-rate-control">Yaw-rate control</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/tune-sitl-boat.html#summary">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../walkthroughs/tune-sitl-rov.html">Tuning of closed-loop response for BlueROV2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/tune-sitl-rov.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/tune-sitl-rov.html#mode-descriptions">Mode descriptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/tune-sitl-rov.html#steps">Steps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../walkthroughs/tune-sitl-rov.html#before-either-part">Before either part</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../walkthroughs/tune-sitl-rov.html#part-1-heading-hold-stabilize">Part 1: heading hold (<code class="docutils literal notranslate"><span class="pre">STABILIZE</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../walkthroughs/tune-sitl-rov.html#part-2-depth-hold-alt-hold">Part 2: depth hold (<code class="docutils literal notranslate"><span class="pre">ALT_HOLD</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/tune-sitl-rov.html#if-a-row-is-wrong">If a row is wrong</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../walkthroughs/mission-sitl-boat.html">Waypoint mission for BlueBoat</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/mission-sitl-boat.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/mission-sitl-boat.html#the-mission">The mission</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/mission-sitl-boat.html#steps">Steps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../walkthroughs/mission-sitl-boat.html#load-the-mission">Load the mission</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../walkthroughs/mission-sitl-boat.html#graph-the-navigation">Graph the navigation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../walkthroughs/mission-sitl-boat.html#fly-it">Fly it</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/mission-sitl-boat.html#what-a-correct-run-looks-like">What a correct run looks like</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../walkthroughs/mission-sitl-boat.html#assessment">Assessment</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/mission-sitl-boat.html#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../walkthroughs/change-parts.html">Change the fitted parts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/change-parts.html#fit-the-ping2-kit">Fit the Ping2 kit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/change-parts.html#fit-the-other-propellers">Fit the other propellers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/change-parts.html#leave-the-ping2-kit-off">Leave the Ping2 kit off</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/change-parts.html#add-the-antenna-mast-or-the-payload-bracket">Add the antenna mast or the payload bracket</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/change-parts.html#rename-the-ping-topics">Rename the Ping topics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/change-parts.html#add-a-part-somewhere-specific">Add a part somewhere specific</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/change-parts.html#declare-your-own-mount-point">Declare your own mount point</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/change-parts.html#see-what-you-got">See what you got</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../walkthroughs/own-world.html">Run in your own world</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/own-world.html#include-the-default-model">Include the default model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/own-world.html#spawn-at-runtime">Spawn at runtime</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/own-world.html#use-the-stock-launch-with-your-world">Use the stock launch with your world</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/own-world.html#with-a-custom-config">With a custom config</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../walkthroughs/namespaces.html">Several vehicles and several simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/namespaces.html#one-name-per-instance">One name per instance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../walkthroughs/namespaces.html#topic-overrides-under-the-name">Topic overrides under the name</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/namespaces.html#a-second-instance-in-the-same-world">A second instance in the same world</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/namespaces.html#several-simulations">Several simulations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../walkthroughs/teleop.html">Teleoperate with a gamepad</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/teleop.html#configure-the-gamepad-mapping-optional">Configure the gamepad mapping (optional)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/teleop.html#run">Run</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../walkthroughs/teleop.html#blueboat">BlueBoat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../walkthroughs/teleop.html#bluerov2">BlueROV2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../walkthroughs/teleop.html#a-named-instance-or-two">A named instance, or two</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/teleop.html#safety-behavior">Safety behavior</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../walkthroughs/teleop.html#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../walkthroughs/troubleshooting.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../walkthroughs/troubleshooting.html#xacro-fails-with-assembly-error">xacro fails with “ASSEMBLY ERROR: …”</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../walkthroughs/troubleshooting.html#the-boat-appears-rolled-90-degrees-in-rviz-parts-detached">The boat appears rolled 90 degrees in RViz, parts detached</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../walkthroughs/troubleshooting.html#the-boat-moves-sideways-instead-of-forward">The boat moves sideways instead of forward</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../walkthroughs/troubleshooting.html#no-ranges-on-blueboat-ping-range">No ranges on /blueboat/ping/range</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../walkthroughs/troubleshooting.html#a-part-looks-rolled-90-degrees-in-rviz-but-fine-in-gazebo">A part looks rolled 90 degrees in RViz but fine in Gazebo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../walkthroughs/troubleshooting.html#cannot-locate-rosdep-definition">“Cannot locate rosdep definition”</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../walkthroughs/troubleshooting.html#two-simulations-interfere-with-each-other">Two simulations interfere with each other</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../walkthroughs/troubleshooting.html#robot-state-publisher-warns-about-the-root-link-inertia">robot_state_publisher warns about the root link inertia</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../vehicles/index.html">Vehicles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../vehicles/blueboat/index.html">BlueBoat</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/blueboat/running.html">Launch and worlds</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/blueboat/running.html#launch-arguments">Launch arguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/blueboat/running.html#choosing-the-world">Choosing the world</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/blueboat/running.html#in-rviz">In RViz</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/blueboat/actuators.html">Actuators</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/blueboat/actuators.html#available-actuators">Available actuators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/blueboat/actuators.html#actuators-ros-api">Actuators ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../vehicles/blueboat/actuators.html#thrusters">Thrusters</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/blueboat/actuators.html#gazebo-transport-api">Gazebo transport API</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/blueboat/sensors.html">Sensors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/blueboat/sensors.html#available-sensors">Available sensors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/blueboat/sensors.html#sensors-ros-api">Sensors ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../vehicles/blueboat/sensors.html#echosounder">Echosounder</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/blueboat/configuration.html">Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/blueboat/configuration.html#hull-displacement">Hull displacement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/blueboat/configuration.html#payload">Payload</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/blueboat/index.html#the-default-vehicle">The default vehicle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../vehicles/bluerov2/index.html">BlueROV2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/bluerov2/running.html">Launch and worlds</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/bluerov2/running.html#launch-arguments">Launch arguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/bluerov2/running.html#choosing-the-world">Choosing the world</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/bluerov2/running.html#in-rviz">In RViz</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/bluerov2/actuators.html">Actuators</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/bluerov2/actuators.html#available-actuators">Available actuators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/bluerov2/actuators.html#actuators-ros-api">Actuators ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../vehicles/bluerov2/actuators.html#thrusters">Thrusters</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../vehicles/bluerov2/actuators.html#grippers">Grippers</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/bluerov2/actuators.html#gazebo-transport-api">Gazebo transport API</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/bluerov2/sensors.html">Sensors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/bluerov2/sensors.html#available-sensors">Available sensors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/bluerov2/sensors.html#sensors-ros-api">Sensors ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../vehicles/bluerov2/sensors.html#camera">Camera</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../vehicles/bluerov2/sensors.html#stereo-camera">Stereo camera</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../vehicles/bluerov2/sensors.html#scanning-sonar">Scanning sonar</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../vehicles/bluerov2/sensors.html#dvl">DVL</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/bluerov2/configuration.html">Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/bluerov2/configuration.html#variants">Variants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/bluerov2/configuration.html#buoyancy">Buoyancy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/bluerov2/configuration.html#payload">Payload</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/bluerov2/index.html#the-default-vehicle">The default vehicle</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/index.html">Parts catalog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../reference/parts-catalog.html">Parts catalog and slots</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/parts-catalog.html#catalog">Catalog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/parts-catalog.html#slots">Slots</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../reference/parts-catalog.html#blueboat-chassis">BlueBoat chassis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../reference/parts-catalog.html#bluerov2-chassis">BlueROV2 chassis</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/parts-catalog.html#configuration-keys">Configuration keys</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../reference/parts-catalog.html#frames">Frames</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developers</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Developers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Design</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#the-pieces">The pieces</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#why-it-works-this-way">Why it works this way</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="parts.html">Parts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="parts.html#the-part-contract">The part contract</a></li>
+<li class="toctree-l4"><a class="reference internal" href="parts.html#meshes">Meshes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="parts.html#reviewing-parts">Reviewing parts</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="slots.html">Slots and assembly</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="slots.html#resolution">Resolution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="slots.html#what-a-slot-is-in-the-urdf">What a slot is in the URDF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="slots.html#why-defaults-live-in-the-parts">Why defaults live in the parts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="slots.html#where-to-add-a-slot">Where to add a slot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="buoyancy.html">Buoyancy: all up round mass and displacement</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="buoyancy.html#usv-hull-displacement">USV: hull displacement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="buoyancy.html#uuv-declared-trim-bluerov2">UUV: declared trim (BlueROV2)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="buoyancy.html#marked-for-any-world">Marked for any world</a></li>
+<li class="toctree-l4"><a class="reference internal" href="buoyancy.html#constraints">Constraints</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="gazebo-composition.html">Gazebo composition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="gazebo-composition.html#merge-include-and-lumping">Merge include and lumping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gazebo-composition.html#sensors-and-thrusters-follow-their-part">Sensors and thrusters follow their part</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gazebo-composition.html#the-bridge-agrees-by-construction">The bridge agrees by construction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gazebo-composition.html#build-time-and-launch-time">Build time and launch time</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gazebo-composition.html#what-is-in-the-composed-model">What is in the composed model</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../specs/SITL_SPEC.html">SITL spec</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../specs/SITL_SPEC.html#how-this-spec-is-used">How this spec is used</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../specs/SITL_SPEC.html#phases">Phases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC.html#prerequisites-assumptions-and-contraints">Prerequisites, assumptions and contraints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC.html#phase-0-toolchain-and-a-setup-document">Phase 0 — Toolchain and a setup document</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC.html#phase-1-blueboat-under-ardurover-newtons-interface">Phase 1 — BlueBoat under ArduRover, newtons interface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC.html#phase-2-normalized-command-mode-on-the-thruster">Phase 2 — Normalized command mode on the thruster</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC.html#phase-2-999-patches-from-pr-58">Phase 2.999 — Patches from PR #58</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC.html#phase-3-bluerov2-under-ardusub">Phase 3 — BlueROV2 under ArduSub</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC.html#phase-4-stabilization-layer-boat">Phase 4 — Stabilization layer, boat</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../specs/SITL_SPEC.html#automated-verification">Automated verification</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../specs/SITL_SPEC.html#human-verification">Human verification</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC.html#phase-5-stabilization-layer-rov">Phase 5 — Stabilization layer, ROV</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../specs/SITL_SPEC.html#id1">Automated verification</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../specs/SITL_SPEC.html#id2">Human verification</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC.html#phase-6-waypoint-mission-boat-only">Phase 6 — Waypoint mission, boat only</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../specs/SITL_SPEC.html#id3">Automated verification</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../specs/SITL_SPEC.html#id4">Human verification</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC.html#phase-7-removed">Phase 7 — Removed</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC.html#phase-8-documentation">Phase 8 — Documentation</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../specs/SITL_SPEC.html#id5">Automated verification</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../specs/SITL_SPEC.html#id6">Human verification</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../specs/SITL_SPEC.html#what-the-phases-are-protecting">What the phases are protecting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../specs/SITL_SPEC.html#out-of-scope">Out of scope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../specs/SITL_SPEC.html#open-questions">Open questions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html">SITL integration for the BlueBoat: a roadmap</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#what-we-are-trying-to-do">What we are trying to do</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#background-what-sitl-actually-is">Background: what SITL actually is</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#the-interface-question">The interface question</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#where-we-are">Where we are</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#where-we-want-to-be">Where we want to be</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#the-change-to-the-thruster-plugin">The change to the thruster plugin</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#what-the-firmware-side-commits-us-to">What the firmware side commits us to</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#px4-community-supported-and-not-designed-out">PX4: community supported, and not designed out</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#why-the-architecture-already-accommodates-it">Why the architecture already accommodates it</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#what-px4-actually-expects-and-why-our-interface-fits">What PX4 actually expects, and why our interface fits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#what-this-commits-us-to">What this commits us to</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#a-note-on-ardupilot-sitl-models">A note on ArduPilot/SITL_Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#three-parameter-sets-and-reconciling-them-later">Three parameter sets, and reconciling them later</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#phases">Phases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#phase-0-toolchain">Phase 0 — Toolchain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#phase-1-first-flotation-and-manual">Phase 1 — First flotation and MANUAL</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#phase-2-a-normalized-command-interface-on-the-thruster">Phase 2 — A normalized command interface on the thruster</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#phase-3-actuator-fidelity">Phase 3 — Actuator fidelity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#phase-4-waves">Phase 4 — Waves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#phase-5-missions">Phase 5 — Missions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#phase-6-packaging-documentation-upstreaming">Phase 6 — Packaging, documentation, upstreaming</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#deferred">Deferred</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#fitting-this-to-the-urdf-first-assembly">Fitting this to the URDF-first assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#layout">Layout</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#amended-during-phase-1-the-wrapper-does-not-work">Amended during phase 1: the wrapper does not work</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#decisions-already-taken">Decisions already taken</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#what-this-pr-is-asking-for">What this PR is asking for</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../specs/SITL_SPEC_CONTEXT.html#risks">Risks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../vehicles/blueboat/parameters.html">BlueBoat parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/blueboat/parameters.html#approach">Approach</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/blueboat/parameters.html#set-via-reference">Set via reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/blueboat/parameters.html#drag-estimates-open-loop">Drag estimates - open loop</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../vehicles/blueboat/parameters.html#surge">Surge</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../vehicles/blueboat/parameters.html#estimate">Estimate</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../vehicles/blueboat/parameters.html#test-open-loop-surge-response">Test - Open-loop surge response</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../vehicles/blueboat/parameters.html#select-in-test">Select in test</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../../vehicles/blueboat/parameters.html#yaw">Yaw</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../../vehicles/blueboat/parameters.html#id1">Estimate</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../vehicles/blueboat/parameters.html#test-open-loop-yaw-response">Test - open-loop yaw response</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../../vehicles/blueboat/parameters.html#id2">Select in test</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/blueboat/parameters.html#the-autopilot-parameter-file">The autopilot parameter file</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/blueboat/parameters.html#provenance-three-descriptions-and-they-disagree">Provenance: three descriptions, and they disagree</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../vehicles/bluerov2/parameters.html">BlueROV2 parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/bluerov2/parameters.html#what-is-fixed-and-what-is-free">What is fixed and what is free</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/bluerov2/parameters.html#the-autopilot-parameter-file">The autopilot parameter file</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/bluerov2/parameters.html#blue-robotics-publish-very-little-and-that-changes-the-claim">Blue Robotics publish very little, and that changes the claim</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/bluerov2/parameters.html#line-by-line">Line by line</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/bluerov2/parameters.html#mass">Mass</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/bluerov2/parameters.html#thrust">Thrust</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/bluerov2/parameters.html#the-installation-factor">The installation factor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/bluerov2/parameters.html#deadband">Deadband</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/bluerov2/parameters.html#hydrodynamics">Hydrodynamics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/bluerov2/parameters.html#coarse-identification">Coarse identification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/bluerov2/parameters.html#verifying-the-coarse-identification">Verifying the coarse identification</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/bluerov2/parameters.html#modes">Modes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/bluerov2/parameters.html#open-questions">Open questions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../vehicles/blueboat/visual_asset_commission.html">BlueBoat visual asset commission</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../vehicles/blueboat/visual_asset_commission.html#blueboat-chassis">blueboat_chassis</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../vehicles/blueboat/visual_asset_commission.html#datum-location">datum location</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../add-part.html">Add a part</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../add-part.html#where-a-part-goes">Where a part goes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../add-sensor-part.html">Add a sensor part</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../contributing.html">Contributing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../contributing.html#build-and-test">Build and test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../contributing.html#pre-commit-hooks">Pre-commit hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../contributing.html#conventions">Conventions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../contributing.html#documentation">Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../binary-install.html">Binary install (future)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../binary-install.html#install-from-ros-packages-debs">Install from ROS packages (debs)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../binary-install.html#configure-an-installed-vehicle">Configure an installed vehicle</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../binary-install.html#the-launch-does-it-for-you">The launch does it for you</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../binary-install.html#generate-the-artifacts-yourself">Generate the artifacts yourself</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../binary-install.html#overlay-workspace">Overlay workspace</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">BlueRobotics Models</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Developers</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Design</a></li>
+      <li class="breadcrumb-item active">Architecture</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/developers/design/architecture.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="architecture">
+<h1>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h1>
+<p>URDF is the source of truth. A <strong>part</strong> is a URDF xacro macro; a <strong>vehicle</strong>
+is an assembly of parts resolved from a config and the parts’ own slot
+tables; everything Gazebo needs is generated from that assembly. Nothing
+converts formats at runtime, and ROS and Gazebo see the same geometry.</p>
+<pre  class="mermaid">
+        flowchart LR
+  GLB[&quot;models/part.visual.glb&quot;]
+  PART[&quot;urdf/part.urdf.xacro&lt;br/&gt;the part: link, inertia, visual, collision,&lt;br/&gt;attach, slots, frames&quot;]
+  GLB -. &quot;referenced by the visual&quot; .-&gt; PART
+  CFG[&quot;config/blueboat.yaml&lt;br/&gt;base, overrides, hull displacement&quot;] --&gt; ASM[&quot;assembly.xacro&lt;br/&gt;slots fill from the config&lt;br/&gt;and their defaults&quot;]
+  PART --&gt; ASM
+  ASM --&gt; URDF[&quot;blueboat.urdf&lt;br/&gt;+ assembly_part manifest&quot;]
+  URDF --&gt; ROS[&quot;ROS: robot_state_publisher, RViz, TF&quot;]
+  URDF -- &quot;merge include&quot; --&gt; MODEL[&quot;model.sdf&lt;br/&gt;+ thrusters, hydrodynamics, sensors&quot;]
+  URDF -- &quot;manifest&quot; --&gt; BRIDGE[&quot;ros_gz_bridge.yaml&quot;]
+  MODEL --&gt; GZ[&quot;Gazebo&quot;]
+  BRIDGE --&gt; GZ
+    </pre><section id="the-pieces">
+<h2>The pieces<a class="headerlink" href="#the-pieces" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Parts</strong> (<a class="reference internal" href="parts.html"><span class="std std-doc">Parts</span></a>): one file per part in <code class="docutils literal notranslate"><span class="pre">bluerobotics_parts/urdf/</span></code>,
+hand maintained. Each part states its own mass, inertia and center of
+gravity, and declares where other parts fit (slots) and where it senses
+(frames).</p></li>
+<li><p><strong>Assembly</strong> (<a class="reference internal" href="slots.html"><span class="std std-doc">Slots and assembly</span></a>): <code class="docutils literal notranslate"><span class="pre">assembly.xacro</span></code> instantiates
+the base part and fills every slot, recursively, with its default unless
+the config says otherwise. The default vehicle is therefore defined by the
+parts, and a config only states differences. The resolved assembly is
+recorded in the URDF as <code class="docutils literal notranslate"><span class="pre">&lt;assembly_part&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;assembly_slot&gt;</span></code> elements,
+and the config is checked against it.</p></li>
+<li><p><strong>Buoyancy</strong> (<a class="reference internal" href="buoyancy.html"><span class="std std-doc">Buoyancy</span></a>): mass properties are composed from
+the parts; displacement is declared at the assembly (box pontoons for a
+USV, a trim target for a UUV).</p></li>
+<li><p><strong>Gazebo composition</strong> (<a class="reference internal" href="gazebo-composition.html"><span class="std std-doc">Gazebo composition</span></a>):
+<code class="docutils literal notranslate"><span class="pre">blueboat_gazebo</span></code> merge includes the URDF and adds plugins; sensors and
+thrusters are emitted by running the same assembly resolution with Gazebo
+emitters, posed at the parts’ frames and driving the propellers’ joints;
+the bridge config is generated from the manifest. Build time for the installed defaults, launch time for
+<code class="docutils literal notranslate"><span class="pre">config_file:=</span></code>.</p></li>
+</ul>
+</section>
+<section id="why-it-works-this-way">
+<h2>Why it works this way<a class="headerlink" href="#why-it-works-this-way" title="Link to this heading"></a></h2>
+<p><strong>A part is the unit.</strong> Defects in geometry, naming or inertia are
+invisible once a whole vehicle is assembled; keeping each part a small,
+self contained file with its own review world (<code class="docutils literal notranslate"><span class="pre">parts_check.sdf</span></code>) makes
+them visible one part at a time.</p>
+<p><strong>URDF is canonical.</strong> Robots that ship to both ROS and Gazebo
+(<code class="docutils literal notranslate"><span class="pre">clearpath_common</span></code>, <code class="docutils literal notranslate"><span class="pre">turtlebot4</span></code>, <code class="docutils literal notranslate"><span class="pre">Universal_Robots_ROS2_Description</span></code>)
+are URDF first without exception; Gazebo consumes the same description
+through a merge include, so both sides always see identical geometry.</p>
+<p><strong>Defaults live in the parts.</strong> The previous design kept a hand written
+“standalone” vehicle and a separate programmatic path and declared them
+deliberately out of sync. Slots with defaults remove the split: the zero
+configuration vehicle and the configurable one are the same resolution,
+with an empty config. A config can instead turn the defaults off (<code class="docutils literal notranslate"><span class="pre">slot_defaults:</span> <span class="pre">false</span></code>) and list every fitted part.</p>
+<p><strong>The structure is Clearpath’s.</strong> <a class="reference external" href="https://github.com/clearpathrobotics/clearpath_common"><code class="docutils literal notranslate"><span class="pre">clearpath_common</span></code></a>
+is the closest analogue, a family of configurable robots for ROS and Gazebo
+built from a shared parts library plus a YAML driven generator. The
+addition here is the slot tables.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Design" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="parts.html" class="btn btn-neutral float-right" title="Parts" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Honu Robotics.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: lyrical
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl id="honu-version-list">
+      <dt>Distributions</dt>
+      <dd><a href="/bluerobotics_models/lyrical/" data-version="lyrical">Lyrical</a></dd>
+    </dl>
+  </div>
+</div>
+<script>
+  (function () {
+    var current = "lyrical";
+    var base = "/bluerobotics_models/";
+
+    /* Keep the reader on the same page when switching versions; the
+       version root href stays as the fallback for pages a version lacks. */
+    function wire() {
+      document.querySelectorAll('.rst-other-versions a[data-version]').forEach(function (a) {
+        var target = a.getAttribute('data-version');
+        var path = window.location.pathname;
+        if (target !== current && path.indexOf('/' + current + '/') !== -1) {
+          a.href = path.replace('/' + current + '/', '/' + target + '/');
+        }
+      });
+    }
+
+    if (!window.fetch) { wire(); return; }
+
+    /* The deploy tool maintains versions.json at the site root; reading it
+       at runtime lets builds published before a new distribution existed
+       still offer it in the flyout. Offline or local preview builds fall
+       back to the build time list rendered above. */
+    fetch(base + 'versions.json', {cache: 'no-cache'}).then(function (response) {
+      if (!response.ok) { throw new Error(response.status); }
+      return response.json();
+    }).then(function (entries) {
+      var list = document.getElementById('honu-version-list');
+      if (!list || !entries.length) { return; }
+      list.querySelectorAll('dd').forEach(function (dd) { dd.remove(); });
+      entries.forEach(function (entry) {
+        var a = document.createElement('a');
+        a.href = entry.url;
+        a.setAttribute('data-version', entry.name);
+        a.textContent = entry.name.charAt(0).toUpperCase() + entry.name.slice(1);
+        var dd = document.createElement('dd');
+        dd.appendChild(a);
+        list.appendChild(dd);
+      });
+    }).catch(function () {}).finally(wire);
+  })();
+</script><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,662 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Binary install (future) &mdash; BlueRobotics Models lyrical documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/honu.css?v=44af46ee" />
+
+  
+    <link rel="shortcut icon" href="../_static/honu-robotics-favicon.svg"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=46f74c5b"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Contributing" href="contributing.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            BlueRobotics Models
+              <img src="../_static/honu-robotics-white-logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Users</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstarts/index.html">Quickstarts</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../quickstarts/setup.html">Set up the drydock workspace</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../quickstarts/setup.html#on-host-setup-workspace-clone-drydock-source-and-build-image">On Host: Setup workspace, clone drydock source, and build image</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../quickstarts/setup.html#on-host-clone-source-for-this-project">On Host: Clone source for this project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../quickstarts/setup.html#on-host-start-bash-session-within-drydock-maritime-container">On Host: Start bash session within drydock maritime container</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../quickstarts/setup.html#in-container-build-the-project">In Container: Build the project</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstarts/first-simulation.html">First simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstarts/ardupilot-setup.html">Set up ArduPilot SITL</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../quickstarts/ardupilot-setup.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../quickstarts/ardupilot-setup.html#install">Install</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../quickstarts/ardupilot-setup.html#source-repo-clones">Source repo clones</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../quickstarts/ardupilot-setup.html#build-the-gazebo-plugin">Build the Gazebo plugin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../quickstarts/ardupilot-setup.html#build-the-ardupilot-firmware">Build the ArduPilot firmware</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../quickstarts/ardupilot-setup.html#verify-the-python-environment-optional">Verify the Python environment (optional)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../quickstarts/ardupilot-setup.html#environment">Environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../quickstarts/ardupilot-setup.html#smoke-test-iris-uav">Smoke test - Iris UAV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../quickstarts/ardupilot-setup.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../quickstarts/ardupilot-setup.html#reference">Reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../quickstarts/ardupilot-setup.html#why-a-venv">Why a venv, and why not to skip it</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstarts/sitl-blueboat.html">Drive the BlueBoat with ArduRover</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../quickstarts/sitl-blueboat.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../quickstarts/sitl-blueboat.html#steps">Steps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../quickstarts/sitl-blueboat.html#verify-that-the-boat-drives-in-the-correct-directions-and-polarity">Verify that the boat drives in the correct directions and polarity.</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstarts/sitl-bluerov2.html">Dive the BlueROV2 with ArduSub</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../quickstarts/sitl-bluerov2.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../quickstarts/sitl-bluerov2.html#steps">Steps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../quickstarts/sitl-bluerov2.html#the-simulation">The simulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../quickstarts/sitl-bluerov2.html#the-autopilot-sitl">The autopilot (SITL)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../quickstarts/sitl-bluerov2.html#verification-teleop-via-the-autopilot">Verification - teleop via the autopilot</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../walkthroughs/index.html">Walkthroughs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../walkthroughs/tune-sitl-boat.html">Tuning of closed-loop response for BlueBoat</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/tune-sitl-boat.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/tune-sitl-boat.html#steps">Steps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../walkthroughs/tune-sitl-boat.html#test-closed-loop-response">Test closed-loop response</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../walkthroughs/tune-sitl-boat.html#surge-control">Surge control</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../walkthroughs/tune-sitl-boat.html#yaw-rate-control">Yaw-rate control</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/tune-sitl-boat.html#summary">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../walkthroughs/tune-sitl-rov.html">Tuning of closed-loop response for BlueROV2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/tune-sitl-rov.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/tune-sitl-rov.html#mode-descriptions">Mode descriptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/tune-sitl-rov.html#steps">Steps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../walkthroughs/tune-sitl-rov.html#before-either-part">Before either part</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../walkthroughs/tune-sitl-rov.html#part-1-heading-hold-stabilize">Part 1: heading hold (<code class="docutils literal notranslate"><span class="pre">STABILIZE</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../walkthroughs/tune-sitl-rov.html#part-2-depth-hold-alt-hold">Part 2: depth hold (<code class="docutils literal notranslate"><span class="pre">ALT_HOLD</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/tune-sitl-rov.html#if-a-row-is-wrong">If a row is wrong</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../walkthroughs/mission-sitl-boat.html">Waypoint mission for BlueBoat</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/mission-sitl-boat.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/mission-sitl-boat.html#the-mission">The mission</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/mission-sitl-boat.html#steps">Steps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../walkthroughs/mission-sitl-boat.html#load-the-mission">Load the mission</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../walkthroughs/mission-sitl-boat.html#graph-the-navigation">Graph the navigation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../walkthroughs/mission-sitl-boat.html#fly-it">Fly it</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/mission-sitl-boat.html#what-a-correct-run-looks-like">What a correct run looks like</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../walkthroughs/mission-sitl-boat.html#assessment">Assessment</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/mission-sitl-boat.html#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../walkthroughs/change-parts.html">Change the fitted parts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/change-parts.html#fit-the-ping2-kit">Fit the Ping2 kit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/change-parts.html#fit-the-other-propellers">Fit the other propellers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/change-parts.html#leave-the-ping2-kit-off">Leave the Ping2 kit off</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/change-parts.html#add-the-antenna-mast-or-the-payload-bracket">Add the antenna mast or the payload bracket</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/change-parts.html#rename-the-ping-topics">Rename the Ping topics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/change-parts.html#add-a-part-somewhere-specific">Add a part somewhere specific</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/change-parts.html#declare-your-own-mount-point">Declare your own mount point</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/change-parts.html#see-what-you-got">See what you got</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../walkthroughs/own-world.html">Run in your own world</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/own-world.html#include-the-default-model">Include the default model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/own-world.html#spawn-at-runtime">Spawn at runtime</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/own-world.html#use-the-stock-launch-with-your-world">Use the stock launch with your world</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/own-world.html#with-a-custom-config">With a custom config</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../walkthroughs/namespaces.html">Several vehicles and several simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/namespaces.html#one-name-per-instance">One name per instance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../walkthroughs/namespaces.html#topic-overrides-under-the-name">Topic overrides under the name</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/namespaces.html#a-second-instance-in-the-same-world">A second instance in the same world</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/namespaces.html#several-simulations">Several simulations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../walkthroughs/teleop.html">Teleoperate with a gamepad</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/teleop.html#configure-the-gamepad-mapping-optional">Configure the gamepad mapping (optional)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/teleop.html#run">Run</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../walkthroughs/teleop.html#blueboat">BlueBoat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../walkthroughs/teleop.html#bluerov2">BlueROV2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../walkthroughs/teleop.html#a-named-instance-or-two">A named instance, or two</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/teleop.html#safety-behavior">Safety behavior</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../walkthroughs/teleop.html#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../walkthroughs/troubleshooting.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../walkthroughs/troubleshooting.html#xacro-fails-with-assembly-error">xacro fails with “ASSEMBLY ERROR: …”</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../walkthroughs/troubleshooting.html#the-boat-appears-rolled-90-degrees-in-rviz-parts-detached">The boat appears rolled 90 degrees in RViz, parts detached</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../walkthroughs/troubleshooting.html#the-boat-moves-sideways-instead-of-forward">The boat moves sideways instead of forward</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../walkthroughs/troubleshooting.html#no-ranges-on-blueboat-ping-range">No ranges on /blueboat/ping/range</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../walkthroughs/troubleshooting.html#a-part-looks-rolled-90-degrees-in-rviz-but-fine-in-gazebo">A part looks rolled 90 degrees in RViz but fine in Gazebo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../walkthroughs/troubleshooting.html#cannot-locate-rosdep-definition">“Cannot locate rosdep definition”</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../walkthroughs/troubleshooting.html#two-simulations-interfere-with-each-other">Two simulations interfere with each other</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../walkthroughs/troubleshooting.html#robot-state-publisher-warns-about-the-root-link-inertia">robot_state_publisher warns about the root link inertia</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../vehicles/index.html">Vehicles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../vehicles/blueboat/index.html">BlueBoat</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/running.html">Launch and worlds</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/running.html#launch-arguments">Launch arguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/running.html#choosing-the-world">Choosing the world</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/running.html#in-rviz">In RViz</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/actuators.html">Actuators</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/actuators.html#available-actuators">Available actuators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/actuators.html#actuators-ros-api">Actuators ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/blueboat/actuators.html#thrusters">Thrusters</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/actuators.html#gazebo-transport-api">Gazebo transport API</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/sensors.html">Sensors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/sensors.html#available-sensors">Available sensors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/sensors.html#sensors-ros-api">Sensors ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/blueboat/sensors.html#echosounder">Echosounder</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/configuration.html">Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/configuration.html#hull-displacement">Hull displacement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/configuration.html#payload">Payload</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/index.html#the-default-vehicle">The default vehicle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../vehicles/bluerov2/index.html">BlueROV2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/running.html">Launch and worlds</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/running.html#launch-arguments">Launch arguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/running.html#choosing-the-world">Choosing the world</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/running.html#in-rviz">In RViz</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/actuators.html">Actuators</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/actuators.html#available-actuators">Available actuators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/actuators.html#actuators-ros-api">Actuators ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/actuators.html#thrusters">Thrusters</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/actuators.html#grippers">Grippers</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/actuators.html#gazebo-transport-api">Gazebo transport API</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/sensors.html">Sensors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#available-sensors">Available sensors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#sensors-ros-api">Sensors ROS API</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#camera">Camera</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#stereo-camera">Stereo camera</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#scanning-sonar">Scanning sonar</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#dvl">DVL</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/configuration.html">Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/configuration.html#variants">Variants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/configuration.html#buoyancy">Buoyancy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/configuration.html#payload">Payload</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/index.html#the-default-vehicle">The default vehicle</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/index.html">Parts catalog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/parts-catalog.html">Parts catalog and slots</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/parts-catalog.html#catalog">Catalog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/parts-catalog.html#slots">Slots</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../reference/parts-catalog.html#blueboat-chassis">BlueBoat chassis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reference/parts-catalog.html#bluerov2-chassis">BlueROV2 chassis</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/parts-catalog.html#configuration-keys">Configuration keys</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/parts-catalog.html#frames">Frames</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developers</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Developers</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="design/index.html">Design</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="design/architecture.html">Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="design/architecture.html#the-pieces">The pieces</a></li>
+<li class="toctree-l4"><a class="reference internal" href="design/architecture.html#why-it-works-this-way">Why it works this way</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="design/parts.html">Parts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="design/parts.html#the-part-contract">The part contract</a></li>
+<li class="toctree-l4"><a class="reference internal" href="design/parts.html#meshes">Meshes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="design/parts.html#reviewing-parts">Reviewing parts</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="design/slots.html">Slots and assembly</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="design/slots.html#resolution">Resolution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="design/slots.html#what-a-slot-is-in-the-urdf">What a slot is in the URDF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="design/slots.html#why-defaults-live-in-the-parts">Why defaults live in the parts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="design/slots.html#where-to-add-a-slot">Where to add a slot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="design/buoyancy.html">Buoyancy: all up round mass and displacement</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="design/buoyancy.html#usv-hull-displacement">USV: hull displacement</a></li>
+<li class="toctree-l4"><a class="reference internal" href="design/buoyancy.html#uuv-declared-trim-bluerov2">UUV: declared trim (BlueROV2)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="design/buoyancy.html#marked-for-any-world">Marked for any world</a></li>
+<li class="toctree-l4"><a class="reference internal" href="design/buoyancy.html#constraints">Constraints</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="design/gazebo-composition.html">Gazebo composition</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="design/gazebo-composition.html#merge-include-and-lumping">Merge include and lumping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="design/gazebo-composition.html#sensors-and-thrusters-follow-their-part">Sensors and thrusters follow their part</a></li>
+<li class="toctree-l4"><a class="reference internal" href="design/gazebo-composition.html#the-bridge-agrees-by-construction">The bridge agrees by construction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="design/gazebo-composition.html#build-time-and-launch-time">Build time and launch time</a></li>
+<li class="toctree-l4"><a class="reference internal" href="design/gazebo-composition.html#what-is-in-the-composed-model">What is in the composed model</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="specs/SITL_SPEC.html">SITL spec</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="specs/SITL_SPEC.html#how-this-spec-is-used">How this spec is used</a></li>
+<li class="toctree-l3"><a class="reference internal" href="specs/SITL_SPEC.html#phases">Phases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC.html#prerequisites-assumptions-and-contraints">Prerequisites, assumptions and contraints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC.html#phase-0-toolchain-and-a-setup-document">Phase 0 — Toolchain and a setup document</a></li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC.html#phase-1-blueboat-under-ardurover-newtons-interface">Phase 1 — BlueBoat under ArduRover, newtons interface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC.html#phase-2-normalized-command-mode-on-the-thruster">Phase 2 — Normalized command mode on the thruster</a></li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC.html#phase-2-999-patches-from-pr-58">Phase 2.999 — Patches from PR #58</a></li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC.html#phase-3-bluerov2-under-ardusub">Phase 3 — BlueROV2 under ArduSub</a></li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC.html#phase-4-stabilization-layer-boat">Phase 4 — Stabilization layer, boat</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="specs/SITL_SPEC.html#automated-verification">Automated verification</a></li>
+<li class="toctree-l5"><a class="reference internal" href="specs/SITL_SPEC.html#human-verification">Human verification</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC.html#phase-5-stabilization-layer-rov">Phase 5 — Stabilization layer, ROV</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="specs/SITL_SPEC.html#id1">Automated verification</a></li>
+<li class="toctree-l5"><a class="reference internal" href="specs/SITL_SPEC.html#id2">Human verification</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC.html#phase-6-waypoint-mission-boat-only">Phase 6 — Waypoint mission, boat only</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="specs/SITL_SPEC.html#id3">Automated verification</a></li>
+<li class="toctree-l5"><a class="reference internal" href="specs/SITL_SPEC.html#id4">Human verification</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC.html#phase-7-removed">Phase 7 — Removed</a></li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC.html#phase-8-documentation">Phase 8 — Documentation</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="specs/SITL_SPEC.html#id5">Automated verification</a></li>
+<li class="toctree-l5"><a class="reference internal" href="specs/SITL_SPEC.html#id6">Human verification</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="specs/SITL_SPEC.html#what-the-phases-are-protecting">What the phases are protecting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="specs/SITL_SPEC.html#out-of-scope">Out of scope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="specs/SITL_SPEC.html#open-questions">Open questions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html">SITL integration for the BlueBoat: a roadmap</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#what-we-are-trying-to-do">What we are trying to do</a></li>
+<li class="toctree-l3"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#background-what-sitl-actually-is">Background: what SITL actually is</a></li>
+<li class="toctree-l3"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#the-interface-question">The interface question</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#where-we-are">Where we are</a></li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#where-we-want-to-be">Where we want to be</a></li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#the-change-to-the-thruster-plugin">The change to the thruster plugin</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#what-the-firmware-side-commits-us-to">What the firmware side commits us to</a></li>
+<li class="toctree-l3"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#px4-community-supported-and-not-designed-out">PX4: community supported, and not designed out</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#why-the-architecture-already-accommodates-it">Why the architecture already accommodates it</a></li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#what-px4-actually-expects-and-why-our-interface-fits">What PX4 actually expects, and why our interface fits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#what-this-commits-us-to">What this commits us to</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#a-note-on-ardupilot-sitl-models">A note on ArduPilot/SITL_Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#three-parameter-sets-and-reconciling-them-later">Three parameter sets, and reconciling them later</a></li>
+<li class="toctree-l3"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#phases">Phases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#phase-0-toolchain">Phase 0 — Toolchain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#phase-1-first-flotation-and-manual">Phase 1 — First flotation and MANUAL</a></li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#phase-2-a-normalized-command-interface-on-the-thruster">Phase 2 — A normalized command interface on the thruster</a></li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#phase-3-actuator-fidelity">Phase 3 — Actuator fidelity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#phase-4-waves">Phase 4 — Waves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#phase-5-missions">Phase 5 — Missions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#phase-6-packaging-documentation-upstreaming">Phase 6 — Packaging, documentation, upstreaming</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#deferred">Deferred</a></li>
+<li class="toctree-l3"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#fitting-this-to-the-urdf-first-assembly">Fitting this to the URDF-first assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#layout">Layout</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#amended-during-phase-1-the-wrapper-does-not-work">Amended during phase 1: the wrapper does not work</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#decisions-already-taken">Decisions already taken</a></li>
+<li class="toctree-l3"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#what-this-pr-is-asking-for">What this PR is asking for</a></li>
+<li class="toctree-l3"><a class="reference internal" href="specs/SITL_SPEC_CONTEXT.html#risks">Risks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../vehicles/blueboat/parameters.html">BlueBoat parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/parameters.html#approach">Approach</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/parameters.html#set-via-reference">Set via reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/parameters.html#drag-estimates-open-loop">Drag estimates - open loop</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/blueboat/parameters.html#surge">Surge</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../vehicles/blueboat/parameters.html#estimate">Estimate</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../vehicles/blueboat/parameters.html#test-open-loop-surge-response">Test - Open-loop surge response</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../vehicles/blueboat/parameters.html#select-in-test">Select in test</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/blueboat/parameters.html#yaw">Yaw</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../vehicles/blueboat/parameters.html#id1">Estimate</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../vehicles/blueboat/parameters.html#test-open-loop-yaw-response">Test - open-loop yaw response</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../vehicles/blueboat/parameters.html#id2">Select in test</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/parameters.html#the-autopilot-parameter-file">The autopilot parameter file</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/parameters.html#provenance-three-descriptions-and-they-disagree">Provenance: three descriptions, and they disagree</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../vehicles/bluerov2/parameters.html">BlueROV2 parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#what-is-fixed-and-what-is-free">What is fixed and what is free</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#the-autopilot-parameter-file">The autopilot parameter file</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#blue-robotics-publish-very-little-and-that-changes-the-claim">Blue Robotics publish very little, and that changes the claim</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#line-by-line">Line by line</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#mass">Mass</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#thrust">Thrust</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#the-installation-factor">The installation factor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#deadband">Deadband</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#hydrodynamics">Hydrodynamics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#coarse-identification">Coarse identification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#verifying-the-coarse-identification">Verifying the coarse identification</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#modes">Modes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/bluerov2/parameters.html#open-questions">Open questions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../vehicles/blueboat/visual_asset_commission.html">BlueBoat visual asset commission</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../vehicles/blueboat/visual_asset_commission.html#blueboat-chassis">blueboat_chassis</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/visual_asset_commission.html#datum-location">datum location</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="add-part.html">Add a part</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="add-part.html#where-a-part-goes">Where a part goes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="add-sensor-part.html">Add a sensor part</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html">Contributing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#build-and-test">Build and test</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#pre-commit-hooks">Pre-commit hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#conventions">Conventions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#documentation">Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Binary install (future)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#install-from-ros-packages-debs">Install from ROS packages (debs)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configure-an-installed-vehicle">Configure an installed vehicle</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#the-launch-does-it-for-you">The launch does it for you</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generate-the-artifacts-yourself">Generate the artifacts yourself</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#overlay-workspace">Overlay workspace</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">BlueRobotics Models</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Developers</a></li>
+      <li class="breadcrumb-item active">Binary install (future)</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/HonuRobotics/bluerobotics_models/blob/lyrical/docs/developers/binary-install.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="binary-install-future">
+<h1>Binary install (future)<a class="headerlink" href="#binary-install-future" title="Link to this heading"></a></h1>
+<p>Parked for later. Binary packages are a work in progress and are not part of the tested workflow while the repositories are changing quickly; the supported path is the source build in <a class="reference internal" href="../quickstarts/setup.html"><span class="std std-doc">Set up the drydock workspace</span></a>.</p>
+<section id="install-from-ros-packages-debs">
+<h2>Install from ROS packages (debs)<a class="headerlink" href="#install-from-ros-packages-debs" title="Link to this heading"></a></h2>
+<p>Binary packages (<code class="docutils literal notranslate"><span class="pre">ros-&lt;distro&gt;-blueboat-gazebo</span></code>, <code class="docutils literal notranslate"><span class="pre">ros-&lt;distro&gt;-bluerov2-gazebo</span></code>,
+the <code class="docutils literal notranslate"><span class="pre">*-description</span></code> packages, <code class="docutils literal notranslate"><span class="pre">ros-&lt;distro&gt;-bluerobotics-parts</span></code>, …) are
+planned for the ROS build farm and are not published yet. When they are,
+installation is one package per vehicle you want:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>ros-lyrical-blueboat-gazebo<span class="w"> </span>ros-lyrical-bluerov2-gazebo
+<span class="nb">source</span><span class="w"> </span>/opt/ros/lyrical/setup.bash
+ros2<span class="w"> </span>launch<span class="w"> </span>blueboat_gazebo<span class="w"> </span>sim.launch.xml<span class="w">    </span><span class="c1"># the boat</span>
+ros2<span class="w"> </span>launch<span class="w"> </span>bluerov2_gazebo<span class="w"> </span>sim.launch.xml<span class="w">    </span><span class="c1"># or the ROV</span>
+</pre></div>
+</div>
+<p>Nothing under <code class="docutils literal notranslate"><span class="pre">/opt/ros</span></code> is meant to be edited. The default vehicle is baked
+into the packages; a custom config is a YAML file anywhere on disk passed
+to the launch (<code class="docutils literal notranslate"><span class="pre">config_file:=</span></code>), which regenerates every artifact at launch
+time. See <a class="reference internal" href="#configure-an-installed-vehicle">Configure an installed vehicle</a>.</p>
+</section>
+<section id="configure-an-installed-vehicle">
+<h2>Configure an installed vehicle<a class="headerlink" href="#configure-an-installed-vehicle" title="Link to this heading"></a></h2>
+<p>From a binary (deb) install nothing under <code class="docutils literal notranslate"><span class="pre">/opt/ros</span></code> should be edited, and
+there is no workspace to rebuild. The vehicle is still fully configurable:
+every artifact (URDF, composed Gazebo model, ros_gz bridge config) is
+generated from a config file on demand, by the same tools the build uses
+(writing the config: <a class="reference internal" href="../walkthroughs/change-parts.html"><span class="std std-doc">Change the fitted parts</span></a>).</p>
+<section id="the-launch-does-it-for-you">
+<h3>The launch does it for you<a class="headerlink" href="#the-launch-does-it-for-you" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>blueboat_gazebo<span class="w"> </span>sim.launch.xml<span class="w"> </span>config_file:<span class="o">=</span>/path/my_vehicle.yaml
+ros2<span class="w"> </span>launch<span class="w"> </span>blueboat_description<span class="w"> </span>display.launch.xml<span class="w"> </span>config_file:<span class="o">=</span>/path/my_vehicle.yaml
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">sim.launch.xml</span></code> runs <code class="docutils literal notranslate"><span class="pre">configure_vehicle.py</span></code> into a per config directory under <code class="docutils literal notranslate"><span class="pre">$ROS_HOME</span></code> at
+start, spawns that model and starts the bridge on that config. The default
+(no argument) is the baked default vehicle.</p>
+</section>
+<section id="generate-the-artifacts-yourself">
+<h3>Generate the artifacts yourself<a class="headerlink" href="#generate-the-artifacts-yourself" title="Link to this heading"></a></h3>
+<p>For anything beyond the stock launch (your own world and launch files, a
+model to hand to somebody else):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>run<span class="w"> </span>blueboat_gazebo<span class="w"> </span>configure_vehicle.py<span class="w"> </span>--config<span class="w"> </span>my_vehicle.yaml<span class="w"> </span>--out-dir<span class="w"> </span>~/my_models/blueboat
+</pre></div>
+</div>
+<p>writes <code class="docutils literal notranslate"><span class="pre">blueboat.urdf</span></code>, <code class="docutils literal notranslate"><span class="pre">blueboat.gazebo.urdf</span></code> (the copy the model merges,
+glTF visuals pre-rotated for Gazebo), <code class="docutils literal notranslate"><span class="pre">model.sdf</span></code>, <code class="docutils literal notranslate"><span class="pre">model.config</span></code> and
+<code class="docutils literal notranslate"><span class="pre">ros_gz_bridge.yaml</span></code>, plus <code class="docutils literal notranslate"><span class="pre">vehicle.yaml</span></code>, the config as used. Add
+<code class="docutils literal notranslate"><span class="pre">--name</span> <span class="pre">&lt;name&gt;</span></code> to generate an instance under another name (model name and
+topic namespace at once).
+The directory is a Gazebo model: with <code class="docutils literal notranslate"><span class="pre">~/my_models</span></code> prepended to
+<code class="docutils literal notranslate"><span class="pre">GZ_SIM_RESOURCE_PATH</span></code> it is <code class="docutils literal notranslate"><span class="pre">model://blueboat</span></code>, shadowing the installed
+default, so a world can <code class="docutils literal notranslate"><span class="pre">&lt;include&gt;</span></code> it, or spawn it with
+<code class="docutils literal notranslate"><span class="pre">ros2</span> <span class="pre">run</span> <span class="pre">ros_gz_sim</span> <span class="pre">create</span> <span class="pre">-world</span> <span class="pre">&lt;world&gt;</span> <span class="pre">-file</span> <span class="pre">~/my_models/blueboat/model.sdf</span> <span class="pre">-name</span> <span class="pre">blueboat</span> <span class="pre">-z</span> <span class="pre">0.05</span></code>.
+The <code class="docutils literal notranslate"><span class="pre">model://</span></code> name is the directory’s name, so an instance generated with
+<code class="docutils literal notranslate"><span class="pre">--name</span> <span class="pre">boat_b</span></code> belongs in a directory called <code class="docutils literal notranslate"><span class="pre">boat_b</span></code> (<code class="docutils literal notranslate"><span class="pre">~/my_models/boat_b</span></code>)
+to be <code class="docutils literal notranslate"><span class="pre">model://boat_b</span></code>.
+Start the bridge on the generated config
+(<code class="docutils literal notranslate"><span class="pre">ros2</span> <span class="pre">run</span> <span class="pre">ros_gz_bridge</span> <span class="pre">parameter_bridge</span> <span class="pre">--ros-args</span> <span class="pre">-p</span> <span class="pre">config_file:=$HOME/my_models/blueboat/ros_gz_bridge.yaml</span></code>)
+and <code class="docutils literal notranslate"><span class="pre">robot_state_publisher</span></code> on the generated URDF. The three files come from
+one resolution of the config, so they agree with each other.</p>
+</section>
+<section id="overlay-workspace">
+<h3>Overlay workspace<a class="headerlink" href="#overlay-workspace" title="Link to this heading"></a></h3>
+<p>The third option, for anything long lived: an overlay workspace that builds
+only <code class="docutils literal notranslate"><span class="pre">blueboat_description</span></code> with your edited <code class="docutils literal notranslate"><span class="pre">config/blueboat.yaml</span></code> on top
+of the installed packages. The build regenerates the URDF, the composed model
+and the bridge config consistently, and <code class="docutils literal notranslate"><span class="pre">model://blueboat</span></code> resolves to
+your overlay.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="contributing.html" class="btn btn-neutral float-left" title="Contributing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Honu Robotics.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: lyrical
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl id="honu-version-list">
+      <dt>Distributions</dt>
+      <dd><a href="/bluerobotics_models/lyrical/" data-version="lyrical">Lyrical</a></dd>
+    </dl>
+  </div>
+</div>
+<script>
+  (function () {
+    var current = "lyrical";
+    var base = "/bluerobotics_models/";
+
+    /* Keep the reader on the same page when switching versions; the
+       version root href stays as the fallback for pages a version lacks. */
+    function wire() {
+      document.querySelectorAll('.rst-other-versions a[data-version]').forEach(function (a) {
+        var target = a.getAttribute('data-version');
+        var path = window.location.pathname;
+        if (target !== current && path.indexOf('/' + current + '/') !== -1) {
+          a.href = path.replace('/' + current + '/', '/' + target + '/');
+        }
+      });
+    }
+
+    if (!window.fetch) { wire(); return; }
+
+    /* The deploy tool maintains versions.json at the site root; reading it
+       at runtime lets builds published before a new distribution existed
+       still offer it in the flyout. Offline or local preview builds fall
+       back to the build time list rendered above. */
+    fetch(base + 'versions.json', {cache: 'no-cache'}).then(function (response) {
+      if (!response.ok) { throw new Error(response.status); }
+      return response.json();
+    }).then(function (entries) {
+      var list = document.getElementById('honu-version-list');
+      if (!list || !entries.length) { return; }
+      list.querySelectorAll('dd').forEach(function (dd) { dd.remove(); });
+      entries.forEach(function (entry) {
+        var a = document.createElement('a');
+        a.href = entry.url;
+        a.setAttribute('data-version', entry.name);
+        a.textContent = entry.name.charAt(0).toUpperCase() + entry.name.slice(1);
+        var dd = document.createElement('dd');
+        dd.appendChild(a);
+        list.appendChild(dd);
+      });
+    }).catch(function () {}).finally(wire);
+  })();
+</script><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

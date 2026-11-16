@@ -1,0 +1,104 @@
+# Dive the BlueROV2 with ArduSub
+
+Confirm that ArduSub in SITL is driving the simulated BlueROV2 (standard configuration, not "heavy") in `MANUAL` mode, which means surge, yaw, sway and heave commands are provided via RC channels and ArduSub maps from commands in the body frame to individual thruster commands.  
+
+## Prerequisites
+
+[Set up ArduPilot SITL](ardupilot-setup.md), through the Iris smoke test.
+
+## Steps
+All commands are issued within the drydock dev container.
+
+### The simulation
+
+Start the ROV sim
+ 
+```bash
+source ~/maritime_ws/install/setup.bash
+source ~/maritime_ws/thirdparty/setup-ardupilot.sh
+gz sim -v4 -r $(ros2 pkg prefix --share bluerov2_gazebo)/worlds/bluerov2_sitl.sdf
+```
+
+If successful, you should see Gazebo sim start with the ROV spawned in a simple underwater environment. 
+
+### The autopilot (SITL)
+
+```bash
+source ~/maritime_ws/install/setup.bash
+source ~/maritime_ws/thirdparty/setup-ardupilot.sh
+AP=$HOME/maritime_ws/thirdparty/ardupilot/Tools/autotest
+sim_vehicle.py -v ArduSub -f gazebo-bluerov2 --model JSON --console -w \
+  --add-param-file=$AP/default_params/sub.parm \
+  --add-param-file=$(ros2 pkg prefix --share bluerov2_gazebo)/params/bluerov2_sitl.params
+```
+
+```{note}
+Gazebo prints `ArduPilot controller has reset` once shortly after SITL
+connects and then roughly once a minute.  This is annoying, but not of concern. (The fix is open upstream as
+[ardupilot_gazebo#174](https://github.com/ArduPilot/ardupilot_gazebo/pull/174).)
+See troubleshooting notes in [Set up ArduPilot SITL](ardupilot-setup.md).
+```
+
+## Verification - teleop via the autopilot
+
+One axis at a time, at the MAVProxy prompt in the autopilot shell. 
+
+Forward surge... 
+```
+mode manual
+arm throttle
+rc 5 1600
+```
+
+`rc <channel> <microseconds>` overrides one RC input. Channel 5 is surge, and the channel spans 1100 to 1900; 1500 is neutral.
+
+Send `rc all 1500` between checks. 
+
+The channel mapping is different from the usual ArduPilot one - of course it is.
+`ArduSub/Parameters.h` overrides it for Sub.
+
+| RCMAP | Channel | Axis |
+|---|---|---|
+| `RCMAP_PITCH` | 1 | pitch |
+| `RCMAP_ROLL` | 2 | roll |
+| `RCMAP_THROTTLE` | 3 | heave |
+| `RCMAP_YAW` | 4 | yaw |
+| `RCMAP_FORWARD` | 5 | surge |
+| `RCMAP_LATERAL` | 6 | sway |
+
+`param show RCMAP*` confirms.
+
+Directions below are in the vehicle's own frame, [REP 103](https://www.ros.org/reps/rep-0103.html): x forward, y left, z up.
+
+| Command | Axis | Expected |
+|---|---|---|
+| `rc 5 1600` | surge | moves ahead, without turning or changing depth much |
+| `rc 5 1400` | surge | moves astern |
+| `rc 6 1600` | sway | crabs to starboard (its own right, -y). The sign flips because ArduPilot's lateral axis is (fwd-right-down) FRD, positive to the right, while REP 103 is positive to the left: a positive lateral command is +y to ArduSub and -y here |
+| `rc 4 1600` | yaw | turns to starboard, clockwise seen from above (negative yaw here). The sign flips for the same reason as sway. |
+| `rc 3 1600` | heave | rises |
+| `rc 3 1400` | heave | sinks |
+| `rc 2 1600` | roll | rolls slightly to starboard (right side down); the two verticals push in opposite directions, and the vehicle's own stability rights it when released |
+| `rc all 1500` | — | stops |
+| `disarm` | — | ends the session |
+
+
+The verification passes when each RC channel, commanded on its own, produces the
+motion described above.  This is similar to the open-loop experiments without Ardu decribed in [parameters.md]
+
+The sign convention can be confusing, because two coordinate conventions do not agree:
+
+* ArduPilot uses x forward, y **right**, z down - FRD, as in MAVLink's [`MAV_FRAME_BODY_FRD`](https://mavlink.io/en/messages/common.html#MAV_FRAME_BODY_FRD). 
+* ROS uses x forward, y **left**, z up - FLU, per [REP 103](https://www.ros.org/reps/rep-0103.html).
+
+
+The exmaple commands are a quarter of full stick, but are just exmples. 
+
+To see what the autopilot is commanding while you move the sticks, echo the thruster topics:
+
+```bash
+gz topic -e -t /bluerov2/thruster_1/cmd
+gz topic -e -t /bluerov2/thruster_5/cmd
+# etc. 
+```
+

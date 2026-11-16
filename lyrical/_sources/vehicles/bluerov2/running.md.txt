@@ -1,4 +1,4 @@
-# Running the simulation
+# Launch and worlds
 
 ```bash
 ros2 launch bluerov2_gazebo sim.launch.xml
@@ -11,14 +11,14 @@ config, into a directory under `$ROS_HOME`), the model is spawned as
 
 To run a custom vehicle instead, pass its config with `config_file:=`;
 the [configuration page](configuration.md) lists the slots and
-[Change the fitted parts](../../how-to/change-parts.md) walks through writing one.
+[Change the fitted parts](../../walkthroughs/change-parts.md) walks through writing one.
 
 ## Launch arguments
 
 | Argument | Default | Meaning |
 |---|---|---|
 | `config_file` | the shipped config | Vehicle config, expanded at launch. |
-| `name` | `bluerov2` | Instance name: the Gazebo model name and the topic namespace (`/<name>/...`); letters, digits and underscores. The worlds here float only the default name; see [Several vehicles](../../how-to/namespaces.md). |
+| `name` | `bluerov2` | Instance name: the Gazebo model name and the topic namespace (`/<name>/...`); letters, digits and underscores. The worlds here float only the default name; see [Several vehicles](../../walkthroughs/namespaces.md). |
 | `x`, `y`, `z` | `0`, `0`, the pool default | Spawn position (m); the default is mid water in the pool. |
 | `roll`, `pitch`, `yaw` | `0` | Spawn orientation (rad). |
 | `world` | the pool world | Vehicle free world SDF to spawn into. |
@@ -32,7 +32,7 @@ By default the vehicle is spawned into the pool world
 swaps the environment without changing anything else about the
 simulation: pass any vehicle free world SDF, such as the packaged open
 water one (unbounded water over a bare seabed, and the template for
-[your own world](../../how-to/own-world.md)):
+[your own world](../../walkthroughs/own-world.md)):
 
 ```bash
 ros2 launch bluerov2_gazebo sim.launch.xml world:=$(ros2 pkg prefix --share bluerov2_gazebo)/worlds/bluerov2_water.sdf

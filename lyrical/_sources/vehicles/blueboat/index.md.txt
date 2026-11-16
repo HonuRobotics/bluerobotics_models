@@ -4,6 +4,8 @@ The BlueBoat is a twin hull differential drive unmanned surface vessel. In
 simulation it floats on graded buoyancy, is driven by thrust commands to its
 two outboard motors, and carries the Ping2 echosounder.
 
+To drive it under ArduRover start from [Drive the BlueBoat with ArduRover](../../quickstarts/sitl-blueboat.md); how its parameters were derived is in [BlueBoat parameters](parameters.md).
+
 ```{toctree}
 :maxdepth: 1
 
@@ -11,11 +13,6 @@ running
 actuators
 sensors
 configuration
-parameters
-verify-sitl-boat
-tune-sitl-boat
-mission-sitl-boat
-visual_asset_commission
 ```
 
 ## The default vehicle
