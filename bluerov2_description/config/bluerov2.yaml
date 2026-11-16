@@ -4,7 +4,12 @@
 # composed Gazebo model AND the ros_gz bridge config. To try a config
 # without rebuilding, pass config_file:=<your.yaml> to the launches.
 #
-# The BlueROV2 is exactly what parts: lists, because slot_defaults is false: a slot with no entry stays empty. With slot_defaults true, or left out, every unlisted slot fills with its default instead (the chassis fits its six propellers, their T200 bodies and the exploreHD camera). See bluerobotics_parts/urdf/assembly.xacro for the full rules and the site (vehicles/bluerov2/configuration) for the slots and the catalog.
+# The BlueROV2 is exactly what parts: lists, because slot_defaults is false: a
+# slot with no entry stays empty. With slot_defaults true, or left out, every
+# unlisted slot fills with its default instead (the chassis fits its six
+# propellers, their T200 bodies and the exploreHD camera). See
+# bluerobotics_parts/urdf/assembly.xacro for the full rules and the site
+# (vehicles/bluerov2/configuration) for the slots and the catalog.
 #
 # Topic namespace: part topics default to /<topic_namespace>/<name>/...
 topic_namespace: bluerov2
@@ -14,7 +19,8 @@ topic_namespace: bluerov2
 # bluerov2_heavy_chassis (Heavy kit, 8).
 base: {type: bluerov2_chassis, name: base_link}
 
-# slot_defaults: false fits only the slots listed under parts; true fills every unlisted slot with its default part.
+# slot_defaults: false fits only the slots listed under parts; true fills every
+# unlisted slot with its default part.
 slot_defaults: false
 
 # parts: what is fitted. A slot entry picks what goes in a slot
@@ -50,7 +56,8 @@ parts:
   # - {slot: dvl, type: dvl_a50}                  # sensor only, no visual
   # - {slot: payload, type: payload_skid}
   # - {slot: rack, type: roof_rack}
-  # Subsea manipulation is out of scope for now: newton_gripper and sediment_sampler fit the gripper slot.
+  # Subsea manipulation is out of scope for now: newton_gripper and
+  # sediment_sampler fit the gripper slot.
 
 # slots: ad hoc slots on any instance, usable like the parts' own. (The
 # instance key is of:, not on:, which YAML would read as the boolean true.)
