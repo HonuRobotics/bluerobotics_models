@@ -84,7 +84,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#smoke-test-iris-uav">Smoke test - Iris UAV</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#reference">Reference</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../getting-started/ardupilot_setup.html#why-a-venv-and-why-not-to-skip-it">Why a venv, and why not to skip it</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../getting-started/ardupilot_setup.html#why-a-venv">Why a venv, and why not to skip it</a></li>
 </ul>
 </li>
 </ul>
@@ -428,9 +428,9 @@
            <div itemprop="articleBody">
              
   <section id="troubleshooting-faq">
-<h1>Troubleshooting / FAQ<a class="headerlink" href="#troubleshooting-faq" title="Link to this heading"></a></h1>
+<span id="troubleshooting--faq"></span><h1>Troubleshooting / FAQ<a class="headerlink" href="#troubleshooting-faq" title="Link to this heading"></a></h1>
 <section id="xacro-fails-with-assembly-error">
-<h2>xacro fails with “ASSEMBLY ERROR: …”<a class="headerlink" href="#xacro-fails-with-assembly-error" title="Link to this heading"></a></h2>
+<span id="xacro-fails-with-assembly-error-"></span><h2>xacro fails with “ASSEMBLY ERROR: …”<a class="headerlink" href="#xacro-fails-with-assembly-error" title="Link to this heading"></a></h2>
 <p>The vehicle config asked for something the parts cannot do: a type the slot
 does not accept (the message lists what it accepts), an unknown slot on the
 base, a slot configured twice, a bare <code class="docutils literal notranslate"><span class="pre">on:</span></code> key (YAML reads it as <code class="docutils literal notranslate"><span class="pre">true</span></code>;
@@ -460,7 +460,7 @@ translates. Command both thrusters <strong>in parallel</strong>; see
 <a class="reference internal" href="../vehicles/blueboat/actuators.html"><span class="std std-doc">Driving</span></a>.</p>
 </section>
 <section id="no-ranges-on-blueboat-ping-range">
-<h2>No ranges on /blueboat/ping/range<a class="headerlink" href="#no-ranges-on-blueboat-ping-range" title="Link to this heading"></a></h2>
+<span id="no-ranges-on-blueboatpingrange"></span><h2>No ranges on /blueboat/ping/range<a class="headerlink" href="#no-ranges-on-blueboat-ping-range" title="Link to this heading"></a></h2>
 <p>Rendered sensors need a usable render path. On desktops, run inside an X
 session; headless machines need working EGL (CI installs
 <code class="docutils literal notranslate"><span class="pre">libegl1</span> <span class="pre">libgl1</span> <span class="pre">libgl1-mesa-dri</span> <span class="pre">libglvnd0</span></code>). The bridge is lazy: ranges flow
@@ -483,7 +483,7 @@ on load and Gazebo does not. Convert the file once with
 <code class="docutils literal notranslate"><span class="pre">ROS_DOMAIN_ID</span></code> per ROS graph.</p>
 </section>
 <section id="robot-state-publisher-warns-about-the-root-link-inertia">
-<h2>robot_state_publisher warns about the root link inertia<a class="headerlink" href="#robot-state-publisher-warns-about-the-root-link-inertia" title="Link to this heading"></a></h2>
+<span id="robot_state_publisher-warns-about-the-root-link-inertia"></span><h2>robot_state_publisher warns about the root link inertia<a class="headerlink" href="#robot-state-publisher-warns-about-the-root-link-inertia" title="Link to this heading"></a></h2>
 <p>Expected and harmless: KDL only publishes TF and ignores inertia; Gazebo
 reads it through sdformat. Do not add a dummy root link: Gazebo’s URDF
 conversion would lump <code class="docutils literal notranslate"><span class="pre">base_link</span></code> into it and break every plugin that

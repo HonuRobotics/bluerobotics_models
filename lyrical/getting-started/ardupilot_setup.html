@@ -84,7 +84,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#smoke-test-iris-uav">Smoke test - Iris UAV</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reference">Reference</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#why-a-venv-and-why-not-to-skip-it">Why a venv, and why not to skip it</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#why-a-venv">Why a venv, and why not to skip it</a></li>
 </ul>
 </li>
 </ul>
@@ -562,7 +562,7 @@ python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </
 </div>
 </section>
 <section id="smoke-test-iris-uav">
-<h2>Smoke test - Iris UAV<a class="headerlink" href="#smoke-test-iris-uav" title="Link to this heading"></a></h2>
+<span id="smoke-test---iris-uav"></span><h2>Smoke test - Iris UAV<a class="headerlink" href="#smoke-test-iris-uav" title="Link to this heading"></a></h2>
 <p>Two shells. In the first:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>~/maritime_ws/thirdparty/setup-ardupilot.sh
 gz<span class="w"> </span>sim<span class="w"> </span>-v4<span class="w"> </span>-r<span class="w"> </span>iris_runway.sdf
@@ -619,8 +619,8 @@ nobody here has modified.</span><a class="headerlink" href="#id2" title="Link to
 <section id="reference">
 <h2>Reference<a class="headerlink" href="#reference" title="Link to this heading"></a></h2>
 <p>Optional background. None of it is needed to follow the steps above.</p>
-<section id="why-a-venv-and-why-not-to-skip-it">
-<span id="why-a-venv"></span><h3>Why a venv, and why not to skip it<a class="headerlink" href="#why-a-venv-and-why-not-to-skip-it" title="Link to this heading"></a></h3>
+<section id="why-a-venv">
+<span id="why-a-venv-and-why-not-to-skip-it"></span><h3>Why a venv, and why not to skip it<a class="headerlink" href="#why-a-venv" title="Link to this heading"></a></h3>
 <p>On Ubuntu 24.04 and later the script installs ArduPilot’s Python dependencies into a virtual environment at <code class="docutils literal notranslate"><span class="pre">~/venv-ardupilot</span></code> rather than into the system Python. That is worth understanding rather than working around. The system Python is externally managed, so <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> into it is refused without <code class="docutils literal notranslate"><span class="pre">--break-system-packages</span></code>; and ArduPilot pins <code class="docutils literal notranslate"><span class="pre">empy==3.3.4</span></code> while ROS 2’s <code class="docutils literal notranslate"><span class="pre">ament</span></code> uses empy 4.x, so installing their list system-wide would break colcon in a way that is unpleasant to diagnose.</p>
 <p>The venv is created with <code class="docutils literal notranslate"><span class="pre">--system-site-packages</span></code>, so ROS stays visible from inside it. Activate it before <code class="docutils literal notranslate"><span class="pre">waf</span></code> and before <code class="docutils literal notranslate"><span class="pre">sim_vehicle.py</span></code> — a build outside it fails on a missing <code class="docutils literal notranslate"><span class="pre">pexpect</span></code> import.</p>
 <p>Left to itself the script creates <code class="docutils literal notranslate"><span class="pre">~/venv-ardupilot</span></code>, but it looks in the ArduPilot checkout first: if <code class="docutils literal notranslate"><span class="pre">venv-ardupilot</span></code>, <code class="docutils literal notranslate"><span class="pre">venv</span></code> or <code class="docutils literal notranslate"><span class="pre">.venv</span></code> already exists there it uses that instead. Creating it in the checkout is worth the extra line. It keeps the venv beside the source it belongs to rather than loose in a home directory that, under drydock, is shared with the host and already full of things that are not container-specific.</p>

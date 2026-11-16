@@ -82,7 +82,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#smoke-test-iris-uav">Smoke test - Iris UAV</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#reference">Reference</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../getting-started/ardupilot_setup.html#why-a-venv-and-why-not-to-skip-it">Why a venv, and why not to skip it</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../getting-started/ardupilot_setup.html#why-a-venv">Why a venv, and why not to skip it</a></li>
 </ul>
 </li>
 </ul>
@@ -509,17 +509,17 @@
 </ul>
 </section>
 <section id="phase-0-toolchain-and-a-setup-document">
-<h3>Phase 0 — Toolchain and a setup document<a class="headerlink" href="#phase-0-toolchain-and-a-setup-document" title="Link to this heading"></a></h3>
+<span id="phase-0--toolchain-and-a-setup-document"></span><h3>Phase 0 — Toolchain and a setup document<a class="headerlink" href="#phase-0-toolchain-and-a-setup-document" title="Link to this heading"></a></h3>
 <p><strong>Objective:</strong> have <code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo</span></code> and the ArduPilot firmware building and running inside drydock, and a setup document written alongside the work rather than after it. Nothing of ours is involved — this establishes the toolchain and proves the loop closes on a vehicle somebody else wrote.</p>
 <p><em>Verified by</em> the procedure in <a class="reference internal" href="../getting-started/ardupilot_setup.html"><span class="std std-doc">ArduPilot SITL setup</span></a></p>
 </section>
 <section id="phase-1-blueboat-under-ardurover-newtons-interface">
-<h3>Phase 1 — BlueBoat under ArduRover, newtons interface<a class="headerlink" href="#phase-1-blueboat-under-ardurover-newtons-interface" title="Link to this heading"></a></h3>
+<span id="phase-1--blueboat-under-ardurover-newtons-interface"></span><h3>Phase 1 — BlueBoat under ArduRover, newtons interface<a class="headerlink" href="#phase-1-blueboat-under-ardurover-newtons-interface" title="Link to this heading"></a></h3>
 <p><strong>Objective:</strong> have the BlueBoat moving under ArduRover, on the newtons interface exactly as it stood, so the plumbing and the channel mapping are proven without waiting on phase 2. <code class="docutils literal notranslate"><span class="pre">MANUAL</span></code> only, so that no low-level stabilization has to be configured to get a result. Includes a documentation walkthrough complete enough that a PR reviewer can exercise the whole path end to end.</p>
 <p><em>Verified by</em> the walkthrough in <a class="reference internal" href="../vehicles/blueboat/verify-sitl-boat.html"><span class="std std-doc">Verify the SITL connection (Boat)</span></a>, by hand. <code class="docutils literal notranslate"><span class="pre">mode</span> <span class="pre">manual</span></code>, <code class="docutils literal notranslate"><span class="pre">arm</span> <span class="pre">throttle</span></code>, then <code class="docutils literal notranslate"><span class="pre">rc</span></code> overrides at the MAVProxy prompt, each with a stated expectation and a stated meaning if it fails:</p>
 </section>
 <section id="phase-2-normalized-command-mode-on-the-thruster">
-<h3>Phase 2 — Normalized command mode on the thruster<a class="headerlink" href="#phase-2-normalized-command-mode-on-the-thruster" title="Link to this heading"></a></h3>
+<span id="phase-2--normalized-command-mode-on-the-thruster"></span><h3>Phase 2 — Normalized command mode on the thruster<a class="headerlink" href="#phase-2-normalized-command-mode-on-the-thruster" title="Link to this heading"></a></h3>
 <p><strong>Objective:</strong> have one thruster interface that an autopilot and a custom controller reach the same way — a third input mode taking a normalized command in [-1, 1], scaled by the limits the plugin already carries. It lives in <code class="docutils literal notranslate"><span class="pre">gz-maritime</span></code> because a normalized thruster command is vehicle-agnostic capability, not something a vehicle repository should own.</p>
 <p>The thruster plugin is forked into a package we own and patched in place: it is a system plugin, so it builds as a standalone shared library against the installed gz-sim headers and is loaded by filename — no Gazebo source build. The schema stays additive, so a model that does not ask for the new mode behaves exactly as before, and the existing <code class="docutils literal notranslate"><span class="pre">&lt;deadband&gt;</span></code> is reused. The topic suffix changes from <code class="docutils literal notranslate"><span class="pre">/thrust</span></code> to <code class="docutils literal notranslate"><span class="pre">/cmd</span></code>, since the units change.</p>
 <p>Documentation: both vehicles’ actuator pages move to the new topic and units, and the phase 1 walkthrough is re-run and corrected against the new interface rather than left to drift.</p>
@@ -532,7 +532,7 @@
 </ol>
 </section>
 <section id="phase-2-999-patches-from-pr-58">
-<h3>Phase 2.999 — Patches from PR #58<a class="headerlink" href="#phase-2-999-patches-from-pr-58" title="Link to this heading"></a></h3>
+<span id="phase-2999--patches-from-pr-58"></span><h3>Phase 2.999 — Patches from PR #58<a class="headerlink" href="#phase-2-999-patches-from-pr-58" title="Link to this heading"></a></h3>
 <p><strong>Objective:</strong> make the versions we depend on reproducible. Current setup document doesnt name versions of ArduPilot and <code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo</span></code>Raised in review of this spec. A small PR, done before phase 3.</p>
 <p>The simplest thing that work: the setup document names the versions and the clone steps check them out. Nothing mechanized, nothing new to maintain for now.</p>
 <p><em>Verified by</em> following the setup document from a clean <code class="docutils literal notranslate"><span class="pre">thirdparty/</span></code> and then do both walkthroughs.</p>
@@ -550,7 +550,7 @@
 <p><em>Verified by</em> Not verified - just tell the agents to clean it up for now.</p>
 </section>
 <section id="phase-3-bluerov2-under-ardusub">
-<h3>Phase 3 — BlueROV2 under ArduSub<a class="headerlink" href="#phase-3-bluerov2-under-ardusub" title="Link to this heading"></a></h3>
+<span id="phase-3--bluerov2-under-ardusub"></span><h3>Phase 3 — BlueROV2 under ArduSub<a class="headerlink" href="#phase-3-bluerov2-under-ardusub" title="Link to this heading"></a></h3>
 <p><strong>Objective:</strong> have the BlueROV2 moving under ArduSub, bringing it up to the line the BlueBoat reached in phase 1. It shares the thruster interface from phase 2 and nothing else today — no <code class="docutils literal notranslate"><span class="pre">ArduPilotPlugin</span></code> block, no IMU frame, no parameter set, no SITL world — so this is phase 1 done again for a different vehicle: prove the plumbing and the channel mapping in the simplest mode, and leave fidelity to phase 5.</p>
 <ul class="simple">
 <li><p>ArduSub rather than ArduRover, built the same way and pinned the same way: a release tag paired with the matching published BlueROV2 parameter directory. Our derived file lands at <code class="docutils literal notranslate"><span class="pre">bluerov2_gazebo/params/bluerov2_sitl.params</span></code>, alongside the BlueBoat’s.  To be documented alongside blueboat.</p></li>
@@ -563,7 +563,7 @@
 <p><em>To be verified by</em> a walkthrough written alongside the work, in the shape of <a class="reference internal" href="../vehicles/blueboat/verify-sitl-boat.html"><span class="std std-doc">Verify the SITL connection (Boat)</span></a> but per axis: in <code class="docutils literal notranslate"><span class="pre">MANUAL</span></code>, arm, then command surge, sway, heave and yaw one at a time and confirm each produces that motion and no other. A cross-coupled response means the allocation is wrong; a reversed one means a thruster or a channel is. Magnitudes are not trusted yet, exactly as in phase 1.</p>
 </section>
 <section id="phase-4-stabilization-layer-boat">
-<h3>Phase 4 — Stabilization layer, boat<a class="headerlink" href="#phase-4-stabilization-layer-boat" title="Link to this heading"></a></h3>
+<span id="phase-4--stabilization-layer-boat"></span><h3>Phase 4 — Stabilization layer, boat<a class="headerlink" href="#phase-4-stabilization-layer-boat" title="Link to this heading"></a></h3>
 <p><strong>Objective:</strong> demonstrate the BlueBoat’s inner loops (yaw rate and surge ) behaving under Blue Robotics’ published gains the way the hardware boat does, by engineering judgement.  Requires the vehicle configuration to match the hardware and the hydrodynamics to be identified, which is most of the work.</p>
 <p>The boat is first b/c it is simpler</p>
 <p>Mode: ArduRover’s <code class="docutils literal notranslate"><span class="pre">ACRO</span></code>, where the throttle stick commands a speed and the steering stick commands a turn rate, so both inner loops are exercised directly. No waypoints, no navigation.</p>
@@ -613,7 +613,7 @@ both on a 14.8 V nominal pack.</p></li>
 </section>
 </section>
 <section id="phase-5-stabilization-layer-rov">
-<h3>Phase 5 — Stabilization layer, ROV<a class="headerlink" href="#phase-5-stabilization-layer-rov" title="Link to this heading"></a></h3>
+<span id="phase-5--stabilization-layer-rov"></span><h3>Phase 5 — Stabilization layer, ROV<a class="headerlink" href="#phase-5-stabilization-layer-rov" title="Link to this heading"></a></h3>
 <p><strong>Objective:</strong> the same exercise as phase 4, for the BlueROV2 under ArduSub, carrying whatever the boat taught. Held separate because the vehicle has more degrees of freedom, a different autopilot and a different set of loops, and because doing the simpler one first is how the pattern gets settled.</p>
 <p>Modes: ArduSub’s <code class="docutils literal notranslate"><span class="pre">STABILIZE</span></code> and <code class="docutils literal notranslate"><span class="pre">ALT_HOLD</span></code>. What they close is attitude and depth — forward and lateral remain direct motor demands, so the ROV’s objective is heading and depth holding rather than a commanded speed. There is no surge-speed loop to exercise.</p>
 <p>The work follows phase 4’s shape: thrust limits from Blue Robotics’ T200 data at the vehicle’s own voltage, an audit of the derived parameter file against the published chain, hydrodynamic identification, and a provenance page. Two things differ and are worth stating in advance.</p>
@@ -630,7 +630,7 @@ both on a 14.8 V nominal pack.</p></li>
 </section>
 </section>
 <section id="phase-6-waypoint-mission-boat-only">
-<h3>Phase 6 — Waypoint mission, boat only<a class="headerlink" href="#phase-6-waypoint-mission-boat-only" title="Link to this heading"></a></h3>
+<span id="phase-6--waypoint-mission-boat-only"></span><h3>Phase 6 — Waypoint mission, boat only<a class="headerlink" href="#phase-6-waypoint-mission-boat-only" title="Link to this heading"></a></h3>
 <p><strong>Objective:</strong> demonstrate one standard waypoint mission on the BlueBoat, flown unattended in <code class="docutils literal notranslate"><span class="pre">AUTO</span></code>. This is the autopilot layer above the phase 4 stabilization layer, kept to the minimum that shows it works: one small mission, completed, with the track judged against figures stated beforehand. It is also the broader test of the transfer claim, because the parameters governing it were tuned on the water.</p>
 <p>The inner loops are inherited unchanged: the waypoint controller produces a turn rate and a speed, and those go to the same <code class="docutils literal notranslate"><span class="pre">ATC_STR_RAT_*</span></code> and <code class="docutils literal notranslate"><span class="pre">ATC_SPEED_*</span></code> controllers phase 4 validated. One loop is new — <code class="docutils literal notranslate"><span class="pre">ATC_STR_ANG_P</span></code>, the heading controller, which a boat reaches on pivot turns at waypoints. That is the only control gain this phase puts under test for the first time, and it is worth naming so it does not arrive as a surprise.</p>
 <ul class="simple">
@@ -654,11 +654,11 @@ both on a 14.8 V nominal pack.</p></li>
 </section>
 </section>
 <section id="phase-7-removed">
-<h3>Phase 7 — Removed<a class="headerlink" href="#phase-7-removed" title="Link to this heading"></a></h3>
+<span id="phase-7--removed"></span><h3>Phase 7 — Removed<a class="headerlink" href="#phase-7-removed" title="Link to this heading"></a></h3>
 <p>This phase was waves, boat only: repeat phase 6’s mission in a wave field. It is removed because the boat cannot respond to waves yet. Buoyancy in gz-maritime acts at the flat z = 0 plane and the waves are only drawn; coupling buoyancy to the wave surface is the planned <code class="docutils literal notranslate"><span class="pre">gz_waves_buoyancy</span></code> consumer, which does not exist yet. Building it is wave modeling, not SITL integration, so it is out of scope here (see below). The number is kept so that references to phases 8 and 9 stay valid.</p>
 </section>
 <section id="phase-8-documentation-and-announce">
-<h3>Phase 8 — Documentation and Announce<a class="headerlink" href="#phase-8-documentation-and-announce" title="Link to this heading"></a></h3>
+<span id="phase-8--documentation-and-announce"></span><h3>Phase 8 — Documentation and Announce<a class="headerlink" href="#phase-8-documentation-and-announce" title="Link to this heading"></a></h3>
 <p><strong>Objective:</strong> The user-facing documention should be in the form of walkthroughs that simultaneously serve two purposes:</p>
 <ol class="arabic simple">
 <li><p>to demonstrate to a user the capability</p></li>
@@ -678,7 +678,7 @@ both on a 14.8 V nominal pack.</p></li>
 </section>
 </section>
 <section id="phase-9-upstream-the-thruster-mode">
-<h3>Phase 9 — Upstream the thruster mode<a class="headerlink" href="#phase-9-upstream-the-thruster-mode" title="Link to this heading"></a></h3>
+<span id="phase-9--upstream-the-thruster-mode"></span><h3>Phase 9 — Upstream the thruster mode<a class="headerlink" href="#phase-9-upstream-the-thruster-mode" title="Link to this heading"></a></h3>
 <p><strong>Objective:</strong> have the normalized mode in Gazebo itself and the fork gone. It is a liability while it lasts — a divergence from a <code class="docutils literal notranslate"><span class="pre">Thruster</span></code> that is not frozen, plus a <code class="docutils literal notranslate"><span class="pre">.repos</span></code> pin and a plugin name that exist only because the mode is not upstream yet. The delta is kept tiny so the eventual pull request stays readable.</p>
 <p>Timing matters: prepare it for <code class="docutils literal notranslate"><span class="pre">gz-sim</span></code> only once the mode has stopped changing. Then, once it is released in Gazebo, delete the local implementation along with the <code class="docutils literal notranslate"><span class="pre">.repos</span></code> pin that fetches it and the models’ reference to the forked plugin name.</p>
 <section id="id7">

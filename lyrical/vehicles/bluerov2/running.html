@@ -84,7 +84,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../getting-started/ardupilot_setup.html#smoke-test-iris-uav">Smoke test - Iris UAV</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../getting-started/ardupilot_setup.html#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../getting-started/ardupilot_setup.html#reference">Reference</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../getting-started/ardupilot_setup.html#why-a-venv-and-why-not-to-skip-it">Why a venv, and why not to skip it</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../getting-started/ardupilot_setup.html#why-a-venv">Why a venv, and why not to skip it</a></li>
 </ul>
 </li>
 </ul>
@@ -474,7 +474,11 @@ the <a class="reference internal" href="configuration.html"><span class="std std
 <td><p><code class="docutils literal notranslate"><span class="pre">true</span></code></p></td>
 <td><p>Launch the Gazebo GUI.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">use_composition</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rviz</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+<td><p>Start RViz on the instance’s frames.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">use_composition</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">true</span></code></p></td>
 <td><p>Run the server, the bridge and <code class="docutils literal notranslate"><span class="pre">robot_state_publisher</span></code> in one process.</p></td>
 </tr>
@@ -495,7 +499,13 @@ water one (unbounded water over a bare seabed, and the template for
 </section>
 <section id="in-rviz">
 <h2>In RViz<a class="headerlink" href="#in-rviz" title="Link to this heading"></a></h2>
-<p>To see the model in RViz:</p>
+<p>To watch the simulation in RViz, ask the sim launch for it:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>bluerov2_gazebo<span class="w"> </span>sim.launch.xml<span class="w"> </span>rviz:<span class="o">=</span><span class="nb">true</span>
+</pre></div>
+</div>
+<p>The frames carry the instance name (<code class="docutils literal notranslate"><span class="pre">&lt;name&gt;/base_link</span></code>), so this RViz has
+its fixed frame and its RobotModel TF prefix set to the instance.</p>
+<p>To see the model in RViz without Gazebo:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>bluerov2_description<span class="w"> </span>display.launch.xml
 </pre></div>
 </div>
@@ -503,10 +513,8 @@ water one (unbounded water over a bare seabed, and the template for
 spin the propellers) and RViz with the packaged config, showing the model
 and its frames (parts, slots, the camera and sonar frames). It takes the
 same <code class="docutils literal notranslate"><span class="pre">config_file:=</span></code> argument, and the xacro is expanded at launch time,
-so a custom config needs no rebuild. In a simulation the frames carry the instance name (<code class="docutils literal notranslate"><span class="pre">bluerov2/base_link</span></code>)
-and joint states arrive as <code class="docutils literal notranslate"><span class="pre">/bluerov2/joint_states</span></code>, so RViz next to
-<code class="docutils literal notranslate"><span class="pre">sim.launch.xml</span></code> needs its fixed frame, its RobotModel TF prefix and its
-joint states pointed at the instance.</p>
+so a custom config needs no rebuild. This launch stands alone: it runs a
+state publisher of its own, so do not run it next to <code class="docutils literal notranslate"><span class="pre">sim.launch.xml</span></code>.</p>
 </section>
 </section>
 

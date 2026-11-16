@@ -82,7 +82,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#smoke-test-iris-uav">Smoke test - Iris UAV</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../getting-started/ardupilot_setup.html#reference">Reference</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../getting-started/ardupilot_setup.html#why-a-venv-and-why-not-to-skip-it">Why a venv, and why not to skip it</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../getting-started/ardupilot_setup.html#why-a-venv">Why a venv, and why not to skip it</a></li>
 </ul>
 </li>
 </ul>
@@ -543,7 +543,7 @@
 </section>
 </section>
 <section id="a-note-on-ardupilot-sitl-models">
-<h2>A note on ArduPilot/SITL_Models<a class="headerlink" href="#a-note-on-ardupilot-sitl-models" title="Link to this heading"></a></h2>
+<span id="a-note-on-ardupilotsitl_models"></span><h2>A note on ArduPilot/SITL_Models<a class="headerlink" href="#a-note-on-ardupilot-sitl-models" title="Link to this heading"></a></h2>
 <p><a class="reference external" href="https://github.com/ArduPilot/SITL_Models">ArduPilot/SITL_Models</a> contains a Gazebo BlueBoat, and reviewers will reasonably ask why we are not simply using it.</p>
 <p>The meshes are the main reason. They are derived directly from Blue Robotics CAD — the visual assembly is roughly 285,000 triangles — which is heavy enough to slow real-time simulation in both physics and rendering. Our models are not only for simulation: the same geometry has to serve visualization in RViz, and it has to stay portable to simulators other than Gazebo rather than being tied to a SITL setup. That argues for artist-made low-poly visual meshes with simple primitive collision shapes, which is the approach this repository already takes, and it is not a change we could reasonably make to someone else’s model.</p>
 <p>It remains a good worked example. Its <code class="docutils literal notranslate"><span class="pre">ArduPilotPlugin</span></code> block shows the wiring — channel numbering, <code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">COMMAND</span></code>, <code class="docutils literal notranslate"><span class="pre">cmd_topic</span></code>, the two frame transforms — more clearly than any documentation does, and we will read it for that, alongside <code class="docutils literal notranslate"><span class="pre">orca4</span></code> and <code class="docutils literal notranslate"><span class="pre">bluerov2_gz</span></code>.</p>
@@ -602,7 +602,7 @@
 </tbody>
 </table>
 <section id="phase-0-toolchain">
-<h3>Phase 0 — Toolchain<a class="headerlink" href="#phase-0-toolchain" title="Link to this heading"></a></h3>
+<span id="phase-0--toolchain"></span><h3>Phase 0 — Toolchain<a class="headerlink" href="#phase-0-toolchain" title="Link to this heading"></a></h3>
 <p>Get <code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo</span></code> and the ArduPilot firmware building and running inside drydock, and prove the loop closes on a vehicle we did not write.</p>
 <ul class="simple">
 <li><p>Clone <code class="docutils literal notranslate"><span class="pre">ardupilot</span></code> and <code class="docutils literal notranslate"><span class="pre">ardupilot_gazebo</span></code> into a new <code class="docutils literal notranslate"><span class="pre">thirdparty/</span></code> directory in the workspace.</p></li>
@@ -614,7 +614,7 @@
 <p>Exit criterion: the stock Iris example arms, takes off and lands under MAVProxy, inside drydock. No boat involved.</p>
 </section>
 <section id="phase-1-first-flotation-and-manual">
-<h3>Phase 1 — First flotation and MANUAL<a class="headerlink" href="#phase-1-first-flotation-and-manual" title="Link to this heading"></a></h3>
+<span id="phase-1--first-flotation-and-manual"></span><h3>Phase 1 — First flotation and MANUAL<a class="headerlink" href="#phase-1-first-flotation-and-manual" title="Link to this heading"></a></h3>
 <p>Get the BlueBoat model moving under ArduRover, using the newtons interface exactly as it exists today. No plugin work — this phase proves the plumbing and the channel mapping, and deliberately does not wait on phase 2.</p>
 <ul class="simple">
 <li><p>Add an ArduPilot wrapper model alongside the existing one (see Layout, below).</p></li>
@@ -626,7 +626,7 @@
 <p>Exit criterion: <code class="docutils literal notranslate"><span class="pre">MANUAL</span></code> mode, arm, throttle forward, the boat moves forward; steer right, it turns right. Signs and channel mapping correct, magnitudes not yet trusted.</p>
 </section>
 <section id="phase-2-a-normalized-command-interface-on-the-thruster">
-<h3>Phase 2 — A normalized command interface on the thruster<a class="headerlink" href="#phase-2-a-normalized-command-interface-on-the-thruster" title="Link to this heading"></a></h3>
+<span id="phase-2--a-normalized-command-interface-on-the-thruster"></span><h3>Phase 2 — A normalized command interface on the thruster<a class="headerlink" href="#phase-2-a-normalized-command-interface-on-the-thruster" title="Link to this heading"></a></h3>
 <p>This one belongs in <code class="docutils literal notranslate"><span class="pre">gz-maritime</span></code>, which is intended as a sandbox for features headed to Gazebo. A normalized thruster command is vehicle-agnostic — it is the ordinary interface across UUV and USV work — so it does not belong in a vehicle repository.</p>
 <ul class="simple">
 <li><p>Fork <code class="docutils literal notranslate"><span class="pre">gz-sim-thruster-system</span></code> into a package we own. It is a system plugin, so it builds as a standalone shared library against the installed gz-sim development headers and is loaded by filename: no Gazebo source build, no change to the installed Gazebo.</p></li>
@@ -638,7 +638,7 @@
 <p>Exit criterion: the BlueBoat runs end to end on the new mode, with the ArduPilot <code class="docutils literal notranslate"><span class="pre">&lt;control&gt;</span></code> block reduced to a pure PWM-to-normalized mapping carrying no vehicle physics, and phase 1 behavior reproduced.</p>
 </section>
 <section id="phase-3-actuator-fidelity">
-<h3>Phase 3 — Actuator fidelity<a class="headerlink" href="#phase-3-actuator-fidelity" title="Link to this heading"></a></h3>
+<span id="phase-3--actuator-fidelity"></span><h3>Phase 3 — Actuator fidelity<a class="headerlink" href="#phase-3-actuator-fidelity" title="Link to this heading"></a></h3>
 <p>Make the thrust the firmware asks for equal the thrust the water sees.</p>
 <ul class="simple">
 <li><p>Check <code class="docutils literal notranslate"><span class="pre">max_thrust_cmd</span></code> 51.5 and <code class="docutils literal notranslate"><span class="pre">min_thrust_cmd</span></code> -40.2 against Blue Robotics’ published T200 data at the boat’s actual battery voltage. These are the numbers ±1 maps to, so they are now the whole actuator calibration.</p></li>
@@ -653,7 +653,7 @@
 <p>This is the first real test of the transfer claim, and it is deliberately stated so that it can fail.</p>
 </section>
 <section id="phase-4-waves">
-<h3>Phase 4 — Waves<a class="headerlink" href="#phase-4-waves" title="Link to this heading"></a></h3>
+<span id="phase-4--waves"></span><h3>Phase 4 — Waves<a class="headerlink" href="#phase-4-waves" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Run against <code class="docutils literal notranslate"><span class="pre">gz_waves</span></code> with the Gerstner provider first, then FFT.</p></li>
 <li><p>Characterize the known FFT-versus-Gerstner buoyancy lag as it appears to the EKF.</p></li>
@@ -663,7 +663,7 @@
 <p>Exit criterion: the boat holds <code class="docutils literal notranslate"><span class="pre">LOITER</span></code> within a stated radius in a stated sea state, and the EKF does not diverge. Radius and sea state to be chosen — numbers we pick now and defend later.</p>
 </section>
 <section id="phase-5-missions">
-<h3>Phase 5 — Missions<a class="headerlink" href="#phase-5-missions" title="Link to this heading"></a></h3>
+<span id="phase-5--missions"></span><h3>Phase 5 — Missions<a class="headerlink" href="#phase-5-missions" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">AUTO</span></code> mode, a survey lawnmower pattern, waypoints, <code class="docutils literal notranslate"><span class="pre">WP_SPEED</span></code> and <code class="docutils literal notranslate"><span class="pre">TURN_RADIUS</span></code> from the factory defaults.</p></li>
 <li><p>Failsafes behave: GCS loss, low battery, arming checks.</p></li>
@@ -671,7 +671,7 @@
 <p>Exit criterion: an unattended survey mission completes and the track is plausible against <code class="docutils literal notranslate"><span class="pre">CRUISE_SPEED</span></code> 1 m/s and <code class="docutils literal notranslate"><span class="pre">TURN_RADIUS</span></code> 0.1 m. The second and broader test of the transfer claim.</p>
 </section>
 <section id="phase-6-packaging-documentation-upstreaming">
-<h3>Phase 6 — Packaging, documentation, upstreaming<a class="headerlink" href="#phase-6-packaging-documentation-upstreaming" title="Link to this heading"></a></h3>
+<span id="phase-6--packaging-documentation-upstreaming"></span><h3>Phase 6 — Packaging, documentation, upstreaming<a class="headerlink" href="#phase-6-packaging-documentation-upstreaming" title="Link to this heading"></a></h3>
 <p>Launch files, a <code class="docutils literal notranslate"><span class="pre">docs/</span></code> page in the style of the existing ones, CI, and a decision on whether any of this is testable headlessly. Then, separately and only once the thruster mode has stopped changing, prepare it for <code class="docutils literal notranslate"><span class="pre">gz-sim</span></code> upstream.</p>
 </section>
 </section>
