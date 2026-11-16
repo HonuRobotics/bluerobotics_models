@@ -169,9 +169,8 @@ The quadcopter should lift off in the Gazebo window and hold five meters.
 ```{figure} images/iris_takeoff.png
 :alt: The Iris quadcopter hovering above the runway, with the MAVProxy console and map alongside
 
-The Iris holding altitude under ArduCopter. This is phase 0 complete: the
-firmware, the plugin and the ground station are all talking, on a vehicle
-nobody here has modified.
+The Iris holding altitude under ArduCopter.  The
+firmware (ardu), the gazebo plugin and the ground station(mavproxy) are all talking on the standard example
 ```
 
 ## Troubleshooting
