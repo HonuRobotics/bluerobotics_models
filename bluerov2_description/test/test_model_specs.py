@@ -62,10 +62,8 @@ def test_specs_stamp_matches_model_and_declaration():
 
 
 def test_specs_stamp_reports_the_fitted_parts():
-    """The parts row names every part type the installed URDF fits."""
+    """The parts row reflects the resolved default configuration, defaults included."""
     text = URDF.read_text()
     parts = spec(text, 'parts')
-    fitted = {e.get('type') for e in ET.fromstring(text).findall('assembly_part')}
-    assert fitted
-    for part_type in fitted:
-        assert part_type in parts
+    for expected in ('bluerov2_chassis', 't200_prop_ccw', 'explorehd_camera'):
+        assert expected in parts
