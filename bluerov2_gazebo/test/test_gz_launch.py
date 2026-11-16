@@ -32,7 +32,7 @@ import time
 import uuid
 
 from ament_index_python.packages import get_package_share_directory
-from conftest import launch_sim, make_cli, poll_until, REPORT_TABLES
+from conftest import launch_sim, make_cli, poll_until, REPORT_TABLES, shipped_has_camera
 import pytest
 import yaml
 
@@ -255,12 +255,6 @@ def test_physics_steps(sim):
         return (code == 0 and 'iterations' in out
                 and int(out.split('iterations:')[1].split()[0]) > 0)
     poll_until(advancing, 30, 'sim iterations did not advance')
-
-
-def shipped_has_camera():
-    """Whether the installed (shipped config) URDF fits a camera."""
-    urdf = Path(get_package_share_directory('bluerov2_description')) / 'urdf' / 'bluerov2.urdf'
-    return '<link name="camera">' in urdf.read_text()
 
 
 def test_camera_renders(sim):

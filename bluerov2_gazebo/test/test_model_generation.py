@@ -23,6 +23,7 @@ import xml.etree.ElementTree as ET
 from ament_index_python.packages import (get_package_prefix,
                                          get_package_share_directory)
 from bluerobotics_parts import assembly
+from conftest import kit_config, kit_config_text
 import pytest
 import yaml
 
@@ -57,21 +58,6 @@ buoyancy: {net_buoyancy: 0.002, cob_offset: "0 0 0.046", cob_frame: com,
 def default_config():
     """Return the shipped default vehicle config text."""
     return (DESC_SHARE / 'config' / 'bluerov2.yaml').read_text()
-
-
-def kit_config():
-    """
-    Return the tests' own vehicle config text.
-
-    The shipped hull, namespace and buoyancy with every slot filling with its
-    default (six props, their bodies and the camera). Independent of what the
-    shipped config fits, so these tests follow the generators' rules rather
-    than the current product.
-    """
-    cfg = yaml.safe_load(default_config())
-    cfg['slot_defaults'] = True
-    cfg['parts'] = []
-    return yaml.safe_dump(cfg, sort_keys=False)
 
 
 def urdf_for(config_text):
@@ -127,14 +113,14 @@ def test_model_generation_follows_config():
     assert not plugins(root, 'gz-sim-hydrodynamics-system')
     by_type = {s.get('type') for s in root.iter('sensor')}
     assert by_type == {'camera', 'rgbd_camera', 'gpu_lidar', 'custom'}
-    root, _ = gen_model(kit_config())
+    root, _ = gen_model(kit_config_text())
     assert len(plugins(root, 'gz-maritime-thruster-system')) == 6
     assert {s.get('type') for s in root.iter('sensor')} == {'camera'}
 
 
 def test_thrusters_follow_the_propeller_parts():
     """One Thruster per propeller, on its joint, with balanced coefficients."""
-    root, _ = gen_model(kit_config())
+    root, _ = gen_model(kit_config_text())
     thrusters = plugins(root, 'gz-maritime-thruster-system')
     coeffs = {t.find('joint_name').text: float(t.find('thrust_coefficient').text)
               for t in thrusters}
@@ -153,7 +139,7 @@ def test_dvl_backend_loads_only_with_a_dvl():
     DopplerVelocityLogSystem joins every render iteration once any rendering
     sensor exists and costs half or more of the real time factor.
     """
-    root, _ = gen_model(kit_config())
+    root, _ = gen_model(kit_config_text())
     assert not plugins(root, 'gz-sim-dvl-system')
     root, _ = gen_model(FULL_CONFIG)
     assert len(plugins(root, 'gz-sim-dvl-system')) == 1
@@ -165,11 +151,11 @@ def test_dvl_backend_loads_only_with_a_dvl():
 
 def test_buoyancy_displacement_realizes_the_declaration():
     """The displacement box solves density * volume = mass + net at the CoB."""
-    cfg = yaml.safe_load(kit_config())
+    cfg = kit_config()
     declared = cfg['buoyancy']
-    urdf_root, _, _, _ = urdf_for(kit_config())
+    urdf_root, _, _, _ = urdf_for(kit_config_text())
     total, com = assembly.mass_properties(urdf_root)
-    root, _ = gen_model(kit_config())
+    root, _ = gen_model(kit_config_text())
     link = root.find('.//link[@name="buoyancy_displacement"]')
     assert link is not None
     size = [float(v) for v in link.find('.//box/size').text.split()]
@@ -258,7 +244,7 @@ def sdf_gz_topics(root):
 
 def test_sensor_and_bridge_topics_agree():
     """Model gz topics equal generated bridge gz topics, by construction."""
-    for config in (kit_config(), FULL_CONFIG):
+    for config in (kit_config_text(), FULL_CONFIG):
         root, _ = gen_model(config)
         sdf_topics = sdf_gz_topics(root)
         cfg = yaml.safe_load(config)
@@ -281,7 +267,7 @@ def test_installed_artifacts_match_shipped_config():
 
 def test_world_fluid_density_matches_the_description():
     """The worlds' buoyancy density equals the config's declaration."""
-    declared = yaml.safe_load(kit_config())['buoyancy']
+    declared = kit_config()['buoyancy']
     for world in ('bluerov2_water.sdf', 'bluerov2_pool.sdf',
                   'bluerov2_playground.sdf'):
         text = (GZ_SHARE / 'worlds' / world).read_text()
@@ -298,14 +284,14 @@ def test_model_name_follows_the_topic_namespace():
 
 def test_ardupilot_variant_is_additive():
     """ardupilot:=false generates exactly what it always did."""
-    plain, plain_text = gen_model(kit_config())
+    plain, plain_text = gen_model(kit_config_text())
     assert not plugins(plain, 'ArduPilotPlugin')
     assert 'imu_sensor' not in plain_text
 
 
 def test_ardupilot_controls_follow_the_thrusters():
     """One <control> per propeller, on the channel ArduSub expects."""
-    root, _ = gen_model(kit_config(), ardupilot=True)
+    root, _ = gen_model(kit_config_text(), ardupilot=True)
     ap = plugins(root, 'ArduPilotPlugin')
     assert len(ap) == 1, 'expected exactly one ArduPilotPlugin'
     controls = ap[0].findall('control')
@@ -335,7 +321,7 @@ def test_ardupilot_controls_follow_the_thrusters():
 
 def test_ardupilot_imu_is_the_declared_frame():
     """The imuName resolves to the sensor on the chassis's imu frame."""
-    root, _ = gen_model(kit_config(), ardupilot=True)
+    root, _ = gen_model(kit_config_text(), ardupilot=True)
     ap = plugins(root, 'ArduPilotPlugin')[0]
     link, sensor = ap.find('imuName').text.split('::')
     links = {ln.get('name'): ln for ln in root.iter('link')}

@@ -21,6 +21,7 @@ import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import (get_package_prefix,
                                          get_package_share_directory)
+from conftest import kit_config
 import yaml
 
 GZ_SHARE = Path(get_package_share_directory('bluerov2_gazebo'))
@@ -28,20 +29,6 @@ DESC_SHARE = Path(get_package_share_directory('bluerov2_description'))
 TOOL = (Path(get_package_prefix('bluerov2_gazebo')) / 'lib' / 'bluerov2_gazebo'
         / 'configure_vehicle.py')
 DEFAULT_CONFIG = DESC_SHARE / 'config' / 'bluerov2.yaml'
-
-
-def kit_config(parts=()):
-    """
-    Return the tests' own vehicle.
-
-    The shipped hull, namespace and buoyancy, every slot filling with its
-    default, plus parts. Independent of what the shipped config fits, so these
-    tests follow the tool's behavior rather than the current product.
-    """
-    cfg = yaml.safe_load(DEFAULT_CONFIG.read_text())
-    cfg['slot_defaults'] = True
-    cfg['parts'] = [dict(p) for p in parts]
-    return cfg
 
 
 def configure(config_path, out_dir):
