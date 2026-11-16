@@ -172,7 +172,6 @@ The approach here is worth considering.   Typically we tune controllers to compe
 so the reference is ArduSub's own firmware defaults, written out explicitly
 in the parameter file — see
 [Parameters](../vehicles/bluerov2/parameters.md).  The reason we can use ArduSub's defaults, is because those are also Blue Robotics defaults. 
-```
 
 ## If a row is wrong
 
