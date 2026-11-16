@@ -2,7 +2,8 @@
 <!--
   Visualize the BlueROV2 description in RViz: robot_state_publisher,
   joint_state_publisher_gui (sliders to spin the thrusters) and RViz with the
-  packaged config. Pure ROS/description - no Gazebo. The URDF is expanded by
+  packaged config. Pure ROS/description - no Gazebo. Run it on its own: next to
+  a simulation, use sim.launch.xml rviz:=true instead. The URDF is expanded by
   xacro at launch time from `config_file`, so a custom set of accessories needs
   no rebuild (handy for binary/deb installs); the default config reproduces the
   build-time URDF exactly.

@@ -31,8 +31,9 @@ parts too: an assembly is a chassis plus whatever its slots carry.
 | `omniscan_450_sidescan` | Cerulean Omniscan 450 side scan sonar | [link](https://bluerobotics.com/store/the-reef/cerulean-sidescan-sonar/) | geometry only |
 | `surveyor_multibeam` | Cerulean Surveyor 240-16 multibeam | [link](https://bluerobotics.com/store/sonars/echosounders/cerulean-surveyor-240-16-multibeam-echosounder/) | geometry only |
 
-Parts whose final mesh has not landed yet use placeholder geometry; a
+Parts whose final mesh has not been delivered yet use placeholder geometry; a
 `type` marked pending delivery cannot be fitted until its macro lands.
+The BlueROV2 sensor parts (`explorehd_camera`, `ping360`, `dvl_a50`) carry no visual for now: accessory visuals are out of scope, and each sensor works from its part's frame.
 
 ## Slots
 

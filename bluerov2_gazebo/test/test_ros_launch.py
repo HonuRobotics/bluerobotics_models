@@ -22,9 +22,11 @@ and robot_state_publisher, all headless (gui:=false).
 
 import functools
 import os
+from pathlib import Path
 import signal
 import uuid
 
+from ament_index_python.packages import get_package_share_directory
 from conftest import launch_sim, make_cli, poll_until, stop_process_group
 import pytest
 
@@ -69,8 +71,20 @@ def test_robot_description_published(sim):
     assert code == 0 and 'bluerov2' in out, f'no latched description\n{err}'
 
 
+def shipped_has_camera():
+    """Whether the installed (shipped config) URDF fits a camera."""
+    urdf = Path(get_package_share_directory('bluerov2_description')) / 'urdf' / 'bluerov2.urdf'
+    return '<link name="camera">' in urdf.read_text()
+
+
 def test_camera_topic_bridged(sim):
-    """The default configuration's camera topics exist on the ROS graph."""
+    """
+    The shipped configuration's camera topics exist on the ROS graph.
+
+    Skipped when the shipped config fits no camera.
+    """
+    if not shipped_has_camera():
+        pytest.skip('the shipped config fits no camera')
     poll_until(
         lambda: '/bluerov2/camera/image' in ros(sim, 'topic', 'list')[1], 30,
         lambda: 'camera topic not bridged; last listing:\n'
