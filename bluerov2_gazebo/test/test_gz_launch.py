@@ -182,6 +182,16 @@ def _angle_deg(v, axis):
     return math.degrees(math.acos(max(-1.0, min(1.0, cos))))
 
 
+def max_tilt_deg(track):
+    """Largest |roll| and |pitch| over a pose track, in degrees."""
+    roll = pitch = 0.0
+    for _, _, (qw, qx, qy, qz) in track:
+        r = math.atan2(2 * (qw * qx + qy * qz), 1 - 2 * (qx * qx + qy * qy))
+        p = math.asin(max(-1.0, min(1.0, 2 * (qw * qy - qz * qx))))
+        roll, pitch = max(roll, abs(r)), max(pitch, abs(p))
+    return math.degrees(roll), math.degrees(pitch)
+
+
 def latch_thrusters(env, mapping, period=0.3):
     """
     Hold normalized thrust commands [-1, 1] by republishing them until released.
@@ -298,6 +308,12 @@ MIXER_YAML = (Path(__file__).resolve().parents[2] / 'bluerobotics_teleop'
 AXIS_COMMAND = 0.5
 SPEED_FACTOR = 10.0
 DIRECTION_DEG = 25.0
+# Surge and sway must also hold the vehicle level: a body-frame velocity
+# check alone passes a vehicle that pitches up and climbs, since it still
+# moves "forward" in its own frame. Thrust and drag on different lines tilt
+# it; buoyancy only rights it so far.
+TILT_DEG = 10.0
+TILT_AXES = ('surge', 'sway')
 AXES = {
     # name: (twist index, mixer key, body axis, expected, unit, linear?)
     'surge': (0, 'gains_linear_x', (1, 0, 0), 0.75, 'm/s', True),
@@ -321,7 +337,8 @@ POOL = {'x': 12.3, 'y': 12.3, 'z_top': -0.3, 'z_bottom': -4.7}
 # limits, not just pass or fail. In the terminal and in the colcon test log.
 AXIS_TABLE = 'Axis command results'
 AXIS_HEAD = ('case', 'expected', 'speed limits', 'measured', 'ratio',
-             f'off axis (<= {DIRECTION_DEG:g})', 'body rate x, y, z', 'result')
+             f'off axis (<= {DIRECTION_DEG:g})', f'roll, pitch (<= {TILT_DEG:g})',
+             'body rate x, y, z', 'result')
 
 
 def mixer_commands(axis, sign):
@@ -376,13 +393,19 @@ def test_axis_command_moves_the_vehicle(sim, axis, sign):
               f'({", ".join(f"{c:+.3f}" for c in rate)}), expected {expected:.3f}, '
               f'commands {commands}')
     lo, hi = expected / SPEED_FACTOR, expected * SPEED_FACTOR
-    ok = off_axis <= DIRECTION_DEG and lo <= speed <= hi
+    roll, pitch = max_tilt_deg(track)
+    level = axis not in TILT_AXES or max(roll, pitch) <= TILT_DEG
+    ok = off_axis <= DIRECTION_DEG and lo <= speed <= hi and level
     REPORT_TABLES.setdefault(AXIS_TABLE, [AXIS_HEAD]).append((
         f'{axis} {"+" if sign > 0 else "-"}', f'{expected:.3f} {unit}',
         f'{lo:.3g} - {hi:.3g}', f'{speed:.3f} {unit}', f'{speed / expected:.2f}',
-        f'{off_axis:.1f} deg', ', '.join(f'{c:+.3f}' for c in rate),
+        f'{off_axis:.1f} deg', f'{roll:.1f}, {pitch:.1f} deg',
+        ', '.join(f'{c:+.3f}' for c in rate),
         'pass' if ok else 'FAIL'))
     assert off_axis <= DIRECTION_DEG, (
         f'{detail}: motion is {off_axis:.1f} deg off the commanded axis')
     assert expected / SPEED_FACTOR <= speed <= expected * SPEED_FACTOR, (
         f'{detail}: speed outside a factor of {SPEED_FACTOR:g} of expected')
+    assert level, (
+        f'{detail}: tilted {roll:.1f} deg roll, {pitch:.1f} deg pitch '
+        f'(limit {TILT_DEG:g}); thrust and drag are not on one line')
