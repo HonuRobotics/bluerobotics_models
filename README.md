@@ -18,6 +18,10 @@ Start with the [Quickstarts](https://honurobotics.github.io/bluerobotics_models/
 Developer workflow (build, tests, pre-commit hooks, conventions):
 see [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Blender assemblies (Git LFS)
+
+The Blender assemblies in `bluerobotics_parts/assemblies/` are stored with Git LFS. Nothing builds from them, so a plain clone is enough to build and run. To get the files themselves, install Git LFS and, in the clone, run `git lfs install` and then `git lfs pull`. If Git LFS was already installed when you cloned, they came down with the clone; set `GIT_LFS_SKIP_SMUDGE=1` when cloning to skip them.
+
 ## License
 
 Apache-2.0 (see [LICENSE](LICENSE)). Reused third-party meshes are credited in
