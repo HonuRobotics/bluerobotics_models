@@ -73,7 +73,7 @@ this bridge config carries. A controller binds to one boat through those
 topics: the [teleop stack](teleop.md#a-named-instance-or-two) takes
 `name:=boat_b` and runs under `/boat_b`, so a second stack on a second
 gamepad drives `boat_a` alongside it. The boats float there under any name because
-their displacement collisions are marked ([Buoyancy](../design/buoyancy.md)).
+their displacement collisions are marked ([Buoyancy](../developers/design/buoyancy.md)).
 In this repository's own worlds, buoyancy is enabled by model name
 (`<enable>blueboat::hull_displacement</enable>`), so a renamed instance
 needs its own `<enable>` line in a copy of the world.

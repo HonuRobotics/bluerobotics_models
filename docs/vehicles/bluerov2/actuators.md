@@ -1,10 +1,10 @@
 # Actuators
 
 Actuators are parts fitted into slots, exactly like the sensors. The
-concepts live in [Slots and assembly](../../design/slots.md), the
+concepts live in [Slots and assembly](../../developers/design/slots.md), the
 vehicle's slots and their accepted types in the
 [configuration page](configuration.md), and new parts can be added
-following the [Add a part](../../how-to/add-part.md) guide.
+following the [Add a part](../../developers/add-part.md) walkthrough.
 
 ## Available actuators
 
@@ -30,7 +30,7 @@ Each thruster plugin subscribes to a gz transport topic. Each of those gz
 topics is bridged to ROS and indexed by number, starting at 1, under the
 instance name, `<name>`: `bluerov2` for the default instance, which the
 commands below use, or whatever the vehicle was spawned as
-([Several vehicles](../../how-to/namespaces.md)).
+([Several vehicles](../../walkthroughs/namespaces.md)).
 
 | ROS Topic | Description | Message type |
 |---|---|---|
@@ -82,7 +82,7 @@ thrusters.
 
 
 To drive with a gamepad instead, a ready mixer for either vehicle is in
-[Teleoperate with a gamepad](../../how-to/teleop.md).
+[Teleoperate with a gamepad](../../walkthroughs/teleop.md).
 
 ## Gazebo transport API
 
