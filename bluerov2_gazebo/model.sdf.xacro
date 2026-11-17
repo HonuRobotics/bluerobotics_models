@@ -479,7 +479,7 @@
            center of the frame's footprint on its bottom plane): on the
            horizontal-thrust plane, so surge and sway drag act on the same
            line as the horizontal thrust. A first estimate, not identified. -->
-      <center_of_pressure>0 0 0.128304</center_of_pressure>
+      <center_of_pressure>0 0 0.128319</center_of_pressure>
       <xU>0</xU>   <yV>0</yV>   <zW>0</zW>
       <kP>0</kP>   <mQ>0</mQ>   <nR>0</nR>
       <xUabsU>-39.2</xUabsU>
