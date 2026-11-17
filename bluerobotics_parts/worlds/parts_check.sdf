@@ -349,7 +349,7 @@
           <pose>-1.60 -1.60 0.8 0 0 0</pose>
         <link name='bluerov2_chassis'>
           <inertial>
-            <pose>0.0097937300000000005 -0.00022557600000000001 0.010999999999999999 0 0 0</pose>
+            <pose>0.0065337299999999997 -0.00022557600000000001 0.19885 0 0 0</pose>
             <mass>9.3599999999999994</mass>
             <inertia>
               <ixx>0.13992979999999999</ixx>
@@ -361,7 +361,7 @@
             </inertia>
           </inertial>
           <collision name='bluerov2_chassis_collision'>
-            <pose>0.0091190000000000004 0 0 0 1.5707963267948966 0</pose>
+            <pose>0.0058589999999999996 0 0.18784999999999999 0 1.5707963267948966 0</pose>
             <geometry>
               <cylinder>
                 <length>0.35501300000000002</length>
@@ -370,7 +370,7 @@
             </geometry>
           </collision>
           <collision name='bluerov2_chassis_collision_1'>
-            <pose>0.010900999999999999 0 -0.11498700000000001 0 1.5707963267948966 0</pose>
+            <pose>0.0076410000000000002 0 0.072862999999999997 0 1.5707963267948966 0</pose>
             <geometry>
               <cylinder>
                 <length>0.29096699999999998</length>
@@ -379,7 +379,7 @@
             </geometry>
           </collision>
           <collision name='bluerov2_chassis_collision_2'>
-            <pose>0.143232 -0.109491 0.019975 0 0 0</pose>
+            <pose>0.13997200000000001 -0.109491 0.20782500000000001 0 0 0</pose>
             <geometry>
               <box>
                 <size>0.163831 0.100479 0.085131999999999999</size>
@@ -387,7 +387,7 @@
             </geometry>
           </collision>
           <collision name='bluerov2_chassis_collision_3'>
-            <pose>0.143232 0.108931 0.019975 0 0 0</pose>
+            <pose>0.13997200000000001 0.108931 0.20782500000000001 0 0 0</pose>
             <geometry>
               <box>
                 <size>0.163831 0.100479 0.085131999999999999</size>
@@ -395,7 +395,7 @@
             </geometry>
           </collision>
           <collision name='bluerov2_chassis_collision_4'>
-            <pose>-0.115357 -0.109491 0.019975 0 0 0</pose>
+            <pose>-0.118617 -0.109491 0.20782500000000001 0 0 0</pose>
             <geometry>
               <box>
                 <size>0.16678899999999999 0.100479 0.085131999999999999</size>
@@ -403,7 +403,7 @@
             </geometry>
           </collision>
           <collision name='bluerov2_chassis_collision_5'>
-            <pose>-0.115357 0.108931 0.019975 0 0 0</pose>
+            <pose>-0.118617 0.108931 0.20782500000000001 0 0 0</pose>
             <geometry>
               <box>
                 <size>0.16678899999999999 0.100479 0.085131999999999999</size>
@@ -411,7 +411,7 @@
             </geometry>
           </collision>
           <collision name='bluerov2_chassis_collision_6'>
-            <pose>0.011554 0 -0.17038 0 0 0</pose>
+            <pose>0.0082939999999999993 0 0.017469999999999999 0 0 0</pose>
             <geometry>
               <box>
                 <size>0.24904499999999999 0.31897399999999998 0.012070000000000001</size>
@@ -419,7 +419,7 @@
             </geometry>
           </collision>
           <collision name='bluerov2_chassis_collision_7'>
-            <pose>0.002147 -0.16262499999999999 -0.056151 0 1.5707963267948966 0</pose>
+            <pose>-0.0011130000000000001 -0.16262499999999999 0.13169900000000001 0 1.5707963267948966 0</pose>
             <geometry>
               <box>
                 <size>0.24238199999999999 0.011872000000000001 0.42508800000000002</size>
@@ -427,7 +427,7 @@
             </geometry>
           </collision>
           <collision name='bluerov2_chassis_collision_8'>
-            <pose>0.002147 0.16115099999999999 -0.056151 0 1.5707963267948966 0</pose>
+            <pose>-0.0011130000000000001 0.16115099999999999 0.13169900000000001 0 1.5707963267948966 0</pose>
             <geometry>
               <box>
                 <size>0.24238199999999999 0.011872000000000001 0.42508800000000002</size>
@@ -435,7 +435,7 @@
             </geometry>
           </collision>
           <visual name='bluerov2_chassis_visual'>
-            <pose>0.0032599999999999999 0 -0.18784999999999999 1.5708 -5.5511151231257827e-17 1.5708</pose>
+            <pose>0 0 0 1.5708 -5.5511151231257827e-17 1.5708</pose>
             <geometry>
               <mesh>
                 <scale>1 1 1</scale>
@@ -444,122 +444,116 @@
             </geometry>
           </visual>
         </link>
-        <frame name='base_footprint_joint' attached_to='bluerov2_chassis'>
-          <pose>0.0032599999999999999 0 -0.18784999999999999 0 0 0</pose>
-        </frame>
-        <frame name='base_footprint' attached_to='base_footprint_joint'>
-          <pose>0 0 0 0 0 0</pose>
-        </frame>
         <frame name='bluerov2_chassis_camera_joint' attached_to='bluerov2_chassis'>
-          <pose>0.22 0 0.050000000000000003 0 0 0</pose>
+          <pose>0.21673999999999999 0 0.23785000000000001 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_camera' attached_to='bluerov2_chassis_camera_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_dvl_joint' attached_to='bluerov2_chassis'>
-          <pose>-0.12 0 -0.14000000000000001 0 0 0</pose>
+          <pose>-0.12325999999999999 0 0.047849999999999997 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_dvl' attached_to='bluerov2_chassis_dvl_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_gripper_joint' attached_to='bluerov2_chassis'>
-          <pose>0.28000000000000003 0 -0.080000000000000002 0 0 0</pose>
+          <pose>0.27673999999999999 0 0.10785 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_gripper' attached_to='bluerov2_chassis_gripper_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_imu_joint' attached_to='bluerov2_chassis'>
-          <pose>0 0 0 0 0 0</pose>
+          <pose>-0.0032599999999999999 0 0.18784999999999999 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_imu' attached_to='bluerov2_chassis_imu_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_payload_joint' attached_to='bluerov2_chassis'>
-          <pose>0 0 -0.17000000000000001 0 0 0</pose>
+          <pose>-0.0032599999999999999 0 0.017850000000000001 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_payload' attached_to='bluerov2_chassis_payload_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_rack_joint' attached_to='bluerov2_chassis'>
-          <pose>0 0 0.17000000000000001 0 0 0</pose>
+          <pose>-0.0032599999999999999 0 0.35785 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_rack' attached_to='bluerov2_chassis_rack_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_sonar_joint' attached_to='bluerov2_chassis'>
-          <pose>0.16 0 0.13 0 0 0</pose>
+          <pose>0.15673999999999999 0 0.31785000000000002 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_sonar' attached_to='bluerov2_chassis_sonar_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_1_joint' attached_to='bluerov2_chassis'>
-          <pose>0.15650500000000001 -0.090999999999999998 -0.059546000000000002 3.1415926535897931 -7.3464102067096726e-06 -2.356192653589793</pose>
+          <pose>0.15324499999999999 -0.090999999999999998 0.128304 3.1415926535897931 -7.3464102067096726e-06 -2.356192653589793</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_1' attached_to='bluerov2_chassis_thruster_1_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_2_joint' attached_to='bluerov2_chassis'>
-          <pose>0.15650500000000001 0.090999999999999998 -0.059546000000000002 -3.1415926535897931 -7.3464102067096726e-06 2.356192653589793</pose>
+          <pose>0.15324499999999999 0.090999999999999998 0.128304 -3.1415926535897931 -7.3464102067096726e-06 2.356192653589793</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_2' attached_to='bluerov2_chassis_thruster_2_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_3_joint' attached_to='bluerov2_chassis'>
-          <pose>-0.14449500000000001 -0.089499999999999996 -0.059546000000000002 3.1415853071795872 -4.2351647362715017e-22 -0.78540000000000032</pose>
+          <pose>-0.147755 -0.089499999999999996 0.128304 3.1415853071795872 -4.2351647362715017e-22 -0.78540000000000032</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_3' attached_to='bluerov2_chassis_thruster_3_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_4_joint' attached_to='bluerov2_chassis'>
-          <pose>-0.14449500000000001 0.089499999999999996 -0.059546000000000002 3.1415853071795872 4.2351647362715017e-22 0.78540000000000032</pose>
+          <pose>-0.147755 0.089499999999999996 0.128304 3.1415853071795872 4.2351647362715017e-22 0.78540000000000032</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_4' attached_to='bluerov2_chassis_thruster_4_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_5_joint' attached_to='bluerov2_chassis'>
-          <pose>0.016805 -0.111 0.001954 1.570792653590656 -1.5707926536662187 3.1415926535897931</pose>
+          <pose>0.013545 -0.111 0.189804 1.570792653590656 -1.5707926536662187 3.1415926535897931</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_5' attached_to='bluerov2_chassis_thruster_5_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_6_joint' attached_to='bluerov2_chassis'>
-          <pose>0.013905000000000001 0.111 -0.0047460000000000002 -1.5707926535906547 -1.5707926537266703 3.1415926535746803</pose>
+          <pose>0.010645 0.111 0.18310399999999999 -1.5707926535906547 -1.5707926537266703 3.1415926535746803</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_6' attached_to='bluerov2_chassis_thruster_6_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_body_1_joint' attached_to='bluerov2_chassis'>
-          <pose>0.15650500000000001 -0.090999999999999998 -0.059546000000000002 3.1415926535897931 -7.3464102067096726e-06 -2.356192653589793</pose>
+          <pose>0.15324499999999999 -0.090999999999999998 0.128304 3.1415926535897931 -7.3464102067096726e-06 -2.356192653589793</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_body_1' attached_to='bluerov2_chassis_thruster_body_1_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_body_2_joint' attached_to='bluerov2_chassis'>
-          <pose>0.15650500000000001 0.090999999999999998 -0.059546000000000002 -3.1415926535897931 -7.3464102067096726e-06 2.356192653589793</pose>
+          <pose>0.15324499999999999 0.090999999999999998 0.128304 -3.1415926535897931 -7.3464102067096726e-06 2.356192653589793</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_body_2' attached_to='bluerov2_chassis_thruster_body_2_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_body_3_joint' attached_to='bluerov2_chassis'>
-          <pose>-0.14449500000000001 -0.089499999999999996 -0.059546000000000002 3.1415853071795872 -4.2351647362715017e-22 -0.78540000000000032</pose>
+          <pose>-0.147755 -0.089499999999999996 0.128304 3.1415853071795872 -4.2351647362715017e-22 -0.78540000000000032</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_body_3' attached_to='bluerov2_chassis_thruster_body_3_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_body_4_joint' attached_to='bluerov2_chassis'>
-          <pose>-0.14449500000000001 0.089499999999999996 -0.059546000000000002 3.1415853071795872 4.2351647362715017e-22 0.78540000000000032</pose>
+          <pose>-0.147755 0.089499999999999996 0.128304 3.1415853071795872 4.2351647362715017e-22 0.78540000000000032</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_body_4' attached_to='bluerov2_chassis_thruster_body_4_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_body_5_joint' attached_to='bluerov2_chassis'>
-          <pose>0.016805 -0.111 0.001954 1.570792653590656 -1.5707926536662187 3.1415926535897931</pose>
+          <pose>0.013545 -0.111 0.189804 1.570792653590656 -1.5707926536662187 3.1415926535897931</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_body_5' attached_to='bluerov2_chassis_thruster_body_5_joint'>
           <pose>0 0 0 0 0 0</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_body_6_joint' attached_to='bluerov2_chassis'>
-          <pose>0.013905000000000001 0.111 -0.0047460000000000002 -1.5707926535906547 -1.5707926537266703 3.1415926535746803</pose>
+          <pose>0.010645 0.111 0.18310399999999999 -1.5707926535906547 -1.5707926537266703 3.1415926535746803</pose>
         </frame>
         <frame name='bluerov2_chassis_thruster_body_6' attached_to='bluerov2_chassis_thruster_body_6_joint'>
           <pose>0 0 0 0 0 0</pose>

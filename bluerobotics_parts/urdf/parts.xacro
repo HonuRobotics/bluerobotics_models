@@ -64,7 +64,7 @@
      collision), the mounting joint (part_joint), and its slots and frames as
      massless links named <name>_<slot> / <name>_<frame> (part_slots,
      part_frames), or the entry's `link` where a frame needs a conventional
-     name (the chassis's base_footprint, REP 105), used only when the part is
+     name (REP 105's base_footprint, for example), used only when the part is
      the assembly root (root:=True), so a second instance cannot clash. They show up in TF and are
      lumped away in Gazebo, where they survive as frames of the same name.
 
