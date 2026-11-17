@@ -82,7 +82,7 @@
             thruster_3=dict(xyz='-0.148701 -0.089458 0.128319', rpy='-3.1416 0 -0.7854', accepts=['t200_prop_cw'], default='t200_prop_cw', collision=False),
             thruster_4=dict(xyz='-0.148701 0.089458 0.128319', rpy='-3.1416 0 0.7854', accepts=['t200_prop_cw'], default='t200_prop_cw', collision=False),
             thruster_5=dict(xyz='0.012591 -0.111041 0.18977', rpy='-1.5708 -1.5708 0', accepts=['t200_prop_ccw'], default='t200_prop_ccw', axis='-1 0 0', collision=False),
-            thruster_6=dict(xyz='0.00974 0.111041 0.183095', rpy='1.5708 -1.5708 0', accepts=['t200_prop_cw'], default='t200_prop_cw', axis='-1 0 0', collision=False),
+            thruster_6=dict(xyz='0.012591 0.111041 0.18977', rpy='1.5708 -1.5708 0', accepts=['t200_prop_cw'], default='t200_prop_cw', axis='-1 0 0', collision=False),
             camera=dict(xyz='0.21674 0 0.23785', rpy='0 0 0', accepts=['explorehd_camera', 'marinesitu_c3'], default='explorehd_camera'),
             sonar=dict(xyz='0.15674 0 0.31785', rpy='0 0 0', accepts=['ping360'], default='none'),
             dvl=dict(xyz='-0.12326 0 0.04785', rpy='0 0 0', accepts=['dvl_a50'], default='none'),
@@ -94,7 +94,7 @@
             thruster_body_3=dict(xyz='-0.148701 -0.089458 0.128319', rpy='-3.1416 0 -0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
             thruster_body_4=dict(xyz='-0.148701 0.089458 0.128319', rpy='-3.1416 0 0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
             thruster_body_5=dict(xyz='0.012591 -0.111041 0.18977', rpy='-1.5708 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
-            thruster_body_6=dict(xyz='0.00974 0.111041 0.183095', rpy='1.5708 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_6=dict(xyz='0.012591 0.111041 0.18977', rpy='1.5708 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
         ),
         frames=dict(
             imu=dict(xyz='-0.00326 0 0.18785', rpy='0 0 0'),
