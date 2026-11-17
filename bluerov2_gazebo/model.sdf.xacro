@@ -389,6 +389,22 @@
     <xacro:property name="com" value="${[float(v) for v in '$(arg com)'.split()]}"/>
     <xacro:property name="water_density" value="${float(buoyancy_cfg.get('fluid_density', 1025.0))}"/>
     <xacro:property name="net_buoyancy" value="${float(buoyancy_cfg.get('net_buoyancy', 0.002))}"/>
+    <!-- Where the displacement box's centroid, the center of buoyancy (CB),
+         goes: cob_target = origin + cob_offset, with the origin set by
+         cob_frame.
+           cob_frame com        the origin is the assembled center of mass
+                                (default). The CB stays cob_offset from the
+                                CG whatever the configuration, which matches
+                                the volume below being solved from the mass:
+                                a vehicle re-trimmed to neutral and level
+                                after every change, with constant righting
+                                stiffness.
+           cob_frame base_link  the origin is base_link, the datum. The CB
+                                is a fixed point on the hull; a payload then
+                                changes the righting moment.
+         cob_offset is "x y z" in m, in base_link axes (x forward, y port,
+         z up). The shipped "0 0 0.046" with cob_frame com puts the CB 46 mm
+         above the CG. -->
     <xacro:property name="cob_offset"
       value="${[float(v) for v in str(buoyancy_cfg.get('cob_offset', '0 0 0.046')).split()]}"/>
     <xacro:property name="cob_frame" value="${str(buoyancy_cfg.get('cob_frame', 'com'))}"/>
@@ -457,6 +473,13 @@
     <plugin filename="gz-maritime-hydrodynamics-system"
             name="gz::sim::maritime::Hydrodynamics">
       <link_name>${base_name}</link_name>
+      <!-- Center of pressure: the point the coefficients below are defined
+           about, where the plugin takes the velocity and the current and
+           applies the drag. Stated relative to base_link, the datum (the
+           center of the frame's footprint on its bottom plane): on the
+           horizontal-thrust plane, so surge and sway drag act on the same
+           line as the horizontal thrust. A first estimate, not identified. -->
+      <center_of_pressure>0 0 0.128304</center_of_pressure>
       <xU>0</xU>   <yV>0</yV>   <zW>0</zW>
       <kP>0</kP>   <mQ>0</mQ>   <nR>0</nR>
       <xUabsU>-39.2</xUabsU>

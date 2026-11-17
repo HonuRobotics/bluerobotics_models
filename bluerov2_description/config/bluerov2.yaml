@@ -74,8 +74,9 @@ parts:
 #                  The shipped 0.0 holds depth; a real vehicle is trimmed a
 #                  little positive (0.002 or so) so a dead one surfaces.
 #   cob_offset     "x y z" (m): center of buoyancy, relative to cob_frame.
-#   cob_frame      com (default; preserves righting stiffness across
-#                  configurations) or base_link (pins the CoB like the hull).
+#   cob_frame      com (default; the CoB follows the CoM, consistent with the
+#                  volume being solved from the mass) or base_link (pins the
+#                  CoB to the hull, relative to the datum).
 #   fluid_density  kg/m^3; MUST match the world's buoyancy plugin (a test
 #                  enforces it for the shipped world).
 #   footprint      "x y" (m): the box footprint; height is solved. The
