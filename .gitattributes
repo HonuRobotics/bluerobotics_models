@@ -1,2 +1,5 @@
 # Placeholder meshes: no textual diffs in PRs, excluded from language stats.
 bluerov2_description/meshes/** -diff linguist-vendored
+
+# Blender authoring files (assemblies): stored with Git LFS, see README.md.
+*.blend filter=lfs diff=lfs merge=lfs -text lockable
