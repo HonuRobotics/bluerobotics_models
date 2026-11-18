@@ -14,7 +14,9 @@
 """Generation tests for the composed model: plugins, buoyancy solve, accord."""
 
 import importlib.util
+import math
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
@@ -147,6 +149,63 @@ def test_dvl_backend_loads_only_with_a_dvl():
                   'bluerov2_playground.sdf'):
         text = (GZ_SHARE / 'worlds' / world).read_text()
         assert '<plugin filename="gz-sim-dvl-system"' not in text, world
+
+
+def _cross(a, b):
+    return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2],
+            a[0] * b[1] - a[1] * b[0])
+
+
+@pytest.mark.parametrize('base', ['bluerov2_chassis', 'bluerov2_heavy_chassis'])
+def test_drag_and_mass_lie_on_the_horizontal_thrust_lines(base):
+    """
+    Surge and sway thrust pass through the drag point and the center of mass.
+
+    Thrust and drag on different lines make a couple: off the thrust plane it
+    pitches or rolls the vehicle, and off the sway line it turns it, which
+    shows as a forward creep in a sideways drive. A thruster moved without
+    the chassis's center of pressure, or the reverse, fails here by more
+    than a millimeter.
+    """
+    cfg = kit_config()
+    cfg['base'] = {'type': base, 'name': 'base_link'}
+    if base == 'bluerov2_heavy_chassis':
+        cfg['buoyancy']['footprint'] = '0.457 0.575'
+    config = yaml.safe_dump(cfg, sort_keys=False)
+    urdf_root, _, _, _ = urdf_for(config)
+    poses = assembly.link_poses(urdf_root)
+    thrusters = []
+    for joint in urdf_root.findall('joint'):
+        if not re.fullmatch(r'thruster_\d+_joint', joint.get('name')):
+            continue
+        rot, pos = poses[joint.find('child').get('link')]
+        axis = [float(v) for v in joint.find('axis').get('xyz').split()]
+        direction = tuple(sum(rot[i][k] * axis[k] for k in range(3)) for i in range(3))
+        if abs(direction[2]) < 0.1:          # the horizontals
+            thrusters.append((pos, direction))
+    assert len(thrusters) == 4
+
+    root, _ = gen_model(config)
+    hydro = plugins(root, 'gz-maritime-hydrodynamics-system')[0]
+    drag = [float(v) for v in hydro.find('center_of_pressure').text.split()]
+    _, com = assembly.mass_properties(urdf_root)
+
+    for name, body_axis in (('surge', 0), ('sway', 1)):
+        # Each thruster pushes the way that adds to the commanded axis.
+        pushes = [(pos, tuple(math.copysign(1.0, d[body_axis]) * c for c in d))
+                  for pos, d in thrusters]
+        force = [sum(f[i] for _, f in pushes) for i in range(3)]
+        strength = math.sqrt(sum(c * c for c in force))
+        assert strength > 2.0 and abs(force[body_axis]) == pytest.approx(strength), (
+            f'{name}: the horizontals do not add to a pure {name} force: {force}')
+        for what, point in (('center of pressure', drag), ('center of mass', com)):
+            moment = [0.0, 0.0, 0.0]
+            for pos, f in pushes:
+                arm = [pos[i] - point[i] for i in range(3)]
+                moment = [m + c for m, c in zip(moment, _cross(arm, f))]
+            offset = math.sqrt(sum(c * c for c in moment)) / strength
+            assert offset < 1e-3, (
+                f'{name} thrust passes {offset * 1000:.1f} mm from the {what} {point}')
 
 
 def test_buoyancy_displacement_realizes_the_declaration():

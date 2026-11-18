@@ -31,14 +31,18 @@ import subprocess
 import time
 import uuid
 
-from ament_index_python.packages import get_package_share_directory
-from conftest import launch_sim, make_cli, poll_until, REPORT_TABLES, shipped_has_camera
+from ament_index_python.packages import (get_package_prefix,
+                                         get_package_share_directory)
+from conftest import (kit_config, launch_sim, make_cli, poll_until, REPORT_TABLES,
+                      shipped_has_camera)
 import pytest
 import yaml
 
 WORLD = (Path(get_package_share_directory('bluerov2_gazebo'))
          / 'worlds' / 'bluerov2_playground.sdf')
 WORLD_NAME = 'bluerov2_playground'
+CONFIGURE = (Path(get_package_prefix('bluerov2_gazebo')) / 'lib' / 'bluerov2_gazebo'
+             / 'configure_vehicle.py')
 
 _NUM = r'-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?'
 POSE_TRIPLE = re.compile(rf'({_NUM}) ({_NUM}) ({_NUM})')
@@ -93,6 +97,16 @@ def teleport(env, x, y, z):
                         '--reptype', 'gz.msgs.Boolean',
                         '--timeout', '5000', '--req', req, timeout=15)
     assert code == 0 and 'true' in out, f'set_pose failed:\n{out}\n{err}'
+
+
+def set_paused(env, paused):
+    """Pause or resume the simulation."""
+    code, out, err = gz(env, 'service', '-s', f'/world/{WORLD_NAME}/control',
+                        '--reqtype', 'gz.msgs.WorldControl',
+                        '--reptype', 'gz.msgs.Boolean',
+                        '--timeout', '5000', '--req',
+                        f'pause: {"true" if paused else "false"}', timeout=15)
+    assert code == 0 and 'true' in out, f'world control failed:\n{out}\n{err}'
 
 
 def pose_track(env, messages=120):
@@ -192,6 +206,12 @@ def max_tilt_deg(track):
     return math.degrees(roll), math.degrees(pitch)
 
 
+def heading_deg(q):
+    """Heading (yaw, counter-clockwise from above) of an orientation, in degrees."""
+    qw, qx, qy, qz = q
+    return math.degrees(math.atan2(2 * (qw * qz + qx * qy), 1 - 2 * (qy * qy + qz * qz)))
+
+
 def latch_thrusters(env, mapping, period=0.3):
     """
     Hold normalized thrust commands [-1, 1] by republishing them until released.
@@ -212,6 +232,21 @@ def latch_thrusters(env, mapping, period=0.3):
             ['bash', '-c', loop], env=env, start_new_session=True,
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
     return procs
+
+
+def wait_commands_landed(env, numbers):
+    """
+    Block until every thruster in `numbers` has had a command published.
+
+    A message seen here was also delivered to the thruster, whose subscriber
+    is older than this one. With the simulation paused this tells when all
+    the commands of a latch are in, however slow the publishers start.
+    """
+    for n in numbers:
+        code, out, err = gz(env, 'topic', '-e', '-t', f'/bluerov2/thruster_{n}/cmd',
+                            '-n', '1', timeout=30)
+        assert code == 0 and 'data' in out, (
+            f'no command seen on thruster {n}:\n{out}\n{err}')
 
 
 def _stop_publishers(procs):
@@ -295,11 +330,12 @@ def test_vehicle_neutrally_buoyant(sim):
         f'(z {z0:.3f} -> {z1:.3f} over {t1 - t0:.1f} sim s)')
 
 
-# The teleop mixer's gains for the standard vehicle, read from the sibling
-# package's source rather than declared as a dependency: bluerobotics_teleop
-# already test-depends on this package, and the reverse would be a cycle.
-MIXER_YAML = (Path(__file__).resolve().parents[2] / 'bluerobotics_teleop'
-              / 'config' / 'bluerov2' / 'mixer.yaml')
+# The teleop mixers' gains, read from the sibling package's source rather than
+# declared as a dependency: bluerobotics_teleop already test-depends on this
+# package, and the reverse would be a cycle.
+MIXER_DIR = Path(__file__).resolve().parents[2] / 'bluerobotics_teleop' / 'config'
+MIXER_YAML = {'standard': MIXER_DIR / 'bluerov2' / 'mixer.yaml',
+              'heavy': MIXER_DIR / 'bluerov2_heavy' / 'mixer.yaml'}
 
 # Expected speed for a 0.5 command on each axis, from the vehicle's published
 # performance and engineering judgement - not from the model under test, whose
@@ -307,13 +343,24 @@ MIXER_YAML = (Path(__file__).resolve().parents[2] / 'bluerobotics_teleop'
 # a value that is unreasonable without pinning one that is being tuned.
 AXIS_COMMAND = 0.5
 SPEED_FACTOR = 10.0
-DIRECTION_DEG = 25.0
-# Surge and sway must also hold the vehicle level: a body-frame velocity
-# check alone passes a vehicle that pitches up and climbs, since it still
-# moves "forward" in its own frame. Thrust and drag on different lines tilt
-# it; buoyancy only rights it so far.
+DIRECTION_DEG = 10.0
+# The speed is measured once it has built up; the level and heading checks
+# below also cover these first seconds, where a thrust line that misses the
+# center of mass shows.
+ONSET_S = 2.0
+# A command on one axis must also hold the vehicle level, from its first
+# step: a body-frame velocity check alone passes a vehicle that pitches up
+# and climbs, since it still moves "forward" in its own frame. Thrust and
+# drag on different lines tilt it under way, and thrust off the center of
+# mass tilts it as it starts; buoyancy only rights it so far.
 TILT_DEG = 10.0
-TILT_AXES = ('surge', 'sway')
+# A surge, sway or heave command does not turn the vehicle either. Nothing
+# rights a turn in yaw, so a few millimeters between the line of the thrust
+# and the point where the drag acts turn it steadily, and a vehicle that
+# turns while it moves sideways creeps forward.
+HEADING_DEG = 5.0
+# A yaw command turns the vehicle about the spot.
+YAW_DRIFT_M = 0.3
 AXES = {
     # name: (twist index, mixer key, body axis, expected, unit, linear?)
     'surge': (0, 'gains_linear_x', (1, 0, 0), 0.75, 'm/s', True),
@@ -335,15 +382,18 @@ POOL = {'x': 12.3, 'y': 12.3, 'z_top': -0.3, 'z_bottom': -4.7}
 # One row per axis case, printed as a table at the end of the run (see
 # conftest.REPORT_TABLES), so a run shows every measurement beside its
 # limits, not just pass or fail. In the terminal and in the colcon test log.
-AXIS_TABLE = 'Axis command results'
+AXIS_TABLE = {'standard': 'Axis command results',
+              'heavy': 'Axis command results, heavy variant'}
 AXIS_HEAD = ('case', 'expected', 'speed limits', 'measured', 'ratio',
              f'off axis (<= {DIRECTION_DEG:g})', f'roll, pitch (<= {TILT_DEG:g})',
+             f'turn (<= {HEADING_DEG:g})', f'yaw drift (<= {YAW_DRIFT_M:g})',
              'body rate x, y, z', 'result')
 
 
-def mixer_commands(axis, sign):
+def mixer_commands(variant, axis, sign):
     """Per-thruster commands the teleop mixer would send for one axis."""
-    params = yaml.safe_load(MIXER_YAML.read_text())['twist_to_thrust']['ros__parameters']
+    params = yaml.safe_load(
+        MIXER_YAML[variant].read_text())['twist_to_thrust']['ros__parameters']
     gains = params[AXES[axis][1]]
     topics = params['thruster_topics']
     return {int(re.search(r'thruster_(\d+)', t).group(1)):
@@ -351,34 +401,55 @@ def mixer_commands(axis, sign):
             for t, g in zip(topics, gains)}
 
 
-@pytest.mark.parametrize('sign', [1, -1], ids=['pos', 'neg'])
-@pytest.mark.parametrize('axis', list(AXES))
-def test_axis_command_moves_the_vehicle(sim, axis, sign):
+def check_axis_command(sim, variant, axis, sign):
     """
-    A 0.5 command on one body axis moves the vehicle along that axis.
+    Check that a 0.5 command on one body axis moves the vehicle along it.
 
-    Checks polarity and allocation first and magnitude only loosely: the
-    motion must lie within 20 degrees of the commanded axis (REP 103: x
-    forward, y port, z up, yaw counter-clockwise from above) and its speed
-    within a factor of ten of the expected figure.
+    Checks polarity and allocation first and magnitude only loosely: once the
+    speed has built up (ONSET_S), the motion must lie within DIRECTION_DEG of
+    the commanded axis (REP 103: x forward, y port, z up, yaw
+    counter-clockwise from above) and its speed within a factor of
+    SPEED_FACTOR of the expected figure. From the first step of the command
+    the vehicle must also stay within TILT_DEG of level and, on the linear
+    axes, within HEADING_DEG of its heading. On yaw it must stay within
+    YAW_DRIFT_M of where it started.
 
     This does NOT test the autopilot's thruster allocation (ArduSub's
     Vectored frame). It is contingent on the teleop thruster allocation in
-    bluerobotics_teleop/config/bluerov2/mixer.yaml and only pertains to that
-    setup.
+    the variant's mixer.yaml under bluerobotics_teleop/config and only
+    pertains to that setup.
     """
     _, _, body_axis, expected, unit, linear = AXES[axis]
-    teleport(sim, *START[(axis, sign)])
+    start = START[(axis, sign)]
+    teleport(sim, *start)
     wait_sim_seconds(sim, 3)           # let the relocation transient damp out
-    commands = mixer_commands(axis, sign)
-    procs = latch_thrusters(sim, commands)
+    commands = mixer_commands(variant, axis, sign)
+    # Each thruster has a publisher of its own, and they do not start at the
+    # same instant. Latch them with the simulation paused and resume once
+    # every command is in, so all thrusters start in the same step: one that
+    # leads the others turns or pushes the vehicle, and nothing rights a
+    # turn in yaw. The thrusters this axis leaves at rest are already at zero.
+    driven = {n: value for n, value in commands.items() if value}
+    set_paused(sim, True)
+    procs = latch_thrusters(sim, driven)
     try:
-        wait_sim_seconds(sim, 2)       # onset: speed builds toward steady state
+        wait_commands_landed(sim, driven)
+        began = sim_seconds(sim)
+        set_paused(sim, False)
+        onset = pose_track(sim)        # onset: speed builds toward steady state
+        while onset[-1][0] - began < ONSET_S:
+            onset += pose_track(sim, 30)
         track = pose_track(sim)
     finally:
+        # Stop them together too. A thruster that runs a moment longer than
+        # the others turns the vehicle, and with no linear yaw damping that
+        # turn dies slowly enough to show in the next case's heading.
+        set_paused(sim, True)
         release_thrusters(sim, procs, tuple(commands))
+        set_paused(sim, False)
 
-    for _, (x, y, z), _ in track:
+    run = onset + track
+    for _, (x, y, z), _ in run:
         assert (abs(x) < POOL['x'] and abs(y) < POOL['y']
                 and POOL['z_bottom'] < z < POOL['z_top']), (
             f'{axis} {sign:+d}: ran out of pool at ({x:.2f}, {y:.2f}, {z:.2f}); '
@@ -389,18 +460,26 @@ def test_axis_command_moves_the_vehicle(sim, axis, sign):
     target = [sign * c for c in body_axis]
     speed = math.sqrt(sum(c * c for c in rate))
     off_axis = _angle_deg(rate, target)
+    roll, pitch = max_tilt_deg(run)
+    # Heading change since the command began, for the linear axes.
+    turn = heading_deg(run[-1][2]) - heading_deg(run[0][2]) if linear else 0.0
+    turn = abs((turn + 180.0) % 360.0 - 180.0)
+    # Furthest the vehicle gets from its start point, for yaw.
+    drift = 0.0 if linear else max(
+        math.hypot(x - start[0], y - start[1]) for _, (x, y, _), _ in run)
     detail = (f'{axis} {sign:+d}: measured {speed:.3f} {unit} '
               f'({", ".join(f"{c:+.3f}" for c in rate)}), expected {expected:.3f}, '
               f'commands {commands}')
     lo, hi = expected / SPEED_FACTOR, expected * SPEED_FACTOR
-    roll, pitch = max_tilt_deg(track)
-    level = axis not in TILT_AXES or max(roll, pitch) <= TILT_DEG
-    ok = off_axis <= DIRECTION_DEG and lo <= speed <= hi and level
-    REPORT_TABLES.setdefault(AXIS_TABLE, [AXIS_HEAD]).append((
+    level = max(roll, pitch) <= TILT_DEG
+    ok = (off_axis <= DIRECTION_DEG and lo <= speed <= hi and level
+          and turn <= HEADING_DEG and drift <= YAW_DRIFT_M)
+    REPORT_TABLES.setdefault(AXIS_TABLE[variant], [AXIS_HEAD]).append((
         f'{axis} {"+" if sign > 0 else "-"}', f'{expected:.3f} {unit}',
         f'{lo:.3g} - {hi:.3g}', f'{speed:.3f} {unit}', f'{speed / expected:.2f}',
         f'{off_axis:.1f} deg', f'{roll:.1f}, {pitch:.1f} deg',
-        ', '.join(f'{c:+.3f}' for c in rate),
+        f'{turn:.1f} deg' if linear else '-',
+        '-' if linear else f'{drift:.2f} m', ', '.join(f'{c:+.3f}' for c in rate),
         'pass' if ok else 'FAIL'))
     assert off_axis <= DIRECTION_DEG, (
         f'{detail}: motion is {off_axis:.1f} deg off the commanded axis')
@@ -408,4 +487,50 @@ def test_axis_command_moves_the_vehicle(sim, axis, sign):
         f'{detail}: speed outside a factor of {SPEED_FACTOR:g} of expected')
     assert level, (
         f'{detail}: tilted {roll:.1f} deg roll, {pitch:.1f} deg pitch '
-        f'(limit {TILT_DEG:g}); thrust and drag are not on one line')
+        f'(limit {TILT_DEG:g}); thrust, drag and the center of mass are not '
+        'on one line')
+    assert turn <= HEADING_DEG, (
+        f'{detail}: the vehicle turns {turn:.1f} deg while it moves '
+        f'(limit {HEADING_DEG:g}); the sway thrust misses the center of pressure')
+    assert drift <= YAW_DRIFT_M, (
+        f'{detail}: the vehicle drifts {drift:.2f} m from its start as it turns')
+
+
+@pytest.mark.parametrize('sign', [1, -1], ids=['pos', 'neg'])
+@pytest.mark.parametrize('axis', list(AXES))
+def test_axis_command_moves_the_vehicle(sim, axis, sign):
+    """Each axis command moves the standard vehicle along its axis."""
+    check_axis_command(sim, 'standard', axis, sign)
+
+
+@pytest.fixture(scope='module')
+def heavy_sim(request, tmp_path_factory):
+    """Start a headless gz server with the heavy variant in the playground."""
+    cfg = kit_config()
+    cfg['base'] = {'type': 'bluerov2_heavy_chassis', 'name': 'base_link'}
+    cfg['buoyancy']['footprint'] = '0.457 0.575'
+    folder = tmp_path_factory.mktemp('heavy')
+    (folder / 'heavy.yaml').write_text(yaml.safe_dump(cfg, sort_keys=False))
+    # Every artifact of the heavy vehicle, as the launch file makes them; the
+    # directory is then a model the world can include in place of the default.
+    model = folder / 'bluerov2'
+    out = subprocess.run(
+        [str(CONFIGURE), '--config', str(folder / 'heavy.yaml'), '--out-dir', str(model)],
+        capture_output=True, text=True, timeout=120)
+    assert out.returncode == 0, f'configure_vehicle failed:\n{out.stderr}'
+    world = WORLD.read_text()
+    assert world.count('<uri>model://bluerov2</uri>') == 1
+    (folder / 'world.sdf').write_text(world.replace(
+        '<uri>model://bluerov2</uri>', f'<uri>{model}</uri>'))
+    env = dict(os.environ, GZ_PARTITION=f'test_{uuid.uuid4().hex[:8]}')
+    return launch_sim(
+        request, 'gz sim heavy',
+        ['gz', 'sim', '-s', '-r', '-v', '3', str(folder / 'world.sdf')], env,
+        ready=lambda e: '/bluerov2/thruster_8/cmd' in gz(e, 'topic', '-l')[1])
+
+
+@pytest.mark.parametrize('sign', [1, -1], ids=['pos', 'neg'])
+@pytest.mark.parametrize('axis', list(AXES))
+def test_axis_command_moves_the_heavy_vehicle(heavy_sim, axis, sign):
+    """Each axis command moves the heavy variant along its axis."""
+    check_axis_command(heavy_sim, 'heavy', axis, sign)
