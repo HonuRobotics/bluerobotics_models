@@ -69,9 +69,10 @@
        Vectored frame expects (AP_Motors6DOF.cpp, SUB_FRAME_VECTORED): each
        horizontal's +x lies along ArduSub's direction for that motor (1 aft
        starboard, 2 aft port, 3 fore starboard, 4 fore port). The two
-       verticals face up in the assembly, so their prop slots spin the
-       occupant about -1 0 0 and positive thrust pushes down, as ArduSub's
-       throttle factor of -1 expects.
+       verticals are mirror images of each other, each on the axis of its well
+       in the chassis mesh. They face up in the assembly, so their prop slots
+       spin the occupant about -1 0 0 and positive thrust pushes down, as
+       ArduSub's throttle factor of -1 expects.
 
        The camera, sonar, dvl, gripper, payload and rack positions and the
        inertial origin predate the assembly. The collisions were checked
@@ -93,8 +94,8 @@
             thruster_2=dict(xyz='0.152339 0.091004 0.128319', rpy='0 3.1416 -0.7854', accepts=['t200_prop_ccw'], default='t200_prop_ccw', collision=False),
             thruster_3=dict(xyz='-0.148701 -0.089458 0.128319', rpy='-3.1416 0 -0.7854', accepts=['t200_prop_cw'], default='t200_prop_cw', collision=False),
             thruster_4=dict(xyz='-0.148701 0.089458 0.128319', rpy='-3.1416 0 0.7854', accepts=['t200_prop_cw'], default='t200_prop_cw', collision=False),
-            thruster_5=dict(xyz='0.012591 -0.111041 0.18977', rpy='-1.5708 -1.5708 0', accepts=['t200_prop_ccw'], default='t200_prop_ccw', axis='-1 0 0', collision=False),
-            thruster_6=dict(xyz='0.012591 0.111041 0.18977', rpy='1.5708 -1.5708 0', accepts=['t200_prop_cw'], default='t200_prop_cw', axis='-1 0 0', collision=False),
+            thruster_5=dict(xyz='0.00974 -0.111041 0.183095', rpy='-1.5708 -1.5708 0', accepts=['t200_prop_ccw'], default='t200_prop_ccw', axis='-1 0 0', collision=False),
+            thruster_6=dict(xyz='0.00974 0.111041 0.183095', rpy='1.5708 -1.5708 0', accepts=['t200_prop_cw'], default='t200_prop_cw', axis='-1 0 0', collision=False),
             camera=dict(xyz='0.21674 0 0.23785', rpy='0 0 0', accepts=['explorehd_camera', 'marinesitu_c3'], default='explorehd_camera'),
             sonar=dict(xyz='0.15674 0 0.31785', rpy='0 0 0', accepts=['ping360'], default='none'),
             dvl=dict(xyz='-0.12326 0 0.04785', rpy='0 0 0', accepts=['dvl_a50'], default='none'),
@@ -105,8 +106,8 @@
             thruster_body_2=dict(xyz='0.152339 0.091004 0.128319', rpy='0 3.1416 -0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
             thruster_body_3=dict(xyz='-0.148701 -0.089458 0.128319', rpy='-3.1416 0 -0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
             thruster_body_4=dict(xyz='-0.148701 0.089458 0.128319', rpy='-3.1416 0 0.7854', accepts=['t200_thruster'], default='t200_thruster', collision=False),
-            thruster_body_5=dict(xyz='0.012591 -0.111041 0.18977', rpy='-1.5708 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
-            thruster_body_6=dict(xyz='0.012591 0.111041 0.18977', rpy='1.5708 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_5=dict(xyz='0.00974 -0.111041 0.183095', rpy='-1.5708 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
+            thruster_body_6=dict(xyz='0.00974 0.111041 0.183095', rpy='1.5708 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
         ),
         center_of_pressure='0.002592 0 0.128319',
         frames=dict(
