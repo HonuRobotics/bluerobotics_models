@@ -15,7 +15,19 @@ base: {type: bluerov2_chassis, name: base_link}        # standard
 base: {type: bluerov2_heavy_chassis, name: base_link}  # heavy
 ```
 
-With the heavy hull, widen the buoyancy footprint to `"0.457 0.575"`.
+Both variants ship ready to run. `bluerov2.yaml` is the standard vehicle and
+`bluerov2_heavy.yaml` the Heavy, the same vehicle on the heavy chassis with
+its eight thrusters and the buoyancy footprint widened to `"0.457 0.575"`.
+Each one is built into a Gazebo model, `model://bluerov2` and
+`model://bluerov2_heavy`. To launch the Heavy:
+
+```bash
+ros2 launch bluerov2_gazebo sim.launch.xml \
+  config_file:=$(ros2 pkg prefix --share bluerov2_description)/config/bluerov2_heavy.yaml
+```
+
+On the heavy hull, thruster_5 to thruster_8 are the corner verticals: front
+right, front left, rear right and rear left.
 
 ## Buoyancy
 
