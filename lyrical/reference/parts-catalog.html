@@ -631,8 +631,9 @@ parts too: an assembly is a chassis plus whatever its slots carry.</p>
 </tr>
 </tbody>
 </table>
-<p>Parts whose final mesh has not landed yet use placeholder geometry; a
-<code class="docutils literal notranslate"><span class="pre">type</span></code> marked pending delivery cannot be fitted until its macro lands.</p>
+<p>Parts whose final mesh has not been delivered yet use placeholder geometry; a
+<code class="docutils literal notranslate"><span class="pre">type</span></code> marked pending delivery cannot be fitted until its macro lands.
+The BlueROV2 sensor parts (<code class="docutils literal notranslate"><span class="pre">explorehd_camera</span></code>, <code class="docutils literal notranslate"><span class="pre">ping360</span></code>, <code class="docutils literal notranslate"><span class="pre">dvl_a50</span></code>) carry no visual for now: accessory visuals are out of scope, and each sensor works from its part’s frame.</p>
 </section>
 <section id="slots">
 <h2>Slots<a class="headerlink" href="#slots" title="Link to this heading"></a></h2>
@@ -888,7 +889,7 @@ frames follow the fitted parts, with the same naming patterns on both vehicles:<
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">base_link</span></code></p></td>
 <td><p>root link</p></td>
-<td><p>the chassis part: origin at the mesh centroid, x forward, y left, z up (<a class="reference external" href="https://www.ros.org/reps/rep-0103.html">REP 103</a>); floats with its origin at the waterline</p></td>
+<td><p>the chassis part: origin at the chassis’s datum (the BlueBoat’s at the mesh centroid, so it floats with its origin at the waterline; the BlueROV2’s at the center of the frame’s footprint on its bottom plane), x forward, y left, z up (<a class="reference external" href="https://www.ros.org/reps/rep-0103.html">REP 103</a>)</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;instance&gt;</span></code></p></td>
 <td><p>link</p></td>

@@ -31,8 +31,9 @@ parts too: an assembly is a chassis plus whatever its slots carry.
 | `omniscan_450_sidescan` | Cerulean Omniscan 450 side scan sonar | [link](https://bluerobotics.com/store/the-reef/cerulean-sidescan-sonar/) | geometry only |
 | `surveyor_multibeam` | Cerulean Surveyor 240-16 multibeam | [link](https://bluerobotics.com/store/sonars/echosounders/cerulean-surveyor-240-16-multibeam-echosounder/) | geometry only |
 
-Parts whose final mesh has not landed yet use placeholder geometry; a
+Parts whose final mesh has not been delivered yet use placeholder geometry; a
 `type` marked pending delivery cannot be fitted until its macro lands.
+The BlueROV2 sensor parts (`explorehd_camera`, `ping360`, `dvl_a50`) carry no visual for now: accessory visuals are out of scope, and each sensor works from its part's frame.
 
 ## Slots
 
@@ -121,7 +122,7 @@ frames follow the fitted parts, with the same naming patterns on both vehicles:
 
 | Pattern | Kind | Meaning |
 |---|---|---|
-| `base_link` | root link | the chassis part: origin at the mesh centroid, x forward, y left, z up ([REP 103](https://www.ros.org/reps/rep-0103.html)); floats with its origin at the waterline |
+| `base_link` | root link | the chassis part: origin at the chassis's datum (the BlueBoat's at the mesh centroid, so it floats with its origin at the waterline; the BlueROV2's at the center of the frame's footprint on its bottom plane), x forward, y left, z up ([REP 103](https://www.ros.org/reps/rep-0103.html)) |
 | `<instance>` | link | one frame per fitted part, named after its slot or its `name` (`prop_port`, `thruster_1`, `ping`, `camera`); spinning parts sit on their continuous joint `<instance>_joint` |
 | `<parent>_<slot>` | massless link | one per slot a part declares, whether filled or not (`base_link_prop_port`, `base_link_camera`, `ping_mount_ping`) |
 | `<instance>_<frame>` | massless link | frames the part itself declares (`ping_beam`, the transducer face); sensor messages carry them as `frame_id`, resolved by TF |
