@@ -30,7 +30,14 @@
 
   <!-- Body slots: +x faces the propeller, so the motor bulk trails away
        from the prop plane (downward pointing verticals: motor below,
-       inside the chassis; only the duct ring shows at the foam). -->
+       inside the chassis; only the duct ring shows at the foam).
+
+       base_link is the main tube's center here, not the commissioned datum
+       of the standard chassis, so this part declares its own center of
+       pressure: on the lines of its horizontal thrust, in the plane of the
+       four horizontal thrusters (z 0) and at x -0.005, where the sway thrust
+       acts. bluerov2_gazebo gives it to gz-maritime's Hydrodynamics
+       (<center_of_pressure>). -->
   <xacro:macro name="bluerov2_heavy_chassis_info">
     <xacro:property name="part_info" scope="parent" value="${dict(
         attach='0 0 0',
@@ -58,6 +65,7 @@
             thruster_body_7=dict(xyz='-0.118 -0.215 0.064', rpy='0 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
             thruster_body_8=dict(xyz='-0.118 0.215 0.064', rpy='0 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
         ),
+        center_of_pressure='-0.005 0 0',
         frames=dict(
         ))}"/>
   </xacro:macro>

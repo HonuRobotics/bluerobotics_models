@@ -33,6 +33,10 @@
                                 duct or hull volume would grind on it)
          frames   named reference frames (a sensor's beam origin, a lens),
                   each with xyz / rpy
+         center_of_pressure
+                  optional, chassis parts only: where the hydrodynamic drag
+                  acts, "x y z" in the part frame. Omitted means the part's
+                  origin
          drive    propellers only: what a simulator needs to drive the part
                   as a thruster on its mounting joint
                     diameter    propeller diameter, m. Sets the spin
@@ -46,9 +50,11 @@
                     rotation    'ccw' or 'cw', seen from behind looking
                                 forward along the spin axis
 
-     Simulators read `frames` and `drive` (blueboat_gazebo places a
-     <sensor> at a sensor part's frame and a Thruster on a propeller's
-     joint); the URDF itself only turns `frames` into links.
+     Simulators read `frames`, `drive` and `center_of_pressure`
+     (blueboat_gazebo places a <sensor> at a sensor part's frame and a
+     Thruster on a propeller's joint; bluerov2_gazebo gives the chassis's
+     center of pressure to Hydrodynamics); the URDF itself only turns
+     `frames` into links.
 
   2. <part>: the macro that instantiates it, taking exactly
 

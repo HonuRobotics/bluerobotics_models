@@ -475,11 +475,13 @@
       <link_name>${base_name}</link_name>
       <!-- Center of pressure: the point the coefficients below are defined
            about, where the plugin takes the velocity and the current and
-           applies the drag. Stated relative to base_link, the datum (the
-           center of the frame's footprint on its bottom plane): on the
-           horizontal-thrust plane, so surge and sway drag act on the same
-           line as the horizontal thrust. A first estimate, not identified. -->
-      <center_of_pressure>0 0 0.128319</center_of_pressure>
+           applies the drag. Each chassis part declares its own, relative to
+           its link origin (part_info's center_of_pressure; the link origin
+           when it declares none), on the lines of its horizontal thrust, so
+           surge and sway drag act on the same lines as the thrust whichever
+           chassis is fitted. A first estimate, not identified. -->
+      <xacro:part_info_of ptype="${cfg['base']['type']}"/>
+      <center_of_pressure>${part_info.get('center_of_pressure', '0 0 0')}</center_of_pressure>
       <xU>0</xU>   <yV>0</yV>   <zW>0</zW>
       <kP>0</kP>   <mQ>0</mQ>   <nR>0</nR>
       <xUabsU>-39.2</xUabsU>

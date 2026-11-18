@@ -14,7 +14,7 @@ every part):
 
 | Macro | Role |
 |---|---|
-| `<part>_info` | exports the metadata as the property `part_info`: `attach` (where the part bolts onto its parent, "x y z" in its own frame), `slots` (name → `xyz`, `rpy`, `accepts`, `default`, `joint`), `frames` (name → `xyz`, `rpy`, optional `link`) and, for propellers, `drive` (`max_thrust`, `min_thrust`, `deadband`, `rotation`), what a simulator needs to drive the part on its joint |
+| `<part>_info` | exports the metadata as the property `part_info`: `attach` (where the part bolts onto its parent, "x y z" in its own frame), `slots` (name → `xyz`, `rpy`, `accepts`, `default`, `joint`), `frames` (name → `xyz`, `rpy`, optional `link`), for a chassis that needs it `center_of_pressure` (where the hydrodynamic drag acts, "x y z" in its own frame; its origin when omitted) and, for propellers, `drive` (`max_thrust`, `min_thrust`, `deadband`, `rotation`), what a simulator needs to drive the part on its joint |
 | `<part>` | instantiates it: one link (inertia, visual, optional collision), the mounting joint, and the slots and frames as massless links `<name>_<slot>` / `<name>_<frame>`, or, on the assembly root, the entry's `link` where a frame needs a conventional name such as REP 105's `base_footprint` |
 
 Every part macro takes the same parameters: `name`, `parent` (`""` for the

@@ -37,12 +37,24 @@
        sits at the link origin with no offset: one vehicle origin, with the
        center of mass, the center of buoyancy and the center of pressure
        stated relative to it. The hydrodynamic drag acts at the center of
-       pressure that bluerov2_gazebo gives gz-maritime's Hydrodynamics
-       (<center_of_pressure>), on the horizontal-thrust plane. Without it the
-       plugin takes the velocity and applies the drag at the link origin,
-       which here is the bottom of the frame: an earlier version with
-       base_link on the datum and no center of pressure coupled roll into
-       sway (the axis test measured sway 31 degrees off axis).
+       pressure declared below, which bluerov2_gazebo gives gz-maritime's
+       Hydrodynamics (<center_of_pressure>). Without it the plugin takes the
+       velocity and applies the drag at the link origin, which here is the
+       bottom of the frame: an earlier version with base_link on the datum and
+       no center of pressure coupled roll into sway (the axis test measured
+       sway 31 degrees off axis).
+
+       The center of pressure lies on the lines of the horizontal thrust: in
+       the plane of the four horizontal thrusters (z 0.128319), where surge
+       and sway thrust act, and at x 0.002592, where the sway thrust acts (the
+       moment of a pure sway command about base_link over its force; the fore
+       and aft pairs are not at the same distance from the datum). Drag and
+       thrust then make no couple: the vehicle stays level under way and does
+       not turn in sway. Yaw matters most, because nothing rights it: with the
+       point at x 0, 2.6 mm from the sway line, a half sway command turned the
+       vehicle at 13 degrees per second. A thruster moved without this point,
+       or the reverse, fails bluerov2_gazebo's generation test
+       (test_drag_and_mass_lie_on_the_horizontal_thrust_lines).
 
        The thruster_N and thruster_body_N poses follow the Blender assembly,
        assemblies/bluerov2_assembly.blend, which is the source of truth for
@@ -96,6 +108,7 @@
             thruster_body_5=dict(xyz='0.012591 -0.111041 0.18977', rpy='-1.5708 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
             thruster_body_6=dict(xyz='0.012591 0.111041 0.18977', rpy='1.5708 -1.5708 0', accepts=['t200_thruster'], default='t200_thruster', collision=False),
         ),
+        center_of_pressure='0.002592 0 0.128319',
         frames=dict(
             imu=dict(xyz='-0.00326 0 0.18785', rpy='0 0 0'),
         ))}"/>
