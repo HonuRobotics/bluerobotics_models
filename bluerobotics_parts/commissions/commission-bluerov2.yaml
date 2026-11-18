@@ -5,7 +5,7 @@ commission: bluerov2
 creator: Honu Robotics
 rights: "Copyright 2026 Honu Robotics. Licensed under the Apache License, Version 2.0."
 # Where the authoring files (.blend, CAD) are archived. Leave out if they are not.
-authoringSource: ".blend files should be archived in google drive.  Please send the link to the team for reference."
+authoringSource: "bluerobotics_parts/assemblies/bluerov2_assembly.blend (Git LFS)"
 
 # For the modeler to read. Not written to any file.
 sources:

@@ -14,7 +14,9 @@
 """Generation tests for the composed model: plugins, buoyancy solve, accord."""
 
 import importlib.util
+import math
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
@@ -23,6 +25,7 @@ import xml.etree.ElementTree as ET
 from ament_index_python.packages import (get_package_prefix,
                                          get_package_share_directory)
 from bluerobotics_parts import assembly
+from conftest import kit_config, kit_config_text
 import pytest
 import yaml
 
@@ -112,14 +115,14 @@ def test_model_generation_follows_config():
     assert not plugins(root, 'gz-sim-hydrodynamics-system')
     by_type = {s.get('type') for s in root.iter('sensor')}
     assert by_type == {'camera', 'rgbd_camera', 'gpu_lidar', 'custom'}
-    root, _ = gen_model(default_config())
+    root, _ = gen_model(kit_config_text())
     assert len(plugins(root, 'gz-maritime-thruster-system')) == 6
     assert {s.get('type') for s in root.iter('sensor')} == {'camera'}
 
 
 def test_thrusters_follow_the_propeller_parts():
     """One Thruster per propeller, on its joint, with balanced coefficients."""
-    root, _ = gen_model(default_config())
+    root, _ = gen_model(kit_config_text())
     thrusters = plugins(root, 'gz-maritime-thruster-system')
     coeffs = {t.find('joint_name').text: float(t.find('thrust_coefficient').text)
               for t in thrusters}
@@ -138,7 +141,7 @@ def test_dvl_backend_loads_only_with_a_dvl():
     DopplerVelocityLogSystem joins every render iteration once any rendering
     sensor exists and costs half or more of the real time factor.
     """
-    root, _ = gen_model(default_config())
+    root, _ = gen_model(kit_config_text())
     assert not plugins(root, 'gz-sim-dvl-system')
     root, _ = gen_model(FULL_CONFIG)
     assert len(plugins(root, 'gz-sim-dvl-system')) == 1
@@ -148,13 +151,70 @@ def test_dvl_backend_loads_only_with_a_dvl():
         assert '<plugin filename="gz-sim-dvl-system"' not in text, world
 
 
+def _cross(a, b):
+    return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2],
+            a[0] * b[1] - a[1] * b[0])
+
+
+@pytest.mark.parametrize('base', ['bluerov2_chassis', 'bluerov2_heavy_chassis'])
+def test_drag_and_mass_lie_on_the_horizontal_thrust_lines(base):
+    """
+    Surge and sway thrust pass through the drag point and the center of mass.
+
+    Thrust and drag on different lines make a couple: off the thrust plane it
+    pitches or rolls the vehicle, and off the sway line it turns it, which
+    shows as a forward creep in a sideways drive. A thruster moved without
+    the chassis's center of pressure, or the reverse, fails here by more
+    than a millimeter.
+    """
+    cfg = kit_config()
+    cfg['base'] = {'type': base, 'name': 'base_link'}
+    if base == 'bluerov2_heavy_chassis':
+        cfg['buoyancy']['footprint'] = '0.457 0.575'
+    config = yaml.safe_dump(cfg, sort_keys=False)
+    urdf_root, _, _, _ = urdf_for(config)
+    poses = assembly.link_poses(urdf_root)
+    thrusters = []
+    for joint in urdf_root.findall('joint'):
+        if not re.fullmatch(r'thruster_\d+_joint', joint.get('name')):
+            continue
+        rot, pos = poses[joint.find('child').get('link')]
+        axis = [float(v) for v in joint.find('axis').get('xyz').split()]
+        direction = tuple(sum(rot[i][k] * axis[k] for k in range(3)) for i in range(3))
+        if abs(direction[2]) < 0.1:          # the horizontals
+            thrusters.append((pos, direction))
+    assert len(thrusters) == 4
+
+    root, _ = gen_model(config)
+    hydro = plugins(root, 'gz-maritime-hydrodynamics-system')[0]
+    drag = [float(v) for v in hydro.find('center_of_pressure').text.split()]
+    _, com = assembly.mass_properties(urdf_root)
+
+    for name, body_axis in (('surge', 0), ('sway', 1)):
+        # Each thruster pushes the way that adds to the commanded axis.
+        pushes = [(pos, tuple(math.copysign(1.0, d[body_axis]) * c for c in d))
+                  for pos, d in thrusters]
+        force = [sum(f[i] for _, f in pushes) for i in range(3)]
+        strength = math.sqrt(sum(c * c for c in force))
+        assert strength > 2.0 and abs(force[body_axis]) == pytest.approx(strength), (
+            f'{name}: the horizontals do not add to a pure {name} force: {force}')
+        for what, point in (('center of pressure', drag), ('center of mass', com)):
+            moment = [0.0, 0.0, 0.0]
+            for pos, f in pushes:
+                arm = [pos[i] - point[i] for i in range(3)]
+                moment = [m + c for m, c in zip(moment, _cross(arm, f))]
+            offset = math.sqrt(sum(c * c for c in moment)) / strength
+            assert offset < 1e-3, (
+                f'{name} thrust passes {offset * 1000:.1f} mm from the {what} {point}')
+
+
 def test_buoyancy_displacement_realizes_the_declaration():
     """The displacement box solves density * volume = mass + net at the CoB."""
-    cfg = yaml.safe_load(default_config())
+    cfg = kit_config()
     declared = cfg['buoyancy']
-    urdf_root, _, _, _ = urdf_for(default_config())
+    urdf_root, _, _, _ = urdf_for(kit_config_text())
     total, com = assembly.mass_properties(urdf_root)
-    root, _ = gen_model(default_config())
+    root, _ = gen_model(kit_config_text())
     link = root.find('.//link[@name="buoyancy_displacement"]')
     assert link is not None
     size = [float(v) for v in link.find('.//box/size').text.split()]
@@ -243,7 +303,7 @@ def sdf_gz_topics(root):
 
 def test_sensor_and_bridge_topics_agree():
     """Model gz topics equal generated bridge gz topics, by construction."""
-    for config in (default_config(), FULL_CONFIG):
+    for config in (kit_config_text(), FULL_CONFIG):
         root, _ = gen_model(config)
         sdf_topics = sdf_gz_topics(root)
         cfg = yaml.safe_load(config)
@@ -260,15 +320,13 @@ def test_installed_artifacts_match_shipped_config():
     bridge_yaml = GZ_SHARE / 'config' / 'ros_gz_bridge.yaml'
     assert yaml.safe_load(bridge_yaml.read_text()) == \
         bridge_gen.bridge_entries(cfg, instances)
-    names = {n for _, n in instances}
-    assert {'thruster_1', 'thruster_6', 'camera'} <= names
     installed_sdf = (GZ_SHARE / 'models' / 'bluerov2' / 'model.sdf').read_text()
     assert 'model specs' in installed_sdf, 'installed model.sdf is not stamped'
 
 
 def test_world_fluid_density_matches_the_description():
     """The worlds' buoyancy density equals the config's declaration."""
-    declared = yaml.safe_load(default_config())['buoyancy']
+    declared = kit_config()['buoyancy']
     for world in ('bluerov2_water.sdf', 'bluerov2_pool.sdf',
                   'bluerov2_playground.sdf'):
         text = (GZ_SHARE / 'worlds' / world).read_text()
@@ -285,14 +343,14 @@ def test_model_name_follows_the_topic_namespace():
 
 def test_ardupilot_variant_is_additive():
     """ardupilot:=false generates exactly what it always did."""
-    plain, plain_text = gen_model(default_config())
+    plain, plain_text = gen_model(kit_config_text())
     assert not plugins(plain, 'ArduPilotPlugin')
     assert 'imu_sensor' not in plain_text
 
 
 def test_ardupilot_controls_follow_the_thrusters():
     """One <control> per propeller, on the channel ArduSub expects."""
-    root, _ = gen_model(default_config(), ardupilot=True)
+    root, _ = gen_model(kit_config_text(), ardupilot=True)
     ap = plugins(root, 'ArduPilotPlugin')
     assert len(ap) == 1, 'expected exactly one ArduPilotPlugin'
     controls = ap[0].findall('control')
@@ -322,7 +380,7 @@ def test_ardupilot_controls_follow_the_thrusters():
 
 def test_ardupilot_imu_is_the_declared_frame():
     """The imuName resolves to the sensor on the chassis's imu frame."""
-    root, _ = gen_model(default_config(), ardupilot=True)
+    root, _ = gen_model(kit_config_text(), ardupilot=True)
     ap = plugins(root, 'ArduPilotPlugin')[0]
     link, sensor = ap.find('imuName').text.split('::')
     links = {ln.get('name'): ln for ln in root.iter('link')}

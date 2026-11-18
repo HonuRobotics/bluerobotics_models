@@ -25,7 +25,8 @@ import os
 import signal
 import uuid
 
-from conftest import launch_sim, make_cli, poll_until, stop_process_group
+from conftest import (launch_sim, make_cli, poll_until, shipped_has_camera,
+                      stop_process_group)
 import pytest
 
 LAUNCH = ['ros2', 'launch', 'bluerov2_gazebo', 'sim.launch.xml', 'gui:=false']
@@ -70,7 +71,13 @@ def test_robot_description_published(sim):
 
 
 def test_camera_topic_bridged(sim):
-    """The default configuration's camera topics exist on the ROS graph."""
+    """
+    The shipped configuration's camera topics exist on the ROS graph.
+
+    Skipped when the shipped config fits no camera.
+    """
+    if not shipped_has_camera():
+        pytest.skip('the shipped config fits no camera')
     poll_until(
         lambda: '/bluerov2/camera/image' in ros(sim, 'topic', 'list')[1], 30,
         lambda: 'camera topic not bridged; last listing:\n'

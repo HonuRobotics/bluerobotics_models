@@ -10,7 +10,7 @@ creator: Honu Robotics
 rights: "Copyright 2026 Honu Robotics. Licensed under the Apache License, Version 2.0."
 
 # Where the authoring files (.blend, CAD) are archived. Leave out if they are not.
-authoringSource: ".blend files should be archived in google drive "
+authoringSource: "bluerobotics_parts/assemblies/blueboat_assembly.blend (Git LFS)"
 
 # For the modeler to read. Not written to any file.
 sources:

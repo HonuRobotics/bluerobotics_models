@@ -28,13 +28,13 @@ TOP_XACRO = SHARE / 'urdf' / 'bluerov2.urdf.xacro'
 
 DEFAULT_CONFIG = (SHARE / 'config' / 'bluerov2.yaml').read_text()
 
-# What the chassis slots fill with when the config is silent.
-DEFAULT_PARTS = {'base_link': 'bluerov2_chassis',
-                 'thruster_1': 't200_prop_ccw', 'thruster_2': 't200_prop_ccw',
-                 'thruster_3': 't200_prop_cw', 'thruster_4': 't200_prop_cw',
-                 'thruster_5': 't200_prop_ccw', 'thruster_6': 't200_prop_cw',
-                 'camera': 'explorehd_camera'}
-DEFAULT_PARTS |= {f'thruster_body_{n}': 't200_thruster' for n in range(1, 7)}
+# What the chassis slots fill with when slot defaults are on.
+SLOT_DEFAULT_PARTS = {'base_link': 'bluerov2_chassis',
+                      'thruster_1': 't200_prop_ccw', 'thruster_2': 't200_prop_ccw',
+                      'thruster_3': 't200_prop_cw', 'thruster_4': 't200_prop_cw',
+                      'thruster_5': 't200_prop_ccw', 'thruster_6': 't200_prop_cw',
+                      'camera': 'explorehd_camera'}
+SLOT_DEFAULT_PARTS |= {f'thruster_body_{n}': 't200_thruster' for n in range(1, 7)}
 
 # The parts library is shared across vehicles; each vehicle's suite sweeps
 # only the parts of its own world (the catalog wide guarantee lives in
@@ -53,10 +53,18 @@ def catalog():
     return BLUEROV2_PARTS
 
 
-def make_config(parts=(), slots=(), base='bluerov2_chassis'):
-    """Vehicle config yaml: chassis base, overrides/additions."""
+def make_config(parts=(), slots=(), base='bluerov2_chassis', slot_defaults=None):
+    """
+    Vehicle config yaml: chassis base, overrides/additions.
+
+    The tests' own vehicle, independent of the shipped config: with no
+    slot_defaults key, every slot fills with its default (the six props, their
+    T200 bodies and the camera) unless an entry says otherwise.
+    """
     cfg = {'base': {'type': base, 'name': 'base_link'},
            'parts': [dict(p) for p in parts]}
+    if slot_defaults is not None:
+        cfg['slot_defaults'] = slot_defaults
     if slots:
         cfg['slots'] = [dict(s) for s in slots]
     return yaml.safe_dump(cfg, sort_keys=False)
@@ -103,16 +111,23 @@ def manifest(root):
     return {e.get('name'): e.get('type') for e in root.findall('assembly_part')}
 
 
-def test_default_config_yields_the_default_parts():
-    """The shipped default builds 6 props + the camera from slot defaults."""
-    root = generate_urdf(DEFAULT_CONFIG)
-    assert manifest(root) == DEFAULT_PARTS
-    assert set(DEFAULT_PARTS) <= link_names(root)
+def test_slot_defaults_fill_every_slot():
+    """With slot defaults on and no parts, the chassis fills every slot with its default."""
+    root = generate_urdf(make_config())
+    assert manifest(root) == SLOT_DEFAULT_PARTS
+    assert set(SLOT_DEFAULT_PARTS) <= link_names(root)
+
+
+def test_without_slot_defaults_only_listed_parts_fit():
+    """slot_defaults: false fits exactly what parts lists."""
+    root = generate_urdf(make_config([{'slot': 'thruster_1', 'type': 't200_prop_ccw'}],
+                                     slot_defaults=False))
+    assert manifest(root) == {'base_link': 'bluerov2_chassis', 'thruster_1': 't200_prop_ccw'}
 
 
 def test_vectored_spin_convention():
     """Check ArduSub chirality: ccw props on 1/2/5, cw on 3/4/6, continuous."""
-    root = generate_urdf(DEFAULT_CONFIG)
+    root = generate_urdf(make_config())
     parts = manifest(root)
     for n, expected in ((1, 'ccw'), (2, 'ccw'), (3, 'cw'), (4, 'cw'),
                         (5, 'ccw'), (6, 'cw')):
