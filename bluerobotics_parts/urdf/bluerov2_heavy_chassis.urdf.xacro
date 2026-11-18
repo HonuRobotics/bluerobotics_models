@@ -49,13 +49,17 @@
        generation test
        (test_drag_and_mass_lie_on_the_horizontal_thrust_lines).
 
-       The horizontals 1 to 4 are where the standard vehicle has them. The
-       corner verticals 5 to 8 are taken from the Blender assembly
-       bluerov2_heavy.blend (the heavy chassis with t200_thruster,
-       t200_prop_cw and t200_prop_ccw imported at each slot): each part's
+       The thruster_N and thruster_body_N poses follow the Blender assembly,
+       assemblies/bluerov2_heavy_assembly.blend (the heavy chassis with
+       t200_thruster, t200_prop_cw and t200_prop_ccw placed at each slot),
+       which is the source of truth for where each T200 sits: each part's
        position and orientation in the scene, whose origin is the datum,
        mapped from Blender axes to these (x = -Blender y, y = Blender x,
-       z = Blender z). They stand on the outside of the side panels,
+       z = Blender z). A change is made in the scene first and the slots
+       follow; scripts/check_blend_slots.py checks that the two agree.
+
+       The horizontals 1 to 4 are where the standard vehicle has them. The
+       corner verticals 5 to 8 stand on the outside of the side panels,
        propellers up, centered on the guards' duct arcs: 240.0 mm apart fore
        and aft and 436.1 mm apart across (Blue Robotics' Heavy 2D drawing),
        centered 8.9 mm forward of the frame's fore/aft center, 177.5 mm above
