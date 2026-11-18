@@ -33,6 +33,12 @@
        GZ_SIM_SYSTEM_PLUGIN_PATH. -->
   <exec_depend>gz_hydrodynamics</exec_depend>
   <exec_depend>gz_ocean_current</exec_depend>
+  <!-- blueboat_waves.sdf: gz-maritime's wave field (the FFT engine and the
+       water surface that draws it) and the buoyancy that floats the boat
+       on it. Loaded by name, as above. -->
+  <exec_depend>gz_waves_provider_fft</exec_depend>
+  <exec_depend>gz_waves_rendering</exec_depend>
+  <exec_depend>gz_waves_buoyancy</exec_depend>
   <exec_depend>bluerobotics_common</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>ros_gz_sim</exec_depend>

@@ -7,6 +7,8 @@ which regenerates every artifact of a configuration from one config file.
 
 ```bash
 ros2 launch blueboat_gazebo sim.launch.xml                      # config_file:=my_vehicle.yaml
+ros2 launch blueboat_gazebo sim.launch.xml \
+  world:=$(ros2 pkg prefix --share blueboat_gazebo)/worlds/blueboat_waves.sdf   # on the waves
 ```
 
 Documentation: <https://honurobotics.github.io/bluerobotics_models/>, see
