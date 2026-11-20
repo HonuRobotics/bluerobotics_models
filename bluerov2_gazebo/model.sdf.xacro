@@ -264,6 +264,37 @@
     </xacro:sensor_link>
   </xacro:macro>
 
+  <!-- Sonoptix ECHO imaging sonar: a gz_sonar custom sensor, driven by the
+       world's gz-maritime-sonar-system (gz-maritime), which the world must
+       load once, as it loads the Sensors system; it costs nothing in a world
+       without a sonar. The sensor looks along the part's x axis; the empty
+       <gz:sonar/> gives the ECHO's defaults (700 kHz, 256 beams, 120 by 20
+       degrees, 0.2 to 30 m), and a `sonar:` dict on the part's config entry
+       sets any of its parameters, one element each (for example
+       sonar: {range_max: 15, noise_floor: -40}). Publishes
+       gz.maritime.sonar.SonarImage, which
+       kai_sonar_bridge brings to ROS 2 as ProjectedSonarImage on the same
+       topic, stamped with the part's acoustic frame. -->
+  <xacro:macro name="sonar_settings" params="items">
+    <xacro:if value="${len(items) > 0}">
+      <xacro:element xacro:name="${items[0][0]}">${items[0][1]}</xacro:element>
+      <xacro:sonar_settings items="${items[1:]}"/>
+    </xacro:if>
+  </xacro:macro>
+  <xacro:macro name="imaging_sonar_sensor" params="name frame topic_base settings">
+    <xacro:sensor_link name="${name}" frame="${frame}">
+      <sensor name="${name}" type="custom" gz:type="imaging_sonar">
+        <frame_id>${topic_ns}/${name}</frame_id>
+        <topic>${topic_base}/image</topic>
+        <update_rate>15</update_rate>
+        <always_on>1</always_on>
+        <gz:sonar>
+          <xacro:sonar_settings items="${settings}"/>
+        </gz:sonar>
+      </sensor>
+    </xacro:sensor_link>
+  </xacro:macro>
+
   <!-- One ArduPilotPlugin <control> block: a servo channel mapped onto a
        thruster's command topic.
 
@@ -332,6 +363,7 @@
     <xacro:if value="${ptype == 'marinesitu_c3'}">   <xacro:rgbd_sensor    name="${name}" frame="${name}" topic_base="${topic_base}"/></xacro:if>
     <xacro:if value="${ptype == 'ping360'}">         <xacro:ping360_sensor name="${name}" frame="${name}" topic_base="${topic_base}"/></xacro:if>
     <xacro:if value="${ptype == 'dvl_a50'}">         <xacro:dvl_sensor     name="${name}" frame="${name}" topic_base="${topic_base}"/></xacro:if>
+    <xacro:if value="${ptype == 'sonoptix_echo_multibeam'}"><xacro:imaging_sonar_sensor name="${name}" frame="${name}" topic_base="${topic_base}" settings="${list(entry.get('sonar', dict()).items())}"/></xacro:if>
     <xacro:if value="${ptype == 'newton_gripper'}">  <xacro:claw_controller topic_base="${topic_base}" left_joint="${name}_jaw_left_joint" right_joint="${name}_jaw_right_joint"/></xacro:if>
     <xacro:if value="${ptype == 'sediment_sampler'}"><xacro:claw_controller topic_base="${topic_base}" left_joint="${name}_cup_left_joint" right_joint="${name}_cup_right_joint"/></xacro:if>
   </xacro:macro>

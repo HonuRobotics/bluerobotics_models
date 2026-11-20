@@ -37,8 +37,10 @@ import yaml
 TOP_KEYS = {'topic_namespace', 'base', 'slot_defaults', 'parts', 'slots',
             'hull_displacement', 'buoyancy', 'extra_bridge_topics'}
 BASE_KEYS = {'type', 'name', 'collision'}
+# `sonar` holds a sonar part's sensor settings (gz_sonar's <gz:sonar>
+# parameters, one level of key: value), as `bridge` holds bridge overrides.
 PART_COMMON_KEYS = {'type', 'name', 'xyz', 'rpy', 'collision', 'joint', 'axis',
-                    'topic', 'gz_topic', 'ros_topic', 'bridge'}
+                    'topic', 'gz_topic', 'ros_topic', 'bridge', 'sonar'}
 SLOT_ENTRY_KEYS = PART_COMMON_KEYS | {'slot', 'of'}
 FREE_ENTRY_KEYS = PART_COMMON_KEYS | {'parent'}
 ADHOC_SLOT_KEYS = {'of', 'name', 'xyz', 'rpy', 'accepts', 'default', 'joint',
