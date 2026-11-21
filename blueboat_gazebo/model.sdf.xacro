@@ -92,9 +92,9 @@
   <!-- ===================== Sensors (config-driven) =====================
        One <sensor> per sensor part, as a massless link fixed to the root link
        at the part's frame (keeps the description Gazebo-free). Needs
-       gz-sim-sensors-system in the world (GPU). The two imaging sonars
-       (omniscan_450 side-scan, surveyor_multibeam) are PARKED - no acoustic model
-       ships for Jetty - so they stay geometry-only. -->
+       gz-sim-sensors-system in the world (GPU). The Omniscan 450 SS
+       sidescan and the Surveyor 240-16 profiler are driven by gz-maritime's
+       gz_sonar (see their macros below). -->
   <xacro:macro name="sensor_link" params="name frame *sensor">
     <link name="${name}_sensor">
       <!-- Posed at the frame the part declares for its sensing origin (its
@@ -166,6 +166,58 @@
     </xacro:sensor_link>
   </xacro:macro>
 
+  <!-- Sonars (gz-maritime gz_sonar): custom sensors driven by the world's
+       gz-maritime-sonar-system, which the world must load once, as it loads
+       the Sensors system. Each looks along its frame's x axis. The empty
+       <gz:sonar/> gives each device's defaults, and a `sonar:` dict on the
+       part's config entry sets any of its parameters, one element each (for
+       example sonar: {range_max: 30, noise_floor: -40}); on the sidescan it
+       applies to both sides. Publishes gz.maritime.sonar messages, which
+       kai_sonar_bridge brings to ROS 2 on the same topics: a SonarImage per
+       sidescan side (ProjectedSonarImage, stamped with that side's acoustic
+       frame), and the profiler's SonarDetections (marine_acoustic_msgs
+       SonarDetections, stamped with its beam frame). -->
+  <xacro:macro name="sonar_settings" params="items">
+    <xacro:if value="${len(items) > 0}">
+      <xacro:element xacro:name="${items[0][0]}">${items[0][1]}</xacro:element>
+      <xacro:sonar_settings items="${items[1:]}"/>
+    </xacro:if>
+  </xacro:macro>
+  <!-- Omniscan 450 SS: one bar, a sidescan sensor on each side's beam frame,
+       publishing <topic>/port/image and <topic>/stbd/image. -->
+  <xacro:macro name="sidescan_side" params="name side topic_base settings">
+    <xacro:sensor_link name="${name}_${side}" frame="${name}_${side}">
+      <sensor name="${name}_${side}" type="custom" gz:type="sidescan_sonar">
+        <frame_id>${topic_ns}/${name}_${side}</frame_id>
+        <topic>${topic_base}/${side}/image</topic>
+        <update_rate>10</update_rate>
+        <always_on>1</always_on>
+        <gz:sonar>
+          <xacro:sonar_settings items="${settings}"/>
+        </gz:sonar>
+      </sensor>
+    </xacro:sensor_link>
+  </xacro:macro>
+  <xacro:macro name="sidescan_sonar_sensor" params="name topic_base settings">
+    <xacro:sidescan_side name="${name}" side="port" topic_base="${topic_base}" settings="${settings}"/>
+    <xacro:sidescan_side name="${name}" side="stbd" topic_base="${topic_base}" settings="${settings}"/>
+  </xacro:macro>
+  <!-- Surveyor 240-16: a profiling sensor on the beam frame, publishing its
+       soundings on <topic>/detections. -->
+  <xacro:macro name="profiling_sonar_sensor" params="name frame topic_base settings">
+    <xacro:sensor_link name="${name}" frame="${frame}">
+      <sensor name="${name}" type="custom" gz:type="profiling_sonar">
+        <frame_id>${topic_ns}/${frame}</frame_id>
+        <topic>${topic_base}/detections</topic>
+        <update_rate>10</update_rate>
+        <always_on>1</always_on>
+        <gz:sonar>
+          <xacro:sonar_settings items="${settings}"/>
+        </gz:sonar>
+      </sensor>
+    </xacro:sensor_link>
+  </xacro:macro>
+
   <!-- Emitters for the assembly dispatcher. Per resolved part instance: a
        propeller (a part with a `drive` table) gets a Thruster on its joint,
        the Ping2 echosounder gets its sensor, every other part is geometry
@@ -184,6 +236,12 @@
     </xacro:if>
     <xacro:if value="${ptype == 'ping_singlebeam'}">
       <xacro:echosounder_sensor name="${name}" frame="${name}_beam" topic_base="${topic_base}"/>
+    </xacro:if>
+    <xacro:if value="${ptype == 'omniscan_450_sidescan'}">
+      <xacro:sidescan_sonar_sensor name="${name}" topic_base="${topic_base}" settings="${list(entry.get('sonar', dict()).items())}"/>
+    </xacro:if>
+    <xacro:if value="${ptype == 'surveyor_multibeam'}">
+      <xacro:profiling_sonar_sensor name="${name}" frame="${name}_beam" topic_base="${topic_base}" settings="${list(entry.get('sonar', dict()).items())}"/>
     </xacro:if>
   </xacro:macro>
   <xacro:macro name="gz_no_slot" params="name parent xyz rpy:='0 0 0'">

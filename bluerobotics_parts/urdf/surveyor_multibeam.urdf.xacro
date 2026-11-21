@@ -7,6 +7,10 @@
 
   Inertia: estimated from the delivered collision geometry at 1000 kg/m^3 (SDF auto inertia); replace with measured values.
 
+  Frames: `beam` has x along the acoustic axis, pointing down when the part
+  is mounted level, with the fan across track in its x-y plane; gz_sonar's
+  profiling sensor sits on it, and its soundings are stamped in it.
+
   Contract (see parts.xacro): <part>_info exports the metadata (attach,
   slots, frames, drive); <part> instantiates the link, its mounting joint
   and its slot / frame links.
@@ -19,6 +23,7 @@
         slots=dict(
         ),
         frames=dict(
+            beam=dict(xyz='0 0 0', rpy='0 1.57079633 0'),
         ))}"/>
   </xacro:macro>
 

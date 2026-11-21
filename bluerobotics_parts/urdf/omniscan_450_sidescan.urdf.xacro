@@ -7,6 +7,13 @@
 
   Inertia: estimated from the delivered collision geometry at 1000 kg/m^3 (SDF auto inertia); replace with measured values.
 
+  Frames: the Omniscan 450 SS is one bar with a transducer on each side.
+  `port` and `stbd` are the two beams, each with x along its acoustic axis,
+  pointing out to its side and 15 degrees down; gz_sonar's sidescan sensor
+  sits on each. `port_acoustic` and `stbd_acoustic` are the frames of
+  marine_acoustic_msgs/ProjectedSonarImage for each side, Z along the beam
+  and X up, as on the Sonoptix ECHO.
+
   Contract (see parts.xacro): <part>_info exports the metadata (attach,
   slots, frames, drive); <part> instantiates the link, its mounting joint
   and its slot / frame links.
@@ -19,6 +26,10 @@
         slots=dict(
         ),
         frames=dict(
+            port=dict(xyz='0 0 0', rpy='0 0.26179939 1.57079633'),
+            stbd=dict(xyz='0 0 0', rpy='0 0.26179939 -1.57079633'),
+            port_acoustic=dict(xyz='0 0 0', rpy='3.14159265 -1.30899694 1.57079633'),
+            stbd_acoustic=dict(xyz='0 0 0', rpy='3.14159265 -1.30899694 -1.57079633'),
         ))}"/>
   </xacro:macro>
 
