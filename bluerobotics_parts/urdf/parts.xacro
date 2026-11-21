@@ -190,6 +190,7 @@
   <xacro:include filename="$(find bluerobotics_parts)/urdf/ping_singlebeam.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/roof_rack.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/sediment_sampler.urdf.xacro"/>
+  <xacro:include filename="$(find bluerobotics_parts)/urdf/sonoptix_echo_multibeam.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/surveyor_multibeam.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/t200_prop_ccw.urdf.xacro"/>
   <xacro:include filename="$(find bluerobotics_parts)/urdf/t200_prop_cw.urdf.xacro"/>

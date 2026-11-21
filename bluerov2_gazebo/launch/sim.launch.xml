@@ -68,6 +68,21 @@
                  create_own_container="false"
                  use_composition="$(var use_composition)"/>
 
+  <!-- kai_sonar_bridge for the vehicle's sonars, if it has any: their custom
+       message is beyond ros_gz_bridge. Generated parameters, beside the
+       bridge config. -->
+  <load_composable_node target="ros_gz_container" if="$(var use_composition)">
+    <composable_node pkg="kai_sonar_bridge"
+                     plugin="kai_sonar_bridge::SonarBridge"
+                     name="sonar_bridge">
+      <param from="$(var vehicle_dir)/sonar_bridge.yaml"/>
+    </composable_node>
+  </load_composable_node>
+  <node pkg="kai_sonar_bridge" exec="sonar_bridge" name="sonar_bridge"
+        unless="$(var use_composition)">
+    <param from="$(var vehicle_dir)/sonar_bridge.yaml"/>
+  </node>
+
   <!-- robot_state_publisher, reading the instance's joint states and
        prefixing every TF frame with the instance name, so its frames match
        the frame ids the sensors publish: a composable node in the container

@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!--
+  sonoptix_echo_multibeam part macro: a Sonoptix ECHO forward-looking
+  multibeam imaging sonar (400 or 700 kHz, 256 beams over 90 or 120 degrees,
+  20 degrees vertical).
+  No visual: accessory visuals are out of scope until a glTF part is
+  commissioned, so the part is its link, inertia and frames, and
+  bluerov2_gazebo hangs the sensor on its link. The link's x axis is the
+  acoustic axis, the direction the sonar looks: mount it forward for imaging,
+  or down.
+  Frames: `acoustic` is the frame of marine_acoustic_msgs/ProjectedSonarImage,
+  Z along the acoustic axis and X up (x' = z, y' = -y, z' = x from the link),
+  which kai_sonar_bridge stamps the sonar's messages with.
+  Mass and envelope from the Sonoptix datasheet: 0.75 kg in air,
+  149.7 x 100.0 x 42.3 mm; inertia as a solid box over that envelope.
+  Contract (see parts.xacro): <part>_info exports the metadata (attach,
+  slots, frames, drive); <part> instantiates the link, its mounting joint
+  and its slot / frame links.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="sonoptix_echo_multibeam_info">
+    <xacro:property name="part_info" scope="parent" value="${dict(
+        attach='0 0 0',
+        slots=dict(
+        ),
+        frames=dict(
+            acoustic=dict(xyz='0 0 0', rpy='3.14159265 -1.57079633 0'),
+        ))}"/>
+  </xacro:macro>
+  <xacro:macro name="sonoptix_echo_multibeam"
+               params="name parent xyz:='0 0 0' rpy:='0 0 0' collision:=true joint:=fixed axis:='1 0 0'">
+    <xacro:sonoptix_echo_multibeam_info/>
+    <xacro:property name="_m" value="0.75"/>
+    <xacro:property name="_lx" value="0.1497"/>
+    <xacro:property name="_ly" value="0.1000"/>
+    <xacro:property name="_lz" value="0.0423"/>
+    <link name="${name}">
+      <inertial>
+        <mass value="${_m}"/>
+        <inertia ixx="${_m/12.0 * (_ly**2 + _lz**2)}" ixy="0" ixz="0"
+                 iyy="${_m/12.0 * (_lx**2 + _lz**2)}" iyz="0"
+                 izz="${_m/12.0 * (_lx**2 + _ly**2)}"/>
+      </inertial>
+    </link>
+    <xacro:part_joint name="${name}" parent="${parent}" xyz="${xyz}" rpy="${rpy}"
+                      joint="${joint}" axis="${axis}" attach="${part_info['attach']}"/>
+    <xacro:part_slots name="${name}" items="${list(part_info['slots'].items())}"/>
+    <xacro:part_frames name="${name}" items="${list(part_info['frames'].items())}"/>
+  </xacro:macro>
+</robot>

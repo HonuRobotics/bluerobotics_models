@@ -44,6 +44,8 @@
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>marine_acoustic_msgs</exec_depend>
+  <exec_depend>kai_sonar_bridge</exec_depend>
+  <exec_depend>gz_sonar</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
   <exec_depend>launch_xml</exec_depend>
