@@ -286,7 +286,7 @@
       <sensor name="${name}" type="custom" gz:type="imaging_sonar">
         <frame_id>${topic_ns}/${name}</frame_id>
         <topic>${topic_base}/image</topic>
-        <update_rate>15</update_rate>
+        <update_rate>10</update_rate>
         <always_on>1</always_on>
         <gz:sonar>
           <xacro:sonar_settings items="${settings}"/>
