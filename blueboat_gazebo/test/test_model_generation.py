@@ -460,6 +460,39 @@ def test_sensor_frame_ids_resolve_in_tf():
         assert prefix == 'boat_a' and link in urdf_links, (
             f'sensor {sensor.get("name")} publishes frame_id {frame.text!r}, '
             f'which robot_state_publisher never puts in TF for instance boat_a')
+    # The sonars reach ROS through kai_sonar_bridge, stamped with the frames
+    # it is given, not the sensors' <frame_id>.
+    params = bridge_gen.sonar_entries(yaml.safe_load(config), urdf_instances(config))[
+        'sonar_bridge']['ros__parameters']
+    assert params['frame_ids']
+    for frame in params['frame_ids']:
+        prefix, _, link = frame.partition('/')
+        assert prefix == 'boat_a' and link in urdf_links, (
+            f'kai_sonar_bridge stamps {frame!r}, which TF does not carry')
+
+
+@pytest.mark.parametrize('config', sorted(
+    p.name for p in (DESC_SHARE / 'config').glob('blueboat*.yaml')))
+def test_every_shipped_config_generates(config):
+    """
+    Each shipped config generates a model whose topics the bridges cover.
+
+    A variant (blueboat_sonar.yaml, say) differs from the default only in
+    its parts; anything else drifting would make it a different vehicle.
+    """
+    text = (DESC_SHARE / 'config' / config).read_text()
+    cfg, default = yaml.safe_load(text), yaml.safe_load(DEFAULT_CONFIG)
+    for key in set(cfg) | set(default):
+        if key not in ('parts', 'base', 'slot_defaults'):
+            assert cfg.get(key) == default.get(key), f'{config}: {key} differs from blueboat.yaml'
+    ns = cfg.get('topic_namespace', 'blueboat')
+    entries = bridge_gen.bridge_entries(cfg, urdf_instances(text))
+    fixed = {'/clock', f'/{ns}/joint_states'}
+    bridge_topics = {e['gz_topic_name'] for e in entries if e['gz_topic_name'] not in fixed}
+    sonar = bridge_gen.sonar_entries(cfg, urdf_instances(text))
+    bridge_topics |= set(sonar['sonar_bridge']['ros__parameters'].get('gz_topics', []))
+    root, _ = xacro(MODEL_XACRO, text)
+    assert sdf_gz_topics(root) == bridge_topics
 
 
 def test_installed_artifacts_match_shipped_config():

@@ -63,7 +63,7 @@ parts:
   # Sonoptix ECHO imaging sonars (gz_sonar), by free placement until the
   # chassis has slots for them; the x axis is the acoustic axis. Positions are
   # placeholders: forward, pitched down 15 degrees, and down on the base.
-  - {type: sonoptix_echo_multibeam, name: sonar_forward, xyz: "0.25 0 0.12", rpy: "0 0.26 0",
+  - {type: sonoptix_echo_multibeam, name: sonar_forward, xyz: "0.25 0 0.12", rpy: "0 0.2618 0",
      sonar: {range_max: 15, samples: 768, labels: true}}
   # - {type: sonoptix_echo_multibeam, name: sonar_down, xyz: "0.05 0 0.03", rpy: "0 1.5708 0"}
   # - {slot: payload, type: payload_skid}

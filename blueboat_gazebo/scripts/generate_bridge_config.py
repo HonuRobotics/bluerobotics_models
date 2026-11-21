@@ -38,6 +38,8 @@ import sys
 import xml.etree.ElementTree as ET
 
 from bluerobotics_parts import assembly
+from bluerobotics_parts.sonar import sonar_entries as _sonar_entries
+from bluerobotics_parts.topics import absolute, overrides_for, under
 import yaml
 
 # type -> [(topic suffix, ROS type, gz type, direction)]
@@ -59,26 +61,9 @@ PART_TOPICS = {
 }
 
 
-def absolute(topic):
-    """Return the topic with a leading slash."""
-    return topic if topic.startswith('/') else '/' + topic
-
-
-def under(ns, base):
-    """Return `base` under namespace `ns`, or as given when it starts with a slash."""
-    return base if base.startswith('/') else f'{ns}/{base}'
-
-
-def overrides_for(cfg, name):
-    """
-    Return the config entry that fitted instance `name`, or {}.
-
-    Slot entries name their occupant after the slot by default.
-    """
-    for entry in cfg.get('parts') or []:
-        if entry.get('name', entry.get('slot')) == name:
-            return entry
-    return {}
+def sonar_entries(cfg, instances):
+    """Return the kai_sonar_bridge parameters for the vehicle's sonars."""
+    return _sonar_entries(cfg, instances, 'blueboat')
 
 
 def bridge_entries(cfg, instances):
@@ -127,43 +112,6 @@ def bridge_entries(cfg, instances):
     # Verbatim extra entries (native ros_gz_bridge syntax).
     entries.extend(cfg.get('extra_bridge_topics') or [])
     return entries
-
-
-# Sonar parts, bridged by kai_sonar_bridge: type -> [(topic below the
-# part's, kai_sonar_bridge kind, frame below the instance's)]. The sidescan
-# is one bar with a sensor on each side.
-SONAR_PARTS = {
-    'omniscan_450_sidescan': [('port/image', 'image', 'port_acoustic'),
-                              ('stbd/image', 'image', 'stbd_acoustic')],
-    'surveyor_multibeam': [('detections', 'detections', 'beam')],
-}
-
-
-def sonar_entries(cfg, instances):
-    """
-    Return the kai_sonar_bridge parameters for a vehicle's sonars.
-
-    One (gz topic, ROS topic, frame, kind) per sonar sensor, in the lists
-    the node takes; the frame is the one TF carries for that sensor's data.
-    """
-    ns = cfg.get('topic_namespace', 'blueboat')
-    gz_topics, ros_topics, frame_ids, kinds = [], [], [], []
-    for ptype, name in instances:
-        for suffix, kind, frame in SONAR_PARTS.get(ptype, []):
-            part = overrides_for(cfg, name)
-            gz_base = under(ns, part.get('gz_topic', part.get('topic', name)))
-            ros_base = under(ns, part.get('ros_topic', part.get('topic', name)))
-            gz_topics.append(absolute(f'{gz_base}/{suffix}'))
-            ros_topics.append(absolute(f'{ros_base}/{suffix}'))
-            frame_ids.append(f'{ns}/{name}_{frame}')
-            kinds.append(kind)
-    params = {'use_sim_time': True}
-    # An empty list has no type ROS 2 can infer; with no sonar the node
-    # keeps its empty defaults.
-    if gz_topics:
-        params.update(gz_topics=gz_topics, ros_topics=ros_topics,
-                      frame_ids=frame_ids, kinds=kinds)
-    return {'sonar_bridge': {'ros__parameters': params}}
 
 
 def main():

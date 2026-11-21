@@ -63,9 +63,10 @@
                  create_own_container="false"
                  use_composition="$(var use_composition)"/>
 
-  <!-- kai_sonar_bridge for the vehicle's sonars, if it has any: their custom
-       messages are beyond ros_gz_bridge. Generated parameters, beside the
-       bridge config. -->
+  <!-- kai_sonar_bridge for the vehicle's sonars: their custom messages are
+       beyond ros_gz_bridge. Always started; with no sonar fitted its
+       generated parameters (sonar_bridge.yaml, beside the bridge config) are
+       empty and it idles. Its name is global, like the other nodes here. -->
   <load_composable_node target="ros_gz_container" if="$(var use_composition)">
     <composable_node pkg="kai_sonar_bridge"
                      plugin="kai_sonar_bridge::SonarBridge"

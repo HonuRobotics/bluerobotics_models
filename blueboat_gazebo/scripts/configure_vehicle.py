@@ -98,7 +98,7 @@ def run(cmd, what):
 
 
 def configure(config, out_dir, name=None):
-    """Generate urdf, model.sdf, model.config and ros_gz_bridge.yaml into out_dir."""
+    """Generate urdf, model.sdf, model.config and both bridge configs into out_dir."""
     desc = pathlib.Path(get_package_share_directory('blueboat_description'))
     gz = pathlib.Path(get_package_share_directory('blueboat_gazebo'))
     gz_lib = pathlib.Path(get_package_prefix('blueboat_gazebo')) / 'lib' / 'blueboat_gazebo'
@@ -160,7 +160,7 @@ def main(argv=None):
         sys.stdout.write(str(out_dir))
     else:
         print(f'wrote vehicle.yaml, blueboat.urdf, blueboat.gazebo.urdf, model.sdf, model.config, '
-              f'ros_gz_bridge.yaml, robot_description.yaml to {out_dir}')
+              f'ros_gz_bridge.yaml, sonar_bridge.yaml, robot_description.yaml to {out_dir}')
 
 
 if __name__ == '__main__':

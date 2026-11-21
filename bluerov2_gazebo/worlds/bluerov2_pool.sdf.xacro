@@ -244,13 +244,16 @@
       <direction>0</direction>
     </plugin>
     <!-- Sonars (gz-maritime gz_sonar): drives every sonar a vehicle carries,
-         with the water's properties (seawater, as the buoyancy density 1025 has it, at pool temperature). Idle, at no cost, until a
-         sonar is fitted. -->
+         with the water's properties: seawater, as the buoyancy density 1025
+         has it, at pool temperature. Temperature and salinity set the
+         absorption; the sound speed is its own parameter, here the one they
+         give (Mackenzie, at the surface). Idle, at no cost, until a sonar is
+         fitted. -->
     <plugin filename="gz-maritime-sonar-system"
             name="gz::sim::maritime::Sonar">
       <temperature>27</temperature>
       <salinity>35</salinity>
-      <sound_speed>1500</sound_speed>
+      <sound_speed>1538</sound_speed>
     </plugin>
 
     <light type="directional" name="sun">

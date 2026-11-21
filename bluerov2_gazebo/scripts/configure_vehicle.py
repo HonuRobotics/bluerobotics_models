@@ -18,8 +18,9 @@ Generate every artifact of a BlueROV2 configuration from one config file.
 Writes into an output directory the URDF, its Gazebo flavoured copy (glTF
 visuals pre-rotated, merged by the model), the composed Gazebo model
 (model.sdf plus model.config, so the directory works as a model:// root on
-GZ_SIM_RESOURCE_PATH), the ros_gz bridge config and an RViz config, all
-derived from the same config through the same generators the build uses. This is what lets a
+GZ_SIM_RESOURCE_PATH), the ros_gz bridge config, kai_sonar_bridge's
+parameters (sonar_bridge.yaml) and an RViz config, all derived from the
+same config through the same generators the build uses. This is what lets a
 vehicle be reconfigured without rebuilding, also from a binary install:
 
     ros2 run bluerov2_gazebo configure_vehicle.py --config my_vehicle.yaml --out-dir ~/my_bluerov2
@@ -115,7 +116,7 @@ def rviz_config(template, name):
 
 
 def configure(config, out_dir, name=None):
-    """Generate urdf, model.sdf, model.config, bridge config and bluerov2.rviz into out_dir."""
+    """Generate urdf, model.sdf, model.config, bridge configs and bluerov2.rviz into out_dir."""
     desc = pathlib.Path(get_package_share_directory('bluerov2_description'))
     gz = pathlib.Path(get_package_share_directory('bluerov2_gazebo'))
     gz_lib = pathlib.Path(get_package_prefix('bluerov2_gazebo')) / 'lib' / 'bluerov2_gazebo'
@@ -179,7 +180,8 @@ def main(argv=None):
         sys.stdout.write(str(out_dir))
     else:
         print(f'wrote vehicle.yaml, bluerov2.urdf, bluerov2.gazebo.urdf, model.sdf, model.config, '
-              f'ros_gz_bridge.yaml, robot_description.yaml, bluerov2.rviz to {out_dir}')
+              f'ros_gz_bridge.yaml, sonar_bridge.yaml, robot_description.yaml, bluerov2.rviz '
+              f'to {out_dir}')
 
 
 if __name__ == '__main__':

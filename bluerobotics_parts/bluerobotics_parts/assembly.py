@@ -30,6 +30,7 @@ import math
 import sys
 import xml.etree.ElementTree as ET
 
+from bluerobotics_parts import sonar
 import yaml
 
 # Keys each kind of config entry may carry. A key outside its set is a typo
@@ -165,6 +166,7 @@ def problems(cfg, urdf_root):
         if 'slot' in entry:
             slot, of = entry['slot'], entry.get('of', root)
             keys(entry, SLOT_ENTRY_KEYS, f'slot entry {slot!r} of {of!r}')
+            found += sonar.entry_problems(entry, f'slot entry {slot!r} of {of!r}')
             if (of, slot) not in known_slots:
                 mine = sorted(s for o, s in known_slots if o == of)
                 found.append(
@@ -173,6 +175,7 @@ def problems(cfg, urdf_root):
                        else f'no instance named {of!r} (instances: {names})'))
         else:
             keys(entry, FREE_ENTRY_KEYS, f'free entry {entry.get("name")!r}')
+            found += sonar.entry_problems(entry, f'free entry {entry.get("name")!r}')
             if entry.get('type', 'none') != 'none' and entry.get('name') not in names:
                 found.append(f'free entry {entry.get("name")!r} was not assembled')
     for slot in cfg.get('slots') or []:

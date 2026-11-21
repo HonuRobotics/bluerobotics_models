@@ -21,6 +21,7 @@ collision off, part on part), the result must satisfy urdfdom, and every
 mesh it references must ship.
 """
 
+import math
 from pathlib import Path
 import re
 import subprocess
@@ -94,3 +95,72 @@ def test_glb_textured_materials_have_a_base_color_texture():
                 bad.append(f'{glb.name}: {material.get("name", "unnamed")}')
     assert not bad, ('materials without a base color texture crash RViz; '
                      f'bake a neutral base color texture into: {bad}')
+
+
+def _rpy(r, p, y):
+    """Return the URDF rotation for roll, pitch, yaw: Rz(y) Ry(p) Rx(r)."""
+    cr, sr, cp, sp, cy, sy = (math.cos(r), math.sin(r), math.cos(p), math.sin(p),
+                              math.cos(y), math.sin(y))
+    return [[cy * cp, cy * sp * sr - sy * cr, cy * sp * cr + sy * sr],
+            [sy * cp, sy * sp * sr + cy * cr, sy * sp * cr - cy * sr],
+            [-sp, cp * sr, cp * cr]]
+
+
+def _mul(a, b):
+    return [[sum(a[i][k] * b[k][j] for k in range(3)) for j in range(3)] for i in range(3)]
+
+
+def _frames(part):
+    """Return a part's declared frames as {name: rotation matrix}."""
+    text = (SHARE / 'urdf' / f'{part}.urdf.xacro').read_text()
+    found = re.findall(r"(\w+)=dict\(xyz='[^']*', rpy='([^']*)'\)", text)
+    return {name: _rpy(*map(float, rpy.split())) for name, rpy in found}
+
+
+def _close(a, b):
+    return all(abs(a[i][j] - b[i][j]) < 1e-6 for i in range(3) for j in range(3))
+
+
+# x' = z, y' = -y, z' = x: an `_acoustic` frame's Z is its sensor's look
+# direction (x) and its X is up, as marine_acoustic_msgs expects.
+TO_ACOUSTIC = [[0, 0, 1], [0, -1, 0], [1, 0, 0]]
+
+
+@pytest.mark.parametrize('part,acoustic,sensor', [
+    ('sonoptix_echo_multibeam', 'acoustic', None),
+    ('omniscan_450_sidescan', 'port_acoustic', 'port'),
+    ('omniscan_450_sidescan', 'stbd_acoustic', 'stbd'),
+])
+def test_acoustic_frames_follow_their_sensor(part, acoustic, sensor):
+    """Each `_acoustic` frame is its sensor's frame turned Z along the beam."""
+    frames = _frames(part)
+    base = frames[sensor] if sensor else _rpy(0, 0, 0)
+    assert _close(frames[acoustic], _mul(base, TO_ACOUSTIC))
+
+
+def test_sidescan_sides_look_out_and_down():
+    """The port beam looks to port and down, the starboard beam mirrors it."""
+    frames = _frames('omniscan_450_sidescan')
+    port = [row[0] for row in frames['port']]
+    stbd = [row[0] for row in frames['stbd']]
+    assert port[1] > 0.9 and port[2] < -0.2, port
+    assert abs(port[0]) < 1e-6
+    assert all(abs(a - b) < 1e-6 for a, b in zip(stbd, (port[0], -port[1], port[2])))
+
+
+def test_profiler_beam_looks_straight_down():
+    """The Surveyor's beam frame looks down, its fan across the track."""
+    beam = _frames('surveyor_multibeam')['beam']
+    assert [round(row[0], 6) for row in beam] == [0, 0, -1]
+    assert [round(row[1], 6) for row in beam] == [0, 1, 0]
+
+
+def test_sonar_settings_are_checked():
+    """`sonar:` belongs only on a sonar part, and holds plain values."""
+    from bluerobotics_parts.sonar import entry_problems
+    assert entry_problems({'type': 'surveyor_multibeam', 'sonar': {'range_max': 30}}, 'e') == []
+    assert entry_problems({'type': 'ping360', 'sonar': {'range_max': 30}}, 'e')
+    assert entry_problems({'type': 'surveyor_multibeam',
+                           'sonar': {'range': {'min': 1, 'max': 30}}}, 'e')
+    assert entry_problems({'type': 'surveyor_multibeam', 'sonar': 30}, 'e')
+    assert entry_problems({'type': 'ping360'}, 'e') == []
