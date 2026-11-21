@@ -28,12 +28,13 @@ parts too: an assembly is a chassis plus whatever its slots carry.
 | `sediment_sampler` | Newton sediment sampler attachment | [link](https://bluerobotics.com/store/thrusters/grippers/newton-sediment-sampler-attachment/) | one DOF claw with a position controller |
 | `payload_skid` | BlueROV2 payload skid | [link](https://bluerobotics.com/store/rov/bluerov2-accessories/brov-payload-skid/) | geometry |
 | `roof_rack` | ROV roof rack | [link](https://bluerobotics.com/store/rov/bluerov2-accessories/rov-roof-rack/) | geometry |
-| `omniscan_450_sidescan` | Cerulean Omniscan 450 side scan sonar | [link](https://bluerobotics.com/store/the-reef/cerulean-sidescan-sonar/) | geometry only |
-| `surveyor_multibeam` | Cerulean Surveyor 240-16 multibeam | [link](https://bluerobotics.com/store/sonars/echosounders/cerulean-surveyor-240-16-multibeam-echosounder/) | geometry only |
+| `omniscan_450_sidescan` | Cerulean Omniscan 450 side scan sonar | [link](https://bluerobotics.com/store/the-reef/cerulean-sidescan-sonar/) | gz_sonar sidescan sensor on each side (`port`, `stbd` frames) |
+| `surveyor_multibeam` | Cerulean Surveyor 240-16 multibeam | [link](https://bluerobotics.com/store/sonars/echosounders/cerulean-surveyor-240-16-multibeam-echosounder/) | gz_sonar profiling sensor at its `beam` frame |
+| `sonoptix_echo_multibeam` | Sonoptix ECHO imaging sonar | [link](https://bluerobotics.com/store/sonars/imaging-sonars/sonoptix-echo/) | gz_sonar imaging sensor |
 
 Parts whose final mesh has not been delivered yet use placeholder geometry; a
 `type` marked pending delivery cannot be fitted until its macro lands.
-The BlueROV2 sensor parts (`explorehd_camera`, `ping360`, `dvl_a50`) carry no visual for now: accessory visuals are out of scope, and each sensor works from its part's frame.
+The BlueROV2 sensor parts (`explorehd_camera`, `ping360`, `dvl_a50`, `sonoptix_echo_multibeam`) carry no visual for now: accessory visuals are out of scope, and each sensor works from its part's frame.
 
 ## Slots
 
