@@ -33,16 +33,15 @@ ros2 topic echo /blueboat/ping/range --once
 
 ### Sonars
 
-The sonar parts (`sonoptix_echo_multibeam`, `omniscan_450_sidescan`, `surveyor_multibeam`) fit either vehicle and are simulated by gz-maritime's gz_sonar; the world must load `gz-maritime-sonar-system`. kai_sonar_bridge, which the launch starts, brings them to ROS 2. `blueboat_sonar.yaml` fits the sidescan (`sidescan`) and the profiler (`profiler`).
+The sonar parts (`sonoptix_echo_multibeam`, `omniscan_450_sidescan`, `surveyor_multibeam`) fit either vehicle. gz-maritime's gz_sonar simulates them, which needs `gz-maritime-sonar-system` in the world, and kai_sonar_bridge, started by the launch, brings them to ROS 2. `blueboat_sonar.yaml` fits a sidescan (`sidescan`) and a profiler (`profiler`) under the middle of the boat; the topics follow those names.
 
 | ROS Topic | Description | Message type |
 |---|---|---|
-| `/<name>/sonar_forward/image` | Imaging sonar (Sonoptix ECHO): one fan per ping | [marine_acoustic_msgs/msg/ProjectedSonarImage](https://github.com/apl-ocean-engineering/hydrographic_msgs/blob/main/marine_acoustic_msgs/msg/ProjectedSonarImage.msg) |
-| `/<name>/sidescan/port/image`, `/<name>/sidescan/stbd/image` | Sidescan (Omniscan 450 SS): one line per side per ping | [marine_acoustic_msgs/msg/ProjectedSonarImage](https://github.com/apl-ocean-engineering/hydrographic_msgs/blob/main/marine_acoustic_msgs/msg/ProjectedSonarImage.msg) |
-| `/<name>/profiler/detections` | Profiler (Surveyor 240-16): soundings, a travel time and an angle each | [marine_acoustic_msgs/msg/SonarDetections](https://github.com/apl-ocean-engineering/hydrographic_msgs/blob/main/marine_acoustic_msgs/msg/SonarDetections.msg) |
-| `<image topic>/view`, `<detections topic>/points` | The same data drawn for looking at: a fan or waterfall image, or a point cloud | [sensor_msgs/msg/Image](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Image.html), [sensor_msgs/msg/PointCloud2](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/PointCloud2.html) |
+| `/<name>/sidescan/port/image`, `/<name>/sidescan/stbd/image` | Sidescan (Omniscan 450 SS): one line per side per ping, stamped in `<name>/sidescan_port_acoustic` and `<name>/sidescan_stbd_acoustic` | [marine_acoustic_msgs/msg/ProjectedSonarImage](https://github.com/apl-ocean-engineering/hydrographic_msgs/blob/main/marine_acoustic_msgs/msg/ProjectedSonarImage.msg) |
+| `/<name>/profiler/detections` | Profiler (Surveyor 240-16): soundings, a travel time and an angle each, stamped in `<name>/profiler_beam` | [marine_acoustic_msgs/msg/SonarDetections](https://github.com/apl-ocean-engineering/hydrographic_msgs/blob/main/marine_acoustic_msgs/msg/SonarDetections.msg) |
+| `.../image/view`, `.../detections/points` | The same data drawn for looking at: each side's waterfall, and the soundings as a point cloud | [sensor_msgs/msg/Image](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Image.html), [sensor_msgs/msg/PointCloud2](https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/PointCloud2.html) |
 
-The topics follow the instance names used in `blueboat_sonar.yaml`. Sonar images are stamped with an `_acoustic` frame of the part (`<name>/sonar_forward_acoustic`, `<name>/sidescan_port_acoustic`), whose Z axis is the beam's look direction, as `ProjectedSonarImage` expects; soundings with the profiler's `beam` frame. A part's `sonar:` entry sets its sensor parameters ([Add a sonar](https://honurobotics.github.io/gz-maritime/lyrical/how-to/sonar-add.html)).
+Images are stamped in a part's `_acoustic` frame, whose Z axis is the beam's look direction, as `ProjectedSonarImage` expects; the conventions are in the [sonar design](https://honurobotics.github.io/gz-maritime/lyrical/design/sonar.html#messages), and a part's `sonar:` entry sets its parameters ([Add a sonar](https://honurobotics.github.io/gz-maritime/lyrical/how-to/sonar-add.html)).
 
 `<name>` is the instance name, `blueboat` for the default instance, or
 whatever the boat was spawned as ([Several vehicles](../../walkthroughs/namespaces.md)).
