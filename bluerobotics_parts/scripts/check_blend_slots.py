@@ -32,6 +32,12 @@ Run inside Blender, by a person (not the build):
         --python bluerobotics_parts/scripts/check_blend_slots.py -- \
         bluerobotics_parts/urdf/bluerov2_chassis.urdf.xacro
 
+The heavy chassis is checked the same way, against its own scene:
+
+    blender -b --python-exit-code 1 bluerobotics_parts/assemblies/bluerov2_heavy_assembly.blend \
+        --python bluerobotics_parts/scripts/check_blend_slots.py -- \
+        bluerobotics_parts/urdf/bluerov2_heavy_chassis.urdf.xacro
+
 Prints one row per part and exits non-zero if any row fails.
 """
 
@@ -61,16 +67,23 @@ def read_slots(xacro):
     return slots
 
 
-def role(pos, axis):
-    """Slot number for a T200 at pos with duct axis line axis, in base_link."""
+def role(pos, axis, corners):
+    """
+    Slot number for a T200 at pos with duct axis line axis, in base_link.
+
+    corners: the chassis has four corner verticals (the Heavy: 5 fore
+    starboard, 6 fore port, 7 aft starboard, 8 aft port), not two.
+    """
     if abs(axis[2]) > 0.7:
+        if corners and pos[0] < 0:
+            return 8 if pos[1] > 0 else 7
         return 6 if pos[1] > 0 else 5
     if pos[0] > 0:
         return 2 if pos[1] > 0 else 1
     return 4 if pos[1] > 0 else 3
 
 
-def scene_parts():
+def scene_parts(corners):
     for o in sorted(bpy.data.objects, key=lambda o: o.name):
         if o.type != 'MESH' or not o.name.startswith('t200'):
             continue
@@ -81,7 +94,7 @@ def scene_parts():
         pos = (-t.y, t.x, t.z)
         axis = (-ly[1] / n, ly[0] / n, ly[2] / n)
         kind = 'thruster_body' if o.name.startswith('t200_thruster') else 'thruster'
-        yield o.name, f'{kind}_{role(pos, axis)}', pos, axis
+        yield o.name, f'{kind}_{role(pos, axis, corners)}', pos, axis
 
 
 def main():
@@ -90,7 +103,7 @@ def main():
     failed, seen = 0, set()
     print(f"{'scene object':26} {'slot':16} {'position error mm':>18} "
           f"{'axis error deg':>15}  result")
-    for obj, slot, pos, axis in scene_parts():
+    for obj, slot, pos, axis in scene_parts('thruster_7' in slots):
         seen.add(slot)
         if slot not in slots:
             print(f'{obj:26} {slot:16} {"no such slot":>18}')
