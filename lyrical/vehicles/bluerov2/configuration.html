@@ -518,7 +518,17 @@ by the base part:</p>
 <span class="nt">base</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="nv">bluerov2_heavy_chassis</span><span class="p p-Indicator">,</span><span class="nt"> name</span><span class="p">:</span><span class="w"> </span><span class="nv">base_link</span><span class="p p-Indicator">}</span><span class="w">  </span><span class="c1"># heavy</span>
 </pre></div>
 </div>
-<p>With the heavy hull, widen the buoyancy footprint to <code class="docutils literal notranslate"><span class="pre">&quot;0.457</span> <span class="pre">0.575&quot;</span></code>.</p>
+<p>Both variants ship ready to run. <code class="docutils literal notranslate"><span class="pre">bluerov2.yaml</span></code> is the standard vehicle and
+<code class="docutils literal notranslate"><span class="pre">bluerov2_heavy.yaml</span></code> the Heavy, the same vehicle on the heavy chassis with
+its eight thrusters and the buoyancy footprint widened to <code class="docutils literal notranslate"><span class="pre">&quot;0.457</span> <span class="pre">0.575&quot;</span></code>.
+Each one is built into a Gazebo model, <code class="docutils literal notranslate"><span class="pre">model://bluerov2</span></code> and
+<code class="docutils literal notranslate"><span class="pre">model://bluerov2_heavy</span></code>. To launch the Heavy:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>bluerov2_gazebo<span class="w"> </span>sim.launch.xml<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>config_file:<span class="o">=</span><span class="k">$(</span>ros2<span class="w"> </span>pkg<span class="w"> </span>prefix<span class="w"> </span>--share<span class="w"> </span>bluerov2_description<span class="k">)</span>/config/bluerov2_heavy.yaml
+</pre></div>
+</div>
+<p>On the heavy hull, thruster_5 to thruster_8 are the corner verticals: front
+right, front left, rear right and rear left.</p>
 </section>
 <section id="buoyancy">
 <h2>Buoyancy<a class="headerlink" href="#buoyancy" title="Link to this heading"></a></h2>

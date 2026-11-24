@@ -513,6 +513,12 @@
 full simulation is generated at start (URDF, composed model, bridge
 config, into a directory under <code class="docutils literal notranslate"><span class="pre">$ROS_HOME</span></code>), the model is spawned as
 <code class="docutils literal notranslate"><span class="pre">bluerov2</span></code> into the pool world and the ROS bridge comes up with it.</p>
+<p>The Heavy ships as a second config; pass it to run the eight thruster
+vehicle:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>launch<span class="w"> </span>bluerov2_gazebo<span class="w"> </span>sim.launch.xml<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>config_file:<span class="o">=</span><span class="k">$(</span>ros2<span class="w"> </span>pkg<span class="w"> </span>prefix<span class="w"> </span>--share<span class="w"> </span>bluerov2_description<span class="k">)</span>/config/bluerov2_heavy.yaml
+</pre></div>
+</div>
 <p>To run a custom vehicle instead, pass its config with <code class="docutils literal notranslate"><span class="pre">config_file:=</span></code>;
 the <a class="reference internal" href="configuration.html"><span class="std std-doc">configuration page</span></a> lists the slots and
 <a class="reference internal" href="../../walkthroughs/change-parts.html"><span class="std std-doc">Change the fitted parts</span></a> walks through writing one.</p>
