@@ -24,7 +24,7 @@ parts:
   bluerov2_heavy_chassis:
     # Written to the file's manifest as a part of the workflow
     partRole: base                      # exactly one base part per vehicle
-    datumPoint: "Center of the base footprint: project the chassis onto the horizontal plane tangent to its lowest point (the bottom of the frame); the datum is the center of the bounding rectangle of that projection, midway between the fore and aft extents and midway between the port and starboard extents, on the bottom plane. This is the base_footprint of ROS REP 105: https://www.ros.org/reps/rep-0105.html. The guards widen the footprint symmetrically and stay inside its length and above its bottom, so the point is the standard chassis' datum."
+    datumPoint: "Center of the base footprint: project the chassis onto the horizontal plane tangent to its lowest point (the bottom of the frame); the datum is the center of the bounding rectangle of that projection, midway between the fore and aft extents and midway between the port and starboard extents, on the bottom plane. This point is the vehicle's base_link, the frame REP 105 attaches to the base without saying where (https://www.ros.org/reps/rep-0105.html); the glTF profile makes the base part's datum that frame. The guards widen the footprint symmetrically and stay inside its length and above its bottom, so the point is the standard chassis' datum."
     datumTarget: "None - in free space"
     source: "the delivered bluerov2_chassis_visual.glb; vendor 3D model BROV2-HEAVY-FILES, https://cad.bluerobotics.com/BROV2-HEAVY-FILES.zip; vendor 2D drawing, http://docs.bluerobotics.com/brov2-heavy/cad/2d-drawing-heavy-2018.png"
     dimensionSource: "http://docs.bluerobotics.com/brov2-heavy/cad/2d-drawing-heavy-2018.png"
