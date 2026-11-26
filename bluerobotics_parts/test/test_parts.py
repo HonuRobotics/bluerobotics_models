@@ -208,5 +208,5 @@ def test_sonar_setting_keys_are_checked():
     assert len(found) == 1 and "'range_max'" in found[0]
     assert entry_problems({'type': 'sonoptix_echo_multibeam',
                            'sonar': {'range_max': 15, 'rate': 5, 'gain': 'auto'}}, 'e') == []
-    for rate in (0, -1, 'fast', True):
+    for rate in (0, -1, 'fast', True, float('nan'), float('inf')):
         assert entry_problems({'type': 'sonoptix_echo_multibeam', 'sonar': {'rate': rate}}, 'e')

@@ -47,7 +47,7 @@ def sim(request):
     """Bring up the imaging walkthrough headless on isolated domains; return the env."""
     env = dict(os.environ,
                GZ_PARTITION=f'test_{uuid.uuid4().hex[:8]}',
-               ROS_DOMAIN_ID=str(os.getpid() % 100 + 101))
+               ROS_DOMAIN_ID=str(os.getpid() % 100 + 1))
     return launch_sim(
         request, 'ros2 launch', LAUNCH, env,
         ready=lambda e: TOPIC in ros(e, 'topic', 'list')[1],

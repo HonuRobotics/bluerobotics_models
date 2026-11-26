@@ -25,6 +25,7 @@ The Gazebo side, the sensors each part emits, is bluerobotics_parts/urdf/gz_sona
 """
 
 import difflib
+import math
 
 from bluerobotics_parts.topics import absolute, overrides_for, under
 import yaml
@@ -42,6 +43,9 @@ SONAR_PARTS = {
 # The keys a part's `sonar:` dict may set: the <gz:sonar> parameters gz_sonar
 # reads (its SonarSdf.cc; <range> is the nested form, written here as
 # range_min and range_max), and `rate`, the sensor's <update_rate> in Hz.
+# A copy of gz_sonar's list: a parameter added there is added here too. Only
+# the keys are checked here; gz_sonar's reader checks each value when the
+# world loads and refuses the sensor, with an error in the server's log.
 SONAR_SETTINGS = frozenset({
     'angle_noise', 'beam_width', 'beams', 'detection', 'detection_threshold',
     'dynamic_range', 'elevation_rays', 'elevation_span', 'frequency', 'gain',
@@ -128,6 +132,6 @@ def entry_problems(entry, what):
             found.append(f'{what}: sonar: {key!r} must be a plain value, '
                          f'not {type(v).__name__}')
         elif key == 'rate' and (isinstance(v, bool) or not isinstance(v, (int, float))
-                                or v <= 0):
+                                or not math.isfinite(v) or v <= 0):
             found.append(f'{what}: sonar: rate must be a positive number of Hz, not {v!r}')
     return found
