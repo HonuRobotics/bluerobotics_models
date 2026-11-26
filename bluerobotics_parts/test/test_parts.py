@@ -164,3 +164,14 @@ def test_sonar_settings_are_checked():
                            'sonar': {'range': {'min': 1, 'max': 30}}}, 'e')
     assert entry_problems({'type': 'surveyor_multibeam', 'sonar': 30}, 'e')
     assert entry_problems({'type': 'ping360'}, 'e') == []
+
+
+def test_sonar_setting_keys_are_checked():
+    """A misspelled `sonar:` key is refused when the model is generated, with a hint."""
+    from bluerobotics_parts.sonar import entry_problems
+    found = entry_problems({'type': 'sonoptix_echo_multibeam', 'sonar': {'range_mx': 15}}, 'e')
+    assert len(found) == 1 and "'range_max'" in found[0]
+    assert entry_problems({'type': 'sonoptix_echo_multibeam',
+                           'sonar': {'range_max': 15, 'rate': 5, 'gain': 'auto'}}, 'e') == []
+    for rate in (0, -1, 'fast', True):
+        assert entry_problems({'type': 'sonoptix_echo_multibeam', 'sonar': {'rate': rate}}, 'e')

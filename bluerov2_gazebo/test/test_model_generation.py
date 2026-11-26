@@ -298,6 +298,19 @@ def test_sonar_settings_reach_the_sensor():
         block = sensor.find('gz:sonar')
     assert {c.tag.split('}')[-1]: c.text for c in block} == {
         'range_max': '15', 'labels': 'true'}
+    assert sensor.find('update_rate').text == '10'
+
+
+def test_sonar_rate_sets_the_update_rate():
+    """`rate` in a part's `sonar:` dict is the sensor's <update_rate>, not a <gz:sonar> element."""
+    root, _ = gen_model(FULL_CONFIG.replace('sonar: {range_max: 15, labels: true}',
+                                            'sonar: {range_max: 15, labels: true, rate: 2.5}'))
+    sensor = next(s for s in root.iter('sensor') if s.get('name') == 'sonar_forward')
+    assert sensor.find('update_rate').text == '2.5'
+    block = sensor.find('{http://gazebosim.org/schema}sonar')
+    if block is None:
+        block = sensor.find('gz:sonar')
+    assert 'rate' not in {c.tag.split('}')[-1] for c in block}
 
 
 RGBD_SUFFIXES = ('image', 'depth_image', 'points', 'camera_info')

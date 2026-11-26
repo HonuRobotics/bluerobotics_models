@@ -23,6 +23,8 @@ for a profiler's soundings. The Gazebo side, the sensors each part emits,
 is bluerobotics_parts/urdf/gz_sonar.xacro.
 """
 
+import difflib
+
 from bluerobotics_parts.topics import absolute, overrides_for, under
 
 # Sonar part type -> [(topic below the part's, kai_sonar_bridge kind, frame
@@ -33,6 +35,19 @@ SONAR_PARTS = {
                               ('stbd/image', 'image', 'stbd_acoustic')],
     'surveyor_multibeam': [('detections', 'detections', 'beam')],
 }
+
+
+# The keys a part's `sonar:` dict may set: the <gz:sonar> parameters gz_sonar
+# reads (its SonarSdf.cc; <range> is the nested form, written here as
+# range_min and range_max), and `rate`, the sensor's <update_rate> in Hz.
+SONAR_SETTINGS = frozenset({
+    'angle_noise', 'beam_width', 'beams', 'detection', 'detection_threshold',
+    'dynamic_range', 'elevation_rays', 'elevation_span', 'frequency', 'gain',
+    'gain_time_constant', 'horizontal_fov', 'labels', 'max_soundings',
+    'noise_floor', 'pulse_length', 'range_max', 'range_min', 'range_noise',
+    'rate', 'rays_per_beam', 'samples', 'sidelobe_level', 'sound_speed',
+    'speckle', 'tvg', 'tvg_spreading', 'vertical_fov', 'water_column',
+})
 
 
 def sonar_entries(cfg, instances, default_ns):
@@ -77,5 +92,16 @@ def entry_problems(entry, what):
                 f'(sonars: {sorted(SONAR_PARTS)})']
     if not isinstance(settings, dict):
         return [f'{what}: sonar: must be a dict of key: value']
-    return [f'{what}: sonar: {key!r} must be a plain value, not {type(v).__name__}'
-            for key, v in settings.items() if isinstance(v, (dict, list))]
+    found = []
+    for key, v in settings.items():
+        if key not in SONAR_SETTINGS:
+            near = difflib.get_close_matches(str(key), SONAR_SETTINGS, n=1)
+            hint = f'; did you mean {near[0]!r}?' if near else ''
+            found.append(f'{what}: sonar: {key!r} is not a sonar parameter{hint}')
+        elif isinstance(v, (dict, list)):
+            found.append(f'{what}: sonar: {key!r} must be a plain value, '
+                         f'not {type(v).__name__}')
+        elif key == 'rate' and (isinstance(v, bool) or not isinstance(v, (int, float))
+                                or v <= 0):
+            found.append(f'{what}: sonar: rate must be a positive number of Hz, not {v!r}')
+    return found

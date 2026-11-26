@@ -7,7 +7,9 @@
      looks along its frame's x axis. The empty <gz:sonar/> gives the device's
      defaults, and a `sonar:` dict on the part's config entry sets any of its
      parameters, one element each (for example sonar: {range_max: 15,
-     noise_floor: -40}); on the sidescan it applies to both sides.
+     noise_floor: -110}), and `rate`, the pings per second (10 if unset);
+     on the sidescan it applies to both sides. bluerobotics_parts/sonar.py
+     (SONAR_SETTINGS) lists the keys, and the config check refuses others.
 
      They publish gz.maritime.sonar messages, which kai_sonar_bridge brings to
      ROS 2 on the same topics, with the frames and kinds listed in
@@ -33,10 +35,10 @@
       <sensor name="${name}" type="custom" gz:type="${gztype}">
         <frame_id>${topic_ns}/${frame}</frame_id>
         <topic>${topic}</topic>
-        <update_rate>10</update_rate>
+        <update_rate>${dict(settings).get('rate', 10)}</update_rate>
         <always_on>1</always_on>
         <gz:sonar>
-          <xacro:sonar_settings items="${settings}"/>
+          <xacro:sonar_settings items="${[i for i in settings if i[0] != 'rate']}"/>
         </gz:sonar>
       </sensor>
     </xacro:sensor_link>
