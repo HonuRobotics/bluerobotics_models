@@ -13,6 +13,7 @@ ament_environment_hooks("hooks/resource_paths.sh.in")
 # with); urdf/ carries the parts, one macro file each, the parts level
 # library that includes them and the assembly dispatcher.
 install(DIRECTORY
+  launch
   models
   urdf
   worlds

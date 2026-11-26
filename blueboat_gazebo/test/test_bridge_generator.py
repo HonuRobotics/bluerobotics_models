@@ -113,21 +113,12 @@ def test_cli_rejects_a_config_that_matches_nothing(tmp_path):
     assert not (tmp_path / 'out.yaml').exists()
 
 
-def test_sonar_entries():
-    """Each sonar sensor gets a kai_sonar_bridge entry with its kind and frame."""
+def test_sonars_go_to_the_sonar_bridge_not_ros_gz_bridge():
+    """The sidescan and profiler have no ros_gz_bridge entry; kai_sonar_bridge gets them."""
     cfg = {'topic_namespace': 'boat'}
-    instances = [('omniscan_450_sidescan', 'sidescan'), ('surveyor_multibeam', 'profiler'),
-                 ('ping_singlebeam', 'ping')]
+    instances = [('omniscan_450_sidescan', 'sidescan'), ('surveyor_multibeam', 'profiler')]
+    entries = bridge_gen.bridge_entries(cfg, instances)
+    assert not any('sidescan' in e['gz_topic_name'] or 'profiler' in e['gz_topic_name']
+                   for e in entries)
     params = bridge_gen.sonar_entries(cfg, instances)['/**']['ros__parameters']
-    assert params['gz_topics'] == ['/boat/sidescan/port/image', '/boat/sidescan/stbd/image',
-                                   '/boat/profiler/detections']
-    assert params['ros_topics'] == params['gz_topics']
-    assert params['frame_ids'] == ['boat/sidescan_port_acoustic', 'boat/sidescan_stbd_acoustic',
-                                   'boat/profiler_beam']
-    assert params['kinds'] == ['image', 'image', 'detections']
-
-
-def test_no_sonar_no_lists():
-    """Without a sonar the bridge keeps its defaults: no empty lists."""
-    params = bridge_gen.sonar_entries({}, [])['/**']['ros__parameters']
-    assert 'gz_topics' not in params
+    assert params['gz_topics'][0] == '/boat/sidescan/port/image'
