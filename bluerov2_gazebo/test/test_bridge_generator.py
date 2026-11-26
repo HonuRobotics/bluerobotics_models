@@ -124,7 +124,7 @@ def test_sonars_go_to_the_sonar_bridge_not_ros_gz_bridge():
     instances = [('sonoptix_echo_multibeam', 'sonar_forward')]
     entries = bridge_gen.bridge_entries(cfg, instances)
     assert not any('sonar_forward' in e['gz_topic_name'] for e in entries)
-    params = bridge_gen.sonar_entries(cfg, instances)['sonar_bridge'][
+    params = bridge_gen.sonar_entries(cfg, instances)['/**'][
         'ros__parameters']
     assert params['gz_topics'] == ['/rov/sonar_forward/image']
     assert params['ros_topics'] == ['/rov/sonar_forward/image']
@@ -133,5 +133,5 @@ def test_sonars_go_to_the_sonar_bridge_not_ros_gz_bridge():
 
 def test_no_sonar_no_lists():
     """Without a sonar the bridge keeps its defaults: no empty lists."""
-    params = bridge_gen.sonar_entries({}, [])['sonar_bridge']['ros__parameters']
+    params = bridge_gen.sonar_entries({}, [])['/**']['ros__parameters']
     assert 'gz_topics' not in params

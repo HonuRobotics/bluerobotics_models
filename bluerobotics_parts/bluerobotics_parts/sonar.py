@@ -74,7 +74,10 @@ def sonar_entries(cfg, instances, default_ns):
     if gz_topics:
         params.update(gz_topics=gz_topics, ros_topics=ros_topics,
                       frame_ids=frame_ids, kinds=kinds)
-    return {'sonar_bridge': {'ros__parameters': params}}
+    # Keyed /** so the file applies to the bridge under any name and in any
+    # namespace; keyed by the bare node name it would match only a node of
+    # that name in the root namespace, and be ignored without a word elsewhere.
+    return {'/**': {'ros__parameters': params}}
 
 
 def entry_problems(entry, what):

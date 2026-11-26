@@ -118,7 +118,7 @@ def test_sonar_entries():
     cfg = {'topic_namespace': 'boat'}
     instances = [('omniscan_450_sidescan', 'sidescan'), ('surveyor_multibeam', 'profiler'),
                  ('ping_singlebeam', 'ping')]
-    params = bridge_gen.sonar_entries(cfg, instances)['sonar_bridge']['ros__parameters']
+    params = bridge_gen.sonar_entries(cfg, instances)['/**']['ros__parameters']
     assert params['gz_topics'] == ['/boat/sidescan/port/image', '/boat/sidescan/stbd/image',
                                    '/boat/profiler/detections']
     assert params['ros_topics'] == params['gz_topics']
@@ -129,5 +129,5 @@ def test_sonar_entries():
 
 def test_no_sonar_no_lists():
     """Without a sonar the bridge keeps its defaults: no empty lists."""
-    params = bridge_gen.sonar_entries({}, [])['sonar_bridge']['ros__parameters']
+    params = bridge_gen.sonar_entries({}, [])['/**']['ros__parameters']
     assert 'gz_topics' not in params

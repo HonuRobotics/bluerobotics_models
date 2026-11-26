@@ -424,7 +424,7 @@ def test_sensor_and_bridge_topics_agree():
                          if e['gz_topic_name'] not in fixed}
         # Sonars go through kai_sonar_bridge, not ros_gz_bridge.
         sonar = bridge_gen.sonar_entries(cfg, urdf_instances(config))
-        bridge_topics |= set(sonar['sonar_bridge']['ros__parameters'].get('gz_topics', []))
+        bridge_topics |= set(sonar['/**']['ros__parameters'].get('gz_topics', []))
         root, _ = xacro(MODEL_XACRO, config)
         assert sdf_gz_topics(root) == bridge_topics
 
@@ -463,7 +463,7 @@ def test_sensor_frame_ids_resolve_in_tf():
     # The sonars reach ROS through kai_sonar_bridge, stamped with the frames
     # it is given, not the sensors' <frame_id>.
     params = bridge_gen.sonar_entries(yaml.safe_load(config), urdf_instances(config))[
-        'sonar_bridge']['ros__parameters']
+        '/**']['ros__parameters']
     assert params['frame_ids']
     for frame in params['frame_ids']:
         prefix, _, link = frame.partition('/')
@@ -490,7 +490,7 @@ def test_every_shipped_config_generates(config):
     fixed = {'/clock', f'/{ns}/joint_states'}
     bridge_topics = {e['gz_topic_name'] for e in entries if e['gz_topic_name'] not in fixed}
     sonar = bridge_gen.sonar_entries(cfg, urdf_instances(text))
-    bridge_topics |= set(sonar['sonar_bridge']['ros__parameters'].get('gz_topics', []))
+    bridge_topics |= set(sonar['/**']['ros__parameters'].get('gz_topics', []))
     root, _ = xacro(MODEL_XACRO, text)
     assert sdf_gz_topics(root) == bridge_topics
 
