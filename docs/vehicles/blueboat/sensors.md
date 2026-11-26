@@ -51,3 +51,17 @@ or removed in the config moves or drops its topics
 part declares as `frame_id` (`ping_beam`, the transducer face), under the
 instance name (`<name>/ping_beam`), which is how TF carries it; the sonars' frames are above. Rendered
 sensors need a GPU (headless EGL works).
+
+#### Sonar settings
+
+A sonar part's entry in the vehicle config takes a `sonar:` dict that sets the sensor's parameters:
+
+```yaml
+- {type: omniscan_450_sidescan, name: sidescan, xyz: "0.2 0 -0.08", rpy: "0 0 0",
+   sonar: {rate: 5, range_max: 30}}
+```
+
+- `rate` is the pings per second (10 if unset); lowering it is the first thing to try when the simulation runs slower than real time.
+- Every other key is one of gz_sonar's `<gz:sonar>` parameters, such as `range_min`, `range_max`, `samples`, `beams`, `gain`, `noise_floor`, `speckle` and `labels`; the [sonar design](https://honurobotics.github.io/gz-maritime/lyrical/design/sonar.html) lists them all with their defaults. On the sidescan the dict applies to both sides.
+- A key that is not a sonar parameter is refused when the model is generated, at build or launch, with the nearest known key as a hint (`range_mx`: "did you mean 'range_max'?").
+- Values are checked when the world loads: a value the sonar cannot use (`samples: 76.5`, `labels: maybe`) refuses that one sensor, with an error in the Gazebo server's log, and the sonar's topics never appear.
