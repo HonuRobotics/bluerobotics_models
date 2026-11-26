@@ -56,6 +56,11 @@ def test_container_and_nodes_up(sim):
         lambda: f'missing nodes; last listing:\n{ros(sim, "node", "list")[1]}')
 
 
+def test_no_sonar_no_sonar_bridge(sim):
+    """The shipped config fits no simulated sonar, so no sonar bridge is started."""
+    assert '/sonar_bridge' not in ros(sim, 'node', 'list')[1]
+
+
 def test_bridge_clock_flows(sim):
     """/clock arrives on the ROS side: the generated bridge config loaded."""
     code, out, err = ros(sim, 'topic', 'echo', '/clock', '--once', timeout=30)

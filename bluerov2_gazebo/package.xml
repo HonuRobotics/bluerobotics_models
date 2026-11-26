@@ -60,6 +60,9 @@
   <test_depend>ament_index_python</test_depend>
   <test_depend>python3-pytest</test_depend>
   <test_depend>xacro</test_depend>
+  <!-- test_sonar_launch: gz_sonar's imaging world, and the message type ros2 echoes -->
+  <test_depend>gz_sonar</test_depend>
+  <test_depend>marine_acoustic_msgs</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

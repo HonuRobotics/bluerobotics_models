@@ -165,6 +165,10 @@ if(BUILD_TESTING)
     NOCAPTURE)
   ament_add_pytest_test(test_ros_launch test/test_ros_launch.py TIMEOUT 300
     NOCAPTURE)
+  # The whole sonar chain: the imaging walkthrough, headless, until a
+  # ProjectedSonarImage arrives (about 25 s).
+  ament_add_pytest_test(test_sonar_launch test/test_sonar_launch.py TIMEOUT 300
+    NOCAPTURE)
 endif()
 
 ament_package()
