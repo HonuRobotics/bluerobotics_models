@@ -1,5 +1,5 @@
 # BlueBoat with sonars: the standard configuration (blueboat.yaml) plus a
-# Cerulean Omniscan 450 SS sidescan (one bar, a beam to each side, 15 degrees
+# Cerulean Omniscan 450 SS sidescan (one bar, a beam to each side, 20 degrees
 # down) and a Cerulean Surveyor 240-16 profiler looking straight down, both
 # under the middle of the boat, for the gz_sonar walkthroughs. Launch it with
 #   config_file:=$(ros2 pkg prefix --share blueboat_description)/config/blueboat_sonar.yaml

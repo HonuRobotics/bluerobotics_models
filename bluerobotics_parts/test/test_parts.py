@@ -144,6 +144,8 @@ def test_sidescan_sides_look_out_and_down():
     port = [row[0] for row in frames['port']]
     stbd = [row[0] for row in frames['stbd']]
     assert port[1] > 0.9 and port[2] < -0.2, port
+    # 20 degrees down, Cerulean's recommended mounting.
+    assert abs(math.degrees(math.asin(-port[2])) - 20.0) < 1e-6, port
     assert abs(port[0]) < 1e-6
     assert all(abs(a - b) < 1e-6 for a, b in zip(stbd, (port[0], -port[1], port[2])))
 
