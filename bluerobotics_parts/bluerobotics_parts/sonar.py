@@ -17,10 +17,11 @@ The sonar parts, driven by gz-maritime's gz_sonar, for both vehicles.
 
 Each sonar part publishes on topics below the part's own, and
 kai_sonar_bridge brings each to ROS 2 stamped with a frame of the part's:
-an `_acoustic` frame for an image (Z along the beam, X up, as
-marine_acoustic_msgs/ProjectedSonarImage expects), the beam frame itself
-for a profiler's soundings. The Gazebo side, the sensors each part emits,
-is bluerobotics_parts/urdf/gz_sonar.xacro.
+an `_acoustic` frame, the sensor's frame turned so Z runs along the beam and
+X up (as marine_acoustic_msgs/ProjectedSonarImage expects), for images and
+for a profiler's soundings alike; looking down, a profiler's is X forward,
+Y starboard, Z down, the frame SonarDetections counts its rx angles in.
+The Gazebo side, the sensors each part emits, is bluerobotics_parts/urdf/gz_sonar.xacro.
 """
 
 import difflib
@@ -34,7 +35,7 @@ SONAR_PARTS = {
     'sonoptix_echo_multibeam': [('image', 'image', 'acoustic')],
     'omniscan_450_sidescan': [('port/image', 'image', 'port_acoustic'),
                               ('stbd/image', 'image', 'stbd_acoustic')],
-    'surveyor_multibeam': [('detections', 'detections', 'beam')],
+    'surveyor_multibeam': [('detections', 'detections', 'beam_acoustic')],
 }
 
 

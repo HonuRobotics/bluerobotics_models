@@ -130,6 +130,7 @@ TO_ACOUSTIC = [[0, 0, 1], [0, -1, 0], [1, 0, 0]]
     ('sonoptix_echo_multibeam', 'acoustic', None),
     ('omniscan_450_sidescan', 'port_acoustic', 'port'),
     ('omniscan_450_sidescan', 'stbd_acoustic', 'stbd'),
+    ('surveyor_multibeam', 'beam_acoustic', 'beam'),
 ])
 def test_acoustic_frames_follow_their_sensor(part, acoustic, sensor):
     """Each `_acoustic` frame is its sensor's frame turned Z along the beam."""
@@ -178,9 +179,10 @@ def test_sonar_entries():
     assert params['gz_topics'] == ['/boat/sonar_forward/image', '/boat/sidescan/port/image',
                                    '/boat/sidescan/stbd/image', '/boat/profiler/detections']
     assert params['ros_topics'] == params['gz_topics']
-    assert params['frame_ids'][:3] == ['boat/sonar_forward_acoustic',
-                                       'boat/sidescan_port_acoustic',
-                                       'boat/sidescan_stbd_acoustic']
+    assert params['frame_ids'] == ['boat/sonar_forward_acoustic',
+                                   'boat/sidescan_port_acoustic',
+                                   'boat/sidescan_stbd_acoustic',
+                                   'boat/profiler_beam_acoustic']
     assert params['kinds'] == ['image', 'image', 'image', 'detections']
     # With no topic_namespace in the config, the vehicle's default names it.
     params = sonar_entries({}, instances[:1], 'rov')['/**']['ros__parameters']
