@@ -11,6 +11,8 @@
 # * gz_ocean_current: gz-maritime-ocean-current-system, the current the
 #   vehicles' worlds own and gz_hydrodynamics reads.
 # * gz_marked_shapes: a library gz_ocean_current builds on.
+# * gz_waves: the wave core, which gz_hydrodynamics builds on to damp a
+#   vehicle against the waves' water velocity. It names no wave engine.
 # * gz_sonar: gz-maritime-sonar-system, the sonar system every vehicle world
 #   loads, which drives the sonar parts' sensors.
 # * kai_sonar_bridge: the node both vehicles' launches start to bring the

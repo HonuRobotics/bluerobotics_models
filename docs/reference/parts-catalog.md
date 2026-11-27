@@ -10,7 +10,7 @@ parts too: an assembly is a chassis plus whatever its slots carry.
 |--------|------|--------------|---------------|
 | `blueboat_chassis` | BlueBoat hulls, crossbeams and both thruster bodies | [BlueBoat](https://bluerobotics.com/store/boat/blueboat-components-spares/blueboat-components/) | assembly root; displacement declared at the assembly |
 | `bluerov2_chassis` | BlueROV2 standard hull (frame, tanks, foam) | [BlueROV2](https://bluerobotics.com/store/rov/bluerov2/) | assembly root; declares every slot including thruster bodies and propellers |
-| `bluerov2_heavy_chassis` | BlueROV2 Heavy kit hull | [Heavy kit](https://bluerobotics.com/store/rov/bluerov2-accessories/brov2-heavy-kit/) | as the standard chassis with eight thruster and body slots |
+| `bluerov2_heavy_chassis` | BlueROV2 hull with the Heavy kit fitted (frame, tanks, foam, guards) | [Heavy kit](https://bluerobotics.com/store/rov/bluerov2-upgrade-kits/brov2-heavy-retrofit/) | as the standard chassis with eight thruster and body slots |
 | `m200_weedless_prop_cw`, `m200_weedless_prop_ccw` | weedless propellers | [link](https://bluerobotics.com/store/thrusters/t100-t200-thrusters/weedless-propeller-set/) | default BlueBoat motor occupants, driven by the Thruster plugin |
 | `t200_prop_cw`, `t200_prop_ccw` | standard T200 propellers | [link](https://bluerobotics.com/store/rov/bluerov2-components-spares/t200-thruster-brov2-spare-r1-vp/) | default ROV propellers; alternative BlueBoat motor occupants |
 | `t200_thruster` | T200 thruster body | [link](https://bluerobotics.com/store/thrusters/t100-t200-thrusters/t200-thruster-r2-rp/) | default occupant of the ROV thruster body slots; the BlueBoat chassis already carries its bodies |

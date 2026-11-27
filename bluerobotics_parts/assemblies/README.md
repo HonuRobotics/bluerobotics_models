@@ -5,15 +5,19 @@ The modeler's assembly scenes: each vehicle's chassis with its parts (T200 thrus
 | File | Vehicle | Xacro it drives |
 |---|---|---|
 | `bluerov2_assembly.blend` | BlueROV2 (standard, six thrusters) | `../urdf/bluerov2_chassis.urdf.xacro`: `thruster_N`, `thruster_body_N` |
+| `bluerov2_heavy_assembly.blend` | BlueROV2 Heavy (eight thrusters) | `../urdf/bluerov2_heavy_chassis.urdf.xacro`: `thruster_N`, `thruster_body_N` |
 | `blueboat_assembly.blend` | BlueBoat | `../urdf/blueboat_chassis.urdf.xacro`: `prop_port`, `prop_stbd` |
 
 A change to a part's placement is made in the `.blend` first, and the xacro follows in the same pull request, so the two never drift apart.
 
-Reading a pose from the scene: the BlueROV2 scene's origin is the commissioned datum, which is also the chassis link's origin (`base_link`), so a part's position and orientation in the scene map straight into the link by Blender's axes to the link's (x = −Blender y, y = Blender x, z = Blender z), with no offset. For the BlueROV2, `../scripts/check_blend_slots.py` reads the scene and checks the xacro's thruster slots against it, within 0.5 mm and 1 degree:
+Reading a pose from the scene: each BlueROV2 scene's origin is the commissioned datum, which is also the chassis link's origin (`base_link`), so a part's position and orientation in the scene map straight into the link by Blender's axes to the link's (x = −Blender y, y = Blender x, z = Blender z), with no offset. For the BlueROV2, `../scripts/check_blend_slots.py` reads the scene and checks the xacro's thruster slots against it, within 0.5 mm and 1 degree:
 
 ```bash
 blender -b --python-exit-code 1 bluerov2_assembly.blend --python ../scripts/check_blend_slots.py -- ../urdf/bluerov2_chassis.urdf.xacro
+blender -b --python-exit-code 1 bluerov2_heavy_assembly.blend --python ../scripts/check_blend_slots.py -- ../urdf/bluerov2_heavy_chassis.urdf.xacro
 ```
+
+The Heavy scene is the heavy chassis with the delivered T200 parts placed at its eight slots. Its four horizontals are where the standard scene has them; a change to those is made in both scenes.
 
 The BlueBoat's current prop poses were read from a glTF export of the assembly (PR #83), with the glTF mapping (x = glTF z, y = glTF x, z = glTF y); read them from this file from now on, after checking that its origin is the boat's commissioned datum (the BlueROV2 scene's was not, and was re-based in #102).
 

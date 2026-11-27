@@ -22,7 +22,7 @@ parts:
   bluerov2_chassis:
     # Written to the file's manifest as a part of the workflow
     partRole: base                      # exactly one base part per vehicle
-    datumPoint: "Center of the base footprint: project the chassis onto the horizontal plane tangent to its lowest point (the bottom of the frame); the datum is the center of the bounding rectangle of that projection, midway between the fore and aft extents and midway between the port and starboard extents, on the bottom plane. This is the base_footprint of ROS REP 105: https://www.ros.org/reps/rep-0105.html"
+    datumPoint: "Center of the base footprint: project the chassis onto the horizontal plane tangent to its lowest point (the bottom of the frame); the datum is the center of the bounding rectangle of that projection, midway between the fore and aft extents and midway between the port and starboard extents, on the bottom plane. This point is the vehicle's base_link, the frame REP 105 attaches to the base without saying where (https://www.ros.org/reps/rep-0105.html); the glTF profile makes the base part's datum that frame"
     datumTarget: "None - in free space"          
     source: "vendor 3D model BLUEROV2-R4, https://cad.bluerobotics.com/BLUEROV2-R4.zip; images from https://bluerobotics.com/store/rov/bluerov2/"
     dimensionSource: "https://bluerobotics.com/store/rov/bluerov2/"
@@ -33,7 +33,7 @@ parts:
     referenceImages:
       - "product images at the source page"
       - "docs/vehicles/bluerov2/images/thrusters.png: thruster numbering, top view"
-      - "docs/vehicles/bluerov2/images/base_footprint.png: the datum (base_footprint), the ground plane at the bottom of the frame and the footprint rectangle that encloses the chassis"
+      - "docs/vehicles/bluerov2/images/base_footprint.png: the datum (base_link), the ground plane at the bottom of the frame and the footprint rectangle that encloses the chassis"
       - "Blue Robotics BlueROV2 assembly guide, https://bluerobotics.com/learn/bluerov2-assembly/: which thruster gets which propeller"
     forwardFeature: "the camera dome on the electronics enclosure; Forward points from the tail toward the camera dome"
     visualRequirement: "Start simple"
