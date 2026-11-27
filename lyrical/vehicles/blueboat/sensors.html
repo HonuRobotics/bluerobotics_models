@@ -216,6 +216,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#available-sensors">Available sensors</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sensors-ros-api">Sensors ROS API</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="#echosounder">Echosounder</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#sonars">Sonars</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#sonar-settings">Sonar settings</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -252,6 +256,10 @@
 <li class="toctree-l5"><a class="reference internal" href="../bluerov2/sensors.html#stereo-camera">Stereo camera</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../bluerov2/sensors.html#scanning-sonar">Scanning sonar</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../bluerov2/sensors.html#dvl">DVL</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../bluerov2/sensors.html#sonars">Sonars</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../bluerov2/sensors.html#sonar-settings">Sonar settings</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -527,6 +535,16 @@ sensors can be added following the
 <td><p><code class="docutils literal notranslate"><span class="pre">ping</span></code> (on the integration kit bracket, itself in the chassis <code class="docutils literal notranslate"><span class="pre">ping_mount</span></code> slot)</p></td>
 <td><p>no</p></td>
 </tr>
+<tr class="row-odd"><td><p>Omniscan 450 SS sidescan</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">omniscan_450_sidescan</span></code></p></td>
+<td><p>free placed</p></td>
+<td><p>no (<code class="docutils literal notranslate"><span class="pre">blueboat_sonar.yaml</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>Surveyor 240-16 profiler</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">surveyor_multibeam</span></code></p></td>
+<td><p>free placed</p></td>
+<td><p>no (<code class="docutils literal notranslate"><span class="pre">blueboat_sonar.yaml</span></code>)</p></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -555,14 +573,55 @@ starboard hull.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ros2<span class="w"> </span>topic<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>/blueboat/ping/range<span class="w"> </span>--once
 </pre></div>
 </div>
+</section>
+<section id="sonars">
+<h3>Sonars<a class="headerlink" href="#sonars" title="Link to this heading"></a></h3>
+<p>The sonar parts (<code class="docutils literal notranslate"><span class="pre">sonoptix_echo_multibeam</span></code>, <code class="docutils literal notranslate"><span class="pre">omniscan_450_sidescan</span></code>, <code class="docutils literal notranslate"><span class="pre">surveyor_multibeam</span></code>) fit either vehicle. gz-maritime’s gz_sonar simulates them, which needs <code class="docutils literal notranslate"><span class="pre">gz-maritime-sonar-system</span></code> in the world, and kai_sonar_bridge, started by the launch, brings them to ROS 2. <code class="docutils literal notranslate"><span class="pre">blueboat_sonar.yaml</span></code> fits a sidescan (<code class="docutils literal notranslate"><span class="pre">sidescan</span></code>) and a profiler (<code class="docutils literal notranslate"><span class="pre">profiler</span></code>) under the middle of the boat; the topics follow those names.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>ROS Topic</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Message type</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/sidescan/port/image</span></code>, <code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/sidescan/stbd/image</span></code></p></td>
+<td><p>Sidescan (Omniscan 450 SS): one line per side per ping, stamped in <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;/sidescan_port_acoustic</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;/sidescan_stbd_acoustic</span></code></p></td>
+<td><p><a class="reference external" href="https://github.com/apl-ocean-engineering/hydrographic_msgs/blob/main/marine_acoustic_msgs/msg/ProjectedSonarImage.msg">marine_acoustic_msgs/msg/ProjectedSonarImage</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/&lt;name&gt;/profiler/detections</span></code></p></td>
+<td><p>Profiler (Surveyor 240-16): soundings, a travel time and an angle each, stamped in <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;/profiler_beam_acoustic</span></code> (X forward, Y starboard, Z down)</p></td>
+<td><p><a class="reference external" href="https://github.com/apl-ocean-engineering/hydrographic_msgs/blob/main/marine_acoustic_msgs/msg/SonarDetections.msg">marine_acoustic_msgs/msg/SonarDetections</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">.../image/view</span></code>, <code class="docutils literal notranslate"><span class="pre">.../detections/points</span></code></p></td>
+<td><p>The same data drawn for looking at: each side’s waterfall, and the soundings as a point cloud</p></td>
+<td><p><a class="reference external" href="https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/Image.html">sensor_msgs/msg/Image</a>, <a class="reference external" href="https://docs.ros.org/en/rolling/p/sensor_msgs/interfaces/msg/PointCloud2.html">sensor_msgs/msg/PointCloud2</a></p></td>
+</tr>
+</tbody>
+</table>
+<p>Images are stamped in a part’s <code class="docutils literal notranslate"><span class="pre">_acoustic</span></code> frame, whose Z axis is the beam’s look direction, as <code class="docutils literal notranslate"><span class="pre">ProjectedSonarImage</span></code> expects; the conventions are in the <a class="reference external" href="https://honurobotics.github.io/gz-maritime/lyrical/design/sonar.html#messages">sonar design</a>, and a part’s <code class="docutils literal notranslate"><span class="pre">sonar:</span></code> entry sets its parameters (<a class="reference external" href="https://honurobotics.github.io/gz-maritime/lyrical/how-to/sonar-add.html">Add a sonar</a>).</p>
 <p><code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code> is the instance name, <code class="docutils literal notranslate"><span class="pre">blueboat</span></code> for the default instance, or
 whatever the boat was spawned as (<a class="reference internal" href="../../walkthroughs/namespaces.html"><span class="std std-doc">Several vehicles</span></a>).
 A part topic follows the part’s own name (<code class="docutils literal notranslate"><span class="pre">ping</span></code> above), so a part renamed
 or removed in the config moves or drops its topics
 (<a class="reference internal" href="configuration.html"><span class="std std-doc">Configuration</span></a>). Sensor messages carry a frame the
 part declares as <code class="docutils literal notranslate"><span class="pre">frame_id</span></code> (<code class="docutils literal notranslate"><span class="pre">ping_beam</span></code>, the transducer face), under the
-instance name (<code class="docutils literal notranslate"><span class="pre">&lt;name&gt;/ping_beam</span></code>), which is how TF carries it. Rendered
+instance name (<code class="docutils literal notranslate"><span class="pre">&lt;name&gt;/ping_beam</span></code>), which is how TF carries it; the sonars’ frames are above. Rendered
 sensors need a GPU (headless EGL works).</p>
+<section id="sonar-settings">
+<h4>Sonar settings<a class="headerlink" href="#sonar-settings" title="Link to this heading"></a></h4>
+<p>A sonar part’s entry in the vehicle config takes a <code class="docutils literal notranslate"><span class="pre">sonar:</span></code> dict that sets the sensor’s parameters:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="nv">omniscan_450_sidescan</span><span class="p p-Indicator">,</span><span class="nt"> name</span><span class="p">:</span><span class="w"> </span><span class="nv">sidescan</span><span class="p p-Indicator">,</span><span class="nt"> xyz</span><span class="p">:</span><span class="w"> </span><span class="s">"0.2</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">-0.08"</span><span class="p p-Indicator">,</span><span class="nt"> rpy</span><span class="p">:</span><span class="w"> </span><span class="s">"0</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">0"</span><span class="p p-Indicator">,</span>
+<span class="nt">   sonar</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">rate</span><span class="p">:</span><span class="w"> </span><span class="nv">5</span><span class="p p-Indicator">,</span><span class="nt"> range_max</span><span class="p">:</span><span class="w"> </span><span class="nv">30</span><span class="p p-Indicator">}}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">rate</span></code> is the pings per second (10 if unset); lowering it is the first thing to try when the simulation runs slower than real time.</p></li>
+<li><p>Every other key is one of gz_sonar’s <code class="docutils literal notranslate"><span class="pre">&lt;gz:sonar&gt;</span></code> parameters, such as <code class="docutils literal notranslate"><span class="pre">range_min</span></code>, <code class="docutils literal notranslate"><span class="pre">range_max</span></code>, <code class="docutils literal notranslate"><span class="pre">samples</span></code>, <code class="docutils literal notranslate"><span class="pre">beams</span></code>, <code class="docutils literal notranslate"><span class="pre">gain</span></code>, <code class="docutils literal notranslate"><span class="pre">noise_floor</span></code>, <code class="docutils literal notranslate"><span class="pre">speckle</span></code> and <code class="docutils literal notranslate"><span class="pre">labels</span></code>; the <a class="reference external" href="https://honurobotics.github.io/gz-maritime/lyrical/design/sonar.html">sonar design</a> lists them all with their defaults. On the sidescan the dict applies to both sides.</p></li>
+<li><p>A key that is not a sonar parameter is refused when the model is generated, at build or launch, with the nearest known key as a hint (<code class="docutils literal notranslate"><span class="pre">range_mx</span></code>: “did you mean ‘range_max’?”).</p></li>
+<li><p>Values are checked when the world loads: a value the sonar cannot use (<code class="docutils literal notranslate"><span class="pre">samples:</span> <span class="pre">76.5</span></code>, <code class="docutils literal notranslate"><span class="pre">labels:</span> <span class="pre">maybe</span></code>) refuses that one sensor, with an error in the Gazebo server’s log, and the sonar’s topics never appear.</p></li>
+</ul>
+</section>
 </section>
 </section>
 </section>

@@ -216,6 +216,10 @@
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/sensors.html#available-sensors">Available sensors</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/sensors.html#sensors-ros-api">Sensors ROS API</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="../vehicles/blueboat/sensors.html#echosounder">Echosounder</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/blueboat/sensors.html#sonars">Sonars</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../vehicles/blueboat/sensors.html#sonar-settings">Sonar settings</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -252,6 +256,10 @@
 <li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#stereo-camera">Stereo camera</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#scanning-sonar">Scanning sonar</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#dvl">DVL</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#sonars">Sonars</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#sonar-settings">Sonar settings</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -524,13 +532,16 @@ type, defaults and free placements alike.</p></li>
 <li><p><strong>The bridge knows the topics.</strong> In <code class="docutils literal notranslate"><span class="pre">scripts/generate_bridge_config.py</span></code>,
 add the type to <code class="docutils literal notranslate"><span class="pre">PART_TOPICS</span></code>: one <code class="docutils literal notranslate"><span class="pre">(suffix,</span> <span class="pre">ros</span> <span class="pre">type,</span> <span class="pre">gz</span> <span class="pre">type,</span> <span class="pre">direction)</span></code>
 per topic the sensor produces. The generator reads the fitted instances
-from the URDF manifest, so again no per vehicle edit.</p></li>
+from the URDF manifest, so again no per vehicle edit. A sonar is the
+exception: its messages go through kai_sonar_bridge, so it is listed in
+<code class="docutils literal notranslate"><span class="pre">SONAR_PARTS</span></code> in <code class="docutils literal notranslate"><span class="pre">bluerobotics_parts/sonar.py</span></code> and its sensors live in
+<code class="docutils literal notranslate"><span class="pre">bluerobotics_parts/urdf/gz_sonar.xacro</span></code>, shared by both vehicles.</p></li>
 <li><p><strong>Fit it</strong>: in a slot (add the type to the slot’s <code class="docutils literal notranslate"><span class="pre">accepts</span></code>, make it the
 <code class="docutils literal notranslate"><span class="pre">default</span></code> if it should come standard) or free placed.</p></li>
 </ol>
 <p>The tests guard the contract: every sensor’s <code class="docutils literal notranslate"><span class="pre">frame_id</span></code> must be a TF frame of the instance,
 every sensor’s frame must survive URDF to SDF conversion, and the Gazebo
-topics must equal the bridge’s, for the default, a full catalog and a
+topics must equal the bridges’ (ros_gz_bridge’s and kai_sonar_bridge’s together), for the default, a full catalog and a
 renamed instance config. Run <code class="docutils literal notranslate"><span class="pre">colcon</span> <span class="pre">test</span> <span class="pre">--packages-select</span> <span class="pre">blueboat_gazebo</span></code>.</p>
 </section>
 

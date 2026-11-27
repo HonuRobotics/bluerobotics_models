@@ -216,6 +216,10 @@
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/sensors.html#available-sensors">Available sensors</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../vehicles/blueboat/sensors.html#sensors-ros-api">Sensors ROS API</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="../vehicles/blueboat/sensors.html#echosounder">Echosounder</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/blueboat/sensors.html#sonars">Sonars</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../vehicles/blueboat/sensors.html#sonar-settings">Sonar settings</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -252,6 +256,10 @@
 <li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#stereo-camera">Stereo camera</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#scanning-sonar">Scanning sonar</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#dvl">DVL</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#sonars">Sonars</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../vehicles/bluerov2/sensors.html#sonar-settings">Sonar settings</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -622,18 +630,23 @@ parts too: an assembly is a chassis plus whatever its slots carry.</p>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">omniscan_450_sidescan</span></code></p></td>
 <td><p>Cerulean Omniscan 450 side scan sonar</p></td>
 <td><p><a class="reference external" href="https://bluerobotics.com/store/the-reef/cerulean-sidescan-sonar/">link</a></p></td>
-<td><p>geometry only</p></td>
+<td><p>gz_sonar sidescan sensor on each side (<code class="docutils literal notranslate"><span class="pre">port</span></code>, <code class="docutils literal notranslate"><span class="pre">stbd</span></code> frames)</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">surveyor_multibeam</span></code></p></td>
 <td><p>Cerulean Surveyor 240-16 multibeam</p></td>
 <td><p><a class="reference external" href="https://bluerobotics.com/store/sonars/echosounders/cerulean-surveyor-240-16-multibeam-echosounder/">link</a></p></td>
-<td><p>geometry only</p></td>
+<td><p>gz_sonar profiling sensor at its <code class="docutils literal notranslate"><span class="pre">beam</span></code> frame</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sonoptix_echo_multibeam</span></code></p></td>
+<td><p>Sonoptix ECHO imaging sonar</p></td>
+<td><p><a class="reference external" href="https://bluerobotics.com/store/sonars/imaging-sonars/sonoptix-echo/">link</a></p></td>
+<td><p>gz_sonar imaging sensor</p></td>
 </tr>
 </tbody>
 </table>
 <p>Parts whose final mesh has not been delivered yet use placeholder geometry; a
 <code class="docutils literal notranslate"><span class="pre">type</span></code> marked pending delivery cannot be fitted until its macro lands.
-The BlueROV2 sensor parts (<code class="docutils literal notranslate"><span class="pre">explorehd_camera</span></code>, <code class="docutils literal notranslate"><span class="pre">ping360</span></code>, <code class="docutils literal notranslate"><span class="pre">dvl_a50</span></code>) carry no visual for now: accessory visuals are out of scope, and each sensor works from its part’s frame.</p>
+The BlueROV2 sensor parts (<code class="docutils literal notranslate"><span class="pre">explorehd_camera</span></code>, <code class="docutils literal notranslate"><span class="pre">ping360</span></code>, <code class="docutils literal notranslate"><span class="pre">dvl_a50</span></code>, <code class="docutils literal notranslate"><span class="pre">sonoptix_echo_multibeam</span></code>) carry no visual for now: accessory visuals are out of scope, and each sensor works from its part’s frame.</p>
 </section>
 <section id="slots">
 <h2>Slots<a class="headerlink" href="#slots" title="Link to this heading"></a></h2>
