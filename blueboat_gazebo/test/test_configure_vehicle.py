@@ -245,3 +245,15 @@ def test_rejects_a_name_that_is_not_a_ros_name(tmp_path):
                              capture_output=True, text=True, timeout=180)
         assert out.returncode != 0, bad
         assert 'invalid instance name' in out.stderr, bad
+
+
+def test_a_refused_config_writes_nothing(tmp_path):
+    """The config is checked before anything is written: a refusal leaves no artifact."""
+    cfg = kit_config([{'type': 'surveyor_multibeam', 'name': 'profiler', 'xyz': '0.35 0 -0.08',
+                       'rpy': '0 0 0', 'sonar': {'rate': float('nan')}}])
+    config = tmp_path / 'bad.yaml'
+    config.write_text(yaml.safe_dump(cfg, sort_keys=False))
+    out = subprocess.run([str(TOOL), '--config', str(config), '--out-dir', str(tmp_path / 'v')],
+                         capture_output=True, text=True, timeout=180)
+    assert out.returncode != 0 and 'rate' in out.stderr, out.stderr
+    assert not (tmp_path / 'v').exists()
