@@ -128,6 +128,11 @@ if(BUILD_TESTING)
   # reach the test logs.
   ament_add_pytest_test(test_ocean_current test/test_ocean_current.py
     TIMEOUT 300 NOCAPTURE)
+  # The vehicle on the waves: gz-maritime's wave buoyancy floats it by its
+  # marked pontoon boxes, at its static draft on still water and riding
+  # the sea at sea state 4. NOCAPTURE, as above.
+  ament_add_pytest_test(test_waves test/test_waves.py
+    TIMEOUT 600 NOCAPTURE)
   ament_add_pytest_test(test_mission_file test/test_mission_file.py
     TIMEOUT 60)
   # NOCAPTURE so the sim output printed at teardown reaches the test logs

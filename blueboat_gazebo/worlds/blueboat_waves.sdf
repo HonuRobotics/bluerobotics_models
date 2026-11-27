@@ -1,0 +1,136 @@
+<?xml version="1.0"?>
+<!--
+  The water world with waves: the BlueBoat rides them.
+
+  As blueboat_water.sdf, but the water is gz-maritime's wave field (the FFT
+  engine, gz_waves_provider_fft), drawn by its water surface, and the
+  vehicle floats on that field, not on the flat z = 0 plane:
+
+    * buoyancy is gz-maritime's wave buoyancy (gz_waves_buoyancy), in place
+      of gz-sim's graded buoyancy. Every collision marked gz:buoyancy="true"
+      is pushed up by the water it displaces under the wave surface above
+      it: the BlueBoat's pontoon segments, whatever name it was spawned
+      under, so this world lists no vehicle. Each segment rides its own part
+      of the wave, so the boat heaves, pitches and rolls with it;
+    * the vehicle's own Hydrodynamics (gz-maritime's, in the model) sees the
+      world is wave coupled and damps against the current plus the water
+      that moves with the waves, so the boat is carried back and forth by
+      them, as well as lifted.
+
+  The sea is a WMO sea state, set here and changed while running:
+
+    gz service -s /world/blueboat_waves/wave/set_parameters \
+      --reqtype gz.msgs.Param --reptype gz.msgs.Boolean --timeout 2000 \
+      --req 'params { key: "sea_state" value { type: INT32 int_value: 4 } }'
+
+  0 is still water: the boat rests at its static draft, as in
+  blueboat_water.sdf. Past sea state 6 the field's default 200 m tile is
+  shorter than the longest waves, and the sea comes out smaller than the
+  state says.
+
+  Run it directly, no ROS, with the boat in it:
+    gz sim <this file>, then spawn model://blueboat;
+  or with the vehicle and the bridge:
+    ros2 launch blueboat_gazebo sim.launch.xml \
+      world:=$(ros2 pkg prefix blueboat_gazebo)/share/blueboat_gazebo/worlds/blueboat_waves.sdf
+-->
+<sdf version="1.12">
+  <world name="blueboat_waves">
+
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.0 0.7 0.8</background>
+      <sky></sky>
+      <grid>false</grid>
+    </scene>
+
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster"/>
+
+    <!-- Renders the echosounder (gpu_lidar) sensor; needs a GPU + ogre2. -->
+    <plugin filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <!-- The waves: the FFT engine at a WMO sea state (0 still, 1 rippled,
+         3 slight, 4 moderate, 5 rough, 6 very rough). The sea ramps in
+         over <tau> seconds, at the start and at every change. Updated at
+         100 Hz: at 30 Hz the surface under the hull moves in steps against
+         1 ms physics, and 40 % of the boat's vertical acceleration (what an
+         IMU reads) sits at 30 Hz and its multiples. -->
+    <plugin filename="gz-sim-waves-fft-system"
+            name="gz::sim::systems::FftWaves">
+      <update_rate>100</update_rate>
+      <wave>
+        <sea_state>3</sea_state>
+      </wave>
+    </plugin>
+
+    <!-- Buoyancy on the waves, instead of gz-sim's flat graded buoyancy:
+         never run both, or each marked shape is pushed up twice. Seawater
+         under the wave surface, air above it. -->
+    <plugin filename="gz-maritime-wave-buoyancy-system"
+            name="gz::sim::maritime::WaveBuoyancy">
+      <water_density>1025</water_density>
+      <air_density>1</air_density>
+      <water_level>0</water_level>
+    </plugin>
+
+    <!-- gz-maritime's ocean current (gz_ocean_current), slack here, as in
+         blueboat_water.sdf; the vehicle damps against it plus the waves. -->
+    <plugin filename="gz-maritime-ocean-current-system"
+            name="gz::sim::maritime::OceanCurrent">
+      <speed>0</speed>
+      <direction>0</direction>
+    </plugin>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- The water surface, displaced by the same wave field the boat floats
+         on: a 1 km square of tiles around the origin. -->
+    <include>
+      <uri>model://water_surface</uri>
+    </include>
+
+    <!-- A floor 50 m down, out of the waves' reach. Drawn, so the Ping
+         echosounder (a gpu_lidar, which sees visuals only, up to 100 m)
+         reads the depth; dark, so the water looks open from above. -->
+    <model name="seabed">
+      <static>true</static>
+      <pose>0 0 -50 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane><normal>0 0 1</normal><size>1000 1000</size></plane>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane><normal>0 0 1</normal><size>1000 1000</size></plane>
+          </geometry>
+          <material>
+            <ambient>0.05 0.08 0.1 1</ambient>
+            <diffuse>0.05 0.08 0.1 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

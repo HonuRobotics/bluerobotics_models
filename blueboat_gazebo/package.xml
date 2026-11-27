@@ -33,6 +33,12 @@
        GZ_SIM_SYSTEM_PLUGIN_PATH. -->
   <exec_depend>gz_hydrodynamics</exec_depend>
   <exec_depend>gz_ocean_current</exec_depend>
+  <!-- blueboat_waves.sdf: gz-maritime's wave field (the FFT engine and the
+       water surface that draws it) and the buoyancy that floats the boat
+       on it. Loaded by name, as above. -->
+  <exec_depend>gz_waves_provider_fft</exec_depend>
+  <exec_depend>gz_waves_rendering</exec_depend>
+  <exec_depend>gz_waves_buoyancy</exec_depend>
   <exec_depend>bluerobotics_common</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>ros_gz_sim</exec_depend>
@@ -52,6 +58,9 @@
   <test_depend>ament_lint_common</test_depend>
   <test_depend>ament_cmake_pytest</test_depend>
   <test_depend>ament_index_python</test_depend>
+  <!-- test_waves reads gz_waves' sea-state table, so the heights it
+       expects cannot drift from the engine's. -->
+  <test_depend>gz_waves</test_depend>
   <test_depend>python3-pytest</test_depend>
   <test_depend>xacro</test_depend>
   <test_depend>ros2cli</test_depend>
