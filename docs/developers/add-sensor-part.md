@@ -19,11 +19,14 @@ sense. The split keeps the description Gazebo free:
 3. **The bridge knows the topics.** In `scripts/generate_bridge_config.py`,
    add the type to `PART_TOPICS`: one `(suffix, ros type, gz type, direction)`
    per topic the sensor produces. The generator reads the fitted instances
-   from the URDF manifest, so again no per vehicle edit.
+   from the URDF manifest, so again no per vehicle edit. A sonar is the
+   exception: its messages go through kai_sonar_bridge, so it is listed in
+   `SONAR_PARTS` in `bluerobotics_parts/sonar.py` and its sensors live in
+   `bluerobotics_parts/urdf/gz_sonar.xacro`, shared by both vehicles.
 4. **Fit it**: in a slot (add the type to the slot's `accepts`, make it the
    `default` if it should come standard) or free placed.
 
 The tests guard the contract: every sensor's `frame_id` must be a TF frame of the instance,
 every sensor's frame must survive URDF to SDF conversion, and the Gazebo
-topics must equal the bridge's, for the default, a full catalog and a
+topics must equal the bridges' (ros_gz_bridge's and kai_sonar_bridge's together), for the default, a full catalog and a
 renamed instance config. Run `colcon test --packages-select blueboat_gazebo`.

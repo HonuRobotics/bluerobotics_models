@@ -30,6 +30,7 @@ import math
 import sys
 import xml.etree.ElementTree as ET
 
+from bluerobotics_parts import sonar
 import yaml
 
 # Keys each kind of config entry may carry. A key outside its set is a typo
@@ -37,8 +38,10 @@ import yaml
 TOP_KEYS = {'topic_namespace', 'base', 'slot_defaults', 'parts', 'slots',
             'hull_displacement', 'buoyancy', 'extra_bridge_topics'}
 BASE_KEYS = {'type', 'name', 'collision'}
+# `sonar` holds a sonar part's sensor settings (gz_sonar's <gz:sonar>
+# parameters, one level of key: value), as `bridge` holds bridge overrides.
 PART_COMMON_KEYS = {'type', 'name', 'xyz', 'rpy', 'collision', 'joint', 'axis',
-                    'topic', 'gz_topic', 'ros_topic', 'bridge'}
+                    'topic', 'gz_topic', 'ros_topic', 'bridge', 'sonar'}
 SLOT_ENTRY_KEYS = PART_COMMON_KEYS | {'slot', 'of'}
 FREE_ENTRY_KEYS = PART_COMMON_KEYS | {'parent'}
 ADHOC_SLOT_KEYS = {'of', 'name', 'xyz', 'rpy', 'accepts', 'default', 'joint',
@@ -163,6 +166,7 @@ def problems(cfg, urdf_root):
         if 'slot' in entry:
             slot, of = entry['slot'], entry.get('of', root)
             keys(entry, SLOT_ENTRY_KEYS, f'slot entry {slot!r} of {of!r}')
+            found += sonar.entry_problems(entry, f'slot entry {slot!r} of {of!r}')
             if (of, slot) not in known_slots:
                 mine = sorted(s for o, s in known_slots if o == of)
                 found.append(
@@ -171,6 +175,7 @@ def problems(cfg, urdf_root):
                        else f'no instance named {of!r} (instances: {names})'))
         else:
             keys(entry, FREE_ENTRY_KEYS, f'free entry {entry.get("name")!r}')
+            found += sonar.entry_problems(entry, f'free entry {entry.get("name")!r}')
             if entry.get('type', 'none') != 'none' and entry.get('name') not in names:
                 found.append(f'free entry {entry.get("name")!r} was not assembled')
     for slot in cfg.get('slots') or []:

@@ -52,6 +52,9 @@ parts:
   - {slot: payload, type: payload_skid, name: skid}
   - {type: explorehd_camera, name: camera, xyz: "0.22 0 0.05", rpy: "0 0 0"}
   - {type: sediment_sampler, name: sampler, xyz: "-0.26 0 -0.06", rpy: "0 0 0"}
+  - {type: sonoptix_echo_multibeam, name: sonar_forward, xyz: "0.25 0 0.12", rpy: "0 0.2618 0",
+     sonar: {range_max: 15, labels: true}}
+  - {type: surveyor_multibeam, name: profiler, xyz: "0 0 -0.14", rpy: "0 0 0"}
 buoyancy: {net_buoyancy: 0.002, cob_offset: "0 0 0.046", cob_frame: com,
            fluid_density: 1025.0, footprint: "0.457 0.575"}
 """
@@ -275,6 +278,39 @@ def test_sensor_frame_ids_resolve_in_tf():
         assert prefix == 'rov_a' and link in urdf_links, (
             f'sensor {sensor.get("name")} publishes frame_id {frame.text!r}, '
             f'which robot_state_publisher never puts in TF for instance rov_a')
+    # The sonars reach ROS through kai_sonar_bridge, stamped with the frames
+    # it is given, not the sensors' <frame_id>.
+    params = bridge_gen.sonar_entries(yaml.safe_load(config), urdf_instances(config))[
+        '/**']['ros__parameters']
+    assert params['frame_ids']
+    for frame in params['frame_ids']:
+        prefix, _, link = frame.partition('/')
+        assert prefix == 'rov_a' and link in urdf_links, (
+            f'kai_sonar_bridge stamps {frame!r}, which TF does not carry')
+
+
+def test_sonar_settings_reach_the_sensor():
+    """A part's `sonar:` dict becomes its <gz:sonar> elements, booleans as sdformat spells them."""
+    root, _ = gen_model(FULL_CONFIG)
+    sensor = next(s for s in root.iter('sensor') if s.get('name') == 'sonar_forward')
+    block = sensor.find('{http://gazebosim.org/schema}sonar')
+    if block is None:
+        block = sensor.find('gz:sonar')
+    assert {c.tag.split('}')[-1]: c.text for c in block} == {
+        'range_max': '15', 'labels': 'true'}
+    assert sensor.find('update_rate').text == '10'
+
+
+def test_sonar_rate_sets_the_update_rate():
+    """`rate` in a part's `sonar:` dict is the sensor's <update_rate>, not a <gz:sonar> element."""
+    root, _ = gen_model(FULL_CONFIG.replace('sonar: {range_max: 15, labels: true}',
+                                            'sonar: {range_max: 15, labels: true, rate: 2.5}'))
+    sensor = next(s for s in root.iter('sensor') if s.get('name') == 'sonar_forward')
+    assert sensor.find('update_rate').text == '2.5'
+    block = sensor.find('{http://gazebosim.org/schema}sonar')
+    if block is None:
+        block = sensor.find('gz:sonar')
+    assert 'rate' not in {c.tag.split('}')[-1] for c in block}
 
 
 RGBD_SUFFIXES = ('image', 'depth_image', 'points', 'camera_info')
@@ -309,7 +345,36 @@ def test_sensor_and_bridge_topics_agree():
         cfg = yaml.safe_load(config)
         entries = bridge_gen.bridge_entries(cfg, urdf_instances(config))
         bridge_topics = {e['gz_topic_name'] for e in entries} - {'/clock'}
+        # Sonars go through kai_sonar_bridge, not ros_gz_bridge.
+        sonar = bridge_gen.sonar_entries(cfg, urdf_instances(config))
+        bridge_topics |= set(sonar['/**']['ros__parameters'].get('gz_topics', []))
         assert sdf_topics == bridge_topics
+
+
+@pytest.mark.parametrize('config', sorted(
+    p.name for p in (DESC_SHARE / 'config').glob('bluerov2*.yaml')))
+def test_every_shipped_config_generates(config):
+    """
+    Each shipped config generates a model whose topics the bridges cover.
+
+    A variant on the default's chassis (bluerov2_sonar.yaml, say) differs
+    from the default only in its parts; anything else drifting would make it
+    a different vehicle. A config on another chassis (bluerov2_heavy.yaml) is
+    a different vehicle, with its own buoyancy, and is not compared.
+    """
+    text = (DESC_SHARE / 'config' / config).read_text()
+    cfg, default = yaml.safe_load(text), yaml.safe_load(default_config())
+    if cfg.get('base') == default.get('base'):
+        for key in set(cfg) | set(default):
+            if key not in ('parts', 'slot_defaults'):
+                assert cfg.get(key) == default.get(key), \
+                    f'{config}: {key} differs from bluerov2.yaml'
+    root, _ = gen_model(text)
+    entries = bridge_gen.bridge_entries(cfg, urdf_instances(text))
+    bridge_topics = {e['gz_topic_name'] for e in entries} - {'/clock'}
+    sonar = bridge_gen.sonar_entries(cfg, urdf_instances(text))
+    bridge_topics |= set(sonar['/**']['ros__parameters'].get('gz_topics', []))
+    assert sdf_gz_topics(root) == bridge_topics
 
 
 def test_installed_artifacts_match_shipped_config():

@@ -39,7 +39,9 @@ def sim(request):
     """Bring up sim.launch.xml headless on isolated domains; yield the env."""
     env = dict(os.environ,
                GZ_PARTITION=f'test_{uuid.uuid4().hex[:8]}',
-               ROS_DOMAIN_ID=str(os.getpid() % 100 + 1))
+               # Domains 1 to 33: each launch test of this repository has a band of
+               # its own, so two of them running at once never share a domain.
+               ROS_DOMAIN_ID=str(os.getpid() % 33 + 1))
     # SIGINT first so ros2 launch shuts its children down in order.
     return launch_sim(
         request, 'ros2 launch', LAUNCH, env,
@@ -54,6 +56,11 @@ def test_container_and_nodes_up(sim):
     poll_until(
         lambda: all(n in ros(sim, 'node', 'list')[1] for n in needed), 30,
         lambda: f'missing nodes; last listing:\n{ros(sim, "node", "list")[1]}')
+
+
+def test_no_sonar_no_sonar_bridge(sim):
+    """The shipped config fits no simulated sonar, so no sonar bridge is started."""
+    assert '/sonar_bridge' not in ros(sim, 'node', 'list')[1]
 
 
 def test_bridge_clock_flows(sim):

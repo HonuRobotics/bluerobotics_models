@@ -63,6 +63,15 @@
                  create_own_container="false"
                  use_composition="$(var use_composition)"/>
 
+  <!-- kai_sonar_bridge for the vehicle's sonars, whose custom messages are
+       beyond ros_gz_bridge; started only when the vehicle has one. Shared by
+       both vehicles: bluerobotics_parts/launch/sonar_bridge.launch.py. -->
+  <include file="$(find-pkg-share bluerobotics_parts)/launch/sonar_bridge.launch.py">
+    <arg name="params_file" value="$(var vehicle_dir)/sonar_bridge.yaml"/>
+    <arg name="use_composition" value="$(var use_composition)"/>
+    <arg name="container_name" value="ros_gz_container"/>
+  </include>
+
   <!-- robot_state_publisher, reading the instance's joint states and
        prefixing every TF frame with the instance name, so its frames match
        the frame ids the sensors publish: a composable node in the container

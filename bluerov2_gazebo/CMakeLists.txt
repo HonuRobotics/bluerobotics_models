@@ -51,8 +51,10 @@ install(FILES
 set(vehicle_config ${bluerov2_description_DIR}/../config/bluerov2.yaml)
 set(desc_urdf ${bluerov2_description_DIR}/../urdf/bluerov2.urdf)
 set(bridge_yaml ${CMAKE_CURRENT_BINARY_DIR}/ros_gz_bridge.yaml)
+# Written beside it by the same run: kai_sonar_bridge's parameters.
+set(sonar_yaml ${CMAKE_CURRENT_BINARY_DIR}/sonar_bridge.yaml)
 add_custom_command(
-  OUTPUT ${bridge_yaml}
+  OUTPUT ${bridge_yaml} ${sonar_yaml}
   COMMAND Python3::Interpreter
           ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_bridge_config.py
           ${vehicle_config} ${desc_urdf} ${bridge_yaml}
@@ -60,7 +62,7 @@ add_custom_command(
           ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_bridge_config.py
   COMMENT "Generating ros_gz_bridge.yaml from bluerov2.yaml and bluerov2.urdf")
 add_custom_target(${PROJECT_NAME}_bridge_yaml ALL DEPENDS ${bridge_yaml})
-install(FILES ${bridge_yaml} DESTINATION share/${PROJECT_NAME}/config)
+install(FILES ${bridge_yaml} ${sonar_yaml} DESTINATION share/${PROJECT_NAME}/config)
 
 # The URDF Gazebo merges: the same description expanded with gltf_up:=z, which
 # pre-rotates the (Y-up, spec conforming) glTF visuals for Gazebo, which does
@@ -202,6 +204,10 @@ if(BUILD_TESTING)
   ament_add_pytest_test(test_gz_launch test/test_gz_launch.py TIMEOUT 420
     NOCAPTURE)
   ament_add_pytest_test(test_ros_launch test/test_ros_launch.py TIMEOUT 300
+    NOCAPTURE)
+  # The whole sonar chain: the imaging walkthrough, headless, until a
+  # ProjectedSonarImage arrives (about 25 s).
+  ament_add_pytest_test(test_sonar_launch test/test_sonar_launch.py TIMEOUT 300
     NOCAPTURE)
 endif()
 

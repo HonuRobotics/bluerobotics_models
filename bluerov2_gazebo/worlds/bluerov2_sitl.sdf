@@ -7,7 +7,7 @@
   Running it takes two shells and the workspace sourced before the ArduPilot
   environment; the whole procedure is in docs/quickstarts/sitl-bluerov2.
 -->
-<sdf version="1.12">
+<sdf version="1.12" xmlns:gz="http://gazebosim.org/schema">
   <world name="bluerov2_sitl">
 
     <physics name="1ms" type="ignored">
@@ -70,6 +70,15 @@
       <speed>0</speed>
       <direction>0</direction>
     </plugin>
+    <!-- Sonars (gz-maritime gz_sonar): drives every sonar a vehicle carries,
+         with the water's properties (open seawater). Idle, at no cost, until a
+         sonar is fitted. -->
+    <plugin filename="gz-maritime-sonar-system"
+            name="gz::sim::maritime::Sonar">
+      <temperature>10</temperature>
+      <salinity>35</salinity>
+      <sound_speed>1500</sound_speed>
+    </plugin>
 
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
@@ -111,8 +120,9 @@
     </model>
 
     <!-- Visual only water surface at the z=0 graded buoyancy waterline. -->
-    <model name="water_surface">
+    <model name="water_surface" gz:acoustic_transparent="true">
       <static>true</static>
+      <!-- Drawn for the cameras only: sonars do not see it (gz_sonar). -->
       <link name="link">
         <visual name="visual">
           <transparency>0.4</transparency>

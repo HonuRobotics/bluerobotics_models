@@ -40,7 +40,9 @@ def sim(request):
                GZ_PARTITION=f'test_{uuid.uuid4().hex[:8]}',
                # uuid, not pid: parallel colcon test runs could share a domain
                # when two pids agree modulo 100.
-               ROS_DOMAIN_ID=str(int(uuid.uuid4().hex[:2], 16) % 100 + 1))
+               # Domains 67 to 99: each launch test of this repository has a band
+               # of its own, so two of them running at once never share a domain.
+               ROS_DOMAIN_ID=str(int(uuid.uuid4().hex[:2], 16) % 33 + 67))
     # SIGINT first so ros2 launch shuts its children down in order.
     return launch_sim(
         request, 'ros2 launch', LAUNCH, env,

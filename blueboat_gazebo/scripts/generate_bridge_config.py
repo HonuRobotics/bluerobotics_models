@@ -33,10 +33,14 @@ instance that does not exist fails the build or the launch with the reason.
 Usage: generate_bridge_config.py <vehicle_config.yaml> <vehicle.urdf> <output_bridge.yaml>
 """
 
+import pathlib
 import sys
 import xml.etree.ElementTree as ET
 
 from bluerobotics_parts import assembly
+from bluerobotics_parts.sonar import sonar_entries as _sonar_entries
+from bluerobotics_parts.sonar import write_bridge_params
+from bluerobotics_parts.topics import absolute, overrides_for, under
 import yaml
 
 # type -> [(topic suffix, ROS type, gz type, direction)]
@@ -58,26 +62,9 @@ PART_TOPICS = {
 }
 
 
-def absolute(topic):
-    """Return the topic with a leading slash."""
-    return topic if topic.startswith('/') else '/' + topic
-
-
-def under(ns, base):
-    """Return `base` under namespace `ns`, or as given when it starts with a slash."""
-    return base if base.startswith('/') else f'{ns}/{base}'
-
-
-def overrides_for(cfg, name):
-    """
-    Return the config entry that fitted instance `name`, or {}.
-
-    Slot entries name their occupant after the slot by default.
-    """
-    for entry in cfg.get('parts') or []:
-        if entry.get('name', entry.get('slot')) == name:
-            return entry
-    return {}
+def sonar_entries(cfg, instances):
+    """Return the kai_sonar_bridge parameters for the vehicle's sonars."""
+    return _sonar_entries(cfg, instances, 'blueboat')
 
 
 def bridge_entries(cfg, instances):
@@ -146,6 +133,8 @@ def main():
                 '# URDF by generate_bridge_config.py. Do not edit; edit the '
                 'vehicle config and rebuild.\n')
         yaml.safe_dump(bridge_entries(cfg, instances), f, sort_keys=False)
+    write_bridge_params(pathlib.Path(sys.argv[3]).with_name('sonar_bridge.yaml'),
+                        cfg, instances, 'blueboat', 'generate_bridge_config.py')
 
 
 if __name__ == '__main__':

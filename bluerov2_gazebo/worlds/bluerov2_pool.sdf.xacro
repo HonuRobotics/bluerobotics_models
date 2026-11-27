@@ -15,7 +15,7 @@
   at z -2.5: the shipped trim is neutral (net_buoyancy 0.0), so nothing
   moves it until it is commanded.
 -->
-<sdf version="1.12" xmlns:xacro="http://ros.org/wiki/xacro">
+<sdf version="1.12" xmlns:xacro="http://ros.org/wiki/xacro" xmlns:gz="http://gazebosim.org/schema">
   <xacro:arg name="world_name" default="bluerov2_pool"/>
   <xacro:arg name="vehicle" default="false"/>
   <world name="$(arg world_name)">
@@ -243,6 +243,17 @@
       <speed>0</speed>
       <direction>0</direction>
     </plugin>
+    <!-- Sonars (gz-maritime gz_sonar): drives every sonar a vehicle carries,
+         with the water's properties: seawater, as the buoyancy density 1025
+         has it, at pool temperature. Temperature and salinity set the
+         absorption; the sound speed is its own parameter, the nominal value.
+         Idle, at no cost, until a sonar is fitted. -->
+    <plugin filename="gz-maritime-sonar-system"
+            name="gz::sim::maritime::Sonar">
+      <temperature>27</temperature>
+      <salinity>35</salinity>
+      <sound_speed>1500</sound_speed>
+    </plugin>
 
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
@@ -302,8 +313,9 @@
 
     <!-- Visual only water surface at the z=0 graded buoyancy waterline,
          sized to the pool basin so it does not flood the deck. -->
-    <model name="water_surface">
+    <model name="water_surface" gz:acoustic_transparent="true">
       <static>true</static>
+      <!-- Drawn for the cameras only: sonars do not see it (gz_sonar). -->
       <link name="link">
         <visual name="visual">
           <transparency>0.4</transparency>

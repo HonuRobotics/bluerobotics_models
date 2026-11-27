@@ -7,6 +7,18 @@
 
   Inertia: estimated from the delivered collision geometry at 1000 kg/m^3 (SDF auto inertia); replace with measured values.
 
+  Frames: `port` and `stbd` are the two beams, each with x along its acoustic
+  axis, pointing out to its side and 20 degrees down, the depression Cerulean
+  recommends mounting it at (docs.ceruleansonar.com/c/omniscan-450,
+  "Mechanical mounting": approximately 20 degrees; "Application tips": 20 to
+  25 optimal); the housing itself has none. gz_sonar's sidescan sensor sits
+  on each. The real Omniscan 450 SS is one transducer per side, two housings
+  (on the BlueBoat, one on each hull with Blue Robotics' integration kit);
+  this part models both as one bar on the center line, so each beam starts
+  about half the hull spacing inboard of where it would. `port_acoustic` and `stbd_acoustic` are the frames of
+  marine_acoustic_msgs/ProjectedSonarImage for each side, Z along the beam
+  and X up, as on the Sonoptix ECHO.
+
   Contract (see parts.xacro): <part>_info exports the metadata (attach,
   slots, frames, drive); <part> instantiates the link, its mounting joint
   and its slot / frame links.
@@ -19,6 +31,10 @@
         slots=dict(
         ),
         frames=dict(
+            port=dict(xyz='0 0 0', rpy='0 0.34906585 1.57079633'),
+            stbd=dict(xyz='0 0 0', rpy='0 0.34906585 -1.57079633'),
+            port_acoustic=dict(xyz='0 0 0', rpy='3.14159265 -1.22173048 1.57079633'),
+            stbd_acoustic=dict(xyz='0 0 0', rpy='3.14159265 -1.22173048 -1.57079633'),
         ))}"/>
   </xacro:macro>
 

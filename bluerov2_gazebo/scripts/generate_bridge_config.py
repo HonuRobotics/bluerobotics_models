@@ -30,13 +30,23 @@ they cannot drift. The config is also checked against the manifest here
 (bluerobotics_parts.assembly.check), so a config that names a slot or an
 instance that does not exist fails the build or the launch with the reason.
 
+Sonars are not bridged by ros_gz_bridge, which cannot convert their custom
+message. Beside the bridge config, sonar_bridge.yaml is written: the ROS
+parameters of a kai_sonar_bridge node listing each sonar's gz topic, ROS
+topic and acoustic frame (/<topic_namespace>/<part name>/image, and the
+part's <name>_acoustic frame under the instance name).
+
 Usage: generate_bridge_config.py <vehicle_config.yaml> <vehicle.urdf> <output_bridge.yaml>
 """
 
+import pathlib
 import sys
 import xml.etree.ElementTree as ET
 
 from bluerobotics_parts import assembly
+from bluerobotics_parts.sonar import sonar_entries as _sonar_entries
+from bluerobotics_parts.sonar import write_bridge_params
+from bluerobotics_parts.topics import absolute, overrides_for, under
 import yaml
 
 # type -> [(topic suffix, ROS type, gz type, direction)]
@@ -68,32 +78,16 @@ PART_TOPICS = {
         ('velocity', 'marine_acoustic_msgs/msg/Dvl',
          'gz.msgs.DVLVelocityTracking', 'GZ_TO_ROS'),
     ],
+    # Sonars go to kai_sonar_bridge instead; see bluerobotics_parts.sonar.
     # Claws: one shared command topic per claw (both finger controllers).
     'newton_gripper': [CMD_POS],
     'sediment_sampler': [CMD_POS],
 }
 
 
-def absolute(topic):
-    """Return the topic with a leading slash."""
-    return topic if topic.startswith('/') else '/' + topic
-
-
-def under(ns, base):
-    """Return `base` under namespace `ns`, or as given when it starts with a slash."""
-    return base if base.startswith('/') else f'{ns}/{base}'
-
-
-def overrides_for(cfg, name):
-    """
-    Return the config entry that fitted instance `name`, or {}.
-
-    Slot entries name their occupant after the slot by default.
-    """
-    for entry in cfg.get('parts') or []:
-        if entry.get('name', entry.get('slot')) == name:
-            return entry
-    return {}
+def sonar_entries(cfg, instances):
+    """Return the kai_sonar_bridge parameters for the vehicle's sonars."""
+    return _sonar_entries(cfg, instances, 'bluerov2')
 
 
 def bridge_entries(cfg, instances):
@@ -162,6 +156,8 @@ def main():
                 '# URDF by generate_bridge_config.py. Do not edit; edit the '
                 'vehicle config and rebuild.\n')
         yaml.safe_dump(bridge_entries(cfg, instances), f, sort_keys=False)
+    write_bridge_params(pathlib.Path(sys.argv[3]).with_name('sonar_bridge.yaml'),
+                        cfg, instances, 'bluerov2', 'generate_bridge_config.py')
 
 
 if __name__ == '__main__':

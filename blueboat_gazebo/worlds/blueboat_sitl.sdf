@@ -12,7 +12,7 @@
 
   then, in a second shell, sim_vehicle.py; see docs getting-started/ardupilot_setup.
 -->
-<sdf version="1.12">
+<sdf version="1.12" xmlns:gz="http://gazebosim.org/schema">
   <world name="blueboat_sitl">
 
     <physics name="1ms" type="ignored">
@@ -66,6 +66,15 @@
             name="gz::sim::maritime::OceanCurrent">
       <speed>0</speed>
       <direction>0</direction>
+    </plugin>
+    <!-- Sonars (gz-maritime gz_sonar): drives every sonar a vehicle carries,
+         with the water's properties (open seawater). Idle, at no cost, until a
+         sonar is fitted. -->
+    <plugin filename="gz-maritime-sonar-system"
+            name="gz::sim::maritime::Sonar">
+      <temperature>10</temperature>
+      <salinity>35</salinity>
+      <sound_speed>1500</sound_speed>
     </plugin>
 
     <light type="directional" name="sun">

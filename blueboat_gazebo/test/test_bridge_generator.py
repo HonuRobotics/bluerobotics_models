@@ -111,3 +111,14 @@ def test_cli_rejects_a_config_that_matches_nothing(tmp_path):
                          capture_output=True, text=True)
     assert out.returncode != 0 and "'mastt' of 'base_link'" in out.stderr, out.stderr
     assert not (tmp_path / 'out.yaml').exists()
+
+
+def test_sonars_go_to_the_sonar_bridge_not_ros_gz_bridge():
+    """The sidescan and profiler have no ros_gz_bridge entry; kai_sonar_bridge gets them."""
+    cfg = {'topic_namespace': 'boat'}
+    instances = [('omniscan_450_sidescan', 'sidescan'), ('surveyor_multibeam', 'profiler')]
+    entries = bridge_gen.bridge_entries(cfg, instances)
+    assert not any('sidescan' in e['gz_topic_name'] or 'profiler' in e['gz_topic_name']
+                   for e in entries)
+    params = bridge_gen.sonar_entries(cfg, instances)['/**']['ros__parameters']
+    assert params['gz_topics'][0] == '/boat/sidescan/port/image'

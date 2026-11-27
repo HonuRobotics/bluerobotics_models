@@ -18,8 +18,9 @@ Generate every artifact of a BlueROV2 configuration from one config file.
 Writes into an output directory the URDF, its Gazebo flavoured copy (glTF
 visuals pre-rotated, merged by the model), the composed Gazebo model
 (model.sdf plus model.config, so the directory works as a model:// root on
-GZ_SIM_RESOURCE_PATH), the ros_gz bridge config and an RViz config, all
-derived from the same config through the same generators the build uses. This is what lets a
+GZ_SIM_RESOURCE_PATH), the ros_gz bridge config, kai_sonar_bridge's
+parameters (sonar_bridge.yaml) and an RViz config, all derived from the
+same config through the same generators the build uses. This is what lets a
 vehicle be reconfigured without rebuilding, also from a binary install:
 
     ros2 run bluerov2_gazebo configure_vehicle.py --config my_vehicle.yaml --out-dir ~/my_bluerov2
@@ -45,9 +46,12 @@ import pathlib
 import re
 import subprocess
 import sys
+import tempfile
+import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import (get_package_prefix,
                                          get_package_share_directory)
+from bluerobotics_parts import assembly
 import yaml
 
 MODEL_CONFIG = """\
@@ -115,22 +119,34 @@ def rviz_config(template, name):
 
 
 def configure(config, out_dir, name=None):
-    """Generate urdf, model.sdf, model.config, bridge config and bluerov2.rviz into out_dir."""
+    """Generate urdf, model.sdf, model.config, bridge configs and bluerov2.rviz into out_dir."""
     desc = pathlib.Path(get_package_share_directory('bluerov2_description'))
     gz = pathlib.Path(get_package_share_directory('bluerov2_gazebo'))
     gz_lib = pathlib.Path(get_package_prefix('bluerov2_gazebo')) / 'lib' / 'bluerov2_gazebo'
     out_dir = pathlib.Path(out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
     # The config the generators read: the given one with the instance name
     # applied, kept next to the artifacts it produced.
     config_text = derive(config, name)
+    vehicle_xacro = str(desc / 'urdf' / 'bluerov2.urdf.xacro')
+    # Checked before anything is written: the URDF is assembled from a
+    # scratch copy of the config and the config checked against it, so a
+    # config that is refused leaves no artifact behind, not even a model
+    # from the steps before the check.
+    with tempfile.TemporaryDirectory() as scratch:
+        draft = pathlib.Path(scratch) / 'vehicle.yaml'
+        draft.write_text(config_text)
+        urdf_text = run(['xacro', vehicle_xacro, f'config_file:={draft}'],
+                        'URDF generation')
+    try:
+        assembly.check(yaml.safe_load(config_text) or {}, ET.fromstring(urdf_text))
+    except assembly.AssemblyError as e:
+        sys.exit(str(e))
+
+    out_dir.mkdir(parents=True, exist_ok=True)
     config = out_dir / 'vehicle.yaml'
     config.write_text(config_text)
-
-    vehicle_xacro = str(desc / 'urdf' / 'bluerov2.urdf.xacro')
     urdf = out_dir / 'bluerov2.urdf'
-    urdf.write_text(run(['xacro', vehicle_xacro, f'config_file:={config}'],
-                        'URDF generation'))
+    urdf.write_text(urdf_text)
     # robot_state_publisher parameter file, so the launch loads the URDF
     # without shelling out to read it (portable: no `cat`).
     (out_dir / 'robot_description.yaml').write_text(yaml.safe_dump(
@@ -179,7 +195,8 @@ def main(argv=None):
         sys.stdout.write(str(out_dir))
     else:
         print(f'wrote vehicle.yaml, bluerov2.urdf, bluerov2.gazebo.urdf, model.sdf, model.config, '
-              f'ros_gz_bridge.yaml, robot_description.yaml, bluerov2.rviz to {out_dir}')
+              f'ros_gz_bridge.yaml, sonar_bridge.yaml, robot_description.yaml, bluerov2.rviz '
+              f'to {out_dir}')
 
 
 if __name__ == '__main__':

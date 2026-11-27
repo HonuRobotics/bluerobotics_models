@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!-- The Gazebo sensors of the sonar parts, shared by both vehicles' models.
+
+     Each is a gz-maritime gz_sonar custom sensor, driven by the world's
+     gz-maritime-sonar-system, which the world must load once, as it loads
+     the Sensors system; it costs nothing in a world without a sonar. Each
+     looks along its frame's x axis. The empty <gz:sonar/> gives the device's
+     defaults, and a `sonar:` dict on the part's config entry sets any of its
+     parameters, one element each (for example sonar: {range_max: 15,
+     noise_floor: -110}), and `rate`, the pings per second (10 if unset);
+     on the sidescan it applies to both sides. bluerobotics_parts/sonar.py
+     (SONAR_SETTINGS) lists the keys, and the config check refuses others.
+
+     They publish gz.maritime.sonar messages, which kai_sonar_bridge brings to
+     ROS 2 on the same topics, with the frames and kinds listed in
+     bluerobotics_parts/sonar.py (SONAR_PARTS):
+       sonoptix_echo_multibeam  <topic>/image                 imaging
+       omniscan_450_sidescan    <topic>/port/image, stbd/image sidescan, one per side
+       surveyor_multibeam       <topic>/detections            profiling
+
+     The including model provides the sensor_link macro and the topic_ns
+     property. -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" xmlns:gz="http://gazebosim.org/schema">
+
+  <!-- One element per (key, value); YAML booleans as sdformat spells them. -->
+  <xacro:macro name="sonar_settings" params="items">
+    <xacro:if value="${len(items) > 0}">
+      <xacro:element xacro:name="${items[0][0]}">${'true' if items[0][1] is True else 'false' if items[0][1] is False else items[0][1]}</xacro:element>
+      <xacro:sonar_settings items="${items[1:]}"/>
+    </xacro:if>
+  </xacro:macro>
+
+  <xacro:macro name="gz_sonar_sensor" params="name frame gztype topic settings">
+    <xacro:sensor_link name="${name}" frame="${frame}">
+      <sensor name="${name}" type="custom" gz:type="${gztype}">
+        <frame_id>${topic_ns}/${frame}</frame_id>
+        <topic>${topic}</topic>
+        <update_rate>${dict(settings).get('rate', 10)}</update_rate>
+        <always_on>1</always_on>
+        <gz:sonar>
+          <xacro:sonar_settings items="${[i for i in settings if i[0] != 'rate']}"/>
+        </gz:sonar>
+      </sensor>
+    </xacro:sensor_link>
+  </xacro:macro>
+
+  <!-- The sensors of one sonar part instance, or nothing for any other part. -->
+  <xacro:macro name="gz_sonar_part" params="ptype name topic_base settings">
+    <!-- Sonoptix ECHO: an imaging sensor on the part's own frame. -->
+    <xacro:if value="${ptype == 'sonoptix_echo_multibeam'}">
+      <xacro:gz_sonar_sensor name="${name}" frame="${name}" gztype="imaging_sonar"
+                             topic="${topic_base}/image" settings="${settings}"/>
+    </xacro:if>
+    <!-- Omniscan 450 SS: one bar, a sidescan sensor on each side's beam frame. -->
+    <xacro:if value="${ptype == 'omniscan_450_sidescan'}">
+      <xacro:gz_sonar_sensor name="${name}_port" frame="${name}_port" gztype="sidescan_sonar"
+                             topic="${topic_base}/port/image" settings="${settings}"/>
+      <xacro:gz_sonar_sensor name="${name}_stbd" frame="${name}_stbd" gztype="sidescan_sonar"
+                             topic="${topic_base}/stbd/image" settings="${settings}"/>
+    </xacro:if>
+    <!-- Surveyor 240-16: a profiling sensor on the beam frame. -->
+    <xacro:if value="${ptype == 'surveyor_multibeam'}">
+      <xacro:gz_sonar_sensor name="${name}" frame="${name}_beam" gztype="profiling_sonar"
+                             topic="${topic_base}/detections" settings="${settings}"/>
+    </xacro:if>
+  </xacro:macro>
+</robot>

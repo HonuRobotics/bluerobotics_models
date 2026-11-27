@@ -13,6 +13,10 @@
 # * gz_marked_shapes: a library gz_ocean_current builds on.
 # * gz_waves: the wave core, which gz_hydrodynamics builds on to damp a
 #   vehicle against the waves' water velocity. It names no wave engine.
+# * gz_sonar: gz-maritime-sonar-system, the sonar system every vehicle world
+#   loads, which drives the sonar parts' sensors.
+# * kai_sonar_bridge: the node both vehicles' launches start to bring the
+#   sonars' messages to ROS 2.
 #
 # Only those packages are copied into the workspace (see
 # .github/workflows/ci.yml). Importing the whole repository would pull in

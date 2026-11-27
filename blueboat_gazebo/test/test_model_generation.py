@@ -135,8 +135,13 @@ def test_model_generation_follows_config():
     assert len(plugins(root, 'gz-maritime-hydrodynamics-system')) == 1
     assert not plugins(root, 'gz-sim-hydrodynamics-system')
     sensors = list(root.iter('sensor'))
-    assert {s.get('type') for s in sensors} == {'gpu_lidar'}
-    assert len(sensors) == 1  # only the Ping2 emits a sensor
+    assert {s.get('type') for s in sensors} == {'gpu_lidar', 'custom'}
+    # The Ping2's lidar, and gz_sonar's sensors: one per sidescan side and
+    # the profiler.
+    assert len([s for s in sensors if s.get('type') == 'gpu_lidar']) == 1
+    sonar_types = sorted(s.get('{http://gazebosim.org/schema}type') or s.get('gz:type')
+                         for s in sensors if s.get('type') == 'custom')
+    assert sonar_types == ['profiling_sonar', 'sidescan_sonar', 'sidescan_sonar']
     empty_root, _ = xacro(MODEL_XACRO, NO_SENSOR_CONFIG)
     assert not list(empty_root.iter('sensor')), 'emptying the Ping slot removes the sensor'
     assert len(plugins(empty_root, 'gz-maritime-thruster-system')) == 2
@@ -417,6 +422,9 @@ def test_sensor_and_bridge_topics_agree():
         fixed = {'/clock', f'/{ns}/joint_states', extra['gz_topic_name']}
         bridge_topics = {e['gz_topic_name'] for e in entries
                          if e['gz_topic_name'] not in fixed}
+        # Sonars go through kai_sonar_bridge, not ros_gz_bridge.
+        sonar = bridge_gen.sonar_entries(cfg, urdf_instances(config))
+        bridge_topics |= set(sonar['/**']['ros__parameters'].get('gz_topics', []))
         root, _ = xacro(MODEL_XACRO, config)
         assert sdf_gz_topics(root) == bridge_topics
 
@@ -452,6 +460,39 @@ def test_sensor_frame_ids_resolve_in_tf():
         assert prefix == 'boat_a' and link in urdf_links, (
             f'sensor {sensor.get("name")} publishes frame_id {frame.text!r}, '
             f'which robot_state_publisher never puts in TF for instance boat_a')
+    # The sonars reach ROS through kai_sonar_bridge, stamped with the frames
+    # it is given, not the sensors' <frame_id>.
+    params = bridge_gen.sonar_entries(yaml.safe_load(config), urdf_instances(config))[
+        '/**']['ros__parameters']
+    assert params['frame_ids']
+    for frame in params['frame_ids']:
+        prefix, _, link = frame.partition('/')
+        assert prefix == 'boat_a' and link in urdf_links, (
+            f'kai_sonar_bridge stamps {frame!r}, which TF does not carry')
+
+
+@pytest.mark.parametrize('config', sorted(
+    p.name for p in (DESC_SHARE / 'config').glob('blueboat*.yaml')))
+def test_every_shipped_config_generates(config):
+    """
+    Each shipped config generates a model whose topics the bridges cover.
+
+    A variant (blueboat_sonar.yaml, say) differs from the default only in
+    its parts; anything else drifting would make it a different vehicle.
+    """
+    text = (DESC_SHARE / 'config' / config).read_text()
+    cfg, default = yaml.safe_load(text), yaml.safe_load(DEFAULT_CONFIG)
+    for key in set(cfg) | set(default):
+        if key not in ('parts', 'base', 'slot_defaults'):
+            assert cfg.get(key) == default.get(key), f'{config}: {key} differs from blueboat.yaml'
+    ns = cfg.get('topic_namespace', 'blueboat')
+    entries = bridge_gen.bridge_entries(cfg, urdf_instances(text))
+    fixed = {'/clock', f'/{ns}/joint_states'}
+    bridge_topics = {e['gz_topic_name'] for e in entries if e['gz_topic_name'] not in fixed}
+    sonar = bridge_gen.sonar_entries(cfg, urdf_instances(text))
+    bridge_topics |= set(sonar['/**']['ros__parameters'].get('gz_topics', []))
+    root, _ = xacro(MODEL_XACRO, text)
+    assert sdf_gz_topics(root) == bridge_topics
 
 
 def test_installed_artifacts_match_shipped_config():

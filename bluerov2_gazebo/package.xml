@@ -44,6 +44,8 @@
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>marine_acoustic_msgs</exec_depend>
+  <exec_depend>kai_sonar_bridge</exec_depend>
+  <exec_depend>gz_sonar</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
   <exec_depend>launch_xml</exec_depend>
@@ -58,6 +60,9 @@
   <test_depend>ament_index_python</test_depend>
   <test_depend>python3-pytest</test_depend>
   <test_depend>xacro</test_depend>
+  <!-- test_sonar_launch: gz_sonar's imaging world, and the message type ros2 echoes -->
+  <test_depend>gz_sonar</test_depend>
+  <test_depend>marine_acoustic_msgs</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
