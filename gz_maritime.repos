@@ -12,13 +12,20 @@
 #   vehicles' worlds own and gz_hydrodynamics reads.
 # * gz_marked_shapes: a library gz_ocean_current builds on.
 # * gz_waves: the wave core, which gz_hydrodynamics builds on to damp a
-#   vehicle against the waves' water velocity. It names no wave engine.
+#   vehicle against the waves' water velocity.
+# * gz_waves_provider_fft, gz_waves_rendering, gz_waves_buoyancy: the wave
+#   engine, the water surface that draws it and the buoyancy that floats the
+#   BlueBoat on it, which blueboat_waves.sdf loads.
 #
 # Only those packages are copied into the workspace (see
-# .github/workflows/ci.yml). Importing the whole repository would pull in
-# gz_waves_provider_fft, whose ehukai dependency has no rosdep key either.
+# .github/workflows/ci.yml), and Ehukai, the spectral library the FFT engine
+# builds on, which has no rosdep key either. Its own dependencies do.
 repositories:
   gz-maritime:
     type: git
     url: https://github.com/HonuRobotics/gz-maritime.git
     version: lyrical
+  ehukai:
+    type: git
+    url: https://github.com/HonuRobotics/ehukai.git
+    version: main

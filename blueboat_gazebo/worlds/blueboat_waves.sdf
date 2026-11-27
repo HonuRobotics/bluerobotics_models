@@ -64,10 +64,13 @@
 
     <!-- The waves: the FFT engine at a WMO sea state (0 still, 1 rippled,
          3 slight, 4 moderate, 5 rough, 6 very rough). The sea ramps in
-         over <tau> seconds, at the start and at every change. -->
+         over <tau> seconds, at the start and at every change. Updated at
+         100 Hz: at 30 Hz the surface under the hull moves in steps against
+         1 ms physics, and 40 % of the boat's vertical acceleration (what an
+         IMU reads) sits at 30 Hz and its multiples. -->
     <plugin filename="gz-sim-waves-fft-system"
             name="gz::sim::systems::FftWaves">
-      <update_rate>30</update_rate>
+      <update_rate>100</update_rate>
       <wave>
         <sea_state>3</sea_state>
       </wave>
@@ -105,8 +108,9 @@
       <uri>model://water_surface</uri>
     </include>
 
-    <!-- A safety floor 50 m down, out of the waves' reach; nothing is
-         drawn, the water is open. -->
+    <!-- A floor 50 m down, out of the waves' reach. Drawn, so the Ping
+         echosounder (a gpu_lidar, which sees visuals only, up to 100 m)
+         reads the depth; dark, so the water looks open from above. -->
     <model name="seabed">
       <static>true</static>
       <pose>0 0 -50 0 0 0</pose>
@@ -116,6 +120,15 @@
             <plane><normal>0 0 1</normal><size>1000 1000</size></plane>
           </geometry>
         </collision>
+        <visual name="visual">
+          <geometry>
+            <plane><normal>0 0 1</normal><size>1000 1000</size></plane>
+          </geometry>
+          <material>
+            <ambient>0.05 0.08 0.1 1</ambient>
+            <diffuse>0.05 0.08 0.1 1</diffuse>
+          </material>
+        </visual>
       </link>
     </model>
 

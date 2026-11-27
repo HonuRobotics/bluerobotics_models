@@ -26,23 +26,31 @@ boxes it marks gz:buoyancy="true", under the wave surface.
     as much as the sea does, and stays upright and afloat. On gz-sim's flat
     buoyancy it would not move at all.
 
-The world starts paused, so the vehicle is released at sim time 0. Each
-sample's time and pose come from one dynamic_pose message, the time from its
-header stamp, so a slow runner changes how long the test waits, never what
-it asserts.
+The world starts paused, so the vehicle is released at sim time 0. The
+samples come from one subscription to the dynamic poses, each with its time
+from the message's header stamp, so a slow runner changes how long the test
+waits, never how many samples it gets or what it asserts. The water's
+density comes from the world, and the sea's height from gz_waves' own
+sea-state table, so neither can drift from what the simulation uses.
 """
 
 import math
 import os
 from pathlib import Path
+import queue
 import re
+import signal
 import statistics
+import subprocess
 import tempfile
+import threading
+import time
 import uuid
 import xml.etree.ElementTree as ET
 
+from ament_index_python.packages import get_package_prefix
 from ament_index_python.packages import get_package_share_directory
-from conftest import launch_sim, make_cli, poll_until
+from conftest import launch_sim, make_cli
 import pytest
 
 GZ_SHARE = Path(get_package_share_directory('blueboat_gazebo'))
@@ -51,7 +59,6 @@ WORLD_NAME = 'blueboat_waves'
 MODEL = 'blueboat'
 MODEL_SDF = GZ_SHARE / 'models' / MODEL / 'model.sdf'
 START = '0 0 0.05 0 0 0'
-WATER_DENSITY = 1025.0
 BUOYANCY_MARK = '{http://gazebosim.org/schema}buoyancy'
 
 # Still water: settled after SETTLE sim seconds, then watched for WATCH.
@@ -60,11 +67,9 @@ WATCH = 4.0
 # How close to the static draft it must rest, m.
 DRAFT_TOLERANCE = 0.005
 
-# The rough sea: the state, its significant wave height from gz_waves'
-# sea-state table, how long it is given to ramp in (tau 2 s) and how long it
-# is watched for: several of its peak periods (about 7 s).
+# The rough sea: the state, how long it is given to ramp in (tau 2 s) and
+# how long it is watched for: several of its peak periods (about 7 s).
 SEA_STATE = 4
-SEA_STATE_HS = 1.875
 RAMP = 12.0
 RIDE = 30.0
 # The heave's standard deviation, against the sea's (Hs / 4): the boat is
@@ -79,6 +84,28 @@ MAX_TILT = 30.0
 _NUM = r'-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?'
 
 gz = make_cli('gz')
+
+
+def water_density():
+    """Return the seawater density the world's wave buoyancy uses, kg/m^3."""
+    match = re.search(r'<water_density>\s*([^<\s]+)\s*</water_density>',
+                      SOURCE_WORLD.read_text())
+    assert match, f'{SOURCE_WORLD} sets no <water_density>'
+    return float(match.group(1))
+
+
+def significant_wave_height(code):
+    """
+    Return the significant wave height of a WMO sea state, m.
+
+    Read from gz_waves' own table (SeaStateFromCode, in its installed
+    Wavefield.hh), the one the wave engine uses.
+    """
+    header = (Path(get_package_prefix('gz_waves')) / 'include' / 'gz' / 'sim' /
+              'waves' / 'Wavefield.hh')
+    match = re.search(r'kHs\[10\]\s*=\s*\{([^}]*)\}', header.read_text())
+    assert match, f'no sea-state table (kHs) in {header}'
+    return [float(v) for v in match.group(1).split(',')][code]
 
 
 def static_rest_height():
@@ -110,25 +137,27 @@ def static_rest_height():
             bottoms.add(round(link_pose[2] + pose[2] - sz / 2.0, 6))
     assert area > 0.0, f'{MODEL_SDF} marks no buoyancy boxes'
     assert len(bottoms) == 1, f'the marked boxes have different bottoms: {bottoms}'
-    draft = float(mass.group(1)) / (WATER_DENSITY * area)
+    draft = float(mass.group(1)) / (water_density() * area)
     return -(bottoms.pop() + draft)
 
 
-def stamped_pose(env):
+POSES = f'/world/{WORLD_NAME}/dynamic_pose/info'
+
+
+def parse_pose(text):
     """
     Return (sim time, z, roll, pitch) of the vehicle from one dynamic_pose.
 
-    Text format leaves out fields that are zero, so a missing one reads 0
-    (and a missing w, 1 only when the whole orientation is left out).
+    None if the message does not have the vehicle. Text format leaves out
+    fields that are zero, so a missing one reads 0 (and a missing w, 1 only
+    when the whole orientation is left out).
     """
-    code, out, err = gz(env, 'topic', '-e', '-n', '1',
-                        '-t', f'/world/{WORLD_NAME}/dynamic_pose/info', timeout=15)
-    stamp = re.search(r'header\s*{\s*stamp\s*{([^}]*)}', out)
+    stamp = re.search(r'header\s*{\s*stamp\s*{([^}]*)}', text)
     pose = re.search(
         rf'name: "{MODEL}"\s*id: \d+\s*position\s*{{([^}}]*)}}\s*'
-        rf'(?:orientation\s*{{([^}}]*)}})?', out)
-    assert code == 0 and stamp and pose, \
-        f'cannot read the pose of {MODEL}:\n{out}\n{err}'
+        rf'(?:orientation\s*{{([^}}]*)}})?', text)
+    if not (stamp and pose):
+        return None
 
     def field(block, name, default=0.0):
         match = re.search(rf'\b{name}:\s*({_NUM})', block or '')
@@ -143,17 +172,60 @@ def stamped_pose(env):
     return t, field(pose.group(1), 'z'), math.degrees(roll), math.degrees(pitch)
 
 
-def watch(env, start, until):
-    """Sample the pose from sim time `start` until `until`; return the samples."""
-    samples = []
+def stamped_pose(env):
+    """Return (sim time, z, roll, pitch) of the vehicle, once."""
+    code, out, err = gz(env, 'topic', '-e', '-n', '1', '-t', POSES, timeout=15)
+    sample = parse_pose(out)
+    assert code == 0 and sample, \
+        f'cannot read the pose of {MODEL}:\n{out}\n{err}'
+    return sample
 
-    def reached():
-        s = stamped_pose(env)
-        if s[0] >= start:
-            samples.append(s)
-        return s[0] >= until
-    poll_until(reached, 600, f'sim did not reach {until}s in 600s of wall time',
-               interval=0.1)
+
+def watch(env, start, until, wall_limit=600.0):
+    """
+    Sample the pose from sim time `start` until `until`; return the samples.
+
+    Every message of one subscription, so the number of samples follows sim
+    time, not how fast the gz CLI answers.
+    """
+    proc = subprocess.Popen(['gz', 'topic', '-e', '-t', POSES], env=env,
+                            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                            text=True, start_new_session=True)
+    lines = queue.Queue()
+
+    def read():
+        for line in proc.stdout:
+            lines.put(line)
+        lines.put(None)
+    threading.Thread(target=read, daemon=True).start()
+
+    samples, message = [], []
+
+    def take(text):
+        sample = parse_pose(text)
+        if sample and sample[0] >= start:
+            samples.append(sample)
+        return bool(sample) and sample[0] >= until
+
+    deadline = time.monotonic() + wall_limit
+    try:
+        while True:
+            try:
+                line = lines.get(timeout=max(0.1, deadline - time.monotonic()))
+            except queue.Empty:
+                pytest.fail(f'sim did not reach {until}s in {wall_limit:.0f}s '
+                            'of wall time')
+            if line is None:
+                pytest.fail('the pose subscription ended')
+            # Each message starts with its header, at the line's start
+            if line.startswith('header') and message:
+                if take(''.join(message)):
+                    break
+                message = []
+            message.append(line)
+    finally:
+        os.killpg(proc.pid, signal.SIGKILL)
+        proc.wait()
     assert len(samples) >= 20, f'only {len(samples)} samples from {start}s to {until}s'
     return samples
 
@@ -219,7 +291,8 @@ def test_rides_the_waves(sim):
     start = sim_time(sim) + RAMP
     samples = watch(sim, start, start + RIDE)
     z = [s[1] for s in samples]
-    heave = statistics.pstdev(z) / (SEA_STATE_HS / 4.0)
+    hs = significant_wave_height(SEA_STATE)
+    heave = statistics.pstdev(z) / (hs / 4.0)
     tilt = max(max(abs(s[2]), abs(s[3])) for s in samples)
     print(f'sea state {SEA_STATE}: {len(samples)} samples, heave sd '
           f'{statistics.pstdev(z):.3f} m = {heave:.2f} x Hs/4, z from '
@@ -227,4 +300,4 @@ def test_rides_the_waves(sim):
     assert HEAVE_RANGE[0] <= heave <= HEAVE_RANGE[1], \
         f'heaves {heave:.2f} x Hs/4 of the sea, expected {HEAVE_RANGE}'
     assert tilt < MAX_TILT, f'tilted {tilt:.1f} deg'
-    assert min(z) > -SEA_STATE_HS, f'went down to {min(z):+.2f} m'
+    assert min(z) > -hs, f'went down to {min(z):+.2f} m'
