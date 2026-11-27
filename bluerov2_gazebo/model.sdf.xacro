@@ -38,7 +38,7 @@
        generated; true adds an IMU and the ArduPilotPlugin, so ArduSub can
        drive the ROV instead of ROS 2 topics. Two models come out of this one
        source: model://bluerov2 and model://bluerov2_with_ardupilot. See
-       docs vehicles/bluerov2/verify-sitl-rov. -->
+       docs quickstarts/sitl-bluerov2. -->
   <xacro:arg name="ardupilot" default="false"/>
   <xacro:property name="ardupilot" value="${'$(arg ardupilot)'.lower() == 'true'}"/>
 
@@ -389,6 +389,22 @@
     <xacro:property name="com" value="${[float(v) for v in '$(arg com)'.split()]}"/>
     <xacro:property name="water_density" value="${float(buoyancy_cfg.get('fluid_density', 1025.0))}"/>
     <xacro:property name="net_buoyancy" value="${float(buoyancy_cfg.get('net_buoyancy', 0.002))}"/>
+    <!-- Where the displacement box's centroid, the center of buoyancy (CB),
+         goes: cob_target = origin + cob_offset, with the origin set by
+         cob_frame.
+           cob_frame com        the origin is the assembled center of mass
+                                (default). The CB stays cob_offset from the
+                                CG whatever the configuration, which matches
+                                the volume below being solved from the mass:
+                                a vehicle re-trimmed to neutral and level
+                                after every change, with constant righting
+                                stiffness.
+           cob_frame base_link  the origin is base_link, the datum. The CB
+                                is a fixed point on the hull; a payload then
+                                changes the righting moment.
+         cob_offset is "x y z" in m, in base_link axes (x forward, y port,
+         z up). The shipped "0 0 0.046" with cob_frame com puts the CB 46 mm
+         above the CG. -->
     <xacro:property name="cob_offset"
       value="${[float(v) for v in str(buoyancy_cfg.get('cob_offset', '0 0 0.046')).split()]}"/>
     <xacro:property name="cob_frame" value="${str(buoyancy_cfg.get('cob_frame', 'com'))}"/>
@@ -457,6 +473,15 @@
     <plugin filename="gz-maritime-hydrodynamics-system"
             name="gz::sim::maritime::Hydrodynamics">
       <link_name>${base_name}</link_name>
+      <!-- Center of pressure: the point the coefficients below are defined
+           about, where the plugin takes the velocity and the current and
+           applies the drag. Each chassis part declares its own, relative to
+           its link origin (part_info's center_of_pressure; the link origin
+           when it declares none), on the lines of its horizontal thrust, so
+           surge and sway drag act on the same lines as the thrust whichever
+           chassis is fitted. A first estimate, not identified. -->
+      <xacro:part_info_of ptype="${cfg['base']['type']}"/>
+      <center_of_pressure>${part_info.get('center_of_pressure', '0 0 0')}</center_of_pressure>
       <xU>0</xU>   <yV>0</yV>   <zW>0</zW>
       <kP>0</kP>   <mQ>0</mQ>   <nR>0</nR>
       <xUabsU>-39.2</xUabsU>
@@ -471,8 +496,8 @@
          the assembly resolves to. No manifest: that lives in the merged
          URDF. -->
     <xacro:assemble base="${cfg['base']}" parts="${cfg.get('parts') or []}"
-                    slots="${cfg.get('slots') or []}" emit="gz_part" emit_slot="gz_no_slot"
-                    manifest="false"/>
+                    slots="${cfg.get('slots') or []}" defaults="${cfg.get('slot_defaults', True)}"
+                    emit="gz_part" emit_slot="gz_no_slot" manifest="false"/>
 
     <!-- ===================== ArduPilot SITL =====================
          Only when ardupilot:=true. Everything above is unchanged, so the
@@ -529,8 +554,8 @@
           gets correct blocks with no edit here.
         -->
         <xacro:assemble base="${cfg['base']}" parts="${cfg.get('parts') or []}"
-                        slots="${cfg.get('slots') or []}" emit="ap_control"
-                        emit_slot="gz_no_slot" manifest="false"/>
+                        slots="${cfg.get('slots') or []}" defaults="${cfg.get('slot_defaults', True)}"
+                        emit="ap_control" emit_slot="gz_no_slot" manifest="false"/>
       </plugin>
 
     </xacro:if>

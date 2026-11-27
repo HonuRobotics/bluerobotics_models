@@ -1,9 +1,6 @@
 # Configuration
 
-The BlueROV2 needs no configuration: every slot the parts declare fills
-itself with its default. The vehicle config
-(`bluerov2_description/config/bluerov2.yaml`, or any file passed as
-`config_file:=`) states differences only.
+The vehicle config (`bluerov2_description/config/bluerov2.yaml`, or any file passed as `config_file:=`) lists the fitted parts. The shipped config sets `slot_defaults: false` and fits the chassis, its six propellers and their T200 bodies, and the exploreHD camera. With `slot_defaults: true`, or the key left out, every slot fills itself with the default in the table below, and the config states differences only.
 
 ## Variants
 
@@ -18,7 +15,19 @@ base: {type: bluerov2_chassis, name: base_link}        # standard
 base: {type: bluerov2_heavy_chassis, name: base_link}  # heavy
 ```
 
-With the heavy hull, widen the buoyancy footprint to `"0.457 0.575"`.
+Both variants ship ready to run. `bluerov2.yaml` is the standard vehicle and
+`bluerov2_heavy.yaml` the Heavy, the same vehicle on the heavy chassis with
+its eight thrusters and the buoyancy footprint widened to `"0.457 0.575"`.
+Each one is built into a Gazebo model, `model://bluerov2` and
+`model://bluerov2_heavy`. To launch the Heavy:
+
+```bash
+ros2 launch bluerov2_gazebo sim.launch.xml \
+  config_file:=$(ros2 pkg prefix --share bluerov2_description)/config/bluerov2_heavy.yaml
+```
+
+On the heavy hull, thruster_5 to thruster_8 are the corner verticals: front
+right, front left, rear right and rear left.
 
 ## Buoyancy
 
@@ -36,7 +45,7 @@ trim directly instead of asking you to tune volumes:
 
 The Gazebo composition realizes the declaration as a dedicated
 displacement volume solved from the assembled mass, so the declared trim
-holds when the config changes ([Buoyancy](../../design/buoyancy.md)).
+holds when the config changes ([Buoyancy](../../developers/design/buoyancy.md)).
 
 ## Payload
 
@@ -53,6 +62,8 @@ config entry each. The fitted options and their topics live in
 | `gripper` | `newton_gripper`, `sediment_sampler` | empty |
 | `payload` | `payload_skid` | empty |
 | `rack` | `roof_rack` | empty |
+
+Subsea manipulation is out of scope for now, so the `gripper` slot stays empty.
 
 Slot entries, free placements, ad hoc slots and topic overrides follow
 the same schema as the BlueBoat

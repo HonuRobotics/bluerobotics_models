@@ -1,15 +1,17 @@
 # Sensors
 
 Sensors are parts fitted into slots. The concepts live in
-[Slots and assembly](../../design/slots.md), the vehicle's slots and their
+[Slots and assembly](../../developers/design/slots.md), the vehicle's slots and their
 accepted types in the [configuration page](configuration.md), and new
 sensors can be added following the
-[Add a sensor part](../../how-to/add-sensor-part.md) guide. The grippers
+[Add a sensor part](../../developers/add-sensor-part.md) walkthrough. The grippers
 live with the [actuators](actuators.md).
+
+The sensors have no visual: the camera, sonar and DVL work from their part frames, and the parts will gain glTF visuals when they are commissioned.
 
 ## Available sensors
 
-| Sensor | Part | Slot | Fitted by default |
+| Sensor | Part | Slot | Fitted in the shipped config |
 |---|---|---|---|
 | exploreHD camera | `explorehd_camera` | `camera` | yes |
 | MarineSitu C3 stereo camera | `marinesitu_c3` | `camera` | no |
@@ -47,7 +49,7 @@ live with the [actuators](actuators.md).
 | `/<name>/dvl/velocity` | Bottom track velocity | [marine_acoustic_msgs/msg/Dvl](https://github.com/apl-ocean-engineering/hydrographic_msgs/blob/main/marine_acoustic_msgs/msg/Dvl.msg) |
 
 `<name>` is the instance name, `bluerov2` for the default instance, or
-whatever the vehicle was spawned as ([Several vehicles](../../how-to/namespaces.md)).
+whatever the vehicle was spawned as ([Several vehicles](../../walkthroughs/namespaces.md)).
 A part topic follows the part's own name (`camera` above), so a part
 renamed or removed in the config moves or drops its topics
 ([Configuration](configuration.md)). Sensor messages carry the part's own

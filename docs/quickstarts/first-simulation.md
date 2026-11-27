@@ -1,0 +1,31 @@
+# First simulation
+
+Prerequisite: [Set up the drydock workspace](setup.md), with a shell open in the container.
+
+Bring up the BlueBoat with the full ROS stack (Gazebo server, ros_gz bridge,
+robot_state_publisher and the Gazebo GUI):
+
+```bash
+ros2 launch blueboat_gazebo sim.launch.xml
+```
+
+The simulation starts running, with the camera a few meters off the boat's
+port quarter. The boat is spawned at its static waterline and floats there: the chassis and its two outboard propellers, which is what the shipped config lists.
+
+In a second terminal (also sourced), spin the propellers:
+
+```bash
+ros2 topic pub /blueboat/prop_port/cmd std_msgs/msg/Float64 "data: 0.2" -1 &
+ros2 topic pub /blueboat/prop_stbd/cmd std_msgs/msg/Float64 "data: 0.2" -1 &
+wait
+```
+
+The BlueROV2 equivalent is `ros2 launch bluerov2_gazebo sim.launch.xml`,
+which spawns the ROV hovering near the surface of its pool.
+
+Next: [drive it](../vehicles/blueboat/actuators.md), then
+[change what is fitted](../vehicles/blueboat/configuration.md). Each
+vehicle's Launch and worlds page
+([BlueBoat](../vehicles/blueboat/running.md),
+[BlueROV2](../vehicles/bluerov2/running.md)) covers worlds, custom
+configs and RViz.

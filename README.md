@@ -7,25 +7,20 @@ via `ros_gz`.
 
 **Documentation: <https://honurobotics.github.io/bluerobotics_models/>**
 
-The site covers installation, driving each vehicle, accessory configuration,
-the ROS interfaces and the design of the parts pipeline.
+The site covers quickstarts, walkthroughs, a reference manual for each vehicle and the design of the parts pipeline.
 
 ## Quick start
 
-```bash
-cd ~/ws/src && git clone https://github.com/HonuRobotics/bluerobotics_models.git
-cd ~/ws
-rosdep update
-rosdep install --from-paths src --ignore-packages-from-source --default-yes
-colcon build --merge-install
-source install/setup.bash
-ros2 launch bluerov2_gazebo sim.launch.xml
-```
+Start with the [Quickstarts](https://honurobotics.github.io/bluerobotics_models/lyrical/quickstarts/index.html): they set up the drydock container and a source build, then run the BlueBoat and the BlueROV2, first on their own and then under ArduPilot SITL.
 
 ## Contributing
 
 Developer workflow (build, tests, pre-commit hooks, conventions):
 see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Blender assemblies (Git LFS)
+
+The Blender assemblies in `bluerobotics_parts/assemblies/` are stored with Git LFS. Nothing builds from them, so a plain clone is enough to build and run. To get the files themselves, install Git LFS and, in the clone, run `git lfs install` and then `git lfs pull`. If Git LFS was already installed when you cloned, they came down with the clone; set `GIT_LFS_SKIP_SMUDGE=1` when cloning to skip them.
 
 ## License
 

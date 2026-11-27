@@ -11,36 +11,36 @@ reconfigured from one YAML file when you want different parts.
 - **BlueROV2**: vectored six or eight thruster ROV with camera, sonar, DVL and
   manipulator parts: [BlueROV2 manual](vehicles/bluerov2/index.md)
 
-## Quick start
+## Where to start
 
-```bash
-mkdir -p ~/ws/src
-cd ~/ws/src && git clone https://github.com/HonuRobotics/bluerobotics_models.git
-cd ~/ws && rosdep update && rosdep install --from-paths src --ignore-packages-from-source --default-yes
-colcon build --merge-install
-source install/setup.bash
-ros2 launch blueboat_gazebo sim.launch.xml
-```
+- Users: the [Quickstarts](quickstarts/index.md) take you from a clean machine to a running simulation, a boat driven by ArduRover and a ROV diving under ArduSub. The [Walkthroughs](walkthroughs/index.md) then take one capability at a time: tuning, a waypoint mission, changing the fitted parts, worlds, several vehicles, teleoperation.
+- Reference: one manual per vehicle ([BlueBoat](vehicles/blueboat/index.md), [BlueROV2](vehicles/bluerov2/index.md)) with launch arguments, topics and configuration, and the [parts catalog](reference/parts-catalog.md).
+- Developers: [design](developers/design/index.md), the SITL spec, vehicle parameter derivations, extending the parts library and [contributing](developers/contributing.md).
 
-Press play in Gazebo: the BlueBoat floats at its waterline, the propellers
-take thrust commands and the echosounder streams ranges. Nothing to
-configure; [First simulation](getting-started/first-simulation.md) walks
-through it, [Configuring the BlueBoat](vehicles/blueboat/configuration.md)
-shows how to change the fitted parts, and [Design](design/index.md) explains how
-parts, slots and the generated models fit together.
-
-These models target **ROS 2 Lyrical** and **Gazebo Jetty** on Ubuntu 26.04.
+These models target **ROS 2 Lyrical** and **Gazebo Jetty** on Ubuntu 26.04, built from source in the drydock container.
 Use the version flyout (lower left) to switch documentation between ROS
 distributions.
 
 ```{toctree}
 :hidden:
-:maxdepth: 4
+:caption: Users
 
-Getting started <getting-started/index>
+Quickstarts <quickstarts/index>
+Walkthroughs <walkthroughs/index>
+Troubleshooting <walkthroughs/troubleshooting>
+```
+
+```{toctree}
+:hidden:
+:caption: Reference
+
 Vehicles <vehicles/index>
-How-to guides <how-to/index>
-Reference <reference/index>
-Design <design/index>
-Project <project/index>
+Parts catalog <reference/index>
+```
+
+```{toctree}
+:hidden:
+:caption: Developers
+
+Developers <developers/index>
 ```

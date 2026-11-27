@@ -12,21 +12,55 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Shared plumbing for the integration test modules.
+Shared plumbing for the test modules.
 
 The gz and ros2 suites launch a long-lived process, poll it until ready, and
 audit its output; the mechanics live here once so a change to (say) the log
-handling cannot drift between the two modules.
+handling cannot drift between the two modules. The vehicle config the
+generator tests build on, and the check for what the shipped config fits,
+live here for the same reason.
 """
 
 import os
+from pathlib import Path
 import shutil
 import signal
 import subprocess
 import tempfile
 import time
+import xml.etree.ElementTree as ET
 
+from ament_index_python.packages import get_package_share_directory
 import pytest
+import yaml
+
+DESC_SHARE = Path(get_package_share_directory('bluerov2_description'))
+
+
+def kit_config(parts=()):
+    """
+    Return the tests' own vehicle config, as a dict.
+
+    The shipped hull, namespace and buoyancy, every slot filling with its
+    default (six props, their bodies and the camera), plus parts. Independent
+    of what the shipped config fits, so the tests follow the generators' rules
+    rather than the current product.
+    """
+    cfg = yaml.safe_load((DESC_SHARE / 'config' / 'bluerov2.yaml').read_text())
+    cfg['slot_defaults'] = True
+    cfg['parts'] = [dict(p) for p in parts]
+    return cfg
+
+
+def kit_config_text(parts=()):
+    """Return kit_config(parts) as YAML text, for the generators that read text."""
+    return yaml.safe_dump(kit_config(parts), sort_keys=False)
+
+
+def shipped_has_camera():
+    """Whether the installed (shipped config) URDF has a link named camera."""
+    root = ET.parse(DESC_SHARE / 'urdf' / 'bluerov2.urdf').getroot()
+    return any(link.get('name') == 'camera' for link in root.iter('link'))
 
 
 def make_cli(binary, default_timeout=10):

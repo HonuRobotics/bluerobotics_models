@@ -10,7 +10,7 @@ parts too: an assembly is a chassis plus whatever its slots carry.
 |--------|------|--------------|---------------|
 | `blueboat_chassis` | BlueBoat hulls, crossbeams and both thruster bodies | [BlueBoat](https://bluerobotics.com/store/boat/blueboat-components-spares/blueboat-components/) | assembly root; displacement declared at the assembly |
 | `bluerov2_chassis` | BlueROV2 standard hull (frame, tanks, foam) | [BlueROV2](https://bluerobotics.com/store/rov/bluerov2/) | assembly root; declares every slot including thruster bodies and propellers |
-| `bluerov2_heavy_chassis` | BlueROV2 Heavy kit hull | [Heavy kit](https://bluerobotics.com/store/rov/bluerov2-accessories/brov2-heavy-kit/) | as the standard chassis with eight thruster and body slots |
+| `bluerov2_heavy_chassis` | BlueROV2 hull with the Heavy kit fitted (frame, tanks, foam, guards) | [Heavy kit](https://bluerobotics.com/store/rov/bluerov2-upgrade-kits/brov2-heavy-retrofit/) | as the standard chassis with eight thruster and body slots |
 | `m200_weedless_prop_cw`, `m200_weedless_prop_ccw` | weedless propellers | [link](https://bluerobotics.com/store/thrusters/t100-t200-thrusters/weedless-propeller-set/) | default BlueBoat motor occupants, driven by the Thruster plugin |
 | `t200_prop_cw`, `t200_prop_ccw` | standard T200 propellers | [link](https://bluerobotics.com/store/rov/bluerov2-components-spares/t200-thruster-brov2-spare-r1-vp/) | default ROV propellers; alternative BlueBoat motor occupants |
 | `t200_thruster` | T200 thruster body | [link](https://bluerobotics.com/store/thrusters/t100-t200-thrusters/t200-thruster-r2-rp/) | default occupant of the ROV thruster body slots; the BlueBoat chassis already carries its bodies |
@@ -31,8 +31,9 @@ parts too: an assembly is a chassis plus whatever its slots carry.
 | `omniscan_450_sidescan` | Cerulean Omniscan 450 side scan sonar | [link](https://bluerobotics.com/store/the-reef/cerulean-sidescan-sonar/) | geometry only |
 | `surveyor_multibeam` | Cerulean Surveyor 240-16 multibeam | [link](https://bluerobotics.com/store/sonars/echosounders/cerulean-surveyor-240-16-multibeam-echosounder/) | geometry only |
 
-Parts whose final mesh has not landed yet use placeholder geometry; a
+Parts whose final mesh has not been delivered yet use placeholder geometry; a
 `type` marked pending delivery cannot be fitted until its macro lands.
+The BlueROV2 sensor parts (`explorehd_camera`, `ping360`, `dvl_a50`) carry no visual for now: accessory visuals are out of scope, and each sensor works from its part's frame.
 
 ## Slots
 
@@ -82,7 +83,7 @@ for both vehicles:
 | `parts` | no (`[]`) | slot entries and free placements, see below |
 | `slots` | no | ad hoc slots: `{of (instance, default base_link), name, xyz, rpy (default "0 0 0"), accepts (list, optional), default (type or none), joint, axis}` |
 | `hull_displacement` | BlueBoat | the box pontoons the Gazebo composition places on the `hull_displacement` link: `{length, width, height, x, y, z, segments}` |
-| `buoyancy` | BlueROV2 | `{net_buoyancy (kg), cob_offset, cob_frame (com/base_link), fluid_density, footprint}`, realized as a dedicated displacement link solved from the assembled mass; see [Buoyancy](../design/buoyancy.md) |
+| `buoyancy` | BlueROV2 | `{net_buoyancy (kg), cob_offset, cob_frame (com/base_link), fluid_density, footprint}`, realized as a dedicated displacement link solved from the assembled mass; see [Buoyancy](../developers/design/buoyancy.md) |
 | `extra_bridge_topics` | no | list appended verbatim to the generated ros_gz bridge config (native syntax) |
 
 A **slot entry** in `parts` (has `slot`):
@@ -109,7 +110,7 @@ A **free placement** (no `slot`):
 | `joint`, `axis`, `collision`, topic keys | as above |
 
 Resolution rules, including how defaults fill, are in
-[Slots and assembly](../design/slots.md). Errors name the problem and fail
+[Slots and assembly](../developers/design/slots.md). Errors name the problem and fail
 the build or launch; a key outside these tables is reported as a typo.
 Avoid the other YAML 1.1 boolean words (`yes`, `no`, `off`, `y`, `n`) as
 bare values too, or quote them.
@@ -121,7 +122,7 @@ frames follow the fitted parts, with the same naming patterns on both vehicles:
 
 | Pattern | Kind | Meaning |
 |---|---|---|
-| `base_link` | root link | the chassis part: origin at the mesh centroid, x forward, y left, z up ([REP 103](https://www.ros.org/reps/rep-0103.html)); floats with its origin at the waterline |
+| `base_link` | root link | the chassis part: origin at the chassis's datum (the BlueBoat's at the mesh centroid, so it floats with its origin at the waterline; the BlueROV2's at the center of the frame's footprint on its bottom plane), x forward, y left, z up ([REP 103](https://www.ros.org/reps/rep-0103.html)) |
 | `<instance>` | link | one frame per fitted part, named after its slot or its `name` (`prop_port`, `thruster_1`, `ping`, `camera`); spinning parts sit on their continuous joint `<instance>_joint` |
 | `<parent>_<slot>` | massless link | one per slot a part declares, whether filled or not (`base_link_prop_port`, `base_link_camera`, `ping_mount_ping`) |
 | `<instance>_<frame>` | massless link | frames the part itself declares (`ping_beam`, the transducer face); sensor messages carry them as `frame_id`, resolved by TF |
@@ -131,7 +132,7 @@ it to the composed model as a dedicated link (`hull_displacement` on the
 boat, `buoyancy_displacement` on the ROV). In Gazebo every fixed joint is
 lumped into `base_link`; the names survive as SDF frames, which is how
 sensors are placed. See
-[Gazebo composition](../design/gazebo-composition.md).
+[Gazebo composition](../developers/design/gazebo-composition.md).
 
 Slot poses, accepted types and defaults live in each part's `<part>_info`
 macro (`bluerobotics_parts/urdf/<part>.urdf.xacro`); this page mirrors them.

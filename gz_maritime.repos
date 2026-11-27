@@ -11,6 +11,8 @@
 # * gz_ocean_current: gz-maritime-ocean-current-system, the current the
 #   vehicles' worlds own and gz_hydrodynamics reads.
 # * gz_marked_shapes: a library gz_ocean_current builds on.
+# * gz_waves: the wave core, which gz_hydrodynamics builds on to damp a
+#   vehicle against the waves' water velocity. It names no wave engine.
 #
 # Only those packages are copied into the workspace (see
 # .github/workflows/ci.yml). Importing the whole repository would pull in
