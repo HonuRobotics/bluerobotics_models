@@ -52,7 +52,7 @@ SONAR_SETTINGS = frozenset({
     'gain_time_constant', 'horizontal_fov', 'labels', 'max_soundings',
     'noise_floor', 'pulse_length', 'range_max', 'range_min', 'range_noise',
     'rate', 'rays_per_beam', 'samples', 'sidelobe_level', 'sound_speed',
-    'speckle', 'tvg', 'tvg_spreading', 'vertical_fov', 'water_column',
+    'speckle', 'threads', 'tvg', 'tvg_spreading', 'vertical_fov', 'water_column',
 })
 
 
