@@ -7,8 +7,16 @@
     Shared simulation resources for the Blue Robotics vehicle packages,
     starting with the pool environment models both playground worlds use.
   </description>
-  <maintainer email="caguero@honurobotics.com">Carlos Aguero</maintainer>
-  <license>Apache-2.0</license>
+  <maintainer email="acordero@honurobotics.com">Alejandro Hernández Cordero</maintainer>
+  <maintainer email="bbingham@honurobotics.com">Brian Bingham</maintainer>
+  <maintainer email="caguero@honurobotics.com">Carlos Agüero</maintainer>
+  <maintainer email="jrivero@honurobotics.com">Jose Luis Rivero</maintainer>
+  <license file="LICENSE">Apache-2.0</license>
+  <url type="website">https://honurobotics.github.io/bluerobotics_models/</url>
+  <url type="repository">https://github.com/HonuRobotics/bluerobotics_models</url>
+  <url type="bugtracker">https://github.com/HonuRobotics/bluerobotics_models/issues</url>
+  <author email="caguero@honurobotics.com">Carlos Agüero</author>
+  <author>Honu Robotics</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

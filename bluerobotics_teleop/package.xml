@@ -8,8 +8,16 @@
     Twist to thrust mixer with deadman, timeout and EPA safety behavior,
     plus an interactive joystick calibration tool.
   </description>
-  <maintainer email="caguero@honurobotics.com">Carlos Aguero</maintainer>
-  <license>Apache-2.0</license>
+  <maintainer email="acordero@honurobotics.com">Alejandro Hernández Cordero</maintainer>
+  <maintainer email="bbingham@honurobotics.com">Brian Bingham</maintainer>
+  <maintainer email="caguero@honurobotics.com">Carlos Agüero</maintainer>
+  <maintainer email="jrivero@honurobotics.com">Jose Luis Rivero</maintainer>
+  <license file="LICENSE">Apache-2.0</license>
+  <url type="website">https://honurobotics.github.io/bluerobotics_models/</url>
+  <url type="repository">https://github.com/HonuRobotics/bluerobotics_models</url>
+  <url type="bugtracker">https://github.com/HonuRobotics/bluerobotics_models/issues</url>
+  <author email="caguero@honurobotics.com">Carlos Agüero</author>
+  <author>Honu Robotics</author>
 
   <exec_depend>ament_index_python</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
