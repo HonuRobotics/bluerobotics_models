@@ -47,7 +47,7 @@ SONAR_PARTS = {
 # the keys are checked here; gz_sonar's reader checks each value when the
 # world loads and refuses the sensor, with an error in the server's log.
 SONAR_SETTINGS = frozenset({
-    'angle_noise', 'beam_width', 'beams', 'detection', 'detection_threshold',
+    'always_ping', 'angle_noise', 'beam_width', 'beams', 'detection', 'detection_threshold',
     'dynamic_range', 'elevation_rays', 'elevation_span', 'frequency', 'gain',
     'gain_time_constant', 'horizontal_fov', 'labels', 'max_soundings',
     'noise_floor', 'pulse_length', 'range_max', 'range_min', 'range_noise',
