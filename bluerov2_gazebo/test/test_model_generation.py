@@ -357,14 +357,18 @@ def test_every_shipped_config_generates(config):
     """
     Each shipped config generates a model whose topics the bridges cover.
 
-    A variant (bluerov2_sonar.yaml, say) differs from the default only in
-    its parts; anything else drifting would make it a different vehicle.
+    A variant on the default's chassis (bluerov2_sonar.yaml, say) differs
+    from the default only in its parts; anything else drifting would make it
+    a different vehicle. A config on another chassis (bluerov2_heavy.yaml) is
+    a different vehicle, with its own buoyancy, and is not compared.
     """
     text = (DESC_SHARE / 'config' / config).read_text()
     cfg, default = yaml.safe_load(text), yaml.safe_load(default_config())
-    for key in set(cfg) | set(default):
-        if key not in ('parts', 'base', 'slot_defaults'):
-            assert cfg.get(key) == default.get(key), f'{config}: {key} differs from bluerov2.yaml'
+    if cfg.get('base') == default.get('base'):
+        for key in set(cfg) | set(default):
+            if key not in ('parts', 'slot_defaults'):
+                assert cfg.get(key) == default.get(key), \
+                    f'{config}: {key} differs from bluerov2.yaml'
     root, _ = gen_model(text)
     entries = bridge_gen.bridge_entries(cfg, urdf_instances(text))
     bridge_topics = {e['gz_topic_name'] for e in entries} - {'/clock'}
